@@ -1,6 +1,7 @@
 
 import pandas as pd
 import numpy as np
+import re
 
 
 # Функция корректировки возраста
@@ -114,12 +115,26 @@ def f_gen_age_exp( gender_m, gender_f, age, exp ):
     return gender*100 + age*10 + exp
 
 
-# Функция полиномайзер
+# Функция проверки имени
 
-def f_polynomizer( data, column, n=2 ):
-    for i in range(2,n+1):
-        data[ column + '_' + str(i) ] = data[column]**i
-    return data
+def f_get_name( client_name ):
+    tokenize_re = re.compile(r'[\w\-]+', re.I)
+    try:
+        name = tokenize_re.findall( str(client_name) ).upper()
+        return name
+    except Exception:
+        return 'ERROR'
+
+def f_check_name( name, names_list ):
+    if name.upper() in names_list:
+        check = 1
+    else:
+        check = 0
+    return check
+
+def f_check_name_df( df, column_name, column_check_name, names_list ):
+    df[column_check_name] = 1 * df[column_name].isin(names_list)
+    return df
 
 
 
