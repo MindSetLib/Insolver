@@ -65,5 +65,5 @@ model_freq_best = fmin(fn=objective_xgb, space=space_freq, algo=tpe.suggest, max
 model_avclaim_best = fmin(fn=objective_xgb, space=space_avgclm, algo=tpe.suggest, max_evals=50)
 
 # Оптимальные гиперпараметры
-best_params_freq = space_eval(space, model_freq_best)
-best_params_avclaim = space_eval(space, model_avclaim_best)
+best_params_freq = space_eval(space_freq, model_freq_best)
+best_params_avclaim = space_eval(space_avgclm, model_avclaim_best)
