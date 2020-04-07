@@ -4,17 +4,23 @@ from hyperopt.fmin import fmin
 import numpy as np
 
 # Определим функцию Deviance для распределения Пуассона
+
+
 def xgb_eval_dev_poisson(yhat, dtrain):
     y = dtrain.get_label()
-    return 'dev_poisson', 2 * np.sum( y*np.log(y/yhat) - (y-yhat) )
+    return 'dev_poisson', 2 * np.sum(y*np.log(y/yhat) - (y-yhat))
 
 # Определим функцию Deviance для распределения Гамма
+
+
 def xgb_eval_dev_gamma(yhat, dtrain):
     y = dtrain.get_label()
-    return 'dev_gamma', 2 * np.sum( -np.log(y/yhat) + (y-yhat)/yhat )
+    return 'dev_gamma', 2 * np.sum(-np.log(y/yhat) + (y-yhat)/yhat)
 
 # Определим функцию для оптимизации гиперпараметров алгоритмом TPE
-def objective_xgb( params ):
+
+
+def objective_xgb(params):
     params['max_depth'] = int(params['max_depth'])
     n_b_r = int(params.pop('num_boost_round'))
     data = params.pop('data')
@@ -22,7 +28,8 @@ def objective_xgb( params ):
     nfold = params.pop('nfold')
     e_s_r = params.pop('early_stopping_rounds')
     maximize = params.pop('maximize')
-    cv_result = xgb.cv(params, data, num_boost_round=n_b_r, nfold=nfold, seed=0, maximize=maximize, feval=feval, early_stopping_rounds=e_s_r)
+    cv_result = xgb.cv(params, data, num_boost_round=n_b_r, nfold=nfold, seed=0, maximize=maximize,
+                       feval=feval, early_stopping_rounds=e_s_r)
     name, _ = feval(data.get_label(), data)
     score = cv_result['test-{}-mean'.format(name)][-1:].values[0]
     return score
@@ -34,7 +41,7 @@ space_freq = {'data': train_freq,
               'maximize': False,
               'nfold': 5,
               'early_stopping_rounds': 20,
-              'num_boost_round': 300, # hp.choice('num_boost_round', [50, 300, 500])
+              'num_boost_round': 300,  # hp.choice('num_boost_round', [50, 300, 500])
               'max_depth': hp.choice('max_depth', [5, 8, 10, 12, 15]),
               'min_child_weight': hp.uniform('min_child_weight', 0, 50),
               'subsample': hp.uniform('subsample', 0.5, 1),
@@ -45,25 +52,42 @@ space_freq = {'data': train_freq,
               }
 
 space_avgclm = {'data': train_avgclaim,
-              'objective': 'reg:gamma',
-              'feval': xgb_eval_dev_gamma,
-              'maximize': False,
-              'nfold': 5,
-              'early_stopping_rounds': 20,
-              'num_boost_round': 300, # hp.choice('num_boost_round', [50, 300, 500])
-              'max_depth': hp.choice('max_depth', [5, 8, 10, 12, 15]),
-              'min_child_weight': hp.uniform('min_child_weight', 0, 50),
-              'subsample': hp.uniform('subsample', 0.5, 1),
-              'colsample_bytree': hp.uniform('colsample_bytree', 0.5, 1),
-              'alpha': hp.uniform('alpha', 0, 1),
-              'lambda': hp.uniform('lambda', 0, 1),
-              'eta': hp.uniform('eta', 0.01, 1),
-              }
+                'objective': 'reg:gamma',
+                'feval': xgb_eval_dev_gamma,
+                'maximize': False,
+                'nfold': 5,
+                'early_stopping_rounds': 20,
+                'num_boost_round': 300,  # hp.choice('num_boost_round', [50, 300, 500])
+                'max_depth': hp.choice('max_depth', [5, 8, 10, 12, 15]),
+                'min_child_weight': hp.uniform('min_child_weight', 0, 50),
+                'subsample': hp.uniform('subsample', 0.5, 1),
+                'colsample_bytree': hp.uniform('colsample_bytree', 0.5, 1),
+                'alpha': hp.uniform('alpha', 0, 1),
+                'lambda': hp.uniform('lambda', 0, 1),
+                'eta': hp.uniform('eta', 0.01, 1),
+                }
 
 # Оптимизация
+
+
 model_freq_best = fmin(fn=objective_xgb, space=space_freq, algo=tpe.suggest, max_evals=50)
 model_avclaim_best = fmin(fn=objective_xgb, space=space_avgclm, algo=tpe.suggest, max_evals=50)
 
 # Оптимальные гиперпараметры
+
+
 best_params_freq = space_eval(space_freq, model_freq_best)
 best_params_avclaim = space_eval(space_avgclm, model_avclaim_best)
+
+# Функция для обучения модели
+
+
+def train_xgb_best_params(params, dtrain, evals, early_stopping_rounds, evals_result=None, verbose_eval=None):
+    params.remove('nfold')
+    params.remove('data')
+    params.remove('early_stopping_rounds')
+    n_b_r = int(params.pop('num_boost_round'))
+    maximize = params.pop('maximize')
+    feval = params.pop('feval')
+    return xgb.train(params=params, dtrain=dtrain, num_boost_round=n_b_r, evals=evals, feval=feval, maximize=maximize,
+                     early_stopping_rounds=early_stopping_rounds, evals_result=evals_result, verbose_eval=verbose_eval)
