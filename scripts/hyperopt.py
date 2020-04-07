@@ -1,7 +1,8 @@
+import numpy as np
 import xgboost as xgb
 from hyperopt import hp, tpe, space_eval
 from hyperopt.fmin import fmin
-import numpy as np
+from sklearn.model_selection import train_test_split
 
 # Определим функцию Deviance для распределения Пуассона
 
@@ -83,11 +84,18 @@ best_params_avclaim = space_eval(space_avgclm, model_avclaim_best)
 
 
 def train_xgb_best_params(params, dtrain, evals, early_stopping_rounds, evals_result=None, verbose_eval=None):
-    params.remove('nfold')
-    params.remove('data')
-    params.remove('early_stopping_rounds')
+    for label in ['nfold', 'data', 'early_stopping_rounds']:
+        del params[label]
     n_b_r = int(params.pop('num_boost_round'))
     maximize = params.pop('maximize')
     feval = params.pop('feval')
     return xgb.train(params=params, dtrain=dtrain, num_boost_round=n_b_r, evals=evals, feval=feval, maximize=maximize,
                      early_stopping_rounds=early_stopping_rounds, evals_result=evals_result, verbose_eval=verbose_eval)
+
+
+def train_val_test_split(x, y, val_size, test_size, random_state=0, shuffle=True, stratify=None):
+    x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=random_state, shuffle=shuffle,
+                                                        test_size=test_size, stratify=stratify)
+    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, random_state=random_state, shuffle=shuffle,
+                                                          test_size=val_size/(1-test_size), stratify=stratify)
+    return x_train, x_valid, x_test, y_train, y_valid, y_test
