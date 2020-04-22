@@ -9,8 +9,8 @@ import dash_table
 
 import pandas as pd
 
+df = None
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
@@ -30,22 +30,22 @@ app.layout = html.Div([
     html.Div(id='output-data'),
 ])
 
+
 def parse_contents(contents, filename):
     if contents:
         content_type, content_string = contents.split(',')
-
         decoded = base64.b64decode(content_string)
-        try:
-            if filename.endswith('csv'):
-                df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-            elif filename.endswith('xls') or filename.endswith('xlsx'):
-                df = pd.read_excel(io.BytesIO(decoded))
-        except Exception as e:
-            print(e)
-            return html.Div(['Ошибка при прочтении файла.'])
+        message = filename
+        if filename.endswith('csv'):
+            file = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+        elif filename.endswith('xls') or filename.endswith('xlsx'):
+            file = pd.read_excel(io.BytesIO(decoded))
+        else:
+            file = None
+            message = 'Выбран файл неверного расширения: ' + message
+        globals()['df'] = file  # THIS IS NOT FINE!!!
+        return html.Div([html.H5(message)])
 
-        globals()['df'] = df # THIS IS NOT FINE!!!
-        return html.Div([html.H5(filename)])
 
 @app.callback([Output('header', 'children'),
                Output('drop_column', 'options')],
@@ -53,8 +53,9 @@ def parse_contents(contents, filename):
               [State('upload-df', 'filename')])
 def update_output(list_of_contents, list_of_names):
     children = parse_contents(list_of_contents, list_of_names) if list_of_contents is not None else []
-    opt =  [{'label': x, 'value': x} for x in df.columns] if 'df' in globals() else []
+    opt = [{'label': x, 'value': x} for x in df.columns] if df is not None else []
     return [children, opt]
+
 
 @app.callback(Output('output-data', 'children'),
               [Input('drop_column', "value")])
@@ -65,6 +66,7 @@ def update_table(value):
         x = df[value].value_counts().sort_index().reset_index()
         return html.Div([dash_table.DataTable(id='table', columns=[{"name": i, "id": i} for i in x.columns],
                                               data=x.to_dict('records'))])
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
