@@ -19,7 +19,7 @@ import xgboost as xgb
 import lightgbm as lgb
 # import catboost as cgb
 
-df, df_name = pd.DataFrame(), ''
+df, models_df, df_name = pd.DataFrame(), pd.DataFrame(), ''
 models_dir = None
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -81,8 +81,25 @@ def update_model_dir(value):
         m = [x.split('/')[-1].split('\\')[-1] for x in glob.glob(value + '/*.model')]
         m = list(set(['_'.join(x.split('_')[:-2]) for x in m]))
         m.sort()
-        m = [{'label': x, 'value': x} for x in m]
-        return m
+        mdl = [{'label': x, 'value': x} for x in m]
+        print('Making inference...')
+        for target in m:
+            models = [x for x in glob.glob(value + '/*.model') if target in x]
+            for model in models:
+                model_name = model.split('/')[-1].split('.model')[0]
+                try:
+                    bst, params, target_name = load_model(model)
+                except:
+                    bst, params, target_name = load_sm(model)
+                if type(bst) == xgb.Booster:
+                    pred = bst.predict(xgb.DMatrix(df[[x for x in bst.feature_names if x in df.columns]]))
+                elif type(bst) == lgb.Booster:
+                    pred = bst.predict(df[[x for x in bst.feature_name() if x in df.columns]])
+                else:
+                    pred = np.exp(bst.predict(df[[x for x in bst.feature_names_ if x in df.columns]]))
+                models_df[model_name] = pred
+        print('Inference done.')
+        return mdl
     else:
         return []
 
@@ -101,21 +118,13 @@ def update_graph(column, exposure, path, target, ext_pred):
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Bar(x=g_df[column], y=g_df[exposure], name=exposure))
         if ext_pred:
-            g_df3 = df[[column, ext_pred]].groupby(column).mean().reset_index()
+            g_df3 = df[[column, target, ext_pred]].groupby(column).mean().reset_index()
+            fig.add_trace(go.Scatter(x=g_df3[column], y=g_df3[target], name='True'), secondary_y=True)
             fig.add_trace(go.Scatter(x=g_df3[column], y=g_df3[ext_pred], name='Prediction'), secondary_y=True)
         for model in models:
             model_name = model.split('/')[-1].split('.model')[0]
-            try:
-                bst, params, target_name = load_model(model)
-            except:
-                bst, params, target_name = load_sm(model)
-            if type(bst) == xgb.Booster:
-                df[model_name] = bst.predict(xgb.DMatrix(df[[x for x in bst.feature_names if x in df.columns]]))
-            elif type(bst) == lgb.Booster:
-                df[model_name] = bst.predict(df[[x for x in bst.feature_name() if x in df.columns]])
-            else:
-                df[model_name] = np.exp(bst.predict(df[[x for x in bst.feature_names_ if x in df.columns]]))
-            g_df2 = df[[column, model_name]].groupby(column).mean().reset_index()
+
+            g_df2 = pd.concat([df[column], models_df[model_name]], axis=1).groupby(column).mean().reset_index()
             fig.add_trace(go.Scatter(x=g_df2[column], y=g_df2[model_name], name='Prediction'), secondary_y=True)
         fig.update_layout(yaxis=dict(title_text='Sum of ' + exposure, side='right'),
                           yaxis2=dict(title_text='Mean Prediction', side='left'))
