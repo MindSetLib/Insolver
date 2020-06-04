@@ -71,7 +71,7 @@ def parse_contents(contents, filename):
 def update_output(list_of_contents, list_of_names):
     name = parse_contents(list_of_contents, list_of_names) if list_of_contents is not None else df_name
     opt = [] if df.empty else [{'label': x, 'value': x} for x in df.columns]
-    return [name, opt, opt]
+    return [name, opt, opt, opt]
 
 
 @app.callback(Output('drop_target', 'options'),
