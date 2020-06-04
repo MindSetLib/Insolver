@@ -31,13 +31,15 @@ app.layout = html.Div([
                                 'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
                                 'textAlign': 'center'})]),
     html.Div([dbc.Row([dbc.Col(html.Div('Dataset:')),
-                      dbc.Col(html.Div('Model Dir:')),
-                      dbc.Col(html.Div('Target:')),
-                      dbc.Col(html.Div('Column:')),
-                      dbc.Col(html.Div('Exposure:'))]),
+                       dbc.Col(html.Div('Model Dir:')),
+                       dbc.Col(html.Div('Target:')),
+                       dbc.Col(html.Div('External prediction:')),
+                       dbc.Col(html.Div('Column:')),
+                       dbc.Col(html.Div('Exposure:'))]),
               dbc.Row([dbc.Col(html.Div(id='dataset_name')),
                        dbc.Col(dcc.Input(id='path_input')),
                        dbc.Col(dcc.Dropdown(id='drop_target')),
+                       dbc.Col(dcc.Dropdown(id='drop_extern_pred')),
                        dbc.Col(dcc.Dropdown(id='drop_column')),
                        dbc.Col(dcc.Dropdown(id='drop_exposure'))])]),
     html.Div(id='output-graph')
@@ -62,7 +64,8 @@ def parse_contents(contents, filename):
 
 @app.callback([Output('dataset_name', 'children'),
                Output('drop_column', 'options'),
-               Output('drop_exposure', 'options')],
+               Output('drop_exposure', 'options'),
+               Output('drop_extern_pred', 'options')],
               [Input('upload-df', 'contents')],
               [State('upload-df', 'filename')])
 def update_output(list_of_contents, list_of_names):
@@ -88,14 +91,18 @@ def update_model_dir(value):
               [Input('drop_column', "value"),
                Input('drop_exposure', "value"),
                Input('path_input', "value"),
-               Input('drop_target', "value")])
-def update_graph(column, exposure, path, target):
+               Input('drop_target', "value"),
+               Input('drop_extern_pred', "value")])
+def update_graph(column, exposure, path, target, ext_pred):
     if (column is not None) and (exposure is not None) and (target is not None):
         models = [x for x in glob.glob(path + '/*.model') if target in x]
         # bst = unpickle(model, path)
         g_df = df[[column, exposure]].groupby(column).sum().reset_index()
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Bar(x=g_df[column], y=g_df[exposure], name=exposure))
+        if ext_pred:
+            g_df3 = df[[column, ext_pred]].groupby(column).mean().reset_index()
+            fig.add_trace(go.Scatter(x=g_df3[column], y=g_df3[ext_pred], name='Prediction'), secondary_y=True)
         for model in models:
             model_name = model.split('/')[-1].split('.model')[0]
             try:
@@ -108,8 +115,8 @@ def update_graph(column, exposure, path, target):
                 df[model_name] = bst.predict(df[[x for x in bst.feature_name() if x in df.columns]])
             else:
                 df[model_name] = np.exp(bst.predict(df[[x for x in bst.feature_names_ if x in df.columns]]))
-            g_df2 = df[[column, 'predict']].groupby(column).mean().reset_index()
-            fig.add_trace(go.Scatter(x=g_df2[column], y=g_df2['predict'], name='Prediction'), secondary_y=True)
+            g_df2 = df[[column, model_name]].groupby(column).mean().reset_index()
+            fig.add_trace(go.Scatter(x=g_df2[column], y=g_df2[model_name], name='Prediction'), secondary_y=True)
         fig.update_layout(yaxis=dict(title_text='Sum of ' + exposure, side='right'),
                           yaxis2=dict(title_text='Mean Prediction', side='left'))
         fig.update_xaxes(title_text=column)
