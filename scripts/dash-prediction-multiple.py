@@ -1,5 +1,5 @@
 import glob
-# import pickle
+import pickle
 import base64
 import io
 
@@ -11,7 +11,7 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from scripts.boosting_func import load_model
+from boosting_func import load_model  # scripts.
 
 import numpy as np
 import pandas as pd
@@ -32,12 +32,12 @@ app.layout = html.Div([
                                 'textAlign': 'center'})]),
     html.Div([dbc.Row([dbc.Col(html.Div('Dataset:')),
                       dbc.Col(html.Div('Model Dir:')),
-                      dbc.Col(html.Div('Model:')),
+                      dbc.Col(html.Div('Target:')),
                       dbc.Col(html.Div('Column:')),
                       dbc.Col(html.Div('Exposure:'))]),
               dbc.Row([dbc.Col(html.Div(id='dataset_name')),
                        dbc.Col(dcc.Input(id='path_input')),
-                       dbc.Col(dcc.Dropdown(id='drop_model')),
+                       dbc.Col(dcc.Dropdown(id='drop_target')),
                        dbc.Col(dcc.Dropdown(id='drop_column')),
                        dbc.Col(dcc.Dropdown(id='drop_exposure'))])]),
     html.Div(id='output-graph')
@@ -71,12 +71,15 @@ def update_output(list_of_contents, list_of_names):
     return [name, opt, opt]
 
 
-@app.callback(Output('drop_model', 'options'),
+@app.callback(Output('drop_target', 'options'),
               [Input('path_input', "value")])
 def update_model_dir(value):
     if value is not None:
-        m = m = [x.split('/')[-1].split('\\')[-1] for x in glob.glob(value + '/*.model')]
-        return [{'label': x, 'value': x} for x in m]
+        m = [x.split('/')[-1].split('\\')[-1] for x in glob.glob(value + '/*.model')]
+        m = list(set(['_'.join(x.split('_')[:-2]) for x in m]))
+        m.sort()
+        m = [{'label': x, 'value': x} for x in m]
+        return m
     else:
         return []
 
@@ -85,23 +88,28 @@ def update_model_dir(value):
               [Input('drop_column', "value"),
                Input('drop_exposure', "value"),
                Input('path_input', "value"),
-               Input('drop_model', "value")])
-def update_graph(column, exposure, path, model):
-    if (column is not None) and (exposure is not None) and (model is not None):
+               Input('drop_target', "value")])
+def update_graph(column, exposure, path, target):
+    if (column is not None) and (exposure is not None) and (target is not None):
+        models = [x for x in glob.glob(path + '/*.model') if target in x]
         # bst = unpickle(model, path)
-        bst, params, target_name = load_model(path + '/' + model)
-        if type(bst) == xgb.Booster:
-            df['predict'] = bst.predict(xgb.DMatrix(df[[x for x in bst.feature_names if x in df.columns]]))
-        elif type(bst) == lgb.Booster:
-            df['predict'] = bst.predict(df[[x for x in bst.feature_name() if x in df.columns]])
-        else:
-            df['predict'] = np.exp(bst.predict(df[[x for x in bst.feature_names_ if x in df.columns]]))
-
         g_df = df[[column, exposure]].groupby(column).sum().reset_index()
-        g_df2 = df[[column, 'predict']].groupby(column).mean().reset_index()
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Bar(x=g_df[column], y=g_df[exposure], name=exposure))
-        fig.add_trace(go.Scatter(x=g_df2[column], y=g_df2['predict'], name='Prediction'), secondary_y=True)
+        for model in models:
+            model_name = model.split('/')[-1].split('.model')[0]
+            try:
+                bst, params, target_name = load_model(model)
+            except:
+                bst, params, target_name = load_sm(model)
+            if type(bst) == xgb.Booster:
+                df[model_name] = bst.predict(xgb.DMatrix(df[[x for x in bst.feature_names if x in df.columns]]))
+            elif type(bst) == lgb.Booster:
+                df[model_name] = bst.predict(df[[x for x in bst.feature_name() if x in df.columns]])
+            else:
+                df[model_name] = np.exp(bst.predict(df[[x for x in bst.feature_names_ if x in df.columns]]))
+            g_df2 = df[[column, 'predict']].groupby(column).mean().reset_index()
+            fig.add_trace(go.Scatter(x=g_df2[column], y=g_df2['predict'], name='Prediction'), secondary_y=True)
         fig.update_layout(yaxis=dict(title_text='Sum of ' + exposure, side='right'),
                           yaxis2=dict(title_text='Mean Prediction', side='left'))
         fig.update_xaxes(title_text=column)
@@ -111,9 +119,18 @@ def update_graph(column, exposure, path, model):
     return x
 
 
+def load_sm(model_name):
+    with open(model_name.split('_sv.model')[0] + '_par.pickle', 'rb') as h:
+        meta = pickle.load(h)
+    model = xgb.Booster()
+    model.load_model(model_name)
+    model.feature_names = meta['feature_names']
+    model.feature_types = meta['feature_types']
+    return model, meta['hypepar'], meta['target']
+
+
 if __name__ == '__main__':
     app.run_server(debug=True)
-
 
 # def unpickle(model, path):
 #     with open(path + '/' + model, 'rb') as h:
