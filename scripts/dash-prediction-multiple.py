@@ -42,7 +42,9 @@ app.layout = html.Div([
                        dbc.Col(dcc.Dropdown(id='drop_target')),
                        dbc.Col(dcc.Dropdown(id='drop_extern_pred')),
                        dbc.Col(dcc.Dropdown(id='drop_column')),
-                       dcc.Checklist(id='check_list', options=[{'label': 'Only Positive', 'value': 'pos'}]),
+                       dcc.RadioItems(id='radio_list', value='all',
+                                      options=[{'label': 'All', 'value': 'all'},
+                                               {'label': 'Only Positive', 'value': 'pos'}]),
                        dbc.Col(dcc.Dropdown(id='drop_exposure'))])]),
     html.Div(id='output-graph')
 ])
@@ -112,7 +114,7 @@ def update_model_dir(value):
                Input('path_input', "value"),
                Input('drop_target', "value"),
                Input('drop_extern_pred', "value"),
-               Input('check_list', "value")])
+               Input('radio_list', "value")])
 def update_graph(column, exposure, path, target, ext_pred, pos):
     if (column is not None) and (exposure is not None) and (target is not None):
         models = [x for x in glob.glob(path + '/*.model') if target in x]
@@ -120,14 +122,15 @@ def update_graph(column, exposure, path, target, ext_pred, pos):
         g_df = df[[column, exposure]].groupby(column).sum().reset_index()
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Bar(x=g_df[column], y=g_df[exposure], name=exposure))
+        target_name = '_'.join(target.split('_')[1:])
+        cols = [column, target_name, ext_pred] if ext_pred else [column, target_name]
+        g_df3 = df[cols].groupby(column).mean().reset_index()
+        if pos == 'pos':
+            g_df_pos = df.loc[df[target_name] > 0, [column, target_name]].groupby(column).mean().reset_index()
+            fig.add_trace(go.Scatter(x=g_df_pos[column], y=g_df_pos[target_name], name='True'), secondary_y=True)
+        else:
+            fig.add_trace(go.Scatter(x=g_df3[column], y=g_df3[target_name], name='True'), secondary_y=True)
         if ext_pred:
-            target_name = '_'.join(target.split('_')[1:])
-            g_df3 = df[[column, target_name, ext_pred]].groupby(column).mean().reset_index()
-            if pos == 'pos':
-                g_df_pos = df.loc[df[target_name] > 0, [column, target_name]].groupby(column).mean().reset_index()
-                fig.add_trace(go.Scatter(x=g_df_pos[column], y=g_df_pos[target_name], name='True'), secondary_y=True)
-            else:
-                fig.add_trace(go.Scatter(x=g_df3[column], y=g_df3[target_name], name='True'), secondary_y=True)
             fig.add_trace(go.Scatter(x=g_df3[column], y=g_df3[ext_pred], name='Prediction'), secondary_y=True)
         for model in models:
             model_name = model.split('/')[-1].split('\\')[-1].split('.model')[0]
