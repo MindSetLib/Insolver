@@ -33,14 +33,16 @@ app.layout = html.Div([
     html.Div([dbc.Row([dbc.Col(html.Div('Dataset:')),
                        dbc.Col(html.Div('Model Dir:')),
                        dbc.Col(html.Div('Target:')),
-                       dbc.Col(html.Div('External prediction:')),
+                       dbc.Col(html.Div('External Prediction:')),
                        dbc.Col(html.Div('Column:')),
+                       dbc.Col(html.Div('True Value Subset:')),
                        dbc.Col(html.Div('Exposure:'))]),
               dbc.Row([dbc.Col(html.Div(id='dataset_name')),
                        dbc.Col(dcc.Input(id='path_input')),
                        dbc.Col(dcc.Dropdown(id='drop_target')),
                        dbc.Col(dcc.Dropdown(id='drop_extern_pred')),
                        dbc.Col(dcc.Dropdown(id='drop_column')),
+                       dcc.Checklist(id='check_list', options=[{'label': 'Only Positive', 'value': 'pos'}]),
                        dbc.Col(dcc.Dropdown(id='drop_exposure'))])]),
     html.Div(id='output-graph')
 ])
@@ -86,7 +88,7 @@ def update_model_dir(value):
         for target in m:
             models = [x for x in glob.glob(value + '/*.model') if target in x]
             for model in models:
-                model_name = model.split('/')[-1].split('.model')[0]
+                model_name = model.split('/')[-1].split('\\')[-1].split('.model')[0]
                 try:
                     bst, params, target_name = load_model(model)
                 except:
@@ -109,8 +111,9 @@ def update_model_dir(value):
                Input('drop_exposure', "value"),
                Input('path_input', "value"),
                Input('drop_target', "value"),
-               Input('drop_extern_pred', "value")])
-def update_graph(column, exposure, path, target, ext_pred):
+               Input('drop_extern_pred', "value"),
+               Input('check_list', "value")])
+def update_graph(column, exposure, path, target, ext_pred, pos):
     if (column is not None) and (exposure is not None) and (target is not None):
         models = [x for x in glob.glob(path + '/*.model') if target in x]
         # bst = unpickle(model, path)
@@ -118,11 +121,16 @@ def update_graph(column, exposure, path, target, ext_pred):
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Bar(x=g_df[column], y=g_df[exposure], name=exposure))
         if ext_pred:
-            g_df3 = df[[column, target, ext_pred]].groupby(column).mean().reset_index()
-            fig.add_trace(go.Scatter(x=g_df3[column], y=g_df3[target], name='True'), secondary_y=True)
+            target_name = '_'.join(target.split('_')[1:])
+            g_df3 = df[[column, target_name, ext_pred]].groupby(column).mean().reset_index()
+            if pos == 'pos':
+                g_df_pos = df.loc[df[target_name] > 0, [column, target_name]].groupby(column).mean().reset_index()
+                fig.add_trace(go.Scatter(x=g_df_pos[column], y=g_df_pos[target_name], name='True'), secondary_y=True)
+            else:
+                fig.add_trace(go.Scatter(x=g_df3[column], y=g_df3[target_name], name='True'), secondary_y=True)
             fig.add_trace(go.Scatter(x=g_df3[column], y=g_df3[ext_pred], name='Prediction'), secondary_y=True)
         for model in models:
-            model_name = model.split('/')[-1].split('.model')[0]
+            model_name = model.split('/')[-1].split('\\')[-1].split('.model')[0]
 
             g_df2 = pd.concat([df[column], models_df[model_name]], axis=1).groupby(column).mean().reset_index()
             fig.add_trace(go.Scatter(x=g_df2[column], y=g_df2[model_name], name='Prediction'), secondary_y=True)
