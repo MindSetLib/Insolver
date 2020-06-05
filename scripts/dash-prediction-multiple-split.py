@@ -130,7 +130,8 @@ def update_graph(column, exposure, path, target, ext_pred, split, pos):
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Bar(x=g_df[column], y=g_df[exposure], name=exposure))
         if split:
-            train, test = df[df[split] == 'train'], df[df[split] == 'test']
+            pred_split = pd.concat([models_df, df[split]], axis=1)
+            train, test = pred_split[pred_split[split] == 'train'], pred_split[pred_split[split] == 'test']
             models_df_train = models_df[models_df[split] == 'train']
             models_df_test = models_df[models_df[split] == 'test']
             g_train = train[[column, exposure]].groupby(column).sum().reset_index()
@@ -174,14 +175,15 @@ def update_graph(column, exposure, path, target, ext_pred, split, pos):
                 fig3.add_trace(go.Scatter(x=g_test4[column], y=g_test4[model_name],
                                           name='Prediction'), secondary_y=True)
         fig.update_layout(yaxis=dict(title_text='Sum of ' + exposure, side='right'),
-                          yaxis2=dict(title_text='Mean Prediction', side='left'))
+                          yaxis2=dict(title_text='Mean Prediction', side='left'),
+                          title='Overall Dataset')
         fig.update_xaxes(title_text=column)
         x = dcc.Graph(figure=fig)
         if split:
             fig2.update_layout(yaxis=dict(title_text='Sum of ' + exposure, side='right'),
-                               yaxis2=dict(title_text='Mean Prediction', side='left'))
+                               yaxis2=dict(title_text='Mean Prediction', side='left'), title='Train Set')
             fig3.update_layout(yaxis=dict(title_text='Sum of ' + exposure, side='right'),
-                               yaxis2=dict(title_text='Mean Prediction', side='left'))
+                               yaxis2=dict(title_text='Mean Prediction', side='left'), title='Test Set')
             fig2.update_xaxes(title_text=column)
             fig3.update_xaxes(title_text=column)
             x = [x, dcc.Graph(figure=fig2), dcc.Graph(figure=fig3)]
