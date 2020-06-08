@@ -120,6 +120,9 @@ def update_model_dir(value):
                Input('drop_split', "value"),
                Input('radio_list', "value")])
 def update_graph(column, exposure, path, target, ext_pred, split, pos):
+    train, test, g_train2, g_test2 = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    models_df_train, models_df_test = pd.DataFrame(), pd.DataFrame()
+    fig2, fig3 = '', ''
     if (column is not None) and (exposure is not None) and (target is not None):
         models = [x for x in glob.glob(path + '/*.model') if target in x]
         # bst = unpickle(model, path)
@@ -130,7 +133,7 @@ def update_graph(column, exposure, path, target, ext_pred, split, pos):
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Bar(x=g_df[column], y=g_df[exposure], name=exposure))
         if split:
-            pred_split = pd.concat([models_df, df[split]], axis=1)
+            pred_split = pd.concat([models_df, df[split, target_name]], axis=1)
             train, test = pred_split[pred_split[split] == 'train'], pred_split[pred_split[split] == 'test']
             models_df_train = models_df[models_df[split] == 'train']
             models_df_test = models_df[models_df[split] == 'test']
@@ -163,17 +166,30 @@ def update_graph(column, exposure, path, target, ext_pred, split, pos):
         for model in models:
             model_name = model.split('/')[-1].split('\\')[-1].split('.model')[0]
 
-            g_df2 = pd.concat([df[column], models_df[model_name]], axis=1).groupby(column).mean().reset_index()
+            if pos == 'pos':
+                g_df2 = pd.concat([df[[column, target_name]], models_df[model_name]], axis=1)
+                g_df2[g_df2[target_name > 0]].groupby(column).mean().reset_index()
+            else:
+                g_df2 = pd.concat([df[column], models_df[model_name]], axis=1).groupby(column).mean().reset_index()
             fig.add_trace(go.Scatter(x=g_df2[column], y=g_df2[model_name], name='Prediction'), secondary_y=True)
             if split:
-                g_train4 = pd.concat([train[column],
-                                      models_df_train[model_name]], axis=1).groupby(column).mean().reset_index()
-                g_test4 = pd.concat([test[column],
-                                      models_df_test[model_name]], axis=1).groupby(column).mean().reset_index()
+                if pos == 'pos':
+                    g_train4 = pd.concat([train.loc[train[target_name] > 0, column],
+                                          models_df_train.loc[models_df_train[target_name] > 0,
+                                                              model_name]], axis=1).groupby(column).mean().reset_index()
+                    g_test4 = pd.concat([test.loc[test[target_name] > 0, column],
+                                         models_df_test.loc[models_df_test[target_name] > 0,
+                                                            model_name]], axis=1).groupby(column).mean().reset_index()
+                else:
+                    g_train4 = pd.concat([train[column],
+                                          models_df_train[model_name]], axis=1).groupby(column).mean().reset_index()
+                    g_test4 = pd.concat([test[column],
+                                         models_df_test[model_name]], axis=1).groupby(column).mean().reset_index()
                 fig2.add_trace(go.Scatter(x=g_train4[column], y=g_train4[model_name],
                                           name='Prediction'), secondary_y=True)
                 fig3.add_trace(go.Scatter(x=g_test4[column], y=g_test4[model_name],
                                           name='Prediction'), secondary_y=True)
+
         fig.update_layout(yaxis=dict(title_text='Sum of ' + exposure, side='right'),
                           yaxis2=dict(title_text='Mean Prediction', side='left'),
                           title='Overall Dataset')
