@@ -71,6 +71,18 @@ def f_gender( client_type, client_name, client_gender='not_defined' ):
     return gender_m, gender_f
 
 
+# Функция определения воздаста для м/ж
+
+def f_age_gender( age_gender ):
+    age = age_gender[0]
+    gender = age_gender[1]
+    if gender == 1:
+        age_res = age
+    else:
+        age_res = 18
+    return age_res
+
+
 # Функция формирования признака пол-возраст-стаж
 
 def f_gen_age_exp( gender_m, gender_f, age, exp ):

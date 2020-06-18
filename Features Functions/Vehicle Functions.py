@@ -24,9 +24,8 @@ def f_vehicle_age ( age ):
         age = None
     elif age < 0:
         age = None
-    elif age > 20:
-        age = 20
+    elif age > 25:
+        age = 25
     return age
 
 
-# 
