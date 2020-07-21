@@ -20,9 +20,8 @@ class PostgresConnection(object):
                 print('If this does not work, specify the correct driver manually')
                 self.driver = "{PostgreSQL Unicode}"
 
-        self.conn_str = '''DRIVER={};DATABASE={};UID={};
-                           PWD={};SERVER={};PORT={};'''.format(self.driver, self.database, self.uid,
-                                                               self.pwd, self.server, self.port)
+        self.conn_str = (f'DRIVER={self.driver};DATABASE={self.database};UID={self.uid};'
+                         f'PWD={self.pwd};SERVER={self.server};PORT={self.port};')
 
     def execute_query(self, query):
         pyodbc.setDecimalSeparator(self.decimal)
