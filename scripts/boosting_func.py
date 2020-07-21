@@ -98,24 +98,22 @@ def objective_gb(params):
     data = params.pop('data')
     nfold = params.pop('nfold')
     e_s_r = params.pop('early_stopping_rounds')
+    stratified = params.pop('stratified')
+    shuffle = params.pop('shuffle')
     if type(data) == xgb.DMatrix:
         feval = params.pop('feval')
         name = feval*(data.get_label(), data)[0]
         maximize = params.pop('maximize')
         cv_result = xgb.cv(params, data, num_boost_round=n_b_r, nfold=nfold, seed=0, maximize=maximize,
-                           feval=feval, early_stopping_rounds=e_s_r)
+                           stratified=stratified, shuffle=shuffle, feval=feval, early_stopping_rounds=e_s_r)
         score = cv_result['test-{}-mean'.format(name)][-1:].values[0]
     elif type(data) == lgb.Dataset:
         feval = params.pop('feval')
         name = feval * (data.get_label(), data)[0]
-        stratified = params.pop('stratified')
-        shuffle = params.pop('shuffle')
         cv_result = lgb.cv(params, data, num_boost_round=n_b_r, nfold=nfold, seed=0, stratified=stratified,
                            shuffle=shuffle, feval=feval, early_stopping_rounds=e_s_r)
         score = cv_result['{}-mean'.format(name)][-1]
     else:
-        stratified = params.pop('stratified')
-        shuffle = params.pop('shuffle')
         cv_result = cgb.cv(params=params, dtrain=cgb.Pool(data[0], data[1], weight=data[2]), num_boost_round=n_b_r,
                            nfold=nfold, seed=0, stratified=stratified, shuffle=shuffle,
                            early_stopping_rounds=e_s_r)

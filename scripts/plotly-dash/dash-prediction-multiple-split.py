@@ -139,8 +139,8 @@ def update_graph(column, exposure, path, target, ext_pred, split, pos):
             models_df_test = models_df[models_df[split] == 'test']
             g_train = train[[column, exposure]].groupby(column).sum().reset_index()
             g_test = test[[column, exposure]].groupby(column).sum().reset_index()
-            g_train2 = df[cols].groupby(column).mean().reset_index()
-            g_test2 = df[cols].groupby(column).mean().reset_index()
+            g_train2 = train[cols].groupby(column).mean().reset_index()
+            g_test2 = test[cols].groupby(column).mean().reset_index()
             fig2, fig3 = make_subplots(specs=[[{"secondary_y": True}]]), make_subplots(specs=[[{"secondary_y": True}]])
             fig2.add_trace(go.Bar(x=g_train[column], y=g_train[exposure], name=exposure))
             fig3.add_trace(go.Bar(x=g_test[column], y=g_test[exposure], name=exposure))
