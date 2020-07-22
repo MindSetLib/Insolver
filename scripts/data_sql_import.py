@@ -1,6 +1,6 @@
 import platform
-import pandas as pd
 import pyodbc
+import pandas as pd
 
 
 class PostgresConnection(object):
@@ -17,13 +17,19 @@ class PostgresConnection(object):
             elif platform.system() == "Linux":
                 self.driver = "{PostgreSQL Unicode}"
             else:
-                print('If this does not work, specify the correct driver manually')
+                print('If this does not work, please, specify the correct driver manually')
                 self.driver = "{PostgreSQL Unicode}"
 
         self.conn_str = (f'DRIVER={self.driver};DATABASE={self.database};UID={self.uid};'
                          f'PWD={self.pwd};SERVER={self.server};PORT={self.port};')
 
     def execute_query(self, query):
+        """
+        Method executing SQL queries, extracting the results to the pd.DataFrame object.
+
+        :param query: str, string containing text of the SQL query
+        :return: pd.DataFrame, containing SQL query results if it was successful.
+        """
         pyodbc.setDecimalSeparator(self.decimal)
         conn = pyodbc.connect(self.conn_str)
         df = pd.read_sql(query, conn)
