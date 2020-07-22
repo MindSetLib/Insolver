@@ -59,10 +59,9 @@ def gb_eval_dev_poisson(yhat, y, weight=None):
     else:
         t = y + 1
         if weight:
-            pdev = 2 * np.sum(weight*(t * np.log(t / that) - (t - that)))
+            return 2 * np.sum(weight*(t * np.log(t / that) - (t - that)))
         else:
-            pdev = 2 * np.sum(t * np.log(t / that) - (t - that))
-        return pdev
+            return 2 * np.sum(t * np.log(t / that) - (t - that))
 
 
 def gb_eval_dev_gamma(yhat, y, weight=None):
@@ -81,10 +80,9 @@ def gb_eval_dev_gamma(yhat, y, weight=None):
             return 'dev_gamma', 2 * np.sum(-np.log(t/yhat) + (t-yhat)/yhat), False
     else:
         if weight:
-            gdev = 2 * np.sum(weight*(-np.log(y/yhat) + (y-yhat)/yhat))
+            return 2 * np.sum(weight*(-np.log(y/yhat) + (y-yhat)/yhat))
         else:
-            gdev = 2 * np.sum(-np.log(y/yhat) + (y-yhat)/yhat)
-        return gdev
+            return 2 * np.sum(-np.log(y/yhat) + (y-yhat)/yhat)
 
 
 def objective_gb(params):
@@ -93,28 +91,46 @@ def objective_gb(params):
     :param params: dict object passed to hyperopt fmin() function
     :return: float, mean cross-validation error for XGBoost, LightGBM or Catboost utilizing params
     """
-    params['max_depth'] = int(params['max_depth'])
-    n_b_r = int(params.pop('num_boost_round'))
+    if 'alg' in params.keys():
+        alg = params.pop('alg')
+    for x in ['max_depth', 'num_boost_round', 'max_leaves', 'max_bin']:
+        if x in params.keys():
+            params[x] = int(params[x])
+
+    n_b_r = params.pop('num_boost_round')
     data = params.pop('data')
     nfold = params.pop('nfold')
     e_s_r = params.pop('early_stopping_rounds')
     stratified = params.pop('stratified')
     shuffle = params.pop('shuffle')
-    if type(data) == xgb.DMatrix:
-        feval = params.pop('feval')
-        name = feval*(data.get_label(), data)[0]
+    if alg == 'xgboost':
+        dtrain = xgb.DMatrix(data[0], data[1]/data[2]) if 'poisson' in params['objective'].lower() \
+            else xgb.DMatrix(data[0], data[1])
+        if 'feval' in params.keys():
+            feval = params.pop('feval')
+            name = feval(dtrain.get_label(), dtrain)[0]
+        else:
+            feval = None
         maximize = params.pop('maximize')
-        cv_result = xgb.cv(params, data, num_boost_round=n_b_r, nfold=nfold, seed=0, maximize=maximize,
+        cv_result = xgb.cv(params, dtrain, num_boost_round=n_b_r, nfold=nfold, seed=0, maximize=maximize,
                            stratified=stratified, shuffle=shuffle, feval=feval, early_stopping_rounds=e_s_r)
         score = cv_result['test-{}-mean'.format(name)][-1:].values[0]
-    elif type(data) == lgb.Dataset:
-        feval = params.pop('feval')
-        name = feval * (data.get_label(), data)[0]
-        cv_result = lgb.cv(params, data, num_boost_round=n_b_r, nfold=nfold, seed=0, stratified=stratified,
+    elif alg == 'lightgbm':
+        dtrain = lgb.Dataset(data[0], data[1] / data[2]) if 'poisson' in params['objective'].lower() \
+            else lgb.Dataset(data[0], data[1])
+        if 'feval' in params.keys():
+            feval = params.pop('feval')
+            name = feval(dtrain.get_label(), dtrain)[0]
+        else:
+            feval = None
+            name = params['metric']
+        cv_result = lgb.cv(params, dtrain, num_boost_round=n_b_r, nfold=nfold, seed=0, stratified=stratified,
                            shuffle=shuffle, feval=feval, early_stopping_rounds=e_s_r)
         score = cv_result['{}-mean'.format(name)][-1]
     else:
-        cv_result = cgb.cv(params=params, dtrain=cgb.Pool(data[0], data[1], weight=data[2]), num_boost_round=n_b_r,
+        dtrain = cgb.Pool(data[0], data[1] / data[2]) if 'poisson' in params['objective'].lower() \
+            else cgb.Pool(data[0], data[1])
+        cv_result = cgb.cv(params=params, dtrain=dtrain, num_boost_round=n_b_r,
                            nfold=nfold, seed=0, stratified=stratified, shuffle=shuffle,
                            early_stopping_rounds=e_s_r)
         name = params['objective']
@@ -136,24 +152,38 @@ def train_gb_best_params(params, dtrain, evals, early_stopping_rounds, evals_res
     for label in ['nfold', 'data', 'early_stopping_rounds', 'stratified', 'shuffle']:
         if label in params.keys():
             del params[label]
+    alg = params.pop('alg')
     n_b_r = 10 if 'num_boost_round' not in params.keys() else int(params.pop('num_boost_round'))
 
-    if type(dtrain) == xgb.DMatrix:
-        maximize = params.pop('maximize')
+    if 'feval' in params.keys():
         feval = params.pop('feval')
-        return xgb.train(params=params, dtrain=dtrain, num_boost_round=n_b_r, evals=evals, feval=feval,
+    else:
+        feval = None
+
+    if alg == 'xgboost':
+        data = xgb.DMatrix(dtrain[0], dtrain[1]/dtrain[2]) if 'poisson' in params['objective'].lower() \
+            else xgb.DMatrix(dtrain[0], dtrain[1])
+        evals = [(xgb.DMatrix(x[0][0], x[0][1]/x[0][2]), x[1]) if len(x[0]) == 3 else
+                 (xgb.DMatrix(x[0][0], x[0][1]), x[1]) for x in evals]
+        maximize = params.pop('maximize')
+        return xgb.train(params=params, dtrain=data, num_boost_round=n_b_r, evals=evals, feval=feval,
                          maximize=maximize, early_stopping_rounds=early_stopping_rounds, evals_result=evals_result,
                          verbose_eval=verbose_eval)
-    elif type(dtrain) == lgb.Dataset:
-        feval = params.pop('feval')
-        valid_sets, valid_names = [x[0] for x in evals], [x[1] for x in evals]
-        return lgb.train(params=params, train_set=dtrain, num_boost_round=n_b_r, valid_sets=valid_sets, feval=feval,
+    elif alg == 'lightgbm':
+        data = lgb.Dataset(dtrain[0], dtrain[1] / dtrain[2]) if 'poisson' in params['objective'].lower() \
+            else lgb.Dataset(dtrain[0], dtrain[1])
+        valid_names = [x[1] for x in evals]
+        valid_sets = [(lgb.Dataset(x[0][0], x[0][1]/x[0][2])) if len(x[0]) == 3 else
+                      (lgb.Dataset(x[0][0], x[0][1])) for x in evals]
+        return lgb.train(params=params, train_set=data, num_boost_round=n_b_r, valid_sets=valid_sets, feval=feval,
                          valid_names=valid_names, early_stopping_rounds=early_stopping_rounds,
                          evals_result=evals_result, verbose_eval=verbose_eval)
     else:
-        valid_sets = [cgb.Pool(x[0][0], x[0][1], weight=x[0][2]) if len(x[0]) == 3 else
+        data = cgb.Pool(dtrain[0], dtrain[1] / dtrain[2]) if 'poisson' in params['objective'].lower() \
+            else cgb.Pool(dtrain[0], dtrain[1])
+        valid_sets = [cgb.Pool(x[0][0], x[0][1]/x[0][2]) if len(x[0]) == 3 else
                       cgb.Pool(x[0][0], x[0][1]) for x in evals]
-        return cgb.train(params=params, dtrain=cgb.Pool(dtrain[0], dtrain[1], weight=dtrain[2]), num_boost_round=n_b_r,
+        return cgb.train(params=params, dtrain=data, num_boost_round=n_b_r,
                          evals=valid_sets, early_stopping_rounds=early_stopping_rounds, verbose_eval=verbose_eval)
 
 
