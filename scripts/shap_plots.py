@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 
 class ShapPlots(object):
-    """Class for setting the connection to PostreSQL database.
+    """Class for plotting some graphs from SHAP package.
 
     Attributes:
         model: Model object (XGBoost, LightGBM, Catboost boosters) supported by SHAP package.
@@ -19,11 +19,11 @@ class ShapPlots(object):
         self.explainer = shap.TreeExplainer(model)
         self.shap_values = self.explainer.shap_values(data)
 
-    def plot_shap_importances(self, plot_type="dot"):
+    def plot_shap_importance(self, plot_type="bar"):
         """Plotting summary graph from SHAP package.
 
         Args:
-            plot_type (str): String containing name of SHAP summary plot type.
+            plot_type (:obj:`str`, optional): String containing name of SHAP summary plot type (default="bar").
         """
         shap.summary_plot(self.shap_values, self.data, plot_type=plot_type)
 
@@ -32,9 +32,10 @@ class ShapPlots(object):
 
         Args:
             instance_index (int): Index of the observation in DataFrame passed to SHAP values calculation.
-            exponential (bool): Boolean variable, whether to use exponential for plotting waterfall graph.
-            height (int): Height of the plotly waterfall graph.
-            title (str): Title for plotly waterfall graph.
+            exponential (:obj:`bool`, optional): Whether to use exponential for plotting waterfall graph.
+                Used when SHAP plots values before log-link (default=False).
+            height (:obj:`int`, optional): Height of the plotly waterfall graph (default=700).
+            title (:obj:`str`, optional): Title for plotly waterfall graph (default=None).
         """
         prediction = pd.DataFrame([self.explainer.expected_value] + self.shap_values[instance_index, :].tolist(),
                                   index=['Intercept'] + self.feature_names, columns=['SHAP Values'])

@@ -42,7 +42,7 @@ def parse_contents(contents, filename):
             file = pd.read_excel(io.BytesIO(decoded))
         else:
             file = None
-            message = 'Выбран файл неверного расширения: ' + message
+            message = f'Выбран файл неверного расширения: {message}'
         globals()['df'] = file  # THIS IS NOT FINE!!!
         return html.Div([html.H5(message)])
 

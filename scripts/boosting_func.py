@@ -1,3 +1,4 @@
+# TODO: Hyperopt internal usage, training class or function, docstrings data types.
 import pickle
 import numpy as np
 import xgboost as xgb
@@ -80,6 +81,7 @@ def objective_gb(params):
     e_s_r = params.pop('early_stopping_rounds')
     stratified = params.pop('stratified')
     shuffle = params.pop('shuffle')
+    name = ''
     if alg == 'xgboost':
         dtrain = xgb.DMatrix(data[0], data[1]/data[2]) if 'poisson' in params['objective'].lower() \
             else xgb.DMatrix(data[0], data[1])
@@ -133,7 +135,7 @@ def train_gb_best_params(params, dtrain, evals, early_stopping_rounds, evals_res
         if label in params.keys():
             del params[label]
     alg = params.pop('alg')
-    n_b_r = 10 if 'num_boost_round' not in params.keys() else int(params.pop('num_boost_round'))
+    n_b_r = 10 if 'num_boost_round' not in params.keys() else params.pop('num_boost_round')
 
     if 'feval' in params.keys():
         feval = params.pop('feval')

@@ -1,5 +1,4 @@
 import glob
-# import pickle
 import base64
 import io
 
@@ -17,7 +16,6 @@ import numpy as np
 import pandas as pd
 import xgboost as xgb
 import lightgbm as lgb
-# import catboost as cgb
 
 df, df_name = pd.DataFrame(), ''
 models_dir = None
@@ -55,7 +53,7 @@ def parse_contents(contents, filename):
             file = pd.read_excel(io.BytesIO(decoded))
         else:
             file = None
-            message = 'Выбран файл неверного расширения: ' + message
+            message = f'Выбран файл неверного расширения: {message}'
         globals()['df'] = file  # THIS IS NOT FINE!!!
         return [message]
 
@@ -75,7 +73,7 @@ def update_output(list_of_contents, list_of_names):
               [Input('path_input', "value")])
 def update_model_dir(value):
     if value is not None:
-        m = m = [x.split('/')[-1].split('\\')[-1] for x in glob.glob(value + '/*.model')]
+        m = [x.split('/')[-1].split('\\')[-1] for x in glob.glob(f'{value}/*.model')]
         return [{'label': x, 'value': x} for x in m]
     else:
         return []
@@ -88,8 +86,7 @@ def update_model_dir(value):
                Input('drop_model', "value")])
 def update_graph(column, exposure, path, model):
     if (column is not None) and (exposure is not None) and (model is not None):
-        # bst = unpickle(model, path)
-        bst, params, target_name = load_model(path + '/' + model)
+        bst, params, target_name = load_model(f'{path}/{model}')
         if type(bst) == xgb.Booster:
             df['predict'] = bst.predict(xgb.DMatrix(df[[x for x in bst.feature_names if x in df.columns]]))
         elif type(bst) == lgb.Booster:
@@ -102,7 +99,7 @@ def update_graph(column, exposure, path, model):
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(go.Bar(x=g_df[column], y=g_df[exposure], name=exposure))
         fig.add_trace(go.Scatter(x=g_df2[column], y=g_df2['predict'], name='Prediction'), secondary_y=True)
-        fig.update_layout(yaxis=dict(title_text='Sum of ' + exposure, side='right'),
+        fig.update_layout(yaxis=dict(title_text=f'Sum of {exposure}', side='right'),
                           yaxis2=dict(title_text='Mean Prediction', side='left'))
         fig.update_xaxes(title_text=column)
         x = dcc.Graph(figure=fig)
@@ -113,9 +110,3 @@ def update_graph(column, exposure, path, model):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-
-# def unpickle(model, path):
-#     with open(path + '/' + model, 'rb') as h:
-#         mdl = pickle.load(h)
-#     return mdl

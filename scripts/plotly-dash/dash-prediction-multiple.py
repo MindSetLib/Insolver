@@ -11,13 +11,12 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from boosting_func import load_model  # scripts.
+from scripts.boosting_func import load_model
 
 import numpy as np
 import pandas as pd
 import xgboost as xgb
 import lightgbm as lgb
-# import catboost as cgb
 
 df, models_df, df_name = pd.DataFrame(), pd.DataFrame(), ''
 models_dir = None
@@ -61,7 +60,7 @@ def parse_contents(contents, filename):
             file = pd.read_excel(io.BytesIO(decoded))
         else:
             file = None
-            message = 'Выбран файл неверного расширения: ' + message
+            message = f'Выбран файл неверного расширения: {message}'
         globals()['df'] = file  # THIS IS NOT FINE!!!
         return [message]
 
@@ -82,13 +81,13 @@ def update_output(list_of_contents, list_of_names):
               [Input('path_input', "value")])
 def update_model_dir(value):
     if value is not None:
-        m = [x.split('/')[-1].split('\\')[-1] for x in glob.glob(value + '/*.model')]
+        m = [x.split('/')[-1].split('\\')[-1] for x in glob.glob(f'{value}/*.model')]
         m = list(set(['_'.join(x.split('_')[:-2]) for x in m]))
         m.sort()
         mdl = [{'label': x, 'value': x} for x in m]
         print('Making inference...')
         for target in m:
-            models = [x for x in glob.glob(value + '/*.model') if target in x]
+            models = [x for x in glob.glob(f'{value}/*.model') if target in x]
             for model in models:
                 model_name = model.split('/')[-1].split('\\')[-1].split('.model')[0]
                 try:
@@ -117,7 +116,7 @@ def update_model_dir(value):
                Input('radio_list', "value")])
 def update_graph(column, exposure, path, target, ext_pred, pos):
     if (column is not None) and (exposure is not None) and (target is not None):
-        models = [x for x in glob.glob(path + '/*.model') if target in x]
+        models = [x for x in glob.glob(f'{path}/*.model') if target in x]
         # bst = unpickle(model, path)
         g_df = df[[column, exposure]].groupby(column).sum().reset_index()
         fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -137,7 +136,7 @@ def update_graph(column, exposure, path, target, ext_pred, pos):
 
             g_df2 = pd.concat([df[column], models_df[model_name]], axis=1).groupby(column).mean().reset_index()
             fig.add_trace(go.Scatter(x=g_df2[column], y=g_df2[model_name], name='Prediction'), secondary_y=True)
-        fig.update_layout(yaxis=dict(title_text='Sum of ' + exposure, side='right'),
+        fig.update_layout(yaxis=dict(title_text=f'Sum of {exposure}', side='right'),
                           yaxis2=dict(title_text='Mean Prediction', side='left'))
         fig.update_xaxes(title_text=column)
         x = dcc.Graph(figure=fig)
@@ -147,7 +146,7 @@ def update_graph(column, exposure, path, target, ext_pred, pos):
 
 
 def load_sm(model_name):
-    with open(model_name.split('_sv.model')[0] + '_par.pickle', 'rb') as h:
+    with open(f'{model_name.split("_sv.model")[0]}_par.pickle', 'rb') as h:
         meta = pickle.load(h)
     model = xgb.Booster()
     model.load_model(model_name)
@@ -158,8 +157,3 @@ def load_sm(model_name):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-# def unpickle(model, path):
-#     with open(path + '/' + model, 'rb') as h:
-#         mdl = pickle.load(h)
-#     return mdl
