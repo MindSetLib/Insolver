@@ -27,27 +27,46 @@ class ShapPlots(object):
         """
         shap.summary_plot(self.shap_values, self.data, plot_type=plot_type)
 
-    def plot_shap_waterfall(self, instance_index=0, exponential=False, height=700, title=None):
+    def plot_shap_waterfall(self, instance_index=0, link=None, height=700, title=None):
         """Plotting waterfall graph for individual observation using plotly package.
 
         Args:
             instance_index (int): Index of the observation in DataFrame passed to SHAP values calculation.
-            exponential (:obj:`bool`, optional): Whether to use exponential for plotting waterfall graph.
-                Used when SHAP plots values before log-link (default=False).
+            link (:obj:`str`, optional): Whether to use link function for plotting waterfall graph.
+                Used when SHAP plots values before link function. Takes arguments 'exp' and 'logit' (default=None).
             height (:obj:`int`, optional): Height of the plotly waterfall graph (default=700).
             title (:obj:`str`, optional): Title for plotly waterfall graph (default=None).
         """
-        prediction = pd.DataFrame([self.explainer.expected_value] + self.shap_values[instance_index, :].tolist(),
+
+        def logit(x):
+            return np.true_divide(1, np.add(1, np.exp(x)))
+
+        if (type(self.shap_values) == list) and (len(self.shap_values) == 2):
+            shap_values = self.shap_values[0]
+            expected_value = self.explainer.expected_value[0]
+        else:
+            shap_values = self.shap_values
+            expected_value = self.explainer.expected_value
+
+        prediction = pd.DataFrame([expected_value] + shap_values[instance_index, :].tolist(),
                                   index=['Intercept'] + self.feature_names, columns=['SHAP Values'])
         prediction['CumSum'] = np.cumsum(prediction['SHAP Values'])
-        if exponential:
+        if link == 'exp':
             prediction['Exp'] = np.exp(prediction['CumSum'])
-            prediction['Contribution'] = [np.exp(self.explainer.expected_value)] + list(np.diff(prediction['Exp']))
+            prediction['Contribution'] = [np.exp(expected_value)] + list(np.diff(prediction['Exp']))
+        elif link == 'logit':
+            prediction['Logit'] = logit(prediction['CumSum'])
+            prediction['Contribution'] = [logit(expected_value)] + list(np.diff(prediction['Logit']))
         else:
-            prediction['Contribution'] = [self.explainer.expected_value] + list(np.diff(prediction['CumSum']))
+            prediction['Contribution'] = [expected_value] + list(np.diff(prediction['CumSum']))
 
         fig = go.Figure(go.Waterfall(name=f'Prediction {instance_index}', orientation='h',
-                                     measure=['relative'] * len(prediction), y=prediction.index,
+                                     measure=['relative'] * len(prediction),
+                                     y=[(prediction.index[i] if i == 0
+                                         else '{}={}'.format(prediction.index[i],
+                                                             self.data.loc[instance_index,
+                                                                           self.feature_names][i-1])) for i
+                                        in range(len(prediction.index))],
                                      x=prediction['Contribution']))
         fig.update_layout(title=title, height=height)
         fig.show()

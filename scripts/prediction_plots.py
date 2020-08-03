@@ -41,7 +41,7 @@ class PredictionPlots(object):
                                          name=self.predictions.columns[i],
                                          mode='markers'))
             fig.update_xaxes(title_text='Prediction')
-            fig.update_yaxes(title_text='Deviance')
+            fig.update_yaxes(title_text=metric_name.capitalize())
             fig.show()
         else:
             scatters, names = [], []
@@ -51,7 +51,7 @@ class PredictionPlots(object):
                 names.append(self.predictions.columns[i])
             plt.legend(scatters, names)
             plt.xlabel('Prediction')
-            plt.ylabel('Deviance')
+            plt.ylabel(metric_name.capitalize())
             plt.show()
 
     def plot_distribution_plots(self, plot_target=False):
