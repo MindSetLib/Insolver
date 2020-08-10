@@ -97,9 +97,9 @@ def update_model_dir(value):
                     bst, params, target_name = load_model(model)
                 except:
                     bst, params, target_name = load_sm(model)
-                if type(bst) == xgb.Booster:
+                if isinstance(bst, xgb.Booster):
                     pred = bst.predict(xgb.DMatrix(df[[x for x in bst.feature_names if x in df.columns]]))
-                elif type(bst) == lgb.Booster:
+                elif isinstance(bst, lgb.Booster):
                     pred = bst.predict(df[[x for x in bst.feature_name() if x in df.columns]])
                 else:
                     pred = np.exp(bst.predict(df[[x for x in bst.feature_names_ if x in df.columns]]))

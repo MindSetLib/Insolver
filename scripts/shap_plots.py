@@ -41,7 +41,7 @@ class ShapPlots(object):
         def logit(x):
             return np.true_divide(1, np.add(1, np.exp(x)))
 
-        if (type(self.shap_values) == list) and (len(self.shap_values) == 2):
+        if isinstance(self.shap_values, list) and (len(self.shap_values) == 2):
             shap_values = self.shap_values[0]
             expected_value = self.explainer.expected_value[0]
         else:

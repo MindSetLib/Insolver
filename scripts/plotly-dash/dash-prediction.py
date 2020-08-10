@@ -87,9 +87,9 @@ def update_model_dir(value):
 def update_graph(column, exposure, path, model):
     if (column is not None) and (exposure is not None) and (model is not None):
         bst, params, target_name = load_model(f'{path}/{model}')
-        if type(bst) == xgb.Booster:
+        if isinstance(bst, xgb.Booster):
             df['predict'] = bst.predict(xgb.DMatrix(df[[x for x in bst.feature_names if x in df.columns]]))
-        elif type(bst) == lgb.Booster:
+        elif isinstance(bst, lgb.Booster):
             df['predict'] = bst.predict(df[[x for x in bst.feature_name() if x in df.columns]])
         else:
             df['predict'] = np.exp(bst.predict(df[[x for x in bst.feature_names_ if x in df.columns]]))

@@ -4,8 +4,8 @@ import numpy as np
 import xgboost as xgb
 import lightgbm as lgb
 import catboost as cgb
-# from hyperopt import hp, tpe, space_eval
-# from hyperopt.fmin import fmin
+from hyperopt import hp, tpe, space_eval, Trials
+from hyperopt.fmin import fmin
 
 
 def gb_eval_dev_poisson(yhat, y, weight=None):
@@ -20,11 +20,11 @@ def gb_eval_dev_poisson(yhat, y, weight=None):
         (str, float), tuple with metrics name and its value.
     """
     that = yhat + 1
-    if type(y) in [xgb.DMatrix, lgb.Dataset]:
+    if isinstance(y, (xgb.DMatrix, lgb.Dataset)):
         t = y.get_label() + 1
-        if type(y) == xgb.DMatrix:
+        if isinstance(y, xgb.DMatrix):
             return 'dev_poisson', 2 * np.sum(t * np.log(t / that) - (t - that))
-        if type(y) == lgb.Dataset:
+        if isinstance(y, lgb.Dataset):
             return 'dev_poisson', 2 * np.sum(t * np.log(t / that) - (t - that)), False
     else:
         t = y + 1
@@ -45,11 +45,11 @@ def gb_eval_dev_gamma(yhat, y, weight=None):
     Returns:
         (str, float), tuple with metrics name and its value.
     """
-    if type(y) in [xgb.DMatrix, lgb.Dataset]:
+    if isinstance(y, (xgb.DMatrix, lgb.Dataset)):
         t = y.get_label()
-        if type(y) == xgb.DMatrix:
+        if isinstance(y, xgb.DMatrix):
             return 'dev_gamma', 2 * np.sum(-np.log(t/yhat) + (t-yhat)/yhat)
-        if type(y) == lgb.Dataset:
+        if isinstance(y, lgb.Dataset):
             return 'dev_gamma', 2 * np.sum(-np.log(t/yhat) + (t-yhat)/yhat), False
     else:
         if weight:
@@ -170,11 +170,11 @@ def train_gb_best_params(params, dtrain, evals, early_stopping_rounds, evals_res
 
 
 def save_model(model, params, name, target=None, suffix=None):
-    if type(model) == xgb.Booster:
+    if isinstance(model, xgb.Booster):
         name = f'{name}_xgboost'
-    elif type(model) == lgb.Booster:
+    elif isinstance(model, lgb.Booster):
         name = f'{name}_lightgbm'
-    elif type(model) == cgb.core.CatBoost:
+    elif isinstance(model, cgb.core.CatBoost):
         name = f'{name}_catboost'
     else:
         name = f'{name}_other'
@@ -199,3 +199,26 @@ def load_model(model_path):
         model_dict = pickle.load(h)
     target = model_dict['target'] if 'target' in model_dict.keys() else None
     return model_dict['model'], model_dict['parameters'], target
+
+
+def train_model(data, model_type, objective, evals, enable_cv_hyperopt=False, cv_params=None, space=None, max_evals=5,
+                save=False, name=None):
+    # TODO: This function needs to be finalized.
+    if enable_cv_hyperopt:
+        trials = Trials()
+        best = fmin(fn=objective_gb, space=space, trials=trials, algo=tpe.suggest, max_evals=max_evals)
+        best_params = space_eval(space, best)
+        for x in ['max_depth', 'num_boost_round', 'max_leaves', 'max_bin']:
+            if x in best_params.keys():
+                best_params[x] = int(best_params[x])
+    else:
+        best_params = {'alg': model_type, 'objective': objective, 'verbose': False}
+    model = train_gb_best_params(best_params.copy(), data, early_stopping_rounds=20, evals=evals)
+
+    if save:
+        save_model(model, best_params, name=f"{objective}_{data[1].name}".replace(':', "_"), target=data[1].name,
+                   suffix=name)
+    if enable_cv_hyperopt:
+        return model, trials
+    else:
+        return model

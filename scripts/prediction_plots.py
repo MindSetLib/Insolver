@@ -8,8 +8,8 @@ class PredictionPlots(object):
     """Class for plotting some graphs using predictions of the models.
 
     Attributes:
-        df_predictions (pd.DataFrame): Model object (XGBoost, LightGBM, Catboost boosters) supported by SHAP package.
-        df_targets (pd.DataFrame): DataFrame containing all targets from .
+        df_predictions (pd.DataFrame): DataFrame containing all predictions needed to be visualized.
+        df_targets (pd.DataFrame): DataFrame containing all targets corresponding to df_predictions.
         target_list (list): List of target names from df_targets for every prediction in df_predictions.
     """
     # TODO: Enable configuring custom visualization parameters?
