@@ -2,6 +2,7 @@ import pandas as pd
 import re
 import datetime
 import numpy as np
+import json
 import pyodbc
 
 
@@ -29,62 +30,141 @@ class InsolverDataFrame:
     def columns_set(self, columns=None):
 
         if columns == None:
-            self._df_columns = [
-                'driver_minage',  # int>=18
-                'driver_minexp',  # int>=0
-                'driver_maxkbm',  # float>0
+            self._df_columns = {
+                'json': '_df_columns',
+                'columns': [
+                    {'name': 'driver_minage', 'type': 'number'},
+                    {'name': 'driver_minexp', 'type': 'number'},
+                    {'name': 'driver_maxkbm', 'type': 'number'},
 
-                'client_type',  # [company,person]
-                'client_name',  # 'Иванов Иван Иванович'
-                'client_date_birth',  # date
-                'client_gender',  # [male,female]
+                    {'name': 'client_type', 'type': 'str', 'values': ['company', 'person']},
+                    {'name': 'client_name', 'type': 'str'},  # 'Иванов Иван Иванович'
+                    {'name': 'client_date_birth', 'type': 'datetime'},
+                    {'name': 'client_gender', 'type': 'str', 'values': ['male', 'female']},
 
-                'vehicle_power',  # int>0
-                [
-                    'vehicle_issue_year',  # int>0
-                    'vehicle_age',  # int>=0
-                ],
-                'vehicle_type',  # int>=0
+                    {'name': 'vehicle_power', 'type': 'number'},
+                    {'name':
+                         ['vehicle_issue_year', 'vehicle_age'],
+                     'type':
+                         ['number', 'number']
+                     },
+                    {'name': 'vehicle_type', 'type': 'number'},
 
-                'p_date_start',  # date
-                'p_is_taxi',  # [0,1]
-                'p_is_driver_unlimit',  # [0,1]
-                'kladr',  # str
+                    {'name': 'p_date_start', 'type': 'datetime'},
+                    {'name': 'p_is_taxi', 'type': 'number', 'values': [0, 1]},
+                    {'name': 'p_is_driver_unlimit', 'type': 'number', 'values': [0, 1]},
+                    {'name': 'kladr', 'type': 'str'},
 
-                'p_claims_sum_infl',  # float>=0
-                'p_claims_count_adj',  # float>=0
-            ]
+                    {'name': 'p_claims_sum_infl', 'type': 'number'},
+                    {'name': 'p_claims_count_adj', 'type': 'number'},
+                ]
+            }
+
         else:
-            self._df_columns = columns
+            if type(columns) == dict:
+                self._df_columns = columns
+            elif type(columns) == str:
+                self._df_columns = json.loads(columns)
 
     def columns_check(self):
 
         if not hasattr(self, '_df_columns'):
             self.columns_set()
 
-        _columns_check = {}
+        _columns_check = json.loads('{"json": "_columns_check"}')
 
-        for column in self._df_columns:
+        for n in range(len(self._df_columns['columns'])):
 
-            if type(column) == str:
+            _col = ''
+            _col_exists = False
+            _col_type = False
+            _col_values = True
 
-                if column in list(self._df.columns):
-                    _columns_check[column] = True
-                else:
-                    _columns_check[column] = False
+            if type(self._df_columns['columns'][n]['name']) == str:
 
-            elif type(column) == list:
+                _col = self._df_columns['columns'][n]['name']
 
-                j = 0
-                c = ''
-                for i in range(len(column)):
-                    c = c + column[i] + ' _or_ '
-                    if column[i] in list(self._df.columns):
-                        j += 1
-                if j > 0:
-                    _columns_check[c] = True
-                else:
-                    _columns_check[c] = False
+                # exists
+                if self._df_columns['columns'][n]['name'] in list(self._df.columns):
+                    _col_exists = True
+
+                    # type
+                    if self._df_columns['columns'][n]['type'] == 'number':
+                        if self._df_columns['columns'][n]['name'] in list(
+                                self._df.select_dtypes(include=['int32', 'int64', 'float64', 'int64']).columns):
+                            _col_type = True
+                    elif self._df_columns['columns'][n]['type'] == 'str':
+                        if self._df_columns['columns'][n]['name'] in list(
+                                self._df.select_dtypes(include=['object']).columns):
+                            _col_type = True
+                    elif self._df_columns['columns'][n]['type'] == 'datetime':
+                        if self._df_columns['columns'][n]['name'] in list(
+                                self._df.select_dtypes(include=['datetime64']).columns):
+                            _col_type = True
+
+                # values
+                if 'values' in self._df_columns['columns'][n].keys():
+                    if _col_type == True and not self._df_columns['columns'][n]['values'] == None:
+                        for u in self._df[self._df_columns['columns'][n]['name']].unique():
+                            if u not in self._df_columns['columns'][n]['values']:
+                                _col_values = False
+                                break
+
+
+
+            # if only one column from the list could exists
+            elif type(self._df_columns['columns'][n]['name']) == list:
+
+                _col_exists_ = 0
+                _col_type_ = 0
+                _col_values_ = 0
+
+                for i in range(len(self._df_columns['columns'][n]['name'])):
+
+                    _col = _col + self._df_columns['columns'][n]['name'][i] + ' _or_ '
+
+                    # exists
+                    if self._df_columns['columns'][n]['name'][i] in list(self._df.columns):
+                        _col_exists_ += 1
+
+                        # type
+                        _col_type_add = 0
+                        if self._df_columns['columns'][n]['type'][i] == 'number':
+                            if self._df_columns['columns'][n]['name'][i] in list(
+                                    self._df.select_dtypes(include=['int32', 'int64', 'float64', 'int64']).columns):
+                                _col_type_ += 1
+                                _col_type_add = 1
+                        elif self._df_columns['columns'][n]['type'][i] == 'str':
+                            if self._df_columns['columns'][n]['name'][i] in list(
+                                    self._df.select_dtypes(include=['object']).columns):
+                                _col_type_ += 1
+                                _col_type_add = 1
+                        elif self._df_columns['columns'][n]['type'][i] == 'datetime':
+                            if self._df_columns['columns'][n]['name'][i] in list(
+                                    self._df.select_dtypes(include=['datetime64']).columns):
+                                _col_type_ += 1
+                                _col_type_add = 1
+
+                        # values
+                        if 'values' in self._df_columns['columns'][n].keys():
+                            if _col_type_add == 1 and not self._df_columns['columns'][n]['values'][i] == None:
+                                for i in range(len(self._df_columns['columns'][n]['name'])):
+                                    for u in self._df[self._df_columns['columns'][n]['name'][i]].unique():
+                                        if u not in self._df_columns['columns'][n]['values'][i]:
+                                            _col_values_ += 1
+                                            break
+
+                if _col_exists_ > 0:
+                    _col_exists = True
+                if _col_type_ > 0:
+                    _col_type = True
+                if _col_values_ > 0:
+                    _col_values = True
+
+            if _col_type == False:
+                _col_values = False
+
+            _columns_check.update({_col: {'exists': _col_exists, 'type': _col_type, 'values': _col_values}})
 
         return _columns_check
 
