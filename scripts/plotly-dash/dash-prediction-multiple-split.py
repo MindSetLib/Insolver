@@ -95,7 +95,7 @@ def update_model_dir(value):
                 model_name = model.split('/')[-1].split('\\')[-1].split('.model')[0]
                 try:
                     bst, params, target_name = load_model(model)
-                except:
+                except Exception:
                     bst, params, target_name = load_sm(model)
                 if isinstance(bst, xgb.Booster):
                     pred = bst.predict(xgb.DMatrix(df[[x for x in bst.feature_names if x in df.columns]]))
