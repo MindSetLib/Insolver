@@ -113,6 +113,7 @@ class InsolverGradientBoostingWrapper(object):
                 'type': 'Classical'}
 
     def hyperopt_cv(self, X, y, params, cv_params, max_evals=10, fn=None, algo=None, timeout=None):
+        # TODO: Add default CV params if not specified.
         trials = Trials()
         if algo is None:
             algo = tpe.suggest
@@ -137,14 +138,11 @@ class InsolverGradientBoostingWrapper(object):
             return {'status': STATUS_FAIL, 'exception': str(e)}
 
     def fit_booster(self, X, y, core_params=None):
-        if core_params is None:
-            core_params = dict()
-
+        train_params = dict()
         if self.core_params is not None:
-            train_params = self.core_params
+            train_params.update(self.core_params)
+        if core_params is not None:
             train_params.update(core_params)
-        else:
-            train_params = core_params
 
         if self.best_params is not None:
             params = self.best_params
@@ -171,46 +169,52 @@ class InsolverGradientBoostingWrapper(object):
         else:
             warnings.warn('Specified algorithm parameter is not supported.')
 
-    def model_init(self, params):
-        # for x in ['eta', '']:
-        #     if x in params.keys():
-        #         params['learning_rate'] = params.pop('eta')
-        # num_iterations, num_iteration, n_iter, num_tree, num_trees, num_round, num_rounds, num_boost_round
+    def model_init(self, params=None):
+        hparams = dict()
+        if self.core_params is not None:
+            hparams.update(self.core_params)
+        if self.best_params is not None:
+            hparams.update(self.best_params)
+        if params is not None:
+            hparams.update(params)
+
+        aliases = {'eta': 'learning_rate', 'boosting_type': 'boosting', 'num_leaves': 'max_leaves',
+                   'num_iterations': 'n_estimators', 'num_iteration': 'n_estimators',
+                   'n_iter': 'n_estimators', 'num_tree': 'n_estimators', 'num_trees': 'n_estimators',
+                   'num_round': 'n_estimators', 'num_rounds': 'n_estimators', 'num_boost_round': 'n_estimators'}
+
+        for x in hparams.keys():
+            if x in aliases.keys():
+                hparams[aliases[x]] = hparams.pop(x)
 
         if self.task == 'classification':
             if self.algorithm == 'xgboost':
-                self.model = XGBClassifier(**params)
+                self.model = XGBClassifier(**hparams)
             elif self.algorithm == 'lightgbm':
-                self.model = LGBMClassifier(**params)
+                self.model = LGBMClassifier(**hparams)
             elif self.algorithm == 'catboost':
-                self.model = CatBoostClassifier(**params)
+                self.model = CatBoostClassifier(**hparams)
             else:
                 warnings.warn('Specified algorithm parameter is not supported.')
         elif self.task == 'regression':
             if self.algorithm == 'xgboost':
-                self.model = XGBRegressor(**params)
+                self.model = XGBRegressor(**hparams)
             elif self.algorithm == 'lightgbm':
-                self.model = LGBMRegressor(**params)
+                self.model = LGBMRegressor(**hparams)
             elif self.algorithm == 'catboost':
-                self.model = CatBoostRegressor(**params)
+                self.model = CatBoostRegressor(**hparams)
             else:
                 warnings.warn('Specified algorithm parameter is not supported.')
         else:
             warnings.warn('Tasks other than "classification" and "regression" are not supported.')
 
-    # def fit(self, X, y, params=None, save=False, out_dir=None, name=None):
-    #     if self.best_params is None:
-    #         if params is None:
-    #             # Do something when we did not perform any hyperopt
-    #             pass
-    #         else:
-    #             # Do something when we did not perform any hyperopt but specified args
-    #             pass
-    #     else:
-    #         # Do something when everything is ok with best params
-    #         pass
-    #     # saving with some name
-    #     pass
+    def fit(self, X, y, **kwargs):
+        # fit(X, y, sample_weight=None, base_margin=None, eval_set=None, eval_metric=None, early_stopping_rounds=None,
+        #     verbose=True, xgb_model=None, sample_weight_eval_set=None, feature_weights=None, callbacks=None)
+        if self.model is None:
+            warnings.warn('Model is not initiated, please use .model_init() method.')
+        else:
+            self.model.fit(X, y, **kwargs)
 
 
 def save_model(model, params, name, target=None, suffix=None):
