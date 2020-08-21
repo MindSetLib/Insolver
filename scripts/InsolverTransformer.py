@@ -457,3 +457,13 @@ class InsolverTransformer(InsolverMain):
             for i in range(2, n + 1):
                 self._df[column + '_' + str(i)] = self._df[column] ** i
 
+    def get_dummies(self, columns):
+        """
+        Gets dummy columns of the features.
+
+        :param columns: List of columns to transforme.
+        :returns: None.
+        """
+        self._df = pd.get_dummies(self._df, columns=columns)
+
+
