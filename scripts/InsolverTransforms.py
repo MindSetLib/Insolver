@@ -7,7 +7,7 @@ import json
 from scripts.InsolverMain import InsolverMain
 
 
-class InsolverTransformer(InsolverMain):
+class InsolverTransforms(InsolverMain):
 
     def __init__(self, df):
         self._is_frame = False
@@ -15,26 +15,88 @@ class InsolverTransformer(InsolverMain):
             self._df = df
             self._is_frame = True
 
+    transforms_all = {
+        'prior_zero': [
+            'age_get',
+            'veh_age_get',
+            'region_get',
+        ],
+        'prior_first': [
+            'transform_client_type',
+            'transform_gender',
+            'transform_age',
+            'transform_exp',
+            'transform_name_check',
+            'transform_veh_power',
+            'transform_veh_age',
+            'transform_region_useless_group',
+        ],
+        'prior_second': [
+            'transform_age_gender',
+            'transform_age_exp_18',
+            'transform_veh_type_sort_freq',
+            'transform_veh_type_sort_ac',
+            'transform_region_sort_freq',
+            'transform_region_sort_ac',
+        ],
+        'prior_third': [
+            {'name': 'polynomizer', 'params': ['column', 'n', ]},
+        ]
+    }
+
     # ---------------------------------------------------
     # Get data methods
     # ---------------------------------------------------
 
-    def get_pd(self, columns=None):
+    def get_pd(self, transforms=None, columns=None):
         """
         Gets loaded data.
 
+        :param transforms: Dict or JSON-formatted string with transforms to be done.
         :param columns: Columns of dataframe to get.
         :returns: Pandas Dataframe.
         """
+        _prior_zero = []
+        for n in range(len(self.transforms_all['prior_zero'])):
+            _prior_zero.append(self.transforms_all['prior_zero'][n]['name'])
+
+        _prior_first = []
+        for n in range(len(self.transforms_all['prior_first'])):
+            _prior_zero.append(self.transforms_all['prior_first'][n]['name'])
+
+        _prior_second = []
+        for n in range(len(self.transforms_all['prior_second'])):
+            _prior_zero.append(self.transforms_all['prior_second'][n]['name'])
+
+        _prior_third = []
+        for n in range(len(self.transforms_all['prior_third'])):
+            _prior_zero.append(self.transforms_all['prior_third'][n]['name'])
+
         if self._is_frame is None:
             return None
         if columns is None:
             columns = self._df.columns
+        if transforms is not None:
+            if type(transforms) == dict:
+                pass
+            elif type(transforms) == str:
+                transforms = json.loads(transforms)
+
+            for n in range(len(transforms['transforms'])):
+                if transforms['transforms'][n]['name'] in _prior_zero:
+                    exec("self.%s" % transforms['transforms'][n]['name'])
+
         return self._df[columns]
 
     # ---------------------------------------------------
     # Person data methods
     # ---------------------------------------------------
+
+
+class transform_client_type(InsolverTransforms):
+
+    def __init__(self, df):
+        super().__init__(df)
 
     _client_type_dict = {
         'person': float(0),
@@ -45,13 +107,20 @@ class InsolverTransformer(InsolverMain):
         1: float(1)
     }
 
-    def transform_client_type(self):
+    def __call__(self):
         """
         Transforms values in column 'client_type' from {'person','company'} to {0,1}.
 
-        :returns: None.
+        :returns: Dataframe.
         """
         self._df['client_type'] = self._df['client_type'].map(self._client_type_dict)
+        return self._df
+
+
+class transform_gender(InsolverTransforms):
+
+    def __init__(self, df):
+        super().__init__(df)
 
     @staticmethod
     def _gender(client_type_name_gender):
@@ -106,14 +175,21 @@ class InsolverTransformer(InsolverMain):
 
         return [_gender_m, _gender_f]
 
-    def transform_gender(self):
+    def __call__(self):
         """
         Gets values in dummy columns 'gender_m' and 'gender_f' from columns 'client_type', 'client_name' and 'client_gender'.
 
-        :returns: None.
+        :returns: Dataframe.
         """
         self._df['gender_m'], self._df['gender_f'] = zip(
             *self._df[['client_type', 'client_name', 'client_gender']].apply(self._gender, axis=1).to_frame()[0])
+        return self._df
+
+
+class age_get(InsolverTransforms):
+
+    def __init__(self, df):
+        super().__init__(df)
 
     @staticmethod
     def _age_get(datebirth_datestart):
@@ -130,13 +206,21 @@ class InsolverTransformer(InsolverMain):
             _age = (_p_date_start - _client_date_birth).days // 365.25
         return _age
 
-    def age_get(self):
+    def __call__(self):
         """
         Gets values of age in column 'driver_minage' from columns 'client_date_birth' and 'p_date_start'.
 
-        :returns: None.
+        :returns: Dataframe.
         """
         self._df['driver_minage'] = self._df[['client_date_birth', 'p_date_start']].apply(self._age_get, axis=1)
+        return self._df
+
+
+class transform_age(InsolverTransforms):
+
+    def __init__(self, df, age_max=70):
+        super().__init__(df)
+        self._age_max = age_max
 
     @staticmethod
     def _age(age, age_max):
@@ -148,14 +232,15 @@ class InsolverTransformer(InsolverMain):
             age = age_max
         return age
 
-    def transform_age(self, age_max=70):
+    def __call__(self):
         """
         Transforms values of drivers' minimum age in column 'driver_minage' with values over 'age_max' grouped.
 
         :param age_max: Maximum value of drivers' age, bigger values will be grouped (70 by default).
-        :returns: None.
+        :returns: Dataframe.
         """
-        self._df['driver_minage'] = self._df['driver_minage'].apply(self._age, args=(age_max,))
+        self._df['driver_minage'] = self._df['driver_minage'].apply(self._age, args=(self._age_max,))
+        return self._df
 
     @staticmethod
     def _age_gender(age_gender):

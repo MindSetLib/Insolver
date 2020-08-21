@@ -3,14 +3,7 @@ import numpy as np
 import json
 import pyodbc
 
-
-class InsolverMain:
-
-    def get_pd(self):
-        """
-        Gets the Pandas DataFrame from the backend.
-        """
-        raise NotImplementedError("Class should implement 'get_pd'.")
+from scripts.InsolverMain import InsolverMain
 
 
 class InsolverDataFrame(InsolverMain):
@@ -108,7 +101,7 @@ class InsolverDataFrame(InsolverMain):
             return None
         if columns is None:
             columns = self._df.columns
-        return self._df[columns]
+        return self._df[columns].copy()
 
     # ---------------------------------------------------
     # Columns check methods
@@ -119,7 +112,7 @@ class InsolverDataFrame(InsolverMain):
         Sets the list of useful columns.
 
         :param columns: Dict or JSON-formatted string with columns description.
-        :return: None.
+        :returns: None.
         """
         if columns == None:
             self._df_columns = {
@@ -162,7 +155,7 @@ class InsolverDataFrame(InsolverMain):
         """
         Checks if the columns in dataframe are equal to the list of usefull columns.
 
-        :returns: JSON with columns' ckeck info.
+        :returns: JSON with columns' check info.
         """
         if not hasattr(self, '_df_columns'):
             self.columns_set()
