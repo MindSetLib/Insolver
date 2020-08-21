@@ -9,23 +9,25 @@ from catboost import Pool, cv as ccv, train as ctrain, CatBoost, CatBoostClassif
 from hyperopt import tpe, space_eval, Trials, STATUS_OK, STATUS_FAIL, fmin  # , hp
 
 
-def objective_gb(params, algorithm, cv_params, X, y):
+def objective_gb(params, algorithm, cv_params, data_params, X, y):
+    if data_params is None:
+        data_params = dict()
     for x in ['max_depth', 'num_boost_round', 'max_leaves', 'max_bin', 'num_leaves',
               'min_child_samples', 'min_data_in_leaf']:
         if x in params.keys():
             params[x] = int(params[x])
     if algorithm == 'xgboost':
-        dtrain = DMatrix(X, y)
+        dtrain = DMatrix(X, y, **data_params)
         cv_result = xcv(params=params, dtrain=dtrain, **cv_params)
         name = [i for i in cv_result.columns if all([i.startswith('test-'), i.endswith('-mean')])][-1]
         score = cv_result[name][-1:].values[0]
     elif algorithm == 'lightgbm':
-        dtrain = Dataset(X, y)
+        dtrain = Dataset(X, y, **data_params)
         cv_result = lcv(params=params, train_set=dtrain, **cv_params)
         name = [i for i in cv_result.keys() if i.endswith('-mean')][-1]
         score = cv_result[name][-1]
     elif algorithm == 'catboost':
-        dtrain = Pool(X, y)
+        dtrain = Pool(X, y, **data_params)
         cv_result = ccv(params=params, dtrain=dtrain, **cv_params)
         name = [i for i in cv_result.columns if all([i.startswith('test-'), i.endswith('-mean')])][-1]
         score = cv_result[name][-1:].values[0]
@@ -47,7 +49,7 @@ class InsolverGradientBoostingWrapper(object):
         else:
             warnings.warn('Specified task parameter is not supported. '
                           'Try to enter one of the following options: ["regression", "classification"].')
-        self.trials, self.best_params, self.core_params = None, None, None
+        self.trials, self.best_params, self.core_params, self.data_params = None, None, None, None
         self.model, self.booster = None, None
 
     @staticmethod
@@ -112,13 +114,15 @@ class InsolverGradientBoostingWrapper(object):
                 'folds': None,
                 'type': 'Classical'}
 
-    def hyperopt_cv(self, X, y, params, cv_params, max_evals=10, fn=None, algo=None, timeout=None):
+    def hyperopt_cv(self, X, y, params, cv_params, data_params=None, max_evals=10, fn=None, algo=None, timeout=None):
         # TODO: Add default CV params if not specified.
         trials = Trials()
+        if data_params is not None:
+            self.data_params = data_params
         if algo is None:
             algo = tpe.suggest
         if fn is None:
-            fn = partial(objective_gb, algorithm=self.algorithm, X=X, y=y, cv_params=cv_params)
+            fn = partial(objective_gb, algorithm=self.algorithm, X=X, y=y, cv_params=cv_params, data_params=data_params)
         try:
             best = fmin(fn=fn, space=params, trials=trials, algo=algo, max_evals=max_evals, timeout=timeout)
             best_params = space_eval(params, best)
@@ -137,32 +141,35 @@ class InsolverGradientBoostingWrapper(object):
         except Exception as e:
             return {'status': STATUS_FAIL, 'exception': str(e)}
 
-    def fit_booster(self, X, y, core_params=None):
-        train_params = dict()
+    def fit_booster(self, X, y, data_params=None, core_params=None):
+        dtrain_params, train_params = dict(), dict()
+        if self.data_params is not None:
+            dtrain_params.update(self.data_params)
+        if data_params is not None:
+            dtrain_params.update(data_params)
         if self.core_params is not None:
             train_params.update(self.core_params)
         if core_params is not None:
             train_params.update(core_params)
-
         if self.best_params is not None:
             params = self.best_params
         else:
             params = {}
 
         if self.algorithm == 'xgboost':
-            dtrain = DMatrix(X, y)
+            dtrain = DMatrix(X, y, **dtrain_params)
             if 'evals' in train_params.keys():
                 train_params['evals'] = [(DMatrix(i[0][0], i[0][1]), i[1]) for i in train_params['evals']]
             self.booster = xtrain(params=params, dtrain=dtrain, **train_params)
         elif self.algorithm == 'lightgbm':
-            dtrain = Dataset(X, y)
+            dtrain = Dataset(X, y, **dtrain_params)
             if 'evals' in train_params.keys():
                 evals = train_params.pop('evals')
                 train_params['valid_names'] = [i[1] for i in evals]
                 train_params['valid_sets'] = [(Dataset(i[0][0], i[0][1])) for i in evals]
             self.booster = ltrain(params=params, train_set=dtrain, **train_params)
         elif self.algorithm == 'catboost':
-            dtrain = Pool(X, y)
+            dtrain = Pool(X, y, **dtrain_params)
             if 'evals' in train_params.keys():
                 train_params['evals'] = [Pool(i[0][0], i[0][1]) for i in train_params['evals']]
             self.booster = ctrain(params=params, dtrain=dtrain, **train_params)
@@ -178,7 +185,7 @@ class InsolverGradientBoostingWrapper(object):
         if params is not None:
             hparams.update(params)
 
-        aliases = {'eta': 'learning_rate', 'boosting_type': 'boosting', 'num_leaves': 'max_leaves',
+        aliases = {'eta': 'learning_rate', 'boosting': 'boosting_type', 'max_leaves': 'num_leaves',
                    'num_iterations': 'n_estimators', 'num_iteration': 'n_estimators',
                    'n_iter': 'n_estimators', 'num_tree': 'n_estimators', 'num_trees': 'n_estimators',
                    'num_round': 'n_estimators', 'num_rounds': 'n_estimators', 'num_boost_round': 'n_estimators'}
@@ -209,8 +216,6 @@ class InsolverGradientBoostingWrapper(object):
             warnings.warn('Tasks other than "classification" and "regression" are not supported.')
 
     def fit(self, X, y, **kwargs):
-        # fit(X, y, sample_weight=None, base_margin=None, eval_set=None, eval_metric=None, early_stopping_rounds=None,
-        #     verbose=True, xgb_model=None, sample_weight_eval_set=None, feature_weights=None, callbacks=None)
         if self.model is None:
             warnings.warn('Model is not initiated, please use .model_init() method.')
         else:
