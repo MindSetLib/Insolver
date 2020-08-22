@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import json
 import pyodbc
 
@@ -7,7 +6,9 @@ from scripts.InsolverMain import InsolverMain
 
 
 class InsolverDataFrame(InsolverMain):
-
+    """
+    Primary dataframe class for Insolver. Is similar to pandas' DataFrame.
+    """
     def __init__(
             self,
             data=None,
