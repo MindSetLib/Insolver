@@ -22,13 +22,13 @@ class InsolverDataFrame(InsolverMain):
 
         self._is_frame = False
 
-        if type(data) == pd.DataFrame:
+        if isinstance(data, pd.DataFrame):
             self._df = self._load_pd(data)
             if hasattr(self, '_df'):
                 if self._df is not None:
                     self._is_frame = True
 
-        elif type(data) == str and data.endswith('.csv'):
+        elif isinstance(data, str) and data.endswith('.csv'):
             self._df = self._load_csv(data)
             if hasattr(self, '_df'):
                 if self._df is not None:
@@ -78,9 +78,9 @@ class InsolverDataFrame(InsolverMain):
         :returns: Pandas Dataframe.
         """
         cnxn = pyodbc.connect(
-            'DRIVER=' + driver + ';SERVER=' + server + ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
+            f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
         try:
-            df = pd.read_sql('select * from ' + table, cnxn)
+            df = pd.read_sql(f'select * from {table}', cnxn)
         except Exception:
             df = None
         finally:
@@ -115,7 +115,7 @@ class InsolverDataFrame(InsolverMain):
         :param columns: Dict or JSON-formatted string with columns description.
         :returns: None.
         """
-        if columns == None:
+        if columns is None:
             self._df_columns = {
                 'json': '_df_columns',
                 'columns': [
@@ -147,9 +147,9 @@ class InsolverDataFrame(InsolverMain):
             }
 
         else:
-            if type(columns) == dict:
+            if isinstance(columns, dict):
                 self._df_columns = columns
-            elif type(columns) == str:
+            elif isinstance(columns, str):
                 self._df_columns = json.loads(columns)
 
     def columns_check(self):
@@ -163,82 +163,82 @@ class InsolverDataFrame(InsolverMain):
 
         _columns_check = json.loads('{"json": "_columns_check"}')
 
-        for n in range(len(self._df_columns['columns'])):
+        for column in self._df_columns['columns']:
 
             _col = ''
             _col_exists = False
             _col_type = False
             _col_values = True
 
-            if type(self._df_columns['columns'][n]['name']) == str:
+            if isinstance(column['name'], str):
 
-                _col = self._df_columns['columns'][n]['name']
+                _col = column['name']
 
                 # exists
-                if self._df_columns['columns'][n]['name'] in list(self._df.columns):
+                if column['name'] in list(self._df.columns):
                     _col_exists = True
 
                     # type
-                    if self._df_columns['columns'][n]['type'] == 'number':
-                        if self._df_columns['columns'][n]['name'] in list(
+                    if column['type'] == 'number':
+                        if column['name'] in list(
                                 self._df.select_dtypes(include=['int32', 'int64', 'float64', 'int64']).columns):
                             _col_type = True
-                    elif self._df_columns['columns'][n]['type'] == 'str':
-                        if self._df_columns['columns'][n]['name'] in list(
+                    elif column['type'] == 'str':
+                        if column['name'] in list(
                                 self._df.select_dtypes(include=['object']).columns):
                             _col_type = True
-                    elif self._df_columns['columns'][n]['type'] == 'datetime':
-                        if self._df_columns['columns'][n]['name'] in list(
+                    elif column['type'] == 'datetime':
+                        if column['name'] in list(
                                 self._df.select_dtypes(include=['datetime64']).columns):
                             _col_type = True
 
                 # values
-                if 'values' in self._df_columns['columns'][n].keys():
-                    if _col_type == True and not self._df_columns['columns'][n]['values'] == None:
-                        for u in self._df[self._df_columns['columns'][n]['name']].unique():
-                            if u not in self._df_columns['columns'][n]['values']:
+                if 'values' in column.keys():
+                    if _col_type == True and not column['values'] is None:
+                        for u in self._df[column['name']].unique():
+                            if u not in column['values']:
                                 _col_values = False
                                 break
 
             # if only one column from the list could exists
-            elif type(self._df_columns['columns'][n]['name']) == list:
+            elif isinstance(column['name'], list):
 
                 _col_exists_ = 0
                 _col_type_ = 0
                 _col_values_ = 0
 
-                for i in range(len(self._df_columns['columns'][n]['name'])):
+                for i in range(len(column['name'])):
 
-                    _col = _col + self._df_columns['columns'][n]['name'][i] + ' _or_ '
+                    _col = _col + column['name'][i] + ' _or_ '
 
                     # exists
-                    if self._df_columns['columns'][n]['name'][i] in list(self._df.columns):
+                    if column['name'][i] in list(self._df.columns):
                         _col_exists_ += 1
 
                         # type
                         _col_type_add = 0
-                        if self._df_columns['columns'][n]['type'][i] == 'number':
-                            if self._df_columns['columns'][n]['name'][i] in list(
+                        if column['type'][i] == 'number':
+                            if column['name'][i] in list(
                                     self._df.select_dtypes(include=['int32', 'int64', 'float64', 'int64']).columns):
                                 _col_type_ += 1
                                 _col_type_add = 1
-                        elif self._df_columns['columns'][n]['type'][i] == 'str':
-                            if self._df_columns['columns'][n]['name'][i] in list(
+                        elif column['type'][i] == 'str':
+                            if column['name'][i] in list(
                                     self._df.select_dtypes(include=['object']).columns):
                                 _col_type_ += 1
                                 _col_type_add = 1
-                        elif self._df_columns['columns'][n]['type'][i] == 'datetime':
-                            if self._df_columns['columns'][n]['name'][i] in list(
+                        elif column['type'][i] == 'datetime':
+                            if column['name'][i] in list(
                                     self._df.select_dtypes(include=['datetime64']).columns):
                                 _col_type_ += 1
                                 _col_type_add = 1
 
                         # values
-                        if 'values' in self._df_columns['columns'][n].keys():
-                            if _col_type_add == 1 and not self._df_columns['columns'][n]['values'][i] == None:
-                                for i in range(len(self._df_columns['columns'][n]['name'])):
-                                    for u in self._df[self._df_columns['columns'][n]['name'][i]].unique():
-                                        if u not in self._df_columns['columns'][n]['values'][i]:
+                        if 'values' in column.keys():
+                            if _col_type_add == 1 and not column['values'][i] is None:
+                                for i in range(len(column['name'])):
+                                    for u in self._df[column['name'][i]].unique():
+                                        if u not in column['values'][i]:
                                             _col_values_ += 1
                                             break
 
@@ -279,5 +279,5 @@ class InsolverDataFrame(InsolverMain):
     def head(self, n=5):
         return self._df.head(n)
 
-    def len(self):
+    def __len__(self):
         return len(self._df)

@@ -16,10 +16,10 @@ class InsolverTransforms(InsolverMain):
     """
     def __init__(self, df, transforms):
         self._is_frame = False
-        if type(df) == pd.DataFrame:
+        if isinstance(df, pd.DataFrame):
             self._df = df
             self._is_frame = True
-            if type(transforms) == list:
+            if isinstance(transforms, list):
                 self.transforms = transforms
 
     transforms_all = {
@@ -63,25 +63,25 @@ class InsolverTransforms(InsolverMain):
             return None
 
         if transforms is not None:
-            if type(transforms) == list:
+            if isinstance(transforms, list):
                 self.transforms = transforms
 
-        for idx, t in enumerate(self.transforms):
+        for t in self.transforms:
             if type(t).__name__ in self.transforms_all['prior_zero']:
                 self._df = t(self._df)
                 print(f"Transformation '{type(t).__name__}' is done")
 
-        for idx, t in enumerate(self.transforms):
+        for t in self.transforms:
             if type(t).__name__ in self.transforms_all['prior_first']:
                 self._df = t(self._df)
                 print(f"Transformation '{type(t).__name__}' is done")
 
-        for idx, t in enumerate(self.transforms):
+        for t in self.transforms:
             if type(t).__name__ in self.transforms_all['prior_second']:
                 self._df = t(self._df)
                 print(f"Transformation '{type(t).__name__}' is done")
 
-        for idx, t in enumerate(self.transforms):
+        for t in self.transforms:
             if type(t).__name__ in self.transforms_all['prior_third']:
                 self._df = t(self._df)
                 print(f"Transformation '{type(t).__name__}' is done")
@@ -132,15 +132,7 @@ class transform_gender:
         _client_name = client_type_name_gender[1]
         _client_gender = client_type_name_gender[2]
 
-        if _client_type == 'company':  # juridic
-            _gender_m = 0
-            _gender_f = 0
-
-        elif _client_type == '1':  # juridic
-            _gender_m = 0
-            _gender_f = 0
-
-        elif _client_type == 1:  # juridic
+        if _client_type in ['company', '1', 1]:  # juridic
             _gender_m = 0
             _gender_f = 0
 
@@ -157,16 +149,10 @@ class transform_gender:
                 if len(_client_name) < 2:
                     _gender_m = 0
                     _gender_f = 0
-                elif _client_name[-2:].upper() == 'ИЧ':
+                elif _client_name.upper().endswith(('ИЧ', 'ОГЛЫ')):
                     _gender_m = 1
                     _gender_f = 0
-                elif _client_name[-4:].upper() == 'ОГЛЫ':
-                    _gender_m = 1
-                    _gender_f = 0
-                elif _client_name[-2:].upper() == 'НА':
-                    _gender_m = 0
-                    _gender_f = 1
-                elif _client_name[-4:].upper() == 'КЫЗЫ':
+                elif _client_name.upper().endswith(('НА', 'КЫЗЫ')):
                     _gender_m = 0
                     _gender_f = 1
                 else:
