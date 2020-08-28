@@ -8,7 +8,12 @@ from scripts.InsolverMain import InsolverMain
 class InsolverTransforms(InsolverMain):
     """
     Class to compose transforms.
-    'transforms_all' represents the list of all available transforms with priorities.
+    Each transform must have the priority param.
+    Priority = 0: transforms witch get values from other (AgeGet, RegionGet, ets).
+    Priority = 1: main transforms of values (TransformAge, TransformVehPower, ets).
+    Priority = 2: transforms witch get intersections of features (TransformAgeGender, ets);
+        transforms witch sort values (TransformRegionSortFreq, ets).
+    Priority = 3: transforms witch get functions of values (Polinomizer, ets).
 
     :param df: Pandas' DataFrame to transform.
     :param transforms: List of transforms to be done.
@@ -21,35 +26,6 @@ class InsolverTransforms(InsolverMain):
             self._is_frame = True
             if isinstance(transforms, list):
                 self.transforms = transforms
-
-    transforms_all = {
-        'prior_zero': [
-            'age_get',
-            'veh_age_get',
-            'region_get',
-        ],
-        'prior_first': [
-            'transform_client_type',
-            'transform_gender',
-            'transform_age',
-            'transform_exp',
-            'transform_name_check',
-            'transform_veh_power',
-            'transform_veh_age',
-            'transform_region_useless_group',
-        ],
-        'prior_second': [
-            'transform_age_gender',
-            'transform_age_exp_18',
-            'transform_veh_type_sort_freq',
-            'transform_veh_type_sort_ac',
-            'transform_region_sort_freq',
-            'transform_region_sort_ac',
-        ],
-        'prior_third': [
-            'polynomizer',
-        ]
-    }
 
     def get_pd(self, transforms=None, columns=None):
         """
@@ -67,29 +43,29 @@ class InsolverTransforms(InsolverMain):
                 self.transforms = transforms
 
         for t in self.transforms:
-            if type(t).__name__ in self.transforms_all['prior_zero']:
+            if t.priority == 0:
                 self._df = t(self._df)
                 print(f"Transformation '{type(t).__name__}' is done")
 
         for t in self.transforms:
-            if type(t).__name__ in self.transforms_all['prior_first']:
+            if t.priority == 1:
                 self._df = t(self._df)
                 print(f"Transformation '{type(t).__name__}' is done")
 
         for t in self.transforms:
-            if type(t).__name__ in self.transforms_all['prior_second']:
+            if t.priority == 2:
                 self._df = t(self._df)
                 print(f"Transformation '{type(t).__name__}' is done")
 
         for t in self.transforms:
-            if type(t).__name__ in self.transforms_all['prior_third']:
+            if t.priority == 3:
                 self._df = t(self._df)
                 print(f"Transformation '{type(t).__name__}' is done")
 
         if columns is None:
             columns = self._df.columns
 
-        return self._df[columns]
+        return self._df[columns].copy()
 
 
 # ---------------------------------------------------
@@ -97,12 +73,12 @@ class InsolverTransforms(InsolverMain):
 # ---------------------------------------------------
 
 
-class transform_client_type:
+class TransformClientType:
     """
     Transforms values in column 'client_type' from {'person','company'} to {0,1}.
     """
     def __init__(self):
-        self._apply = True
+        self.priority = 1
 
     _client_type_dict = {
         'person': float(0),
@@ -118,12 +94,12 @@ class transform_client_type:
         return df
 
 
-class transform_gender:
+class TransformGender:
     """
     Gets values in dummy columns 'gender_m' and 'gender_f' from columns 'client_type', 'client_name' and 'client_gender'.
     """
     def __init__(self):
-        self._apply = True
+        self.priority = 1
 
     @staticmethod
     def _gender(client_type_name_gender):
@@ -170,12 +146,12 @@ class transform_gender:
         return df
 
 
-class age_get:
+class AgeGet:
     """
     Gets values of age in column 'driver_minage' from columns 'client_date_birth' and 'p_date_start'.
     """
     def __init__(self):
-        self._apply = True
+        self.priority = 0
 
     @staticmethod
     def _age_get(datebirth_datestart):
@@ -197,14 +173,14 @@ class age_get:
         return df
 
 
-class transform_age:
+class TransformAge:
     """
     Transforms values of drivers' minimum age in column 'driver_minage' with values over 'age_max' grouped.
 
     :param age_max: Maximum value of drivers' age, bigger values will be grouped (70 by default).
     """
     def __init__(self, age_max=70):
-        self._apply = True
+        self.priority = 1
         self._age_max = age_max
 
     @staticmethod
@@ -224,13 +200,13 @@ class transform_age:
         return df
 
 
-class transform_age_gender:
+class TransformAgeGender:
     """
     Gets intersections of drivers' minimum age and gender in columns 'driver_minage_m' and 'driver_minage_f' from
     columns 'driver_minage', 'gender_m' and 'gender_f'.
     """
     def __init__(self):
-        self._apply = True
+        self.priority = 2
 
     @staticmethod
     def _age_gender(age_gender):
@@ -253,14 +229,41 @@ class transform_age_gender:
         return df
 
 
-class transform_exp:
+class ExpGet:
+    """
+    Gets values of age in column 'driver_minage' from columns 'client_date_birth' and 'p_date_start'.
+    """
+    def __init__(self):
+        self.priority = 0
+
+    @staticmethod
+    def _exp_get(datedrivestart_datestart):
+        _client_date_drive_start = datedrivestart_datestart[0]
+        _p_date_start = datedrivestart_datestart[1]
+        _exp = None
+        if _client_date_drive_start > datetime.datetime.now():
+            _exp = None
+        elif _client_date_drive_start.year < datetime.datetime.now().year - 120:
+            _exp = None
+        elif _client_date_drive_start > _p_date_start:
+            _exp = None
+        else:
+            _exp = (_p_date_start - _client_date_drive_start).days // 365.25
+        return _exp
+
+    def __call__(self, df):
+        df['driver_minexp'] = df[['client_date_drive_start', 'p_date_start']].apply(self._exp_get, axis=1)
+        return df
+
+
+class TransformExp:
     """
     Transforms values of drivers' minimum experience in column 'driver_minexp' with values over 'exp_max' grouped.
 
     :param exp_max: Maximum value of drivers' experience, bigger values will be grouped (52 by default).
     """
     def __init__(self, exp_max=70):
-        self._apply = True
+        self.priority = 1
         self._exp_max = exp_max
 
     @staticmethod
@@ -280,21 +283,21 @@ class transform_exp:
         return df
 
 
-class transform_age_exp_18:
+class TransformAgeExp18:
     """
     Transforms records with difference between drivers' minimum age and minimum experience less then 18 years,
     sets drivers' minimum experience equal to drivers' minimum age minus 18 years.
     """
     def __init__(self):
-        self._apply = True
+        self.priority = 2
 
-    def __call__(self):
+    def __call__(self, df):
         self._n = len(df.loc[(df['driver_minage'] - df['driver_minexp']) < 18])
         df['driver_minexp'].loc[(df['driver_minage'] - df['driver_minexp']) < 18] = df['driver_minage'] - 18
         return df
 
 
-class transform_name_check:
+class TransformNameCheck:
     """
     Checks if clients' first names from column 'client_name' are in 'white list',
     strings in column 'client_name' should concatenate surname, first name and second name.
@@ -302,7 +305,7 @@ class transform_name_check:
     :param names_list: A list of 'good' clients' first names.
     """
     def __init__(self, names_list):
-        self._apply = True
+        self.priority = 1
         self._names_list = names_list
 
     @staticmethod
@@ -326,7 +329,7 @@ class transform_name_check:
 # ---------------------------------------------------
 
 
-class transform_veh_power:
+class TransformVehPower:
     """
     Transforms values of vehicles' power in column 'vehocle_power' with values under 'power_min' and over 'power_max'
     grouped, values between 'power_min' and 'power_max' are grouped with group size 'power_group'.
@@ -336,7 +339,7 @@ class transform_veh_power:
     :param power_group: Values of vehicles' power are divided by this parameter, rounded to integers.
     """
     def __init__(self, power_min=10, power_max=500, power_group=10):
-        self._apply = True
+        self.priority = 1
         self._power_min = power_min
         self._power_max = power_max
         self._power_group = power_group
@@ -364,12 +367,13 @@ class transform_veh_power:
         return df
 
 
-class veh_age_get:
+class VehAgeGet:
     """
     Gets values of vehicles' age in column 'vehicle_age' from columns 'vehicle_issue year' and 'p_date_start'.
     """
     def __init__(self):
         self._apply = True
+        self.priority = 0
 
     @staticmethod
     def _veh_age_get(issueyear_datestart):
@@ -391,14 +395,14 @@ class veh_age_get:
         return df
 
 
-class transform_veh_age:
+class TransformVehAge:
     """
     Transforms values of vehicles' age in column 'vehicle_age' with values over 'veh_age_max' grouped.
 
     :param veh_age_max: Maximum value of vehicles' age, bigger values will be grouped (25 by default).
     """
     def __init__(self, veh_age_max=25):
-        self._apply = True
+        self.priority = 1
         self._veh_age_max = veh_age_max
 
     @staticmethod
@@ -418,13 +422,13 @@ class transform_veh_age:
         return df
 
 
-class transform_veh_type_sort_freq:
+class TransformVehTypeSortFreq:
     """
     Gets sorted by claims' frequency vehicles' types in column 'vehicle_type_freq' from columns
     'vehicle_type' and 'p_claims_count_adj'.
     """
     def __init__(self):
-        self._apply = True
+        self.priority = 2
         self.veh_type_freq_dict = {}
 
     def __call__(self, df):
@@ -441,17 +445,17 @@ class transform_veh_type_sort_freq:
         return df
 
 
-class transform_veh_type_sort_ac:
+class TransformVehTypeSortAC:
     """
     Gets sorted by claims' average sum vehicles' types in column 'vehicle_type_ac' from columns
     'vehicle_type', 'p_claims_sum_infl' and 'p_claims_count_adj'.
     """
     def __init__(self):
-        self._apply = True
+        self.priority = 2
         self.veh_type_ac_dict = {}
 
     def __call__(self, df):
-        self._veh_type_ac = df.groupby(['vehicle_type']).sum()[['p_claims_sum_infl', 'p_claims_count_adj']]
+        self._veh_type_ac = df.groupby(['vehicle_type']).sum()[['p_claims_sum_infl', 'p_claims_count']]
         self._veh_type_ac['avg_claim'] = self._veh_type_ac['p_claims_sum_infl'] / self._veh_type_ac['p_claims_count_adj']
         _keys = []
         _values = []
@@ -468,12 +472,13 @@ class transform_veh_type_sort_ac:
 # ---------------------------------------------------
 
 
-class region_get:
+class RegionGet:
     """
     Gets regions' numbers in column 'region_num' from column 'kladr'.
     """
     def __init__(self):
         self._apply = True
+        self.priority = 0
 
     @staticmethod
     def _region_get(kladr):
@@ -494,14 +499,14 @@ class region_get:
         return df
 
 
-class transform_region_useless_group:
+class TransformRegionUselessGroup:
     """
     Groups all regions with few data to one group with number = 0.
 
     :param size_min: Minimum allowed number of records for each region (1000 by default).
     """
     def __init__(self, size_min=1000):
-        self._apply = True
+        self.priority = 1
         self._size_min = size_min
         self.region_useless = {}
 
@@ -524,13 +529,13 @@ class transform_region_useless_group:
         return df
 
 
-class transform_region_sort_freq:
+class TransformRegionSortFreq:
     """
     Gets sorted by claims' frequency regions in column 'region_freq' from columns
     'region_num' and 'p_claims_count_adj'.
     """
     def __init__(self):
-        self._apply = True
+        self.priority = 2
         self.region_freq_dict = {}
 
     def __call__(self, df):
@@ -547,17 +552,17 @@ class transform_region_sort_freq:
         return df
 
 
-class transform_region_sort_ac:
+class TransformRegionSortAC:
     """
     Gets sorted by claims' average sum regions in column 'region_ac' from columns
     'region_num', 'p_claims_sum_infl' and 'p_claims_count_adj'.
     """
     def __init__(self):
-        self._apply = True
+        self.priority = 2
         self.region_ac_dict = {}
 
     def __call__(self, df):
-        self._region_ac = df.groupby(['region_num']).sum()[['p_claims_sum_infl', 'p_claims_count_adj']]
+        self._region_ac = df.groupby(['region_num']).sum()[['p_claims_sum_infl', 'p_claims_count']]
         self._region_ac['avg_claim'] = self._region_ac['p_claims_sum_infl'] / self._region_ac['p_claims_count_adj']
         _keys = []
         _values = []
@@ -574,7 +579,7 @@ class transform_region_sort_ac:
 # ---------------------------------------------------
 
 
-class polynomizer:
+class Polynomizer:
     """
     Gets polynomial of feature.
 
@@ -582,7 +587,7 @@ class polynomizer:
     :param n: Polinomial's degree.
     """
     def __init__(self, column, n=2):
-        self._apply = True
+        self.priority = 3
         self._column = column
         self._n = n
 
@@ -597,14 +602,14 @@ class polynomizer:
         return df
 
 
-class get_dummies:
+class GetDummies:
     """
     Gets dummy columns of the features.
 
     :param column: A columns to transform.
     """
     def __init__(self, column):
-        self._apply = True
+        self.priority = 3
         self._column = column
 
     def __call__(self, df, column=None):

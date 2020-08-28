@@ -12,6 +12,8 @@ class InsolverDataFrame(InsolverMain):
     def __init__(
             self,
             data=None,
+            sep=',',
+            encoding=None,
             driver='{SQL Server}',
             server=None,
             database=None,
@@ -23,49 +25,44 @@ class InsolverDataFrame(InsolverMain):
         self._is_frame = False
 
         if isinstance(data, pd.DataFrame):
-            self._df = self._load_pd(data)
-            if hasattr(self, '_df'):
-                if self._df is not None:
-                    self._is_frame = True
+            self.load_pd(data)
 
-        elif isinstance(data, str) and data.endswith('.csv'):
-            self._df = self._load_csv(data)
-            if hasattr(self, '_df'):
-                if self._df is not None:
-                    self._is_frame = True
+        elif isinstance(data, str):
+            if data.endswith('.csv'):
+                self.load_csv(data, sep, encoding)
 
         elif server is not None and database is not None and table is not None:
-            self._df = self._load_mssql(driver, server, database, username, password, table)
-            if hasattr(self, '_df'):
-                if self._df is not None:
-                    self._is_frame = True
+            self.load_mssql(driver, server, database, username, password, table)
 
     # ---------------------------------------------------
     # Load data methods
     # ---------------------------------------------------
 
-    @staticmethod
-    def _load_pd(pd_dataframe):
+    def load_pd(self, pd_dataframe):
         """
-        Loads data from Pandas Dataframe.
+        Loads data from Pandas' Dataframe.
 
-        :param pd_dataframe: Pandas Dataframe.
-        :returns: Pandas Dataframe.
+        :param pd_dataframe: Pandas' Dataframe.
+        :returns: is_frame.
         """
-        return pd_dataframe
+        self._df = pd_dataframe
+        if self._df is not None:
+            self._is_frame = True
+        return f'is_frame={self._is_frame}'
 
-    @staticmethod
-    def _load_csv(csv_dataframe):
+    def load_csv(self, csv_dataframe, sep, encoding):
         """
-        Loads data from .csv file.
+        Loads data from .csv file, uses Pandas' 'read_csv'.
 
         :param csv_dataframe: Path to .csv file.
-        :returns: Pandas Dataframe.
+        :returns: is_frame.
         """
-        return pd.read_csv(csv_dataframe, low_memory=False)
+        self._df = pd.read_csv(csv_dataframe, sep=sep, encoding=encoding, low_memory=False)
+        if self._df is not None:
+            self._is_frame = True
+        return f'is_frame={self._is_frame}'
 
-    @staticmethod
-    def _load_mssql(driver, server, database, username, password, table):
+    def load_mssql(self, driver, server, database, username, password, table):
         """
         Loads data from Microsoft SQL Server.
 
@@ -75,17 +72,18 @@ class InsolverDataFrame(InsolverMain):
         :param username: Username.
         :param password: Password.
         :param table: Table name.
-        :returns: Pandas Dataframe.
+        :returns: is_frame.
         """
-        cnxn = pyodbc.connect(
-            f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
+        cnxn = pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
         try:
-            df = pd.read_sql(f'select * from {table}', cnxn)
+            self._df = pd.read_sql('select * from ' + table, cnxn)
         except Exception:
-            df = None
+            self._df = None
         finally:
             cnxn.close()
-        return df
+        if self._df is not None:
+            self._is_frame = True
+        return f'is_frame={self._is_frame}'
 
     # ---------------------------------------------------
     # Get data methods
@@ -108,6 +106,50 @@ class InsolverDataFrame(InsolverMain):
     # Columns check methods
     # ---------------------------------------------------
 
+    _df_columns_default = {
+        'json': '_df_columns',
+        'columns': [
+            {'name':
+                 ['driver_minage', 'client_date_birth'],
+             'type':
+                 ['number', 'datetime']
+             },
+            {'name':
+                 ['driver_minexp', 'client_date_drive_start'],
+             'type':
+                 ['number', 'datetime']
+             },
+            {'name': 'driver_maxkbm', 'type': 'number'},
+
+            {'name': 'client_type', 'type': 'str', 'values': ['company', 'person']},
+            {'name': 'client_name', 'type': 'str'},  # 'Иванов Иван Иванович'
+            {'name': 'client_date_birth', 'type': 'datetime'},
+            {'name': 'client_gender', 'type': 'str', 'values': ['male', 'female']},
+
+            {'name': 'vehicle_power', 'type': 'number'},
+            {'name':
+                 ['vehicle_issue_year', 'vehicle_age'],
+             'type':
+                 ['number', 'number']
+             },
+            {'name': 'vehicle_type', 'type': 'number'},
+
+            {'name': 'p_date_start', 'type': 'datetime'},
+            {'name':
+                 ['p_date_end', 'p_exposure'],
+             'type':
+                 ['datetime', 'number']
+             },
+            {'name': 'p_is_taxi', 'type': 'number', 'values': [0, 1]},
+            {'name': 'p_is_driver_unlimit', 'type': 'number', 'values': [0, 1]},
+            {'name': 'kladr', 'type': 'str'},
+
+            {'name': 'p_claims_sum_infl', 'type': 'number'},
+            {'name': 'p_claims_count', 'type': 'number'},
+            {'name': 'p_claims_count_adj', 'type': 'number'},
+        ]
+    }
+
     def columns_set(self, columns=None):
         """
         Sets the list of useful columns.
@@ -115,38 +157,7 @@ class InsolverDataFrame(InsolverMain):
         :param columns: Dict or JSON-formatted string with columns description.
         :returns: None.
         """
-        if columns is None:
-            self._df_columns = {
-                'json': '_df_columns',
-                'columns': [
-                    {'name': 'driver_minage', 'type': 'number'},
-                    {'name': 'driver_minexp', 'type': 'number'},
-                    {'name': 'driver_maxkbm', 'type': 'number'},
-
-                    {'name': 'client_type', 'type': 'str', 'values': ['company', 'person']},
-                    {'name': 'client_name', 'type': 'str'},  # 'Иванов Иван Иванович'
-                    {'name': 'client_date_birth', 'type': 'datetime'},
-                    {'name': 'client_gender', 'type': 'str', 'values': ['male', 'female']},
-
-                    {'name': 'vehicle_power', 'type': 'number'},
-                    {'name':
-                         ['vehicle_issue_year', 'vehicle_age'],
-                     'type':
-                         ['number', 'number']
-                     },
-                    {'name': 'vehicle_type', 'type': 'number'},
-
-                    {'name': 'p_date_start', 'type': 'datetime'},
-                    {'name': 'p_is_taxi', 'type': 'number', 'values': [0, 1]},
-                    {'name': 'p_is_driver_unlimit', 'type': 'number', 'values': [0, 1]},
-                    {'name': 'kladr', 'type': 'str'},
-
-                    {'name': 'p_claims_sum_infl', 'type': 'number'},
-                    {'name': 'p_claims_count_adj', 'type': 'number'},
-                ]
-            }
-
-        else:
+        if columns is not None:
             if isinstance(columns, dict):
                 self._df_columns = columns
             elif isinstance(columns, str):
@@ -193,10 +204,10 @@ class InsolverDataFrame(InsolverMain):
                             _col_type = True
 
                 # values
-                if 'values' in column.keys():
-                    if _col_type == True and not column['values'] is None:
-                        for u in self._df[column['name']].unique():
-                            if u not in column['values']:
+                if 'values' in self._df_columns['columns'][n].keys():
+                    if _col_type == True and not self._df_columns['columns'][n]['values'] == None:
+                        for u in self._df[self._df_columns['columns'][n]['name']].unique():
+                            if u not in self._df_columns['columns'][n]['values']:
                                 _col_values = False
                                 break
 
@@ -281,3 +292,6 @@ class InsolverDataFrame(InsolverMain):
 
     def __len__(self):
         return len(self._df)
+
+    def columns(self):
+        return self._df.columns
