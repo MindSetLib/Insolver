@@ -9,6 +9,7 @@ class InsolverDataFrame(InsolverMain):
     """
     Primary dataframe class for Insolver. Is similar to pandas' DataFrame.
     """
+
     def __init__(
             self,
             data=None,
@@ -21,8 +22,9 @@ class InsolverDataFrame(InsolverMain):
             password=None,
             table=None
     ):
-
+        self._df = pd.DataFrame
         self._is_frame = False
+        self.df_columns = self.df_columns_default
 
         if isinstance(data, pd.DataFrame):
             self.load_pd(data)
@@ -106,47 +108,50 @@ class InsolverDataFrame(InsolverMain):
     # Columns check methods
     # ---------------------------------------------------
 
-    _df_columns_default = {
+    df_columns_default = {
         'json': '_df_columns',
         'columns': [
-            {'name':
-                 ['driver_minage', 'client_date_birth'],
-             'type':
-                 ['number', 'datetime']
+            {'name': ['driver_minage', 'client_date_birth'],
+             'type': ['number', 'datetime'],
+             'use': 'feature',
+             'available': None,
+             'transformed': None,  # TransformAge - list of classes
+             'used_in_model': None,
              },
-            {'name':
-                 ['driver_minexp', 'client_date_drive_start'],
-             'type':
-                 ['number', 'datetime']
+            {'name': ['driver_minexp', 'client_date_drive_start'],
+             'type': ['number', 'datetime'],
+             'use': 'feature',
+             'available': None,
              },
-            {'name': 'driver_maxkbm', 'type': 'number'},
+            {'name': 'driver_maxkbm', 'type': 'number', 'use': 'feature', 'available': None, },
 
-            {'name': 'client_type', 'type': 'str', 'values': ['company', 'person']},
-            {'name': 'client_name', 'type': 'str'},  # 'Иванов Иван Иванович'
-            {'name': 'client_date_birth', 'type': 'datetime'},
-            {'name': 'client_gender', 'type': 'str', 'values': ['male', 'female']},
+            {'name': 'client_type', 'type': 'str', 'values': ['company', 'person'], 'use': 'feature',
+             'available': None, },
+            {'name': 'client_name', 'type': 'str', 'use': 'feature', 'available': None, },  # 'Иванов Иван Иванович'
+            {'name': 'client_date_birth', 'type': 'datetime', 'use': 'service', 'available': None, },
+            {'name': 'client_gender', 'type': 'str', 'values': ['male', 'female'], 'use': 'feature',
+             'available': None, },
 
-            {'name': 'vehicle_power', 'type': 'number'},
-            {'name':
-                 ['vehicle_issue_year', 'vehicle_age'],
-             'type':
-                 ['number', 'number']
+            {'name': 'vehicle_power', 'type': 'number', 'use': 'feature', 'available': None, },
+            {'name': ['vehicle_issue_year', 'vehicle_age'],
+             'type': ['number', 'number'],
+             'use': 'feature',
+             'available': None,
              },
-            {'name': 'vehicle_type', 'type': 'number'},
+            {'name': 'vehicle_type', 'type': 'number', 'use': 'feature', 'available': None, },
 
-            {'name': 'p_date_start', 'type': 'datetime'},
-            {'name':
-                 ['p_date_end', 'p_exposure'],
-             'type':
-                 ['datetime', 'number']
+            {'name': 'p_date_start', 'type': 'datetime', 'use': 'service', 'available': None, },
+            {'name': 'p_is_taxi', 'type': 'number', 'values': [0, 1], 'use': 'feature', 'available': None, },
+            {'name': 'p_is_driver_unlimit', 'type': 'number', 'values': [0, 1], 'use': 'feature', 'available': None, },
+            {'name': 'kladr', 'type': 'str', 'use': 'feature', 'available': None, },
+
+            {'name': 'p_claims_sum_infl', 'type': 'number', 'use': 'target', 'available': None, },
+            {'name': 'p_claims_count', 'type': 'number', 'use': 'target', 'available': None, },
+            {'name': ['p_claims_count_adj', 'p_date_end', 'p_exposure'],
+             'type': ['number', 'datetime', 'number'],
+             'use': 'target',
+             'available': None,
              },
-            {'name': 'p_is_taxi', 'type': 'number', 'values': [0, 1]},
-            {'name': 'p_is_driver_unlimit', 'type': 'number', 'values': [0, 1]},
-            {'name': 'kladr', 'type': 'str'},
-
-            {'name': 'p_claims_sum_infl', 'type': 'number'},
-            {'name': 'p_claims_count', 'type': 'number'},
-            {'name': 'p_claims_count_adj', 'type': 'number'},
         ]
     }
 
@@ -159,9 +164,9 @@ class InsolverDataFrame(InsolverMain):
         """
         if columns is not None:
             if isinstance(columns, dict):
-                self._df_columns = columns
+                self.df_columns = columns
             elif isinstance(columns, str):
-                self._df_columns = json.loads(columns)
+                self.df_columns = json.loads(columns)
 
     def columns_check(self):
         """
@@ -169,12 +174,9 @@ class InsolverDataFrame(InsolverMain):
 
         :returns: JSON with columns' check info.
         """
-        if not hasattr(self, '_df_columns'):
-            self.columns_set()
-
         _columns_check = json.loads('{"json": "_columns_check"}')
 
-        for column in self._df_columns['columns']:
+        for column in self.df_columns['columns']:
 
             _col = ''
             _col_exists = False
@@ -204,10 +206,10 @@ class InsolverDataFrame(InsolverMain):
                             _col_type = True
 
                 # values
-                if 'values' in self._df_columns['columns'][n].keys():
-                    if _col_type == True and not self._df_columns['columns'][n]['values'] == None:
-                        for u in self._df[self._df_columns['columns'][n]['name']].unique():
-                            if u not in self._df_columns['columns'][n]['values']:
+                if 'values' in column.keys():
+                    if _col_type is True and column['values'] is not None:
+                        for u in self._df[column['name']].unique():
+                            if u not in column['values']:
                                 _col_values = False
                                 break
 
@@ -260,7 +262,7 @@ class InsolverDataFrame(InsolverMain):
                 if _col_values_ > 0:
                     _col_values = True
 
-            if _col_type == False:
+            if _col_type is False:
                 _col_values = False
 
             _columns_check.update({_col: {'exists': _col_exists, 'type': _col_type, 'values': _col_values}})

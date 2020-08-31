@@ -102,11 +102,11 @@ class TransformGender:
         self.priority = 1
 
     @staticmethod
-    def _gender(client_type_name_gender):
+    def _gender(_client_type_name_gender):
 
-        _client_type = client_type_name_gender[0]
-        _client_name = client_type_name_gender[1]
-        _client_gender = client_type_name_gender[2]
+        _client_type = _client_type_name_gender[0]
+        _client_name = _client_type_name_gender[1]
+        _client_gender = _client_type_name_gender[2]
 
         if _client_type in ['company', '1', 1]:  # juridic
             _gender_m = 0
@@ -154,9 +154,9 @@ class AgeGet:
         self.priority = 0
 
     @staticmethod
-    def _age_get(datebirth_datestart):
-        _client_date_birth = datebirth_datestart[0]
-        _p_date_start = datebirth_datestart[1]
+    def _age_get(_datebirth_datestart):
+        _client_date_birth = _datebirth_datestart[0]
+        _p_date_start = _datebirth_datestart[1]
         _age = None
         if _client_date_birth > datetime.datetime.now():
             _age = None
@@ -179,24 +179,25 @@ class TransformAge:
 
     :param age_max: Maximum value of drivers' age, bigger values will be grouped (70 by default).
     """
-    def __init__(self, age_max=70):
+    def __init__(self, age_max=70, driver_minage='driver_minage'):
         self.priority = 1
-        self._age_max = age_max
+        self.age_max = age_max
+        self.driver_minage = driver_minage
 
     @staticmethod
-    def _age(age, age_max):
-        if pd.isnull(age):
-            age = None
-        elif age < 18:
-            age = None
-        elif age > age_max:
-            age = age_max
-        return age
+    def _age(_age, _age_max):
+        if pd.isnull(_age):
+            _age = None
+        elif _age < age_min:
+            _age = None
+        elif _age > _age_max:
+            _age = _age_max
+        return _age
 
     def __call__(self, df, age_max=None):
         if age_max is not None:
-            self._age_max = age_max
-        df['driver_minage'] = df['driver_minage'].apply(self._age, args=(self._age_max,))
+            self.age_max = age_max
+        df[driver_minage] = df[driver_minage].apply(self._age, args=(self.age_max,))
         return df
 
 
@@ -209,9 +210,9 @@ class TransformAgeGender:
         self.priority = 2
 
     @staticmethod
-    def _age_gender(age_gender):
-        _age = age_gender[0]
-        _gender = age_gender[1]
+    def _age_gender(_age_gender):
+        _age = _age_gender[0]
+        _gender = _age_gender[1]
         if _gender == 0:  # male
             _driver_minage_m = _age
             _driver_minage_f = 18
@@ -237,9 +238,9 @@ class ExpGet:
         self.priority = 0
 
     @staticmethod
-    def _exp_get(datedrivestart_datestart):
-        _client_date_drive_start = datedrivestart_datestart[0]
-        _p_date_start = datedrivestart_datestart[1]
+    def _exp_get(_datedrivestart_datestart):
+        _client_date_drive_start = _datedrivestart_datestart[0]
+        _p_date_start = _datedrivestart_datestart[1]
         _exp = None
         if _client_date_drive_start > datetime.datetime.now():
             _exp = None
@@ -264,22 +265,22 @@ class TransformExp:
     """
     def __init__(self, exp_max=70):
         self.priority = 1
-        self._exp_max = exp_max
+        self.exp_max = exp_max
 
     @staticmethod
-    def _exp(exp, exp_max):
-        if pd.isnull(exp):
-            exp = None
-        elif exp < 0:
-            exp = None
-        elif exp > exp_max:
-            exp = exp_max
-        return exp
+    def _exp(_exp, _exp_max):
+        if pd.isnull(_exp):
+            _exp = None
+        elif _exp < 0:
+            _exp = None
+        elif _exp > _exp_max:
+            _exp = _exp_max
+        return _exp
 
     def __call__(self, df, exp_max=None):
         if exp_max is not None:
-            self._exp_max = exp_max
-        df['driver_minexp'] = df['driver_minexp'].apply(self._exp, args=(self._exp_max,))
+            self.exp_max = exp_max
+        df['driver_minexp'] = df['driver_minexp'].apply(self._exp, args=(self.exp_max,))
         return df
 
 
@@ -306,21 +307,21 @@ class TransformNameCheck:
     """
     def __init__(self, names_list):
         self.priority = 1
-        self._names_list = names_list
+        self.names_list = names_list
 
     @staticmethod
-    def _name_get(client_name):
+    def _name_get(_client_name):
         _tokenize_re = re.compile(r'[\w\-]+', re.I)
         try:
-            _name = _tokenize_re.findall(str(client_name))[1].upper()
+            _name = _tokenize_re.findall(str(_client_name))[1].upper()
             return _name
         except Exception:
             return 'ERROR'
 
     def __call__(self, df, names_list=None):
         if names_list is not None:
-            self._names_list = names_list
-        df['client_name_check'] = 1 * df['client_name'].apply(self._name_get).isin(self._names_list)
+            self.names_list = names_list
+        df['client_name_check'] = 1 * df['client_name'].apply(self._name_get).isin(self.names_list)
         return df
 
 
@@ -340,30 +341,30 @@ class TransformVehPower:
     """
     def __init__(self, power_min=10, power_max=500, power_group=10):
         self.priority = 1
-        self._power_min = power_min
-        self._power_max = power_max
-        self._power_group = power_group
+        self.power_min = power_min
+        self.power_max = power_max
+        self.power_group = power_group
 
     @staticmethod
-    def _power(power, power_min, power_max, power_group):
-        if pd.isnull(power):
-            power = None
-        elif power < power_min:
-            power = power_min
-        elif power > power_max:
-            power = power_max
+    def _power(_power, _power_min, _power_max, _power_group):
+        if pd.isnull(_power):
+            _power = None
+        elif _power < _power_min:
+            _power = _power_min
+        elif _power > _power_max:
+            _power = _power_max
         else:
-            power = round(power / power_group, 0)
-        return power
+            _power = round(_power / _power_group, 0)
+        return _power
 
     def __call__(self, df, power_min=None, power_max=None, power_group=None):
         if power_min is not None:
-            self._power_min = power_min
+            self.power_min = power_min
         if power_max is not None:
-            self._power_max = power_max
+            self.power_max = power_max
         if power_group is not None:
-            self._power_group = power_group
-        df['vehicle_power'] = df['vehicle_power'].apply(self._power, args=(self._power_min, self._power_max, self._power_group,))
+            self.power_group = power_group
+        df['vehicle_power'] = df['vehicle_power'].apply(self._power, args=(self.power_min, self.power_max, self.power_group,))
         return df
 
 
@@ -376,9 +377,9 @@ class VehAgeGet:
         self.priority = 0
 
     @staticmethod
-    def _veh_age_get(issueyear_datestart):
-        _vehicle_issue_year = issueyear_datestart[0]
-        _p_date_start = issueyear_datestart[1]
+    def _veh_age_get(_issueyear_datestart):
+        _vehicle_issue_year = _issueyear_datestart[0]
+        _p_date_start = _issueyear_datestart[1]
         _veh_age = None
         if _vehicle_issue_year > datetime.datetime.now().year:
             _veh_age = None
@@ -403,22 +404,22 @@ class TransformVehAge:
     """
     def __init__(self, veh_age_max=25):
         self.priority = 1
-        self._veh_age_max = veh_age_max
+        self.veh_age_max = veh_age_max
 
     @staticmethod
-    def _veh_age(age, age_max):
-        if pd.isnull(age):
-            age = None
-        elif age < 0:
-            age = None
-        elif age > age_max:
-            age = age_max
-        return age
+    def _veh_age(_age, _age_max):
+        if pd.isnull(_age):
+            _age = None
+        elif _age < 0:
+            _age = None
+        elif _age > _age_max:
+            _age = _age_max
+        return _age
 
     def __call__(self, df, veh_age_max=None):
         if veh_age_max is not None:
-            self._veh_age_max = veh_age_max
-        df['vehicle_age'] = df['vehicle_age'].apply(self._veh_age, args=(self._veh_age_max,))
+            self.veh_age_max = veh_age_max
+        df['vehicle_age'] = df['vehicle_age'].apply(self._veh_age, args=(self.veh_age_max,))
         return df
 
 
@@ -477,15 +478,14 @@ class RegionGet:
     Gets regions' numbers in column 'region_num' from column 'kladr'.
     """
     def __init__(self):
-        self._apply = True
         self.priority = 0
 
     @staticmethod
-    def _region_get(kladr):
-        if pd.isnull(kladr):
+    def _region_get(_kladr):
+        if pd.isnull(_kladr):
             _region_num = None
         else:
-            _region_num = kladr[0:2]
+            _region_num = _kladr[0:2]
 
         try:
             _region_num = int(_region_num)
@@ -507,7 +507,7 @@ class TransformRegionUselessGroup:
     """
     def __init__(self, size_min=1000):
         self.priority = 1
-        self._size_min = size_min
+        self.size_min = size_min
         self.region_useless = {}
 
     def region_useless_get(self, df, size_min):
@@ -524,8 +524,8 @@ class TransformRegionUselessGroup:
 
     def __call__(self, df, size_min=None):
         if size_min is not None:
-            self._size_min = size_min
-        df.loc[df['region_num'].isin(self.region_useless_get(df, self._size_min)), 'region_num'] = 0
+            self.size_min = size_min
+        df.loc[df['region_num'].isin(self.region_useless_get(df, self.size_min)), 'region_num'] = 0
         return df
 
 
@@ -588,17 +588,17 @@ class Polynomizer:
     """
     def __init__(self, column, n=2):
         self.priority = 3
-        self._column = column
-        self._n = n
+        self.column = column
+        self.n = n
 
     def __call__(self, df, column=None, n=None):
         if column is not None:
-            self._column = column
+            self.column = column
         if n is not None:
-            self._n = n
-        if self._column in list(df.columns):
-            for i in range(2, self._n + 1):
-                df[self._column + '_' + str(i)] = df[self._column] ** i
+            self.n = n
+        if self.column in list(df.columns):
+            for i in range(2, self.n + 1):
+                df[self.column + '_' + str(i)] = df[self.column] ** i
         return df
 
 
@@ -610,10 +610,10 @@ class GetDummies:
     """
     def __init__(self, column):
         self.priority = 3
-        self._column = column
+        self.column = column
 
     def __call__(self, df, column=None):
         if column is not None:
-            self._column = column
-        df = pd.get_dummies(df, columns=self._column)
+            self.column = column
+        df = pd.get_dummies(df, columns=self.column)
         return df
