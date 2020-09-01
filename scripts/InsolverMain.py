@@ -1,13 +1,13 @@
 class InsolverMain:
 
-    def get_pd(self):
+    def get_data(self):
         """
-        Gets the Pandas DataFrame from the backend.
+        Gets data as InsolverDataFrame.
         """
         raise NotImplementedError("Class should implement 'get_pd'.")
 
-    def get_meta_json(self):
+    def get_meta_info(self):
         """
-        Gets the JSON with meta information the backend.
+        Gets JSON with Insolver meta information.
         """
         raise NotImplementedError("Class should implement 'get_meta_json'.")
