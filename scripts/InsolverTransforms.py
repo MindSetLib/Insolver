@@ -9,15 +9,15 @@ class InsolverTransforms(InsolverMain):
     """
     Class to compose transforms.
     Each transform must have the priority param.
-    Priority = 0: transforms witch get values from other (AgeGet, RegionGet, ets).
+    Priority = 0: transforms witch get values from other (TransformAgeGetFromBirthday, TransformRegionGetFromKladr, ets).
     Priority = 1: main transforms of values (TransformAge, TransformVehPower, ets).
     Priority = 2: transforms witch get intersections of features (TransformAgeGender, ets);
         transforms witch sort values (TransformRegionSortFreq, ets).
-    Priority = 3: transforms witch get functions of values (Polinomizer, ets).
+    Priority = 3: transforms witch get functions of values (TransformPolinomizer, ets).
 
-    :param df: Pandas' DataFrame to transform.
+    :param df: InsolverDataFrame to transform.
     :param transforms: List of transforms to be done.
-    :returns: Transformed data as pandas' DataFrame.
+    :returns: Transformed InsolverDataFrame.
     """
     def __init__(self, df, transforms):
         self._is_frame = False
@@ -29,11 +29,11 @@ class InsolverTransforms(InsolverMain):
 
     def get_pd(self, transforms=None, columns=None):
         """
-        Gets transformed data as pandas' DataFrame.
+        Gets transformed data as InsolverDataFrame.
 
         :param transforms: List of transforms to be done.
         :param columns: Columns of dataframe to get.
-        :returns: Transformed data as pandas' DataFrame.
+        :returns: Transformed data as InsolverDataFrame.
         """
         if self._is_frame is None:
             return None
@@ -73,198 +73,165 @@ class InsolverTransforms(InsolverMain):
 # ---------------------------------------------------
 
 
-class TransformClientType:
+class TransformGenderGetFromName:
     """
-    Transforms values in column 'client_type' from {'person','company'} to {0,1}.
+    Gets clients' genders in from russian second names.
+
+    :param column_name: Column in InsolverDataFrame with clients' names, type is string.
+    :param column_gender: Column in InsolverDataFrame for clients' genders, type is string.
+    :param dict_gender: Dict for return values, {'male':'male', 'female':'female'} by default.
     """
-    def __init__(self):
-        self.priority = 1
-
-    _client_type_dict = {
-        'person': float(0),
-        'company': float(1),
-        '0': float(0),
-        '1': float(1),
-        0: float(0),
-        1: float(1)
-    }
-
-    def __call__(self, df):
-        df['client_type'] = df['client_type'].map(self._client_type_dict)
-        return df
-
-
-class TransformGender:
-    """
-    Gets values in dummy columns 'gender_m' and 'gender_f' from columns 'client_type', 'client_name' and 'client_gender'.
-    """
-    def __init__(self):
-        self.priority = 1
+    def __init__(self, column_name, column_gender, dict_gender={'male':'male', 'female':'female'}):
+        self.priority = 0
+        self.column_name = column_name
+        self.column_gender = column_gender
+        self.dict_gender = dict_gender
 
     @staticmethod
-    def _gender(_client_type_name_gender):
-
-        _client_type = _client_type_name_gender[0]
-        _client_name = _client_type_name_gender[1]
-        _client_gender = _client_type_name_gender[2]
-
-        if _client_type in ['company', '1', 1]:  # juridic
-            _gender_m = 0
-            _gender_f = 0
-
-        elif _client_gender == 'male':
-            _gender_m = 1
-            _gender_f = 0
-
-        elif _client_gender == 'female':
-            _gender_m = 0
-            _gender_f = 1
-
+    def _gender(_client_name, _dict_gender):
+        if pd.isnull(_client_name):
+            _gender = None
+        elif len(_client_name) < 2:
+            _gender = None
+        elif _client_name.upper().endswith(('ИЧ', 'ОГЛЫ')):
+            _gender = _dict_gender['male']
+        elif _client_name.upper().endswith(('НА', 'КЫЗЫ')):
+            _gender = _dict_gender['female']
         else:
-            try:
-                if len(_client_name) < 2:
-                    _gender_m = 0
-                    _gender_f = 0
-                elif _client_name.upper().endswith(('ИЧ', 'ОГЛЫ')):
-                    _gender_m = 1
-                    _gender_f = 0
-                elif _client_name.upper().endswith(('НА', 'КЫЗЫ')):
-                    _gender_m = 0
-                    _gender_f = 1
-                else:
-                    _gender_m = 0
-                    _gender_f = 0
-            except:
-                _gender_m = 0
-                _gender_f = 0
-
-        return [_gender_m, _gender_f]
+            _gender = None
+        return _gender
 
     def __call__(self, df):
-        df['gender_m'], df['gender_f'] = zip(
-            *df[['client_type', 'client_name', 'client_gender']].apply(self._gender, axis=1).to_frame()[0])
+        df[self.column_gender] = df[self.column_name].apply(self._gender, args=(self.dict_gender,))
         return df
 
 
-class AgeGet:
+class TransformAgeGetFromBirthday:
     """
-    Gets values of age in column 'driver_minage' from columns 'client_date_birth' and 'p_date_start'.
+    Gets clients' ages from birth dates and policies' start dates.
+
+    :param column_date_birth: Column in InsolverDataFrame with clients' birth dates, type is date.
+    :param column_date_start: Column in InsolverDataFrame with policies' start dates, type is date.
+    :param column_age: Column in InsolverDataFrame for clients' ages, type is integer.
     """
-    def __init__(self):
+    def __init__(self, column_date_birth, column_date_start, column_age):
         self.priority = 0
+        self.column_date_birth = column_date_birth
+        self.column_date_start = column_date_start
+        self.column_age = column_age
 
     @staticmethod
     def _age_get(_datebirth_datestart):
-        _client_date_birth = _datebirth_datestart[0]
-        _p_date_start = _datebirth_datestart[1]
-        _age = None
-        if _client_date_birth > datetime.datetime.now():
+        _date_birth = _datebirth_datestart[0]
+        _date_start = _datebirth_datestart[1]
+        if pd.isnull(_date_birth):
             _age = None
-        elif _client_date_birth.year < datetime.datetime.now().year - 120:
+        elif pd.isnull(_date_start):
             _age = None
-        elif _client_date_birth > _p_date_start:
+        if _date_birth > datetime.datetime.now():
+            _age = None
+        elif _date_birth.year < datetime.datetime.now().year - 120:
+            _age = None
+        elif _date_birth > _date_start:
             _age = None
         else:
-            _age = (_p_date_start - _client_date_birth).days // 365.25
+            _age = int((_date_start - _date_birth).days // 365.25)
         return _age
 
     def __call__(self, df):
-        df['driver_minage'] = df[['client_date_birth', 'p_date_start']].apply(self._age_get, axis=1)
+        df[self.column_age] = df[[self.column_date_birth, self.column_date_start]].apply(self._age_get, axis=1)
         return df
 
 
 class TransformAge:
     """
-    Transforms values of drivers' minimum age in column 'driver_minage' with values over 'age_max' grouped.
+    Transforms values of drivers' minimum ages.
+    Values under 'age_min' are invalid.
+    Values over 'age_max' will be grouped.
 
-    :param age_max: Maximum value of drivers' age, bigger values will be grouped (70 by default).
+    :param column_driver_minage: Column in InsolverDataFrame with drivers' minimum ages, type is integer.
+    :param age_min: Minimum value of drivers' ages, lower values are invalid, type is integer, 18 by default.
+    :param age_max: Maximum value of drivers' ages, bigger values will be grouped, type is integer, 70 by default.
     """
-    def __init__(self, age_max=70, driver_minage='driver_minage'):
+    def __init__(self, column_driver_minage, age_min=18, age_max=70):
         self.priority = 1
+        self.column_driver_minage = column_driver_minage
+        self.age_min = age_min
         self.age_max = age_max
-        self.driver_minage = driver_minage
 
     @staticmethod
-    def _age(_age, _age_max):
+    def _age(_age, _age_min, _age_max):
         if pd.isnull(_age):
             _age = None
-        elif _age < age_min:
+        elif _age < _age_min:
             _age = None
         elif _age > _age_max:
             _age = _age_max
         return _age
 
-    def __call__(self, df, age_max=None):
-        if age_max is not None:
-            self.age_max = age_max
-        df[driver_minage] = df[driver_minage].apply(self._age, args=(self.age_max,))
+    def __call__(self, df):
+        df[self.column_driver_minage] = df[self.column_driver_minage].apply(self._age, args=(self.age_min, self.age_max,))
         return df
 
 
 class TransformAgeGender:
     """
-    Gets intersections of drivers' minimum age and gender in columns 'driver_minage_m' and 'driver_minage_f' from
-    columns 'driver_minage', 'gender_m' and 'gender_f'.
+    Gets intersections of drivers' minimum ages and genders.
+
+    :param column_age: Column in InsolverDataFrame with clients' ages, type is integer.
+    :param column_gender: Column in InsolverDataFrame with clients' genders.
+    :param column_age_m: Column in InsolverDataFrame for males' ages, for females default value is applied, type is integer.
+    :param column_age_f: Column in InsolverDataFrame for females' ages, for males default value is applied, type is integer.
+    :param age_default: Default value of the age, type is integer, 18 by default.
+    :param dict_gender: Dict for genders' values, {'male':'male', 'female':'female'} by default.
     """
-    def __init__(self):
+    def __init__(self, column_age, column_gender, column_age_m, column_age_f, age_default=18,
+                 dict_gender={'male':'male', 'female':'female'}):
         self.priority = 2
+        self.column_age = column_age
+        self.column_gender = column_gender
+        self.column_age_m = column_age_m
+        self.column_age_f = column_age_f
+        self.age_default = age_default
+        self.dict_gender = dict_gender
 
     @staticmethod
-    def _age_gender(_age_gender):
+    def _age_gender(_age_gender, _age_default, _dict_gender):
         _age = _age_gender[0]
         _gender = _age_gender[1]
-        if _gender == 0:  # male
-            _driver_minage_m = _age
-            _driver_minage_f = 18
-        elif _gender == 1:  # female
-            _driver_minage_m = 18
-            _driver_minage_f = _age
+        if pd.isnull(_age):
+            _age_m = None
+            _age_f = None
+        elif pd.isnull(_gender):
+            _age_m = None
+            _age_f = None
+        elif _gender == _dict_gender['male']
+            _age_m = _age
+            _age_f = _age_default
+        elif _gender == _dict_gender['female']
+            _age_m = _age_default
+            _age_f = _age
         else:
-            _driver_minage_m = 18
-            _driver_minage_f = 18
-        return [_driver_minage_m, _driver_minage_f]
+            _age_m = None
+            _age_f = None
+        return [_age_m, _age_f]
 
     def __call__(self, df):
-        df['driver_minage_m'], df['driver_minage_f'] = zip(
-            *df[['driver_minage','Gender']].apply(self._age_gender, axis=1).to_frame()[0])
-        return df
-
-
-class ExpGet:
-    """
-    Gets values of age in column 'driver_minage' from columns 'client_date_birth' and 'p_date_start'.
-    """
-    def __init__(self):
-        self.priority = 0
-
-    @staticmethod
-    def _exp_get(_datedrivestart_datestart):
-        _client_date_drive_start = _datedrivestart_datestart[0]
-        _p_date_start = _datedrivestart_datestart[1]
-        _exp = None
-        if _client_date_drive_start > datetime.datetime.now():
-            _exp = None
-        elif _client_date_drive_start.year < datetime.datetime.now().year - 120:
-            _exp = None
-        elif _client_date_drive_start > _p_date_start:
-            _exp = None
-        else:
-            _exp = (_p_date_start - _client_date_drive_start).days // 365.25
-        return _exp
-
-    def __call__(self, df):
-        df['driver_minexp'] = df[['client_date_drive_start', 'p_date_start']].apply(self._exp_get, axis=1)
+        df[self.column_age_m], df[self.column_age_f] = zip(*df[[self.column_age,self.column_gender]].apply(
+            self._age_gender, axis=1, args=(self.age_default, self.dict_gender)).to_frame()[0])
         return df
 
 
 class TransformExp:
     """
-    Transforms values of drivers' minimum experience in column 'driver_minexp' with values over 'exp_max' grouped.
+    Transforms values of drivers' minimum experiences with values over 'exp_max' grouped.
 
-    :param exp_max: Maximum value of drivers' experience, bigger values will be grouped (52 by default).
+    :param column_driver_minexp: Column in InsolverDataFrame with drivers' minimum experiences, type is integer.
+    :param exp_max: Maximum value of drivers' experiences, bigger values will be grouped, type is integer, 52 by default.
     """
-    def __init__(self, exp_max=70):
+    def __init__(self, column_driver_minexp, exp_max=70):
         self.priority = 1
+        self.column_driver_minexp = column_driver_minexp
         self.exp_max = exp_max
 
     @staticmethod
@@ -277,10 +244,8 @@ class TransformExp:
             _exp = _exp_max
         return _exp
 
-    def __call__(self, df, exp_max=None):
-        if exp_max is not None:
-            self.exp_max = exp_max
-        df['driver_minexp'] = df['driver_minexp'].apply(self._exp, args=(self.exp_max,))
+    def __call__(self, df):
+        df[self.column_driver_minexp] = df[self.column_driver_minexp].apply(self._exp, args=(self.exp_max,))
         return df
 
 
@@ -289,12 +254,16 @@ class TransformAgeExp18:
     Transforms records with difference between drivers' minimum age and minimum experience less then 18 years,
     sets drivers' minimum experience equal to drivers' minimum age minus 18 years.
     """
-    def __init__(self):
+    def __init__(self, column_driver_minage, column_driver_minexp, diff_min=18):
         self.priority = 2
+        self.column_driver_minage = column_driver_minage
+        self.column_driver_minexp = column_driver_minexp
+        self.diff_min = diff_min
 
     def __call__(self, df):
-        self._n = len(df.loc[(df['driver_minage'] - df['driver_minexp']) < 18])
-        df['driver_minexp'].loc[(df['driver_minage'] - df['driver_minexp']) < 18] = df['driver_minage'] - 18
+        self.num_errors = len(df.loc[(df[self.column_driver_minage] - df[self.column_driver_minexp]) < self.diff_min])
+        df[self.column_driver_minexp].loc[(df[self.column_driver_minage] - df[self.column_driver_minexp])
+                                          < self.diff_min] = df[self.column_driver_minage] - self.diff_min
         return df
 
 
@@ -579,7 +548,24 @@ class TransformRegionSortAC:
 # ---------------------------------------------------
 
 
-class Polynomizer:
+class TransformMapValues:
+    """
+    Transforms values in 'column' according to the 'dictionary'.
+
+    :param column: The column to map.
+    :param dict: The dictionary for mapping.
+    """
+    def __init__(self, column, dictionary):
+        self.priority = 1
+        self.column = column
+        self.dict = dictionary
+
+    def __call__(self, df):
+        df[self.column] = df[self.column].map(self.dictionary)
+        return df
+
+
+class TransformPolynomizer:
     """
     Gets polynomial of feature.
 
@@ -602,7 +588,7 @@ class Polynomizer:
         return df
 
 
-class GetDummies:
+class TransformGetDummies:
     """
     Gets dummy columns of the features.
 
