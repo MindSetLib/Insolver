@@ -1,16 +1,4 @@
 
-import pandas as pd
-import numpy as np
-
-
-# Функция полиномайзер
-
-def f_polynomizer( data, column, n=2 ):
-    for i in range(2,n+1):
-        data[ column + '_' + str(i) ] = data[column]**i
-    return data
-
-
 # Функция создания dummy-переменных
 # Есть функция pd.getdummies(df,columns)
 
