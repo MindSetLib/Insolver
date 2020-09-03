@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 # Функция создания dummy-переменных
 # Есть функция pd.get_dummies(df, columns)
 def f_dummy(data, column):
