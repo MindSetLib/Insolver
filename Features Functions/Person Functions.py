@@ -1,7 +1,5 @@
-
 # Функция формирования признака пол-возраст-стаж
-
-def f_gen_age_exp( gender_m, gender_f, age, exp ):
+def f_gen_age_exp(gender_m, gender_f, age, exp):
 
     if gender_m == 1:
         gender = 1
@@ -40,11 +38,4 @@ def f_gen_age_exp( gender_m, gender_f, age, exp ):
     else:
         exp = 6
 
-    return gender*100 + age*10 + exp
-
-
-
-
-
-
-
+    return gender * 100 + age * 10 + exp

@@ -9,7 +9,7 @@ import dash_table
 
 import pandas as pd
 
-df = None
+df = pd.DataFrame()
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -42,7 +42,7 @@ def parse_contents(contents, filename):
             file = pd.read_excel(io.BytesIO(decoded))
         else:
             file = None
-            message = 'Выбран файл неверного расширения: ' + message
+            message = f'Выбран файл неверного расширения: {message}'
         globals()['df'] = file  # THIS IS NOT FINE!!!
         return html.Div([html.H5(message)])
 
@@ -53,7 +53,7 @@ def parse_contents(contents, filename):
               [State('upload-df', 'filename')])
 def update_output(list_of_contents, list_of_names):
     children = parse_contents(list_of_contents, list_of_names) if list_of_contents is not None else []
-    opt = [{'label': x, 'value': x} for x in df.columns] if df is not None else []
+    opt = [{'label': x, 'value': x} for x in df.columns] if not df.empty else []
     return [children, opt]
 
 
