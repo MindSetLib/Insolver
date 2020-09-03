@@ -17,7 +17,8 @@ def gb_eval_dev_poisson(yhat, y, weight=None):
         weight: Weights for weighted metric.
 
     Returns:
-        (str, float), tuple with metrics name and its value.
+        (str, float), tuple with metrics name and its value, if y is xgboost.DMatrix or lightgbm.Dataset;
+        float, otherwise.
     """
     that = yhat + 1
     if isinstance(y, (xgb.DMatrix, lgb.Dataset)):
