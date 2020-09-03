@@ -119,8 +119,8 @@ class GeoPointPoint:
             'latitude_1', 'longitude_1', 'latitude_2', 'longitude_2']])
 
 
----------------------------------
-
+#---------------------------------
+'''
 update [dbo].[data_kladr]
 set
 	 count_pol_200 = T.count_pol
@@ -180,3 +180,4 @@ from
 		group by [kladr_1]
 	) as T
 where T.[kladr_1] = [data_kladr].[insurerKLADR]
+'''

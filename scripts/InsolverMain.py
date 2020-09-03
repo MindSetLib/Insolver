@@ -4,7 +4,7 @@ class InsolverMain:
         """
         Gets data as InsolverDataFrame.
         """
-        raise NotImplementedError("Class should implement 'get_pd'.")
+        raise NotImplementedError("Class should implement 'get_data'.")
 
     def get_meta_info(self):
         """
