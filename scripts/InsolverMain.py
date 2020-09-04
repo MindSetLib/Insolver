@@ -11,3 +11,10 @@ class InsolverMain:
         Gets JSON with Insolver meta information.
         """
         raise NotImplementedError("Class should implement 'get_meta_json'.")
+
+
+class InsolverTransformMain:
+
+    def __init__(self):
+        if not hasattr(self, 'priority'):
+            raise NotImplementedError("Transformation class should have the 'priority' property.")
