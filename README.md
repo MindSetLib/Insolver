@@ -15,3 +15,13 @@ pip install -e .
 ```shell script
 pip install "git+ssh://git@github.com/MindSetLib/MS-InsuranceScoring.git@InsolverPackage#egg=insolver"
 ```
+
+## Запуск тестов
+```shell script
+python -m pytest
+```
+
+### Проверка покрытия тестами
+```shell script
+ python -m pytest --cov=insolver; coverage html; xdg-open htmlcov/index.html
+```
