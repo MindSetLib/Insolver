@@ -3,11 +3,12 @@ import re
 import datetime
 
 from scripts.InsolverDataFrame import InsolverDataFrame
+from scripts.InsolverMain import InsolverTransformMain
 
 
 class InsolverTransforms(InsolverDataFrame):
     """
-    Class to compose transforms.
+    Class to compose transforms to be done on InsolverDataFrame.
     Each transform must have the priority param.
     Priority = 0: transforms witch get values from other (TransformAgeGetFromBirthday, TransformRegionGetFromKladr, ets).
     Priority = 1: main transforms of values (TransformAge, TransformVehPower, ets).
@@ -65,7 +66,7 @@ class InsolverTransforms(InsolverDataFrame):
 # ---------------------------------------------------
 
 
-class TransformGenderGetFromName:
+class TransformGenderGetFromName(InsolverTransformMain):
     """
     Gets clients' genders from russian second names.
 
@@ -76,6 +77,7 @@ class TransformGenderGetFromName:
     """
     def __init__(self, column_name, column_gender, gender_male='male', gender_female='female'):
         self.priority = 0
+        super().__init__()
         self.column_name = column_name
         self.column_gender = column_gender
         self.gender_male = gender_male
@@ -100,7 +102,7 @@ class TransformGenderGetFromName:
         return df
 
 
-class TransformAgeGetFromBirthday:
+class TransformAgeGetFromBirthday(InsolverTransformMain):
     """
     Gets clients' ages from birth dates and policies' start dates.
 
@@ -110,6 +112,7 @@ class TransformAgeGetFromBirthday:
     """
     def __init__(self, column_date_birth, column_date_start, column_age):
         self.priority = 0
+        super().__init__()
         self.column_date_birth = column_date_birth
         self.column_date_start = column_date_start
         self.column_age = column_age
@@ -137,7 +140,7 @@ class TransformAgeGetFromBirthday:
         return df
 
 
-class TransformAge:
+class TransformAge(InsolverTransformMain):
     """
     Transforms values of drivers' minimum ages.
     Values under 'age_min' are invalid.
@@ -149,6 +152,7 @@ class TransformAge:
     """
     def __init__(self, column_driver_minage, age_min=18, age_max=70):
         self.priority = 1
+        super().__init__()
         self.column_driver_minage = column_driver_minage
         self.age_min = age_min
         self.age_max = age_max
@@ -168,7 +172,7 @@ class TransformAge:
         return df
 
 
-class TransformAgeGender:
+class TransformAgeGender(InsolverTransformMain):
     """
     Gets intersections of drivers' minimum ages and genders.
 
@@ -183,6 +187,7 @@ class TransformAgeGender:
     def __init__(self, column_age, column_gender, column_age_m, column_age_f, age_default=18,
                  gender_male='male', gender_female='female'):
         self.priority = 2
+        super().__init__()
         self.column_age = column_age
         self.column_gender = column_gender
         self.column_age_m = column_age_m
@@ -218,7 +223,7 @@ class TransformAgeGender:
         return df
 
 
-class TransformExp:
+class TransformExp(InsolverTransformMain):
     """
     Transforms values of drivers' minimum experiences with values over 'exp_max' grouped.
 
@@ -227,6 +232,7 @@ class TransformExp:
     """
     def __init__(self, column_driver_minexp, exp_max=70):
         self.priority = 1
+        super().__init__()
         self.column_driver_minexp = column_driver_minexp
         self.exp_max = exp_max
 
@@ -245,13 +251,14 @@ class TransformExp:
         return df
 
 
-class TransformAgeExpDiff:
+class TransformAgeExpDiff(InsolverTransformMain):
     """
     Transforms records with difference between drivers' minimum age and minimum experience less then 18 years,
     sets drivers' minimum experience equal to drivers' minimum age minus 18 years.
     """
     def __init__(self, column_driver_minage, column_driver_minexp, diff_min=18):
         self.priority = 2
+        super().__init__()
         self.column_driver_minage = column_driver_minage
         self.column_driver_minexp = column_driver_minexp
         self.diff_min = diff_min
@@ -263,7 +270,7 @@ class TransformAgeExpDiff:
         return df
 
 
-class TransformNameCheck:
+class TransformNameCheck(InsolverTransformMain):
     """
     Checks if clients' first names are in special list.
     Names should concatenate surnames, first names and second names.
@@ -274,6 +281,7 @@ class TransformNameCheck:
     """
     def __init__(self, column_name, column_name_check, names_list):
         self.priority = 1
+        super().__init__()
         self.column_name = column_name
         self.column_name_check = column_name_check
         self.names_list = names_list
@@ -297,7 +305,7 @@ class TransformNameCheck:
 # ---------------------------------------------------
 
 
-class TransformVehPower:
+class TransformVehPower(InsolverTransformMain):
     """
     Transforms values of vehicles' powers.
     Values under 'power_min' and over 'power_max' will be grouped.
@@ -310,6 +318,7 @@ class TransformVehPower:
     """
     def __init__(self, column_veh_power, power_min=10, power_max=500, power_step=10):
         self.priority = 1
+        super().__init__()
         self.column_veh_power = column_veh_power
         self.power_min = power_min
         self.power_max = power_max
@@ -332,7 +341,7 @@ class TransformVehPower:
         return df
 
 
-class TransformVehAgeGetFromIssueYear:
+class TransformVehAgeGetFromIssueYear(InsolverTransformMain):
     """
     Gets vehicles' ages from issue years and policies' start dates.
 
@@ -342,6 +351,7 @@ class TransformVehAgeGetFromIssueYear:
     """
     def __init__(self, column_veh_issue_year, column_date_start, column_veh_age):
         self.priority = 0
+        super().__init__()
         self.column_veh_issue_year = column_veh_issue_year
         self.column_date_start = column_date_start
         self.column_veh_age = column_veh_age
@@ -370,7 +380,7 @@ class TransformVehAgeGetFromIssueYear:
         return df
 
 
-class TransformVehAge:
+class TransformVehAge(InsolverTransformMain):
     """
     Transforms values of vehicles' ages.
     Values over 'veh_age_max' will be grouped.
@@ -380,6 +390,7 @@ class TransformVehAge:
     """
     def __init__(self, column_veh_age, veh_age_max=25):
         self.priority = 1
+        super().__init__()
         self.column_veh_age = column_veh_age
         self.veh_age_max = veh_age_max
 
@@ -403,7 +414,7 @@ class TransformVehAge:
 # ---------------------------------------------------
 
 
-class TransformRegionGetFromKladr:
+class TransformRegionGetFromKladr(InsolverTransformMain):
     """
     Gets regions' numbers from column KLADRs.
 
@@ -412,6 +423,7 @@ class TransformRegionGetFromKladr:
     """
     def __init__(self, column_kladr, column_region_num):
         self.priority = 0
+        super().__init__()
         self.column_kladr = column_kladr
         self.column_region_num = column_region_num
 
@@ -439,7 +451,7 @@ class TransformRegionGetFromKladr:
 # ---------------------------------------------------
 
 
-class TransformParamUselessGroup:
+class TransformParamUselessGroup(InsolverTransformMain):
     """
     Groups all parameter's values with few data to one group.
 
@@ -449,6 +461,7 @@ class TransformParamUselessGroup:
     """
     def __init__(self, column_param, size_min=1000, group_name=0):
         self.priority = 1
+        super().__init__()
         self.column_param = column_param
         self.size_min = size_min
         self.group_name = group_name
@@ -474,7 +487,7 @@ class TransformParamUselessGroup:
         return df
 
 
-class TransformParamSortFreq:
+class TransformParamSortFreq(InsolverTransformMain):
     """
     Gets sorted by claims' frequency parameter's values.
 
@@ -485,6 +498,7 @@ class TransformParamSortFreq:
     """
     def __init__(self, column_param, column_param_sort_freq, column_policies_count, column_claims_count):
         self.priority = 2
+        super().__init__()
         self.column_param = column_param
         self.column_param_sort_freq = column_param_sort_freq
         self.column_policies_count = column_policies_count
@@ -505,7 +519,7 @@ class TransformParamSortFreq:
         return df
 
 
-class TransformParamSortAC:
+class TransformParamSortAC(InsolverTransformMain):
     """
     Gets sorted by claims' average sum parameter's values.
 
@@ -516,6 +530,7 @@ class TransformParamSortAC:
     """
     def __init__(self, column_param, column_param_sort_ac, column_claims_count, column_claims_sum):
         self.priority = 2
+        super().__init__()
         self.column_param = column_param
         self.column_param_sort_ac = column_param_sort_ac
         self.column_claims_count = column_claims_count
@@ -541,15 +556,16 @@ class TransformParamSortAC:
 # ---------------------------------------------------
 
 
-class TransformMapValues:
+class TransformMapValues(InsolverTransformMain):
     """
     Transforms parameter's values according to the dictionary.
 
     :param column_param: Column in InsolverDataFrame with parameter to map.
-    :param dict: The dictionary for mapping.
+    :param dictionary: The dictionary for mapping.
     """
     def __init__(self, column_param, dictionary):
         self.priority = 1
+        super().__init__()
         self.column_param = column_param
         self.dictionary = dictionary
 
@@ -558,7 +574,7 @@ class TransformMapValues:
         return df
 
 
-class TransformPolynomizer:
+class TransformPolynomizer(InsolverTransformMain):
     """
     Gets polynomials of parameter's values.
 
@@ -567,6 +583,7 @@ class TransformPolynomizer:
     """
     def __init__(self, column_param, n=2):
         self.priority = 3
+        super().__init__()
         self.column_param = column_param
         self.n = n
 
@@ -579,7 +596,7 @@ class TransformPolynomizer:
         return df
 
 
-class TransformGetDummies:
+class TransformGetDummies(InsolverTransformMain):
     """
     Gets dummy columns of the parameter.
 
@@ -587,8 +604,9 @@ class TransformGetDummies:
     """
     def __init__(self, column_param):
         self.priority = 3
+        super().__init__()
         self.column_param = column_param
 
     def __call__(self, df):
-        df = pd.get_dummies(df, columns=self.column)
+        df = pd.get_dummies(df, columns=self.column_param)
         return df
