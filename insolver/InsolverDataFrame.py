@@ -1,6 +1,6 @@
 import pandas as pd
 
-from scripts.InsolverMain import InsolverMain
+from .InsolverMain import InsolverMain
 
 
 class InsolverDataFrame(InsolverMain):

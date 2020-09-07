@@ -4,8 +4,8 @@ import pandas as pd
 import math
 import datetime
 
-from scripts.InsolverDataFrame import InsolverDataFrame
-from scripts.InsolverMain import InsolverTransformMain
+from .InsolverDataFrame import InsolverDataFrame
+from .InsolverMain import InsolverTransformMain
 
 
 # ---------------------------------------------------
