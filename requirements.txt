@@ -18,7 +18,6 @@ numba==0.51.2
 numpy==1.19.1
 pandas==1.1.1
 Pillow==7.2.0
-pkg-resources==0.0.0
 plotly==4.9.0
 pyodbc==4.0.30
 pyparsing==2.4.7
