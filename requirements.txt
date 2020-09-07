@@ -8,7 +8,6 @@ future==0.18.2
 graphviz==0.14.1
 hyperopt==0.2.4
 idna==2.10
--e git+git@github.com:MindSetLib/MS-InsuranceScoring.git@a7281af562d8718a6da1f754463b26603c672b79#egg=insolver
 joblib==0.16.0
 kiwisolver==1.2.0
 lightgbm==3.0.0
