@@ -25,3 +25,8 @@ python -m pytest
 ```shell script
  python -m pytest --cov=insolver; coverage html; xdg-open htmlcov/index.html
 ```
+
+#### При проблемах с `pyodbc` на `ubuntu-20.04` установить:
+```shell script
+sudo apt install unixodbc-dev
+```
