@@ -30,3 +30,10 @@ python -m pytest
 ```shell script
 sudo apt install unixodbc-dev
 ```
+
+### Автоматическое создание документации:
+```shell script
+cd docs/
+sphinx-apidoc -f -o ../docs/source/ ../insolver
+make html
+```
