@@ -23,6 +23,7 @@ setup(name='insolver',
             'requests_cache',
             'plotly',
             'seaborn',
-            'shap'
+            'shap',
+            'geocoder'
       ],
       zip_safe=False)
