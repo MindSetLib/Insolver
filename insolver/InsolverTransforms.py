@@ -2,8 +2,8 @@ import pandas as pd
 import re
 import datetime
 
-from scripts.InsolverDataFrame import InsolverDataFrame
-from scripts.InsolverMain import InsolverTransformMain
+from .InsolverDataFrame import InsolverDataFrame
+from .InsolverMain import InsolverTransformMain
 
 
 class InsolverTransforms(InsolverDataFrame):

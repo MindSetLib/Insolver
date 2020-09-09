@@ -3,9 +3,10 @@ import requests_cache
 import pandas as pd
 import math
 import datetime
+import geocoder
 
-from scripts.InsolverDataFrame import InsolverDataFrame
-from scripts.InsolverMain import InsolverTransformMain
+from .InsolverDataFrame import InsolverDataFrame
+from .InsolverMain import InsolverTransformMain
 
 
 # ---------------------------------------------------
@@ -17,6 +18,7 @@ class InsolverGeoPointsFrame(InsolverDataFrame):
     """
     Dataframe class with geo points for Insolver Geo module.
     """
+
     def __init__(self, geo_points):
         super().__init__(geo_points)
 
@@ -57,22 +59,30 @@ class InsolverGeoPointsFrame(InsolverDataFrame):
         """
         _addresses = []
         for _kladr in self._df[column_kladr]:
-            _address = self._get_address_from_kladr(_kladr, token)  # token='Token 79abf89d58871ed1df79b83126f8f8c2362e51db'
+            _address = self._get_address_from_kladr(_kladr,
+                                                    token)  # token='Token 79abf89d58871ed1df79b83126f8f8c2362e51db'
             _addresses.append(_address)
         self._df[column_address] = _addresses
 
     @staticmethod
-    def _get_coordinates_from_address(_address):
+    def _get_coordinates_from_address(_address, provider='sputnik'):
         """
         Gets geo coordinates from addresses by api http://api.sputnik.ru/maps/geocoder/.
 
         :param _address: Address.
         :returns: Coordinates ['latitude', 'longitude'].
         """
-        _request = requests.get(f'http://search.maps.sputnik.ru/search/addr?q={_address}')
-        _response = _request.json()
-        _coordinates = _response['result']['address'][0]['features'][0]['geometry']['geometries'][0]['coordinates']
-        _coordinates = _coordinates[::-1]
+        if provider == 'sputnik':
+            _request = requests.get(f'http://search.maps.sputnik.ru/search/addr?q={_address}')
+            _response = _request.json()
+            _coordinates = _response['result']['address'][0]['features'][0]['geometry']['geometries'][0]['coordinates']
+            _coordinates = _coordinates[::-1]
+        elif provider == 'arcgis':
+            g = geocoder.arcgis(_address)
+            _coordinates = g.latlng
+        else:
+            _coordinates = None
+            raise ValueError(f'Provider {provider} not found')
         return _coordinates
 
     def get_coordinates_from_address(self, column_address, column_lat, column_lon):
@@ -103,6 +113,7 @@ class InsolverGeoPointsToPointsFrame(InsolverDataFrame):
     :param geo_points_main: InsolverGeoPointsFrame with geo points.
     :param geo_points_rel: InsolverGeoPointsFrame with geo points to make relations with.
     """
+
     def __init__(self, geo_points_main, geo_points_rel):
         now = str(datetime.datetime.now())
         geo_points_main[f'key_{now}'] = 0
@@ -126,6 +137,7 @@ class TransformGeoDistGet(InsolverTransformMain):
     :param column_dst_lon: Column in InsolverGeoPointsToPointsFrame with destination points' longitudes.
     :param column_dist: Column in InsolverGeoPointsToPointsFrame for distance.
     """
+
     def __init__(self, column_start_lat, column_start_lon, column_dst_lat, column_dst_lon, column_dist):
         self.priority = 0
         super().__init__()
@@ -168,7 +180,9 @@ class TransformParamsSumAround(InsolverTransformMain):
     :param dist_max: Maximum distance between points for include into surround.
     :param columns_results_p: List of columns in InsolverGeoPointsFrame for calculations' results.
     """
-    def __init__(self, column_link_p, column_link_ptp, columns_params_ptp, column_dist_ptp, dist_max, columns_results_p):
+
+    def __init__(self, column_link_p, column_link_ptp, columns_params_ptp, column_dist_ptp, dist_max,
+                 columns_results_p):
         self.priority = 1
         super().__init__()
         self.column_link_p = column_link_p
@@ -197,6 +211,7 @@ class TransformAddParams(InsolverTransformMain):
     :param column_link_p: Link column in InsolverGeoPointsFrame.
     :param columns_params: List of columns in InsolverGeoPointsFrame to merge into InsolverDataFrame.
     """
+
     def __init__(self, column_link_df, column_link_p, columns_params):
         self.priority = 2
         super().__init__()
