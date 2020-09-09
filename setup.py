@@ -24,6 +24,7 @@ setup(name='insolver',
             'plotly',
             'seaborn',
             'shap',
-            'geocoder'
+            'geocoder',
+            'flask',
       ],
       zip_safe=False)
