@@ -556,6 +556,24 @@ class TransformParamSortAC(InsolverTransformMain):
 # ---------------------------------------------------
 
 
+class TransformToNumeric(InsolverTransformMain):
+    """
+    Transforms parameter's values to numeric types, equal to Pandas' 'to_numeric'.
+
+    :param column_param: Column in InsolverDataFrame with parameter to transform.
+    :param downcast: Target numeric dtype, equal to Pandas' 'downcast' in the 'to_numeric' function, 'integer' by default.
+    """
+    def __init__(self, column_param, downcast='integer'):
+        self.priority = 0
+        super().__init__()
+        self.column_param = column_param
+        self.downcast = downcast
+
+    def __call__(self, df):
+        df[self.column_param] = pd.to_numeric(df[self.column_param], downcast=self.downcast)
+        return df
+
+
 class TransformMapValues(InsolverTransformMain):
     """
     Transforms parameter's values according to the dictionary.
