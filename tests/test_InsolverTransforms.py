@@ -3,8 +3,6 @@ from insolver.InsolverDataFrame import InsolverDataFrame
 
 from insolver.InsolverTransforms import (
     TransformExp,
-    InsolverTransformMain,
-    InsolverTransforms,
     TransformAge,
     TransformMapValues,
     TransformPolynomizer,
@@ -22,3 +20,13 @@ def test_TransformExp():
     assert TransformExp._exp(None, exp_max) is None
     assert TransformExp._exp(-5, exp_max) is None
     assert TransformExp._exp(0, exp_max) == 0
+
+
+def test_TransformAge():
+    # TransformAge('DrivAge', 18, 75)
+    age_min = 18
+    age_max = 70
+    assert TransformAge._age(None, age_min, age_max) is None
+    assert TransformAge._age(16, age_min, age_max) is None
+    assert TransformAge._age(80, age_min, age_max) == 70
+    assert TransformAge._age(50, age_min, age_max) == 50
