@@ -1,4 +1,3 @@
-# TODO: Hyperopt internal usage, docstrings data types.
 import warnings
 import pickle
 from functools import partial
@@ -68,7 +67,6 @@ class InsolverGradientBoostingWrapper(object):
                                      'seed': 0,
                                      'callbacks': None,
                                      'shuffle': True}
-
 
     cv_parameters_default_lightgbm = {'num_boost_round': 100,
                                       'folds': None,
@@ -215,6 +213,24 @@ class InsolverGradientBoostingWrapper(object):
             warnings.warn('Model is not initiated, please use .model_init() method.')
         else:
             self.model.fit(X, y, **kwargs)
+
+    def predict(self, X, **kwargs):
+        if self.model is None:
+            warnings.warn('Please fit or load a model first.')
+        else:
+            self.model.predict(X, **kwargs)
+
+    def predict_booster(self, X, **kwargs):
+        if self.booster is None:
+            warnings.warn('Please fit or load a booster first.')
+        else:
+            if isinstance(self.booster, (XGBClassifier, XGBRegressor)):
+                data = X if isinstance(X, DMatrix) else DMatrix(X)
+                self.booster.predict(data, **kwargs)
+            elif isinstance(self.booster, (LGBMClassifier, LGBMRegressor)):
+                self.booster.predict(X, **kwargs)
+            elif isinstance(self.booster, (CatBoostClassifier, CatBoostRegressor)):
+                self.booster.predict(X, **kwargs)
 
 
 def save_model(model, params, name, target=None, suffix=None):
