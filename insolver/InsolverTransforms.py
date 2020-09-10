@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import datetime
+import traceback
 
 from .InsolverDataFrame import InsolverDataFrame
 from .InsolverMain import InsolverTransformMain
@@ -24,6 +25,7 @@ class InsolverTransforms(InsolverDataFrame):
         super().__init__(df)
         if isinstance(transforms, list):
             self.transforms = transforms
+        self.transforms_done = {}
 
     def transform(self):
         """
@@ -31,34 +33,56 @@ class InsolverTransforms(InsolverDataFrame):
 
         :returns: List of transforms have been done.
         """
-        _transforms_done = []
-
         if self._is_frame is None:
             raise NotImplementedError("No data loaded.")
 
         if self.transforms:
 
-            for t in self.transforms:
-                if t.priority == 0:
-                    self._df = t(self._df)
-                    _transforms_done.append(type(t).__name__)
+            try:
 
-            for t in self.transforms:
-                if t.priority == 1:
-                    self._df = t(self._df)
-                    _transforms_done.append(type(t).__name__)
+                for t in self.transforms:
+                    if t.priority == 0:
+                        self._df = t(self._df)
+                        attributes = {}
+                        for attribute in dir(t):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: t.%s})" % attribute)
+                        self.transforms_done.update({type(t).__name__: attributes})
 
-            for t in self.transforms:
-                if t.priority == 2:
-                    self._df = t(self._df)
-                    _transforms_done.append(type(t).__name__)
+                for t in self.transforms:
+                    if t.priority == 1:
+                        self._df = t(self._df)
+                        attributes = {}
+                        for attribute in dir(t):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: t.%s})" % attribute)
+                        self.transforms_done.update({type(t).__name__: attributes})
 
-            for t in self.transforms:
-                if t.priority == 3:
-                    self._df = t(self._df)
-                    _transforms_done.append(type(t).__name__)
+                for t in self.transforms:
+                    if t.priority == 2:
+                        self._df = t(self._df)
+                        attributes = {}
+                        for attribute in dir(t):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: t.%s})" % attribute)
+                        self.transforms_done.update({type(t).__name__: attributes})
 
-        return _transforms_done
+                for t in self.transforms:
+                    if t.priority == 3:
+                        self._df = t(self._df)
+                        attributes = {}
+                        for attribute in dir(t):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: t.%s})" % attribute)
+                        self.transforms_done.update({type(t).__name__: attributes})
+
+            except Exception:
+                pass
+
+            finally:
+                traceback.print_last()
+
+        return self.transforms_done
 
 
 # ---------------------------------------------------
@@ -230,7 +254,7 @@ class TransformExp(InsolverTransformMain):
     :param column_driver_minexp: Column in InsolverDataFrame with drivers' minimum experiences, type is integer.
     :param exp_max: Maximum value of drivers' experience, bigger values will be grouped, type is integer, 52 by default.
     """
-    def __init__(self, column_driver_minexp, exp_max=70):
+    def __init__(self, column_driver_minexp, exp_max=52):
         self.priority = 1
         super().__init__()
         self.column_driver_minexp = column_driver_minexp
