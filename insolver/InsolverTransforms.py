@@ -56,9 +56,6 @@ class InsolverTransforms(InsolverDataFrame):
                             self.transforms_done.update({type(transform).__name__: attributes})
 
             except Exception:
-                pass
-
-            finally:
                 traceback.print_last()
 
         return self.transforms_done
