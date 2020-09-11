@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import datetime
+import traceback
 
 from .InsolverDataFrame import InsolverDataFrame
 from .InsolverMain import InsolverTransformMain
@@ -24,6 +25,7 @@ class InsolverTransforms(InsolverDataFrame):
         super().__init__(df)
         if isinstance(transforms, list):
             self.transforms = transforms
+        self.transforms_done = {}
 
     def transform(self):
         """
@@ -31,34 +33,56 @@ class InsolverTransforms(InsolverDataFrame):
 
         :returns: List of transforms have been done.
         """
-        _transforms_done = []
-
         if self._is_frame is None:
             raise NotImplementedError("No data loaded.")
 
         if self.transforms:
 
-            for t in self.transforms:
-                if t.priority == 0:
-                    self._df = t(self._df)
-                    _transforms_done.append(type(t).__name__)
+            try:
 
-            for t in self.transforms:
-                if t.priority == 1:
-                    self._df = t(self._df)
-                    _transforms_done.append(type(t).__name__)
+                for t in self.transforms:
+                    if t.priority == 0:
+                        self._df = t(self._df)
+                        attributes = {}
+                        for attribute in dir(t):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: t.%s})" % attribute)
+                        self.transforms_done.update({type(t).__name__: attributes})
 
-            for t in self.transforms:
-                if t.priority == 2:
-                    self._df = t(self._df)
-                    _transforms_done.append(type(t).__name__)
+                for t in self.transforms:
+                    if t.priority == 1:
+                        self._df = t(self._df)
+                        attributes = {}
+                        for attribute in dir(t):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: t.%s})" % attribute)
+                        self.transforms_done.update({type(t).__name__: attributes})
 
-            for t in self.transforms:
-                if t.priority == 3:
-                    self._df = t(self._df)
-                    _transforms_done.append(type(t).__name__)
+                for t in self.transforms:
+                    if t.priority == 2:
+                        self._df = t(self._df)
+                        attributes = {}
+                        for attribute in dir(t):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: t.%s})" % attribute)
+                        self.transforms_done.update({type(t).__name__: attributes})
 
-        return _transforms_done
+                for t in self.transforms:
+                    if t.priority == 3:
+                        self._df = t(self._df)
+                        attributes = {}
+                        for attribute in dir(t):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: t.%s})" % attribute)
+                        self.transforms_done.update({type(t).__name__: attributes})
+
+            except Exception:
+                pass
+
+            finally:
+                traceback.print_last()
+
+        return self.transforms_done
 
 
 # ---------------------------------------------------
@@ -554,6 +578,24 @@ class TransformParamSortAC(InsolverTransformMain):
 # ---------------------------------------------------
 # Other data methods
 # ---------------------------------------------------
+
+
+class TransformToNumeric(InsolverTransformMain):
+    """
+    Transforms parameter's values to numeric types, equal to Pandas' 'to_numeric'.
+
+    :param column_param: Column in InsolverDataFrame with parameter to transform.
+    :param downcast: Target numeric dtype, equal to Pandas' 'downcast' in the 'to_numeric' function, 'integer' by default.
+    """
+    def __init__(self, column_param, downcast='integer'):
+        self.priority = 0
+        super().__init__()
+        self.column_param = column_param
+        self.downcast = downcast
+
+    def __call__(self, df):
+        df[self.column_param] = pd.to_numeric(df[self.column_param], downcast=self.downcast)
+        return df
 
 
 class TransformMapValues(InsolverTransformMain):
