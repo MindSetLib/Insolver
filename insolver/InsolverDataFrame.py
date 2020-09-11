@@ -65,8 +65,8 @@ class InsolverDataFrame(InsolverMain):
                 'len': len(self._df),
                 'columns': [],
             }
-            for c in self._df.columns:
-                meta_json['columns'].append({'name': c, 'dtype': self._df[c].dtypes, 'use': 'unknown'})
+            for column in self._df.columns:
+                meta_json['columns'].append({'name': column, 'dtype': self._df[column].dtypes, 'use': 'unknown'})
         return meta_json
 
     # ---------------------------------------------------
