@@ -1,9 +1,8 @@
-import requests
-import requests_cache
-import pandas as pd
-import math
 import datetime
+import math
+
 import geocoder
+import requests
 
 from .InsolverDataFrame import InsolverDataFrame
 from .InsolverMain import InsolverTransformMain
@@ -27,26 +26,26 @@ class InsolverGeoPointsFrame(InsolverDataFrame):
     # ---------------------------------------------------
 
     @staticmethod
-    def _get_address_from_kladr(_kladr, _token):
+    def _get_address_from_kladr(kladr, token):
         """
         Gets addresses from KLADRs by api https://dadata.ru/.
 
-        :param _kladr: KLADR.
-        :param _token: Token for api https://dadata.ru/.
+        :param kladr: KLADR.
+        :param token: Token for api https://dadata.ru/.
         :returns: Address.
         """
-        _data = {
-            "query": _kladr
+        data = {
+            "query": kladr
         }
-        _api_url = 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/fias'
-        _headers = {
+        api_url = 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/fias'
+        headers = {
             'content-type': 'application/json',
-            'Authorization': _token,
+            'Authorization': token,
         }
-        _response = requests.post(_api_url, json=_data, headers=_headers)
-        _address_json = _response.json()
-        _address_str = _address_json['suggestions'][0]['value']
-        return _address_str
+        response = requests.post(api_url, json=data, headers=headers)
+        address_json = response.json()
+        address_str = address_json['suggestions'][0]['value']
+        return address_str
 
     def get_address_from_kladr(self, column_kladr, column_address, token):
         """
@@ -57,33 +56,33 @@ class InsolverGeoPointsFrame(InsolverDataFrame):
         :param token: Token for api https://dadata.ru/.
         :returns: None.
         """
-        _addresses = []
-        for _kladr in self._df[column_kladr]:
-            _address = self._get_address_from_kladr(_kladr,
+        addresses = []
+        for kladr in self._df[column_kladr]:
+            address = self._get_address_from_kladr(kladr,
                                                     token)  # token='Token 79abf89d58871ed1df79b83126f8f8c2362e51db'
-            _addresses.append(_address)
-        self._df[column_address] = _addresses
+            addresses.append(address)
+        self._df[column_address] = addresses
 
     @staticmethod
-    def _get_coordinates_from_address(_address, provider='sputnik'):
+    def _get_coordinates_from_address(address, provider='sputnik'):
         """
         Gets geo coordinates from addresses by api http://api.sputnik.ru/maps/geocoder/.
 
-        :param _address: Address.
+        :param address: Address.
         :returns: Coordinates ['latitude', 'longitude'].
         """
         if provider == 'sputnik':
-            _request = requests.get(f'http://search.maps.sputnik.ru/search/addr?q={_address}')
-            _response = _request.json()
-            _coordinates = _response['result']['address'][0]['features'][0]['geometry']['geometries'][0]['coordinates']
-            _coordinates = _coordinates[::-1]
+            request = requests.get(f'http://search.maps.sputnik.ru/search/addr?q={address}')
+            response = request.json()
+            coordinates = response['result']['address'][0]['features'][0]['geometry']['geometries'][0]['coordinates']
+            coordinates = coordinates[::-1]
         elif provider == 'arcgis':
-            g = geocoder.arcgis(_address)
-            _coordinates = g.latlng
+            g = geocoder.arcgis(address)
+            coordinates = g.latlng
         else:
-            _coordinates = None
+            coordinates = None
             raise ValueError(f'Provider {provider} not found')
-        return _coordinates
+        return coordinates
 
     def get_coordinates_from_address(self, column_address, column_lat, column_lon):
         """
@@ -94,11 +93,11 @@ class InsolverGeoPointsFrame(InsolverDataFrame):
         :param column_lon: Column in InsolverDataFrame for longitudes.
         :returns: None.
         """
-        _coordinates = []
-        for _address in self._df[column_address]:
-            _coord = self._get_coordinates_from_address(_address)
-            _coordinates.append(_coord)
-            self._df[column_lat], self._df[column_lon] = zip(*_coordinates)
+        coordinates = []
+        for address in self._df[column_address]:
+            coord = self._get_coordinates_from_address(address)
+            coordinates.append(coord)
+            self._df[column_lat], self._df[column_lon] = zip(*coordinates)
 
 
 # ---------------------------------------------------
