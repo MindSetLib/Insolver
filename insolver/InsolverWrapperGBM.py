@@ -218,19 +218,19 @@ class InsolverGradientBoostingWrapper(object):
         if self.model is None:
             warnings.warn('Please fit or load a model first.')
         else:
-            self.model.predict(X, **kwargs)
+            return self.model.predict(X, **kwargs)
 
     def predict_booster(self, X, **kwargs):
         if self.booster is None:
             warnings.warn('Please fit or load a booster first.')
         else:
-            if isinstance(self.booster, (XGBClassifier, XGBRegressor)):
+            if isinstance(self.booster, XBooster):
                 data = X if isinstance(X, DMatrix) else DMatrix(X)
-                self.booster.predict(data, **kwargs)
-            elif isinstance(self.booster, (LGBMClassifier, LGBMRegressor)):
-                self.booster.predict(X, **kwargs)
-            elif isinstance(self.booster, (CatBoostClassifier, CatBoostRegressor)):
-                self.booster.predict(X, **kwargs)
+                return self.booster.predict(data, **kwargs)
+            elif isinstance(self.booster, LBooster):
+                return self.booster.predict(X, **kwargs)
+            elif isinstance(self.booster, CatBoost):
+                return self.booster.predict(X, **kwargs)
 
 
 def save_model(model, params, name, target=None, suffix=None):
