@@ -230,7 +230,7 @@ class TransformExp(InsolverTransformMain):
     :param column_driver_minexp: Column in InsolverDataFrame with drivers' minimum experiences, type is integer.
     :param exp_max: Maximum value of drivers' experience, bigger values will be grouped, type is integer, 52 by default.
     """
-    def __init__(self, column_driver_minexp, exp_max=70):
+    def __init__(self, column_driver_minexp, exp_max=52):
         self.priority = 1
         super().__init__()
         self.column_driver_minexp = column_driver_minexp
