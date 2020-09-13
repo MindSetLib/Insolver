@@ -232,34 +232,34 @@ class InsolverGradientBoostingWrapper(object):
             elif isinstance(self.booster, CatBoost):
                 return self.booster.predict(X, **kwargs)
 
+    def save_booster(self, name, target=None, suffix=None):
+        if isinstance(self.model, XBooster):
+            name = f'{name}_xgboost'
+        elif isinstance(self.model, LBooster):
+            name = f'{name}_lightgbm'
+        elif isinstance(self.model, CatBoost):
+            name = f'{name}_catboost'
+        else:
+            name = f'{name}_other'
 
-def save_model(model, params, name, target=None, suffix=None):
-    if isinstance(model, XBooster):
-        name = f'{name}_xgboost'
-    elif isinstance(model, LBooster):
-        name = f'{name}_lightgbm'
-    elif isinstance(model, CatBoost):
-        name = f'{name}_catboost'
-    else:
-        name = f'{name}_other'
+        if suffix:
+            name = f'{name}_{suffix}'
 
-    if suffix:
-        name = f'{name}_{suffix}'
+        p = self.best_params.copy()
+        for key in ['data', 'feval']:
+            if key in p.keys():
+                del p[key]
 
-    p = params.copy()
-    for key in ['data', 'feval']:
-        if key in p.keys():
-            del p[key]
+        model_dict = {'model': self.model, 'parameters': p}
+        if target:
+            model_dict['target'] = target
+        with open(f'{name}.model', 'wb') as h:
+            pickle.dump(model_dict, h, protocol=pickle.HIGHEST_PROTOCOL)
 
-    model_dict = {'model': model, 'parameters': p}
-    if target:
-        model_dict['target'] = target
-    with open(f'{name}.model', 'wb') as h:
-        pickle.dump(model_dict, h, protocol=pickle.HIGHEST_PROTOCOL)
-
-
-def load_model(model_path):
-    with open(model_path, 'rb') as h:
-        model_dict = pickle.load(h)
-    target = model_dict['target'] if 'target' in model_dict.keys() else None
-    return model_dict['model'], model_dict['parameters'], target
+    def load_booster(self, model_path):
+        with open(model_path, 'rb') as h:
+            model_dict = pickle.load(h)
+        target = model_dict['target'] if 'target' in model_dict.keys() else None
+        self.booster = model_dict['model']
+        self.best_params = model_dict['parameters']
+        self.target = target

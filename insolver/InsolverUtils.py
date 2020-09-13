@@ -8,11 +8,11 @@ from xgboost import DMatrix
 from lightgbm import Dataset
 
 
-def gb_eval_dev_poisson(yhat, y, weight=None):
+def gb_eval_dev_poisson(y_hat, y, weight=None):
     """Function for Poisson Deviance evaluation.
 
     Args:
-        yhat: np.ndarray object with predictions.
+        y_hat: np.ndarray object with predictions.
         y: xgb.DMatrix, lgb.Dataset or np.ndarray object with target variable.
         weight: Weights for weighted metric.
 
@@ -20,26 +20,26 @@ def gb_eval_dev_poisson(yhat, y, weight=None):
         (str, float), tuple with metrics name and its value, if y is xgboost.DMatrix or lightgbm.Dataset;
         float, otherwise.
     """
-    that = yhat + 1
+    t_hat = y_hat + 1
     if isinstance(y, (DMatrix, Dataset)):
         t = y.get_label() + 1
         if isinstance(y, DMatrix):
-            return 'dev_poisson', 2 * np.sum(t * np.log(t / that) - (t - that))
+            return 'dev_poisson', 2 * np.sum(t * np.log(t / t_hat) - (t - t_hat))
         if isinstance(y, Dataset):
-            return 'dev_poisson', 2 * np.sum(t * np.log(t / that) - (t - that)), False
+            return 'dev_poisson', 2 * np.sum(t * np.log(t / t_hat) - (t - t_hat)), False
     else:
         t = y + 1
         if weight:
-            return 2 * np.sum(weight*(t * np.log(t / that) - (t - that)))
+            return 2 * np.sum(weight*(t * np.log(t / t_hat) - (t - t_hat)))
         else:
-            return 2 * np.sum(t * np.log(t / that) - (t - that))
+            return 2 * np.sum(t * np.log(t / t_hat) - (t - t_hat))
 
 
-def gb_eval_dev_gamma(yhat, y, weight=None):
+def gb_eval_dev_gamma(y_hat, y, weight=None):
     """Function for Gamma Deviance evaluation.
 
     Args:
-        yhat: np.ndarray object with predictions.
+        y_hat: np.ndarray object with predictions.
         y: xgb.DMatrix, lgb.Dataset or np.ndarray object with target variable.
         weight: Weights for weighted metric.
 
@@ -49,14 +49,14 @@ def gb_eval_dev_gamma(yhat, y, weight=None):
     if isinstance(y, (DMatrix, Dataset)):
         t = y.get_label()
         if isinstance(y, DMatrix):
-            return 'dev_gamma', 2 * np.sum(-np.log(t/yhat) + (t-yhat)/yhat)
+            return 'dev_gamma', 2 * np.sum(-np.log(t/y_hat) + (t-y_hat)/y_hat)
         if isinstance(y, Dataset):
-            return 'dev_gamma', 2 * np.sum(-np.log(t/yhat) + (t-yhat)/yhat), False
+            return 'dev_gamma', 2 * np.sum(-np.log(t/y_hat) + (t-y_hat)/y_hat), False
     else:
         if weight:
-            return 2 * np.sum(weight*(-np.log(y/yhat) + (y-yhat)/yhat))
+            return 2 * np.sum(weight*(-np.log(y/y_hat) + (y-y_hat)/y_hat))
         else:
-            return 2 * np.sum(-np.log(y/yhat) + (y-yhat)/yhat)
+            return 2 * np.sum(-np.log(y/y_hat) + (y-y_hat)/y_hat)
 
 
 def train_val_test_split(x, y, val_size, test_size, random_state=0, shuffle=True, stratify=None):

@@ -35,3 +35,6 @@ class InsolverGLMWrapper(object):
             warnings.warn('Please fit or load a model first.')
         else:
             return self.model.predict(X, **kwargs)
+
+    def save_model(self, out_folder):
+        h2o.save_model(model=self.model, path=out_folder, force=True)
