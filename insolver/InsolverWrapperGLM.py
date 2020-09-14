@@ -22,12 +22,12 @@ class InsolverGLMWrapper(object):
         self.best_params = sorted_grid[0]
         self.model = sorted_grid.models[0]
 
-    def fit(self, X, y, **kwargs):
+    def fit(self, X, y, training_frame, validation_frame, **kwargs):
         if self.model is None:
             warnings.warn('Model is not initiated, please use .model_init() method.')
         else:
             if self.best_params is None:
-                self.model.train(X, y, **kwargs)
+                self.model.train(y=y, x=X, training_frame=training_frame, validation_frame=validation_frame, **kwargs)
 
     def predict(self, X, **kwargs):
         if self.model is None:
