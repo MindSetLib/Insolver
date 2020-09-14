@@ -10,11 +10,10 @@ class InsolverGLMWrapper(object):
         self.best_params, self.model = None, None
         h2o.init(**kwargs)
 
-    def model_init(self, data, ratios, **kwargs):
-        data_model = h2o.H2OFrame(data)
-        train, test, valid = data_model.split_frame(ratios=ratios)
+    def model_init(self, train, valid, **kwargs):
+        h2o_train, h2o_valid = [h2o.H2OFrame(x) for x in [train, valid]]
         self.model = H2OGeneralizedLinearEstimator(**kwargs)
-        return train, test, valid
+        return h2o_train, h2o_valid
 
     def grid_search_cv(self, X, y, h2odf_train, h2odf_valid, hyper_params, **kwargs):
         model_grid = H2OGridSearch(model=self.model, hyper_params=hyper_params, **kwargs)
@@ -34,7 +33,11 @@ class InsolverGLMWrapper(object):
         if self.model is None:
             warnings.warn('Please fit or load a model first.')
         else:
-            return self.model.predict(X, **kwargs)
+            h2o_predict = X if isinstance(X, h2o.H2OFrame) else h2o.H2OFrame(X)
+            return self.model.predict(h2o_predict, **kwargs).as_data_frame()
 
-    def save_model(self, out_folder):
-        h2o.save_model(model=self.model, path=out_folder, force=True)
+    def save_model(self, path, **kwargs):
+        h2o.save_model(model=self.model, path=path, **kwargs)
+
+    def load_model(self, path):
+        self.model = h2o.load_model(path)

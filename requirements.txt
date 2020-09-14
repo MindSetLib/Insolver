@@ -6,6 +6,7 @@ cycler==0.10.0
 decorator==4.4.2
 future==0.18.2
 graphviz==0.14.1
+h2o==3.30.1.2
 hyperopt==0.2.4
 idna==2.10
 joblib==0.16.0
