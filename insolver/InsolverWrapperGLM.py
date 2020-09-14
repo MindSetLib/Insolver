@@ -15,9 +15,9 @@ class InsolverGLMWrapper(object):
         self.model = H2OGeneralizedLinearEstimator(**kwargs)
         return h2o_train, h2o_valid
 
-    def grid_search_cv(self, X, y, h2odf_train, h2odf_valid, hyper_params, **kwargs):
+    def grid_search_cv(self, X, y, training_frame, validation_frame, hyper_params, **kwargs):
         model_grid = H2OGridSearch(model=self.model, hyper_params=hyper_params, **kwargs)
-        model_grid.train(y=y, x=X, training_frame=h2odf_train, validation_frame=h2odf_valid)
+        model_grid.train(y=y, x=X, training_frame=training_frame, validation_frame=validation_frame)
         sorted_grid = model_grid.get_grid(sort_by='residual_deviance', decreasing=False)
         self.best_params = sorted_grid[0]
         self.model = sorted_grid.models[0]
