@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-class ShapPlots(object):
+class ShapPlots:
     """Class for plotting some graphs from SHAP package.
 
     Attributes:
@@ -74,7 +74,7 @@ class ShapPlots(object):
         fig.show()
 
 
-class PredictionPlots(object):
+class PredictionPlots:
     """Class for plotting some graphs using predictions of the models.
 
     Attributes:

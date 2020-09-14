@@ -36,7 +36,7 @@ def objective_gb(params, algorithm, cv_params, data_params, X, y):
     return {'loss': score, 'status': STATUS_OK}
 
 
-class InsolverGradientBoostingWrapper(object):
+class InsolverGradientBoostingWrapper:
     def __init__(self, algorithm, task):
         if algorithm in ['xgboost', 'lightgbm', 'catboost']:
             self.algorithm = algorithm
