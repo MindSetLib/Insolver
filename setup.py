@@ -30,5 +30,6 @@ setup(name='insolver',
             'fastapi',
             'uvicorn',
             'pydantic',
+            'gunicorn',
       ],
       zip_safe=False)
