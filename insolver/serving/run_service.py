@@ -1,7 +1,8 @@
 import argparse
 import os
-from pprint import pprint
 from subprocess import Popen, PIPE
+
+import uvicorn
 
 
 def exec_cmd():
@@ -11,12 +12,18 @@ def exec_cmd():
 
 
 parser = argparse.ArgumentParser(description='ML API service')
-parser.add_argument('-model', action="store")
-parser.add_argument('-transforms', action="store")
+parser.add_argument('-model', action='store')
+parser.add_argument('-transforms', action='store')
+parser.add_argument('-service', action='store')
+
 args = parser.parse_args()
 
 os.environ['model_path'] = args.model
 os.environ['transforms_path'] = args.transforms
-pprint(os.environ)
 
-exec_cmd()
+if args.service == 'flask':
+    exec_cmd()
+elif args.service == 'fastapi':
+    uvicorn.run("fastapi-app:app", host="127.0.0.1", port=8000, log_level="info")
+else:
+    print('wrong service, try "-service flask" or "-service fastapi"')

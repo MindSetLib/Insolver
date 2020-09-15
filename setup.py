@@ -31,5 +31,6 @@ setup(name='insolver',
             'uvicorn',
             'pydantic',
             'gunicorn',
+            'uvicorn'
       ],
       zip_safe=False)
