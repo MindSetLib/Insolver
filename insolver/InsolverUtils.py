@@ -1,11 +1,26 @@
-import warnings
 import platform
-import pyodbc
+import warnings
+
 import numpy as np
 import pandas as pd
+import pyodbc
+from lightgbm import Dataset
 from sklearn.model_selection import train_test_split
 from xgboost import DMatrix
-from lightgbm import Dataset
+
+import insolver
+
+
+def init_transforms(transforms):
+    transforms_list = []
+    for transform_name in transforms:
+        transform_class = getattr(insolver.InsolverTransforms, transform_name)
+        try:
+            del transforms[transform_name]['priority']
+        except KeyError:
+            pass
+        transforms_list.append(transform_class(**transforms[transform_name]))
+    return transforms_list
 
 
 def gb_eval_dev_poisson(y_hat, y, weight=None):
