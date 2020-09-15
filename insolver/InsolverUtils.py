@@ -59,12 +59,11 @@ def gb_eval_dev_gamma(y_hat, y, weight=None):
             return 2 * np.sum(-np.log(y/y_hat) + (y-y_hat)/y_hat)
 
 
-def train_val_test_split(x, y, val_size, test_size, random_state=0, shuffle=True, stratify=None):
+def train_val_test_split(*arrays, val_size, test_size, random_state=0, shuffle=True, stratify=None):
     """Function for splitting dataset into train/validation/test partitions.
 
     Args:
-        x (array_like): Array containing predictors.
-        y (array_like): Array containing target variable.
+        *arrays (array_like): Arrays to split into train/validation/test sets containing predictors.
         val_size (float): The proportion of the dataset to include in validation partition.
         test_size (float): The proportion of the dataset to include in test partition.
         random_state (:obj:`int`, optional): Random state, passed to train_test_split() from scikit-learn. (default=0).
@@ -76,11 +75,21 @@ def train_val_test_split(x, y, val_size, test_size, random_state=0, shuffle=True
 
         A tuple of partitions of the initial dataset.
     """
-    x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=random_state, shuffle=shuffle,
-                                                        test_size=test_size, stratify=stratify)
-    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, random_state=random_state, shuffle=shuffle,
-                                                          test_size=val_size/(1-test_size), stratify=stratify)
-    return x_train, x_valid, x_test, y_train, y_valid, y_test
+    n_arrays = len(arrays)
+    split1 = train_test_split(*arrays, random_state=random_state, shuffle=shuffle,
+                              test_size=test_size, stratify=stratify)
+    if n_arrays > 1:
+        train, test = split1[0::2], split1[1::2]
+        split2 = train_test_split(*train, random_state=random_state, shuffle=shuffle,
+                                  test_size=val_size / (1 - test_size), stratify=stratify)
+        train, valid = split2[0::2], split2[1::2]
+        return (*train, *valid, *test)
+    else:
+        train, test = split1[0], split1[1]
+        split2 = train_test_split(train, random_state=random_state, shuffle=shuffle,
+                                  test_size=val_size / (1 - test_size), stratify=stratify)
+        train, valid = split2[0], split2[1]
+        return train, valid, test
 
 
 def train_test_column_split(x, y, df_column):
@@ -102,7 +111,7 @@ def train_test_column_split(x, y, df_column):
             y1[y1[col_name] == 'train'].drop(col_name, axis=1), y1[y1[col_name] == 'test'].drop(col_name, axis=1))
 
 
-class PostgresConnection(object):
+class PostgresConnection:
     """Class for setting the connection to PostreSQL database.
 
     Attributes:
@@ -149,7 +158,7 @@ class PostgresConnection(object):
         return df
 
 
-class PredictionMetrics(object):
+class PredictionMetrics:
     # TODO: Support of train/val/test splits.
     """Class for calculating metrics using predictions of the models.
 
