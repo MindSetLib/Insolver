@@ -1,6 +1,12 @@
+import pickle
+import json
+import pandas as pd
 from flask import Flask, request, jsonify
+from insolver.InsolverWrapperGLM import InsolverGLMWrapper
+from insolver.InsolverDataFrame import InsolverDataFrame
+from insolver.InsolverTransforms import InsolverTransforms
+from serve_utils import init_transforms
 
-# from process_data import process_input
 
 # For logging
 import logging
@@ -11,8 +17,14 @@ from time import strftime, time
 app = Flask(__name__)
 
 # Load model
-# model_glm_poisson = h2o.load_model('models/GLM_model_python_1573818197972_1')
-# model_glm_gamma = h2o.load_model('models/GLM_model_python_1573818197972_2')
+model_path = '../../glm/Grid_GLM_Key_Frame__upload_a685662cd198b4799aee7e181b304e66.hex_model_python_1600165671228_1_model_1'
+new_iglm = InsolverGLMWrapper()
+new_iglm.load_model(model_path)
+
+# load and init transformations
+with open('../../transforms.pkl', 'rb') as file:
+    tranforms = pickle.load(file)
+tranforms = init_transforms(tranforms)
 
 # Logging
 handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)
@@ -28,33 +40,26 @@ def index():
 
 @app.route("/predict", methods=['POST'])
 def predict():
-    json_input = request.json
-
     # Request logging
     current_datatime = strftime('[%Y-%b-%d %H:%M:%S]')
     ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
     logger.info(f'{current_datatime} request from {ip_address}: {request.json}')
     start_prediction = time()
 
-    # Prediction
-    # id = json_input['ID']
-    # hf = process_input(json_input)
-    #
-    # prediction_Poisson = model_glm_poisson.predict(hf)
-    # value_Poisson = prediction_Poisson.as_data_frame()['predict'][0]
-    #
-    # prediction_Gamma = model_glm_gamma.predict(hf)
-    # value_Gamma = prediction_Gamma.as_data_frame()['predict'][0]
-    #
-    # value_BurningCost = value_Poisson * value_Gamma
+    json_input = request.json
+    json_str = json.dumps(json_input)
+    df = pd.read_json(json_str)
+    InsDataFrame = InsolverDataFrame(df)
+    # Apply transformations
+    InsTransforms = InsolverTransforms(InsDataFrame.get_data(), tranforms)
+    InsTransforms.transform()
 
-    result = None
-    # result = {
-    #     'ID': id,
-    #     'value_Poisson': value_Poisson,
-    #     'value_Gamma': value_Gamma,
-    #     'value_BurningCost': value_BurningCost
-    # }
+    # Prediction
+    predict_glm = new_iglm.predict(df)
+
+    result = {
+        'predict_glm': predict_glm['predict'][0]
+    }
 
     # Response logging
     end_prediction = time()
