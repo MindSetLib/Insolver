@@ -15,6 +15,9 @@ from insolver.InsolverUtils import train_val_test_split
 from insolver.InsolverWrapperGLM import InsolverGLMWrapper
 
 df = pd.read_csv('freMPL-R.csv', low_memory=False)
+df = df[df.Dataset.isin([5, 6, 7, 8, 9])]
+df.dropna(how='all', axis=1, inplace=True)
+df = df[df.ClaimAmount > 0]
 
 InsDataFrame = InsolverDataFrame(df)
 
@@ -33,10 +36,7 @@ transforms = InsTransforms.transform()
 with open('transforms.pkl', 'wb') as file:
     pickle.dump(transforms, file)
 
-df = InsTransforms.get_data()
-df = df[df.Dataset.isin([5, 6, 7, 8, 9])]
-df.dropna(how='all', axis=1, inplace=True)
-df = df[df.ClaimAmount > 0]
+train, valid, test = InsTransforms.split_frame(val_size=0.15, test_size=0.15, random_state=0, shuffle=True)
 
 iglm = InsolverGLMWrapper()
 
@@ -46,17 +46,10 @@ features = ['LicAge', 'Gender', 'MariStat', 'DrivAge', 'HasKmLimit', 'BonusMalus
             'Age_m', 'Age_f', 'Age_m_2', 'Age_f_2']
 target = 'ClaimAmount'
 
-x_train, x_valid, x_test, y_train, y_valid, y_test = train_val_test_split(
-    df[features], df[target], val_size=0.7, test_size=0.15)
-
-train = pd.concat([x_train, y_train], axis=1)
-valid = pd.concat([x_valid, y_valid], axis=1)
-test = pd.concat([x_test, y_test], axis=1)
-
 test.sample(1).to_json('request_example.json')
 
-train, valid = iglm.model_init(train, valid, family='gamma', link='log')
-iglm.grid_search_cv(features, target, train, valid, params, search_criteria={'strategy': "Cartesian"})
+iglm.model_init(train, valid, family='gamma', link='log')
+iglm.grid_search_cv(features, target, params, search_criteria={'strategy': "Cartesian"})
 predict_glm = iglm.predict(test)
 iglm.save_model('glm')
 print(predict_glm)
