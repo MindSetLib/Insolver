@@ -26,5 +26,11 @@ setup(name='insolver',
             'shap',
             'geocoder',
             'h2o',
+            'flask',
+            'fastapi',
+            'uvicorn',
+            'pydantic',
+            'gunicorn',
+            'uvicorn'
       ],
       zip_safe=False)
