@@ -1,5 +1,3 @@
-import pickle
-
 import pandas as pd
 
 from insolver.InsolverDataFrame import InsolverDataFrame
@@ -11,7 +9,6 @@ from insolver.InsolverTransforms import (
     TransformPolynomizer,
     TransformAgeGender,
 )
-from insolver.InsolverUtils import train_val_test_split
 from insolver.InsolverWrapperGLM import InsolverGLMWrapper
 
 df = pd.read_csv('freMPL-R.csv', low_memory=False)
@@ -31,10 +28,8 @@ InsTransforms = InsolverTransforms(InsDataFrame.get_data(), [
     TransformPolynomizer('Age_f'),
 ])
 
-transforms = InsTransforms.transform()
-
-with open('transforms.pkl', 'wb') as file:
-    pickle.dump(transforms, file)
+InsTransforms.transform()
+InsTransforms.save('transforms.pkl')
 
 train, valid, test = InsTransforms.split_frame(val_size=0.15, test_size=0.15, random_state=0, shuffle=True)
 
