@@ -9,6 +9,11 @@ setup(name='insolver',
       author_email='request@mind-set.ru',
       license='MIT',
       packages=['insolver'],
+      entry_points={
+            "console_scripts": [
+                  "insolver_serving = insolver.serving.run_service:run"
+            ]
+      },
       install_requires=[
             'wheel',
             'numpy',
