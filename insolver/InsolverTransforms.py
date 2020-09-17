@@ -1,7 +1,9 @@
-import pandas as pd
-import re
 import datetime
+import pickle
+import re
 import traceback
+
+import pandas as pd
 
 from .InsolverDataFrame import InsolverDataFrame
 from .InsolverMain import InsolverTransformMain
@@ -59,6 +61,10 @@ class InsolverTransforms(InsolverDataFrame):
                 traceback.print_last()
 
         return self.transforms_done
+
+    def save(self, filename):
+        with open(filename, 'wb') as file:
+            pickle.dump(self.transforms_done, file)
 
 
 # ---------------------------------------------------
