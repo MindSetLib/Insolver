@@ -8,7 +8,7 @@ setup(name='insolver',
       author='Mindset',
       author_email='request@mind-set.ru',
       license='MIT',
-      packages=['insolver'],
+      packages=['insolver', 'insolver.serving'],
       entry_points={
             "console_scripts": [
                   "insolver_serving = insolver.serving.run_service:run"
