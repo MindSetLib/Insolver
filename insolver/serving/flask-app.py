@@ -61,9 +61,10 @@ def predict():
     # Prediction
     predict_glm = new_iglm.predict(df)
 
-    result = {
-        'predict_glm': predict_glm
-    }
+    # result = {
+    #     'predict_glm': predict_glm
+    # }
+    result = pd.Series(predict_glm).to_json(orient='values')
 
     # Response logging
     end_prediction = time()
