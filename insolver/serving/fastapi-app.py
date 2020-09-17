@@ -1,9 +1,10 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import pandas as pd
-import json
 import os
 import pickle
+
+import pandas as pd
+from fastapi import FastAPI
+from pydantic import BaseModel
+
 from insolver.InsolverDataFrame import InsolverDataFrame
 from insolver.InsolverTransforms import InsolverTransforms
 from insolver.InsolverUtils import init_transforms
@@ -11,9 +12,6 @@ from insolver.InsolverWrapperGLM import InsolverGLMWrapper
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
-# model_path = '../../glm/Grid_GLM_Key_Frame__upload_a685662cd198b4799aee7e181b304e66.hex_model_python_1600165671228_1_model_1'
-# transforms_path = '../../transforms.pkl'
-
 
 # Load model
 new_iglm = InsolverGLMWrapper()
@@ -63,10 +61,6 @@ def predict(data: Data):
     predict_glm = new_iglm.predict(df)
 
     result = {
-        'predict_glm': predict_glm['predict'][0]
+        'predict_glm': predict_glm
     }
     return result
-
-
-# запуск сервера
-# uvicorn fastapi-app:app

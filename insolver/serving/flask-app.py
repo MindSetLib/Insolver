@@ -22,12 +22,10 @@ from time import strftime, time
 app = Flask(__name__)
 
 # Load model
-# model_path = 'glm/Grid_GLM_Key_Frame__upload_a685662cd198b4799aee7e181b304e66.hex_model_python_1600165671228_1_model_1'
 new_iglm = InsolverGLMWrapper()
 new_iglm.load_model(model_path)
 
 # load and init transformations
-# transforms_path = 'transforms.pkl'
 with open(transforms_path, 'rb') as file:
     tranforms = pickle.load(file)
 tranforms = init_transforms(tranforms)
@@ -64,7 +62,7 @@ def predict():
     predict_glm = new_iglm.predict(df)
 
     result = {
-        'predict_glm': predict_glm['predict'][0]
+        'predict_glm': predict_glm
     }
 
     # Response logging
