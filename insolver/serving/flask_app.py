@@ -51,7 +51,7 @@ def predict():
     start_prediction = time()
 
     json_input = request.json
-    json_str = json.dumps(json_input)
+    json_str = json.dumps(json_input['df'])
     df = pd.read_json(json_str)
     InsDataFrame = InsolverDataFrame(df)
     # Apply transformations
@@ -61,10 +61,9 @@ def predict():
     # Prediction
     predict_glm = new_iglm.predict(df)
 
-    # result = {
-    #     'predict_glm': predict_glm
-    # }
-    result = pd.Series(predict_glm[0]).to_json(orient='values')
+    result = {
+        'predict_glm': str(predict_glm)
+    }
 
     # Response logging
     end_prediction = time()

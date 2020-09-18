@@ -27,18 +27,7 @@ app = FastAPI()
 
 
 class Data(BaseModel):
-    LicAge: dict
-    Gender: dict
-    MariStat: dict
-    DrivAge: dict
-    HasKmLimit: dict
-    BonusMalus: dict
-    RiskArea: dict
-    Age_m: dict
-    Age_f: dict
-    Age_m_2: dict
-    Age_f_2: dict
-    ClaimAmount: dict
+    df: dict
 
 
 @app.get("/")
@@ -47,10 +36,10 @@ def index():
 
 
 @app.post("/predict")
-def predict(data: Data):
+async def predict(data: Data):
     # Extract data in correct order
     data_dict = data.dict()
-    df = pd.DataFrame(data_dict)
+    df = pd.DataFrame(data_dict['df'])
 
     InsDataFrame = InsolverDataFrame(df)
     # Apply transformations
@@ -61,6 +50,6 @@ def predict(data: Data):
     predict_glm = new_iglm.predict(df)
 
     result = {
-        'predict_glm': predict_glm
+        'predict_glm': str(predict_glm)
     }
     return result

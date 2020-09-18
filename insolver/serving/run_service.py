@@ -2,11 +2,8 @@ import argparse
 import os
 from subprocess import Popen, PIPE
 
-import uvicorn
 
-
-def exec_cmd():
-    cmd = 'gunicorn flask-app:app --pythonpath /home/andrey/PycharmProjects/MS-InsuranceScoring/insolver/serving/'
+def exec_cmd(cmd):
     out, err = Popen(f'{cmd}', shell=True, stdout=PIPE).communicate()
     print(str(out, 'utf-8'))
 
@@ -23,8 +20,10 @@ def run():
     os.environ['transforms_path'] = args.transforms
 
     if args.service == 'flask':
-        exec_cmd()
+        cmd = 'gunicorn insolver.serving.flask_app:app'
+        exec_cmd(cmd)
     elif args.service == 'fastapi':
-        uvicorn.run("fastapi-app:app", host="127.0.0.1", port=8000, log_level="info")
+        cmd = 'gunicorn insolver.serving.fastapi_app:app -k uvicorn.workers.UvicornWorker'
+        exec_cmd(cmd)
     else:
         print('wrong service, try "-service flask" or "-service fastapi"')
