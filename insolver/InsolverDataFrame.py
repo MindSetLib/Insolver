@@ -74,6 +74,12 @@ class InsolverDataFrame(InsolverMain):
         return train_val_test_split(self._df, val_size=val_size, test_size=test_size, random_state=random_state,
                                     shuffle=shuffle, stratify=stratify)
 
+    def fillna(self, *args, **kwargs):
+        return self._df.fillna(*args, **kwargs)
+
+    def dropna(self, *args, **kwargs):
+        return self._df.dropna(*args, **kwargs)
+
     # ---------------------------------------------------
     # General methods
     # ---------------------------------------------------
