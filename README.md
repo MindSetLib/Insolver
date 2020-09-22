@@ -38,6 +38,8 @@ sphinx-apidoc -f -o ../docs/source/ ../insolver
 make html
 ```
 
+**[Ссылка на документацию](docs/html/index.html)**
+
 ## Запуск сервиса с моделью (пример)
 ```shell script
 insolver_serving -model glm/Grid_GLM_Key_Frame__upload_a685662cd198b4799aee7e181b304e66.hex_model_python_1600165671228_1_model_1 -transforms transforms.pkl  -service flask
