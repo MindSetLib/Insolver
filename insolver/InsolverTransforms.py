@@ -634,3 +634,22 @@ class TransformGetDummies(InsolverTransformMain):
     def __call__(self, df):
         df = pd.get_dummies(df, columns=self.column_param)
         return df
+
+
+class AutoFillNATransforms(InsolverTransformMain):
+    def __init__(self, column_param):
+        self.priority = 1
+        super().__init__()
+        self.column_param = column_param
+        self.median = None
+
+    def __call__(self, df):
+        self.median = df.median(axis=0)
+        df.find_num_cat_features()
+        for column in df.numerical_columns:
+            df[column].fillna(self.median, axis=0, inplace=True)
+
+        df.find_binary_features()
+        df.fillna_binary_features()
+        df.fillna_not_binary_features()
+        return df
