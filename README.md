@@ -38,7 +38,7 @@ sphinx-apidoc -f -o ../docs/source/ ../insolver
 make html
 ```
 
-**[Ссылка на документацию](docs/html/index.html)**
+**[Ссылка на документацию](docs/_build/html/index.html)**
 
 ## Запуск сервиса с моделью (пример)
 ```shell script
