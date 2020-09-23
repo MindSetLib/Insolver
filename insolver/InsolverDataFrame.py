@@ -1,5 +1,8 @@
-import pandas as pd
+import json
+
 import numpy as np
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 from .InsolverMain import InsolverMain
 from .InsolverUtils import train_val_test_split
@@ -25,7 +28,6 @@ class InsolverDataFrame(InsolverMain):
                 self._is_frame = True
         else:
             raise NotImplementedError("'df' should be the Pandas' DataFrame.")
-
 
     def get_data(self, columns=None):
         """
@@ -94,7 +96,8 @@ class InsolverDataFrame(InsolverMain):
         self.categorical_columns = [c for c in self._df.columns if self._df[c].dtype.name == 'object']
         self.numerical_columns = [c for c in self._df.columns if self._df[c].dtype.name != 'object']
         # TODO: fix categorical_like_columns method
-        self.categorical_like_columns = [c for c in self.numerical_columns if self._df.describe()[c]['unique'] <= nfeatures]
+        self.categorical_like_columns = [c for c in self.numerical_columns if
+                                         self._df.describe()[c]['unique'] <= nfeatures]
         self.numerical_columns = [c for c in self.numerical_columns if c not in self.categorical_like_columns]
 
     def find_binary_features(self):
@@ -137,6 +140,20 @@ class InsolverDataFrame(InsolverMain):
         :return:
         """
         self._df[col_name] = np.where(self._df[col_name].isnull(), "Unknown", self._df[col_name])
+
+    # ---------------------------------------------------
+    # Encoder methods
+    # ---------------------------------------------------
+
+    @staticmethod
+    def encode_column(column):
+        le = LabelEncoder()
+        le.fit(column)
+        le_classes = le.classes_.tolist()
+        with open(f'le_classes_{column.name}.json', 'w') as file:
+            json.dump(le_classes, file, separators=(',', ':'), sort_keys=True, indent=4)
+        column = le.transform(column)
+        return column
 
     # ---------------------------------------------------
     # General methods

@@ -656,3 +656,15 @@ class AutoFillNATransforms(InsolverTransformMain):
         for column in df.categorical_columns:
             df.fillnan_category(column)
         return df
+
+
+class EncoderTransforms(InsolverTransformMain):
+    def __init__(self, column_param):
+        self.priority = 2
+        super().__init__()
+        self.column_param = column_param
+
+    def __call__(self, df):
+        for column in df.columns:
+            df[column] = df.encode_column(column)
+
