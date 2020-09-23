@@ -652,4 +652,7 @@ class AutoFillNATransforms(InsolverTransformMain):
         df.find_binary_features()
         df.fillna_binary_features()
         df.fillna_not_binary_features()
+
+        for column in df.categorical_columns:
+            df.fillnan_category(column)
         return df

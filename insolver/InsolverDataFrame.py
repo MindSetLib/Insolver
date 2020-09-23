@@ -93,7 +93,8 @@ class InsolverDataFrame(InsolverMain):
     def find_num_cat_features(self, nfeatures=3):
         self.categorical_columns = [c for c in self._df.columns if self._df[c].dtype.name == 'object']
         self.numerical_columns = [c for c in self._df.columns if self._df[c].dtype.name != 'object']
-        self.categorical_like_columns = [c for c in self.numerical_columns if self._df.describe()[c]['unique'] < nfeatures]
+        # TODO: fix categorical_like_columns method
+        self.categorical_like_columns = [c for c in self.numerical_columns if self._df.describe()[c]['unique'] <= nfeatures]
         self.numerical_columns = [c for c in self.numerical_columns if c not in self.categorical_like_columns]
 
     def find_binary_features(self):
@@ -107,7 +108,7 @@ class InsolverDataFrame(InsolverMain):
             self._df.loc[top_items, c] = 0
             self._df.loc[np.logical_not(top_items), c] = 1
 
-    def fillna_not_binary_features(self):
+    def get_dummies_not_binary_features(self):
         pd.get_dummies(self._df[self.nonbinary_columns])
 
     def fillnan_category(self, col_name):
