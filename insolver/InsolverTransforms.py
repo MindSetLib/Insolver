@@ -688,15 +688,22 @@ class AutoFillNATransforms(InsolverTransformMain):
 
 
 class EncoderTransforms(InsolverTransformMain):
-    def __init__(self, column_name, le_classes=None):
+    def __init__(self, column_names, le_classes=None):
         self.priority = 1
         super().__init__()
-        self.column_name = column_name
+        self.column_names = column_names
         self.le_classes = le_classes
 
-    def __call__(self, df):
+    @staticmethod
+    def _encode_column(column):
         le = LabelEncoder()
-        le.fit(df[self.column_name])
-        self.le_classes = le.classes_.tolist()
-        df[self.column_name] = le.transform(df[self.column_name])
+        le.fit(column)
+        le_classes = le.classes_.tolist()
+        column = le.transform(column)
+        return column, le_classes
+
+    def __call__(self, df):
+        self.le_classes = {}
+        for column_name in self.column_names:
+            df[column_name], self.le_classes[column_name] = self._encode_column(df[column_name])
         return df
