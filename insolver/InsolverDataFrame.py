@@ -142,20 +142,6 @@ class InsolverDataFrame(InsolverMain):
         self._df[col_name] = np.where(self._df[col_name].isnull(), "Unknown", self._df[col_name])
 
     # ---------------------------------------------------
-    # Encoder methods
-    # ---------------------------------------------------
-
-    @staticmethod
-    def encode_column(column):
-        le = LabelEncoder()
-        le.fit(column)
-        le_classes = le.classes_.tolist()
-        with open(f'le_classes_{column.name}.json', 'w') as file:
-            json.dump(le_classes, file, separators=(',', ':'), sort_keys=True, indent=4)
-        column = le.transform(column)
-        return column
-
-    # ---------------------------------------------------
     # General methods
     # ---------------------------------------------------
 

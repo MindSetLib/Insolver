@@ -688,24 +688,15 @@ class AutoFillNATransforms(InsolverTransformMain):
 
 
 class EncoderTransforms(InsolverTransformMain):
-    def __init__(self, column_name):
+    def __init__(self, column_name, le_classes=None):
         self.priority = 1
         super().__init__()
         self.column_name = column_name
-        self.le_classes = None
-
-    # @staticmethod
-    # def encode_column(column):
-    #     le = LabelEncoder()
-    #     le.fit(column)
-    #     le_classes = le.classes_.tolist()
-    #     with open(f'le_classes_{column.name}.json', 'w') as file:
-    #         json.dump(le_classes, file, separators=(',', ':'), sort_keys=True, indent=4)
-    #     column = le.transform(column)
-    #     return column
+        self.le_classes = le_classes
 
     def __call__(self, df):
         le = LabelEncoder()
         le.fit(df[self.column_name])
         self.le_classes = le.classes_.tolist()
         df[self.column_name] = le.transform(df[self.column_name])
+        return df
