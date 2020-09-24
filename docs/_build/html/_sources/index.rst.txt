@@ -12,6 +12,8 @@ Welcome to Insolver Projects' documentation!
 
    source/installation
    source/create_df
+   source/user_transforms
+   source/serving
 
 
 Indices and tables
