@@ -360,7 +360,7 @@ class TransformVehPower(InsolverTransformMain):
 
     def __call__(self, df):
         df[self.column_veh_power] = df[self.column_veh_power].apply(self._power, args=(
-        self.power_min, self.power_max, self.power_step,))
+            self.power_min, self.power_max, self.power_step,))
         return df
 
 
@@ -666,24 +666,37 @@ class TransformGetDummies(InsolverTransformMain):
 
 
 class AutoFillNATransforms(InsolverTransformMain):
-    def __init__(self, column_param):
+    def __init__(self, numerical_columns=None, categorical_columns=None, medians=None, freq_categories=None):
         self.priority = 1
         super().__init__()
-        self.column_param = column_param
-        self.median = None
+        self.numerical_columns = numerical_columns
+        self.categorical_columns = categorical_columns
+        self.medians = medians
+        self.freq_categories = freq_categories
+
+    def _find_num_cat_features(self, df):
+        self.categorical_columns = [c for c in df.columns if df[c].dtype.name == 'object']
+        self.numerical_columns = [c for c in df.columns if df[c].dtype.name != 'object']
+
+    def _fillna_numerical(self, df):
+        """Replace nan values with median values"""
+        self.medians = {}
+        for column in self.numerical_columns:
+            self.medians[column] = df[column].median()
+            df[column].fillna(self.medians[column], axis=0, inplace=True)
+
+    def _fillnan_categorical(self, df):
+        """Replace nan values with most occured category"""
+        self.freq_categories = {}
+        for column in self.categorical_columns:
+            most_frequent_category = df[column].mode()[0]
+            self.freq_categories[column] = most_frequent_category
+            df[column].fillna(most_frequent_category, inplace=True)
 
     def __call__(self, df):
-        self.median = df.median(axis=0)
-        df.find_num_cat_features()
-        for column in df.numerical_columns:
-            df[column].fillna(self.median, axis=0, inplace=True)
-
-        df.find_binary_features()
-        df.fillna_binary_features()
-        df.fillna_not_binary_features()
-
-        for column in df.categorical_columns:
-            df.fillnan_category(column)
+        self._find_num_cat_features(df)
+        self._fillna_numerical(df)
+        self._fillnan_categorical(df)
         return df
 
 
