@@ -8,6 +8,7 @@ from insolver.InsolverTransforms import (
     TransformMapValues,
     TransformPolynomizer,
     TransformAgeGender,
+    EncoderTransforms,
 )
 from insolver.InsolverWrapperGLM import InsolverGLMWrapper
 
@@ -18,10 +19,13 @@ df = df[df.ClaimAmount > 0]
 
 InsDataFrame = InsolverDataFrame(df)
 
+# df['Gender'] = InsDataFrame.encode_column(df['Gender'])
+
 InsTransforms = InsolverTransforms(InsDataFrame.get_data(), [
     TransformAge('DrivAge', 18, 75),
     TransformExp('LicAge', 57),
-    TransformMapValues('Gender', {'Male': 0, 'Female': 1}),
+    # TransformMapValues('Gender', {'Male': 0, 'Female': 1}),
+    EncoderTransforms('Gender'),
     TransformMapValues('MariStat', {'Other': 0, 'Alone': 1}),
     TransformAgeGender('DrivAge', 'Gender', 'Age_m', 'Age_f', age_default=18, gender_male=0, gender_female=1),
     TransformPolynomizer('Age_m'),
@@ -30,6 +34,7 @@ InsTransforms = InsolverTransforms(InsDataFrame.get_data(), [
 
 InsTransforms.transform()
 InsTransforms.save('transforms.pkl')
+InsTransforms.save_json('transforms.json')
 
 train, valid, test = InsTransforms.split_frame(val_size=0.15, test_size=0.15, random_state=0, shuffle=True)
 
