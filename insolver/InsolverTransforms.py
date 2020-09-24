@@ -5,7 +5,7 @@ import re
 import traceback
 
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 from .InsolverDataFrame import InsolverDataFrame
 from .InsolverMain import InsolverTransformMain
@@ -719,4 +719,28 @@ class EncoderTransforms(InsolverTransformMain):
         self.le_classes = {}
         for column_name in self.column_names:
             df[column_name], self.le_classes[column_name] = self._encode_column(df[column_name])
+        return df
+
+
+class OneHotEncoderTransforms(InsolverTransformMain):
+    def __init__(self, column_names, encoder_dict=None):
+        self.priority = 1
+        super().__init__()
+        self.column_names = column_names
+        self.encoder_dict = encoder_dict
+
+    def _encode_column(self, df, column_name):
+        encoder = OneHotEncoder(sparse=False)
+        encoder_params = encoder.fit(df[[column_name]])
+        column_encoded = pd.DataFrame(encoder.transform(df[[column_name]]))
+        column_encoded.columns = encoder.get_feature_names([column_name])
+        df.drop([column_name], axis=1, inplace=True)
+        df = pd.concat([df, column_encoded], axis=1)
+        return df, encoder_params
+
+    def __call__(self, df):
+        self.encoder_dict = {}
+        for column in self.column_names:
+            df, encoder_params = self._encode_column(df, column)
+            self.encoder_dict[column] = encoder_params
         return df
