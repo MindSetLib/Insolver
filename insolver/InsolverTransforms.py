@@ -42,28 +42,23 @@ class InsolverTransforms(InsolverDataFrame):
             raise NotImplementedError("No data loaded.")
 
         if self.transforms:
+            priority_max = 0
+            for transform in self.transforms:
+                if transform.priority > priority_max:
+                    priority_max = transform.priority
 
-            try:
-
-                priority_max = 0
+            for priority in range(priority_max + 1):
                 for transform in self.transforms:
-                    if transform.priority > priority_max:
-                        priority_max = transform.priority
+                    if transform.priority == priority:
+                        print(transform)
+                        self._df = transform(self._df)
+                        attributes = {}
+                        for attribute in dir(transform):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: transform.%s})" % attribute)
+                        self.transforms_done.update({type(transform).__name__: attributes})
 
-                for priority in range(priority_max + 1):
-                    for transform in self.transforms:
-                        if transform.priority == priority:
-                            self._df = transform(self._df)
-                            attributes = {}
-                            for attribute in dir(transform):
-                                if attribute[0] != '_':
-                                    exec("attributes.update({attribute: transform.%s})" % attribute)
-                            self.transforms_done.update({type(transform).__name__: attributes})
-
-            except Exception:
-                traceback.print_last()
-
-        return self.transforms_done
+        return self._df
 
     def save(self, filename):
         with open(filename, 'wb') as file:
