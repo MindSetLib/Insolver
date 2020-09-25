@@ -680,16 +680,26 @@ class AutoFillNATransforms(InsolverTransformMain):
 
     def _fillna_numerical(self, df):
         """Replace nan values with median values"""
+        if not self.numerical_columns:
+            return
         self.medians = {}
         for column in self.numerical_columns:
-            self.medians[column] = df[column].median()
+            if df[column].isnull().all():
+                self.medians[column] = 0
+            else:
+                self.medians[column] = df[column].median()
             df[column].fillna(self.medians[column], axis=0, inplace=True)
 
     def _fillnan_categorical(self, df):
         """Replace nan values with most occured category"""
+        if not self.categorical_columns:
+            return
         self.freq_categories = {}
         for column in self.categorical_columns:
-            most_frequent_category = df[column].mode()[0]
+            if df[column].mode().values.size > 0:
+                most_frequent_category = df[column].mode()[0]
+            else:
+                most_frequent_category = 0
             self.freq_categories[column] = most_frequent_category
             df[column].fillna(most_frequent_category, inplace=True)
 
