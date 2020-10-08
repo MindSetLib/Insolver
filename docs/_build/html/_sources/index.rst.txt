@@ -10,6 +10,10 @@ Welcome to Insolver Projects' documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   source/installation
+   source/create_df
+   source/user_transforms
+   source/serving
 
 
 Indices and tables

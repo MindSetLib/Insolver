@@ -1,6 +1,7 @@
 import pandas as pd
 
 from .InsolverMain import InsolverMain
+from .InsolverUtils import train_val_test_split
 
 
 class InsolverDataFrame(InsolverMain):
@@ -68,6 +69,10 @@ class InsolverDataFrame(InsolverMain):
             for column in self._df.columns:
                 meta_json['columns'].append({'name': column, 'dtype': self._df[column].dtypes, 'use': 'unknown'})
         return meta_json
+
+    def split_frame(self, val_size, test_size, random_state=0, shuffle=True, stratify=None):
+        return train_val_test_split(self._df, val_size=val_size, test_size=test_size, random_state=random_state,
+                                    shuffle=shuffle, stratify=stratify)
 
     # ---------------------------------------------------
     # General methods

@@ -10,3 +10,6 @@ def test_InsolverDataFrame():
     assert hasattr(InsDataFrame, 'get_meta_info')
     assert hasattr(InsDataFrame, 'get_data')
     assert hasattr(InsDataFrame, 'columns_match')
+    assert hasattr(InsDataFrame, 'save_data_to_csv')
+    assert hasattr(InsDataFrame, 'split_frame')
+
