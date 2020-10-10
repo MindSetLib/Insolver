@@ -3,13 +3,13 @@ import pickle
 from functools import partial
 
 from numpy import array
-from pandas import DataFrame
+from pandas import DataFrame, Series
 
 from xgboost import DMatrix, cv as xcv, train as xtrain, Booster as XBooster, XGBClassifier, XGBRegressor
 from lightgbm import Dataset, cv as lcv, train as ltrain, Booster as LBooster, LGBMClassifier, LGBMRegressor
 from catboost import Pool, cv as ccv, train as ctrain, CatBoost, CatBoostClassifier, CatBoostRegressor
 from hyperopt import tpe, space_eval, Trials, STATUS_OK, STATUS_FAIL, fmin  # , hp
-from shap import TreeExplainer
+from shap import TreeExplainer, summary_plot
 
 
 def objective_gb(params, algorithm, cv_params, data_params, X, y):
@@ -54,6 +54,7 @@ class InsolverGradientBoostingWrapper:
                           'Try to enter one of the following options: ["regression", "classification"].')
         self.trials, self.best_params, self.core_params, self.data_params = None, None, None, None
         self.fit_params, self.model, self.booster = None, None, None
+        self.shap_values, self.explainer = None, None
 
     cv_parameters_default_xgboost = {'num_boost_round': 10,
                                      'nfold': 3,
@@ -325,3 +326,21 @@ class InsolverGradientBoostingWrapper:
         coefs = DataFrame(array(shap_coefs).T, columns=['Overall'] + [f'Fold {x}' for x in range(strategy.n_splits)],
                           index=[['Intercept'] + x_train.columns.tolist()])
         return output, coefs
+
+    def explain_shap(self, data):
+        self.explainer = TreeExplainer(self.model) if self.model is not None else TreeExplainer(self.booster)
+        if isinstance(data, Series):
+            data = DataFrame(data).T
+        self.shap_values = self.explainer.shap_values(data)
+
+        if isinstance(self.shap_values, list) and (len(self.shap_values) == 2):
+            shap_values = self.shap_values[0]
+            expected_value = self.explainer.expected_value[0].tolist()
+        else:
+            shap_values = self.shap_values
+            expected_value = [self.explainer.expected_value]
+
+        summary_plot(shap_values, data, plot_type='bar')
+        variables = ['Intercept'] + list(data.columns)
+        mean_shap = expected_value + shap_values.mean(axis=0).tolist()
+        return {variables[i]: mean_shap[i] for i in range(len(variables))}
