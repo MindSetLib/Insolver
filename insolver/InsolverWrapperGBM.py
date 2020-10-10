@@ -276,12 +276,12 @@ class InsolverGradientBoostingWrapper:
         model_dict = {'model': self.booster, 'parameters': p}
         if target:
             model_dict['target'] = target
-        with open(f'{out_dir}{name}.model', 'wb') as h:
+        with open(f'{out_dir}{name}', 'wb') as h:
             pickle.dump(model_dict, h, protocol=pickle.HIGHEST_PROTOCOL)
 
     def save_model(self, name, out_dir='./'):
         out_dir = f'{out_dir}/' if not out_dir.endswith('/') else out_dir
-        with open(f'{out_dir}{name}.model', 'wb') as h:
+        with open(f'{out_dir}{name}', 'wb') as h:
             pickle.dump(self.model, h, protocol=pickle.HIGHEST_PROTOCOL)
 
     def cross_val(self, x_train, y_train, strategy, metrics):
@@ -304,12 +304,13 @@ class InsolverGradientBoostingWrapper:
                 x_train_cv, x_test_cv = x_train[train_index], x_train[test_index]
                 y_train_cv, y_test_cv = y_train[train_index], y_train[test_index]
             self.fit(x_train_cv, y_train_cv)
+            predict = self.model.predict(x_test_cv)
 
             if isinstance(metrics, (list, tuple)):
                 for metric in metrics:
-                    fold_metrics.append(metric(y_test_cv, self.model.predict(x_test_cv)))
+                    fold_metrics.append(metric(y_test_cv, predict))
             else:
-                fold_metrics.append(metrics(y_test_cv, self.model.predict(x_test_cv)))
+                fold_metrics.append(metrics(y_test_cv, predict))
 
             explainer = TreeExplainer(self.model)
             shap_coefs.append(explainer.expected_value.tolist() +
