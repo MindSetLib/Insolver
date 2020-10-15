@@ -65,6 +65,10 @@ class InsolverTransforms(InsolverDataFrame):
     def save(self, filename):
         with open(filename, 'wb') as file:
             pickle.dump(self.transforms_done, file)
+            
+    def save_json(self, filename):
+        with open(filename, 'w') as file:
+            json.dump(self.transforms_done, file, separators=(',', ':'), sort_keys=True, indent=4)
 
 
 # ---------------------------------------------------
