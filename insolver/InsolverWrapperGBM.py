@@ -2,10 +2,14 @@ import warnings
 import pickle
 from functools import partial
 
+from numpy import array
+from pandas import DataFrame, Series
+
 from xgboost import DMatrix, cv as xcv, train as xtrain, Booster as XBooster, XGBClassifier, XGBRegressor
 from lightgbm import Dataset, cv as lcv, train as ltrain, Booster as LBooster, LGBMClassifier, LGBMRegressor
 from catboost import Pool, cv as ccv, train as ctrain, CatBoost, CatBoostClassifier, CatBoostRegressor
 from hyperopt import tpe, space_eval, Trials, STATUS_OK, STATUS_FAIL, fmin  # , hp
+from shap import TreeExplainer, summary_plot
 
 
 def objective_gb(params, algorithm, cv_params, data_params, X, y):
@@ -49,7 +53,8 @@ class InsolverGradientBoostingWrapper:
             warnings.warn('Specified task parameter is not supported. '
                           'Try to enter one of the following options: ["regression", "classification"].')
         self.trials, self.best_params, self.core_params, self.data_params = None, None, None, None
-        self.model, self.booster = None, None
+        self.fit_params, self.model, self.booster = None, None, None
+        self.shap_values, self.explainer = None, None
 
     cv_parameters_default_xgboost = {'num_boost_round': 10,
                                      'nfold': 3,
@@ -187,6 +192,10 @@ class InsolverGradientBoostingWrapper:
             if x in aliases.keys():
                 hparams[aliases[x]] = hparams.pop(x)
 
+        if 'early_stopping_rounds' in hparams.keys():
+            self.fit_params = dict()
+            self.fit_params['early_stopping_rounds'] = hparams.pop('early_stopping_rounds')
+
         if self.task == 'classification':
             if self.algorithm == 'xgboost':
                 self.model = XGBClassifier(**hparams)
@@ -212,7 +221,11 @@ class InsolverGradientBoostingWrapper:
         if self.model is None:
             warnings.warn('Model is not initiated, please use .model_init() method.')
         else:
-            self.model.fit(X, y, **kwargs)
+            if self.fit_params is not None:
+                self.fit_params.update(kwargs)
+            else:
+                self.fit_params = kwargs
+            self.model.fit(X, y, **self.fit_params)
 
     def predict(self, X, **kwargs):
         if self.model is None:
@@ -264,10 +277,70 @@ class InsolverGradientBoostingWrapper:
         model_dict = {'model': self.booster, 'parameters': p}
         if target:
             model_dict['target'] = target
-        with open(f'{out_dir}{name}.model', 'wb') as h:
+        with open(f'{out_dir}{name}', 'wb') as h:
             pickle.dump(model_dict, h, protocol=pickle.HIGHEST_PROTOCOL)
 
     def save_model(self, name, out_dir='./'):
         out_dir = f'{out_dir}/' if not out_dir.endswith('/') else out_dir
-        with open(f'{out_dir}{name}.model', 'wb') as h:
+        with open(f'{out_dir}{name}', 'wb') as h:
             pickle.dump(self.model, h, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def cross_val(self, x_train, y_train, strategy, metrics):
+        fold_metrics, shap_coefs = list(), list()
+        self.fit(x_train, y_train)
+        if isinstance(metrics, (list, tuple)):
+            for metric in metrics:
+                fold_metrics.append(metric(y_train, self.model.predict(x_train)))
+        else:
+            fold_metrics.append(metrics(y_train, self.model.predict(x_train)))
+        explainer = TreeExplainer(self.model)
+        shap_coefs.append(explainer.expected_value.tolist() +
+                          explainer.shap_values(x_train).mean(axis=0).tolist())
+
+        for train_index, test_index in strategy.split(x_train):
+            if isinstance(x_train, DataFrame):
+                x_train_cv, x_test_cv = x_train.iloc[train_index], x_train.iloc[test_index]
+                y_train_cv, y_test_cv = y_train.iloc[train_index], y_train.iloc[test_index]
+            else:
+                x_train_cv, x_test_cv = x_train[train_index], x_train[test_index]
+                y_train_cv, y_test_cv = y_train[train_index], y_train[test_index]
+            self.fit(x_train_cv, y_train_cv)
+            predict = self.model.predict(x_test_cv)
+
+            if isinstance(metrics, (list, tuple)):
+                for metric in metrics:
+                    fold_metrics.append(metric(y_test_cv, predict))
+            else:
+                fold_metrics.append(metrics(y_test_cv, predict))
+
+            explainer = TreeExplainer(self.model)
+            shap_coefs.append(explainer.expected_value.tolist() +
+                              explainer.shap_values(x_test_cv).mean(axis=0).tolist())
+
+        if isinstance(metrics, (list, tuple)):
+            output = DataFrame(array(fold_metrics).reshape(-1, len(metrics)).T, index=[x.__name__ for x in metrics],
+                               columns=['Overall'] + [f'Fold {x}' for x in range(strategy.n_splits)])
+        else:
+            output = DataFrame(array([fold_metrics]), index=[metrics.__name__],
+                               columns=['Overall'] + [f'Fold {x}' for x in range(strategy.n_splits)])
+        coefs = DataFrame(array(shap_coefs).T, columns=['Overall'] + [f'Fold {x}' for x in range(strategy.n_splits)],
+                          index=[['Intercept'] + x_train.columns.tolist()])
+        return output, coefs
+
+    def explain_shap(self, data):
+        self.explainer = TreeExplainer(self.model) if self.model is not None else TreeExplainer(self.booster)
+        if isinstance(data, Series):
+            data = DataFrame(data).T
+        self.shap_values = self.explainer.shap_values(data)
+
+        if isinstance(self.shap_values, list) and (len(self.shap_values) == 2):
+            shap_values = self.shap_values[0]
+            expected_value = self.explainer.expected_value[0].tolist()
+        else:
+            shap_values = self.shap_values
+            expected_value = [self.explainer.expected_value]
+
+        summary_plot(shap_values, data, plot_type='bar')
+        variables = ['Intercept'] + list(data.columns)
+        mean_shap = expected_value + shap_values.mean(axis=0).tolist()
+        return {variables[i]: mean_shap[i] for i in range(len(variables))}
