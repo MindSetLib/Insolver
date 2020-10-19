@@ -44,3 +44,14 @@ make html
 ```shell script
 insolver_serving -model glm/Grid_GLM_Key_Frame__upload_a685662cd198b4799aee7e181b304e66.hex_model_python_1600165671228_1_model_1 -transforms transforms.pkl  -service flask
 ```
+
+---
+## Установка insolver в JupyterHub на наш сервер
+```
+(base) andrey@mindset1:~$ python -m venv new_env
+(base) andrey@mindset1:~$ source ./new_env/bin/activate
+(new_env) (base) andrey@mindset1:~$ pip install ipykernel
+(new_env) (base) andrey@mindset1:~$ sudo apt install unixodbc-dev
+(new_env) (base) andrey@mindset1:~$ python -m ipykernel install --user --name new_env --display-name "new_env"
+(new_env) (base) andrey@mindset1:~$ pip install "git+ssh://git@github.com/MindSetLib/MS-InsuranceScoring.git@InsolverPackage#egg=insolver"
+```
