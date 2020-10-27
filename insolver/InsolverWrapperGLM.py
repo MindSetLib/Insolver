@@ -1,21 +1,20 @@
-import os
-import time
-import pickle
+from functools import partial
 
-from h2o import init, no_progress, load_model, save_model, cluster
+from pandas import DataFrame, Series, concat
+from numpy import sum, sqrt
+
 from h2o.frame import H2OFrame
 from h2o.estimators.glm import H2OGeneralizedLinearEstimator
 from h2o.grid.grid_search import H2OGridSearch
 from sklearn.linear_model import TweedieRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from pandas import DataFrame, Series, concat
-from numpy import sum, sqrt
 
-from . import __version__
+from .InsolverUtils import is_number
+from .InsolverBaseWrappers import InsolverWrapperMain, InsolverWrapperH2O
 
 
-class InsolverGLMWrapper:
+class InsolverGLMWrapper(InsolverWrapperMain, InsolverWrapperH2O):
     """Insolver wrapper for Generalized Linear Models.
 
     Attributes:
@@ -26,35 +25,28 @@ class InsolverGLMWrapper:
         link (:obj:`str`, optional): Link function for GLM. If `None`, sets to default value for both h2o and sklearn.
         standardize (:obj:`bool`, optional): Whether to standardize data before fitting the model. Enabled by default.
         h2o_init_params (:obj:`dict`, optional): Parameters passed to `h2o.init()`, when `backend` == 'h2o'.
-        load (:obj:`str`, optional): Path to GLM model to load from disk.
+        load_path (:obj:`str`, optional): Path to GLM model to load from disk.
         **kwargs: Parameters for GLM estimators (for H2OGeneralizedLinearEstimator or TweedieRegressor) except
         `family` (`power` for TweedieRegressor) and `link`.
         """
     def __init__(self, backend, family=None, link=None, standardize=True, h2o_init_params=None,
                  load_path=None, **kwargs):
-        if backend in ['h2o', 'sklearn']:
-            self.backend = backend
-        else:
-            raise NotImplementedError("Only ['h2o', 'sklearn'] are supported as backends.")
+        super(InsolverGLMWrapper, self).__init__(backend)
+        self._backends = ['h2o', 'sklearn']
+        self._back_load_dict = {'sklearn': self._pickle_load, 'h2o': partial(self._h2o_load,
+                                                                             h2o_init_params=h2o_init_params)}
+        self._back_save_dict = {'sklearn': self._pickle_save, 'h2o': self._h2o_save}
+
+        if backend not in self._backends:
+            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
         if load_path is not None:
-            load_path = os.path.normpath(load_path)
-            if self.backend == 'h2o':
-                no_progress()
-                self.model = load_model(load_path)
-            else:
-                with open(load_path, 'rb') as _model:
-                    self.model = pickle.load(_model)
+            self.load_model(load_path)
         else:
             family = family if family is not None else 'gaussian'
             link = link if link is not None else 'family_default' if backend == 'h2o' else 'auto'
             if backend == 'h2o':
-                no_progress()
-                if cluster() is None:
-                    if h2o_init_params is not None:
-                        init(**h2o_init_params)
-                    else:
-                        init()
+                self._h2o_init(h2o_init_params)
                 self.model = H2OGeneralizedLinearEstimator(family=family, link=link, standardize=standardize, **kwargs)
             elif backend == 'sklearn':
                 if isinstance(family, str):
@@ -65,39 +57,7 @@ class InsolverGLMWrapper:
                         raise NotImplementedError('Distribution is not supported with sklearn backend.')
                 self.model = Pipeline([('scaler', StandardScaler(with_mean=standardize, with_std=standardize)),
                                        ('glm', TweedieRegressor(power=family, link=link, **kwargs))])
-        self.best_params, self.features, self.offset, self.standardize = None, None, None, standardize
-
-    def __call__(self):
-        return self.model
-
-    def __x_y_to_h2o_frame(self, X, y, sample_weight, params, X_valid, y_valid, sample_weight_valid):
-        params = params
-        features, target, train_set = None, None, None
-
-        if isinstance(X, (DataFrame, Series)) & isinstance(y, (DataFrame, Series)):
-            features = X.columns.tolist() if isinstance(X, DataFrame) else X.name
-            target = y.columns.tolist() if isinstance(y, DataFrame) else y.name
-            if (sample_weight is not None) & isinstance(sample_weight, (DataFrame, Series)):
-                params['offset_column'] = (sample_weight.columns.tolist() if isinstance(sample_weight, DataFrame)
-                                           else sample_weight.name)
-                self.offset = params['offset_column']
-                # noinspection PyPep8Naming
-                X = concat([X, sample_weight], axis=1)
-            train_set = H2OFrame(concat([X, y], axis=1))
-        else:
-            NotImplementedError('X, y are supposed to be pandas DataFrame or Series')
-
-        if (X_valid is not None) & (y_valid is not None):
-            if isinstance(X_valid, (DataFrame, Series)) & isinstance(y_valid, (DataFrame, Series)):
-                if ((sample_weight_valid is not None) & isinstance(sample_weight_valid, (DataFrame, Series)) &
-                        (sample_weight is not None)):
-                    # noinspection PyPep8Naming
-                    X_valid = concat([X_valid, sample_weight_valid], axis=1)
-                valid_set = H2OFrame(concat([X_valid, y_valid], axis=1))
-                params['validation_frame'] = valid_set
-            else:
-                NotImplementedError('X_valid, y_valid are supposed to be pandas DataFrame or Series')
-        return features, target, train_set, params
+        self.standardize = standardize
 
     def fit(self, X, y, sample_weight=None, X_valid=None, y_valid=None, sample_weight_valid=None, **kwargs):
         """Fit a Generalized Linear Model.
@@ -116,11 +76,11 @@ class InsolverGLMWrapper:
                 self.features = X.columns.tolist() if isinstance(X, DataFrame) else X.name
             self.model.fit(X, y, glm__sample_weight=sample_weight)
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
-            features, target, train_set, params = self.__x_y_to_h2o_frame(X, y, sample_weight, {**kwargs}, X_valid,
-                                                                          y_valid, sample_weight_valid)
+            features, target, train_set, params = self._x_y_to_h2o_frame(X, y, sample_weight, {**kwargs}, X_valid,
+                                                                         y_valid, sample_weight_valid)
             self.model.train(y=target, x=features, training_frame=train_set, **params)
         else:
-            NotImplementedError('Error with the backend choice.')
+            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
     def predict(self, X, sample_weight=None, **kwargs):
         """Predict using GLM with feature matrix X.
@@ -136,35 +96,14 @@ class InsolverGLMWrapper:
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
             predictions = self.model.predict(X)
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
-            if (self.offset is not None) and (sample_weight is not None):
+            if sample_weight is not None:
                 # noinspection PyPep8Naming
                 X = concat([X, sample_weight], axis=1)
             h2o_predict = X if isinstance(X, H2OFrame) else H2OFrame(X)
             predictions = self.model.predict(h2o_predict, **kwargs).as_data_frame().values.reshape(-1)
         else:
-            NotImplementedError('Error with the backend choice.')
-            predictions = None
+            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
         return predictions
-
-    def save_model(self, path=None, name=None, **kwargs):
-        """Saving the GLM model.
-
-        Args:
-            path (:obj:`str`, optional): Path to save the model. Using current working directory by default.
-            name (:obj:`str`, optional): Optional, name of the model.
-            **kwargs: Parameters passed to h2o.save_model().
-        """
-        path = os.getcwd() if path is None else os.path.normpath(path)
-        def_name = f"insolver_{__version__.replace('.', '-')}_glm_{self.backend}_{round(time.time() * 1000)}"
-        name = name if name is not None else def_name
-        if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
-            with open(os.path.join(path, name), 'wb') as _model:
-                pickle.dump(self.model, _model, pickle.HIGHEST_PROTOCOL)
-        elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
-            model_path = save_model(model=self.model, path=path, **kwargs)
-            os.rename(model_path, os.path.join(os.path.dirname(model_path), name))
-        else:
-            NotImplementedError('Error with the backend choice.')
 
     def coef_norm(self):
         """Output GLM coefficients for standardized data.
@@ -182,8 +121,8 @@ class InsolverGLMWrapper:
             elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
                 coefs = self.model.coef_norm()
             else:
-                NotImplementedError('Error with the backend choice.')
-                coefs = dict()
+                raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
+
         else:
             Exception('Normalized coefficients unavailable since model fitted on non-standardized data.')
             coefs = dict()
@@ -211,8 +150,7 @@ class InsolverGLMWrapper:
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
             coefs = self.model.coef()
         else:
-            NotImplementedError('Error with the backend choice.')
-            coefs = dict()
+            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
         return coefs
 
     def optimize_hyperparam(self, hyper_params, X, y, sample_weight=None, X_valid=None, y_valid=None,
@@ -240,17 +178,17 @@ class InsolverGLMWrapper:
         #     self.model.fit(X, y, glm__sample_weight=sample_weight)
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
             params = dict() if h2o_train_params is None else h2o_train_params
-            features, target, train_set, params = self.__x_y_to_h2o_frame(X, y, sample_weight, params, X_valid, y_valid,
-                                                                          sample_weight_valid)
+            features, target, train_set, params = self._x_y_to_h2o_frame(X, y, sample_weight, params, X_valid, y_valid,
+                                                                         sample_weight_valid)
             model_grid = H2OGridSearch(model=self.model, hyper_params=hyper_params, **kwargs)
             model_grid.train(y=target, x=features, training_frame=train_set, **params)
             sorted_grid = model_grid.get_grid(sort_by='residual_deviance', decreasing=False)
             self.best_params = sorted_grid.sorted_metric_table().loc[0, :'model_ids'].drop('model_ids').to_dict()
             self.best_params = {key: self.best_params[key].replace('[', '').replace(']', '')
                                 for key in self.best_params.keys() if key != ''}
-            self.best_params = {key: float(self.best_params[key]) if self.best_params[key].isdigit()
+            self.best_params = {key: float(self.best_params[key]) if is_number(self.best_params[key])
                                 else self.best_params[key] for key in self.best_params.keys()}
             self.model = sorted_grid.models[0]
         else:
-            NotImplementedError('Error with the backend choice.')
+            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
         return self.best_params

@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name='insolver',
-      version='0.3.dev1',
+      version='0.3.dev3',
       description='Mindset insurance scoring ',
       url='https://github.com/MindSetLib/MS-InsuranceScoring',
       author='Mindset',
@@ -22,7 +22,7 @@ setup(name='insolver',
             'lightgbm',
             'catboost',
             'hyperopt',
-            'sklearn',
+            'scikit-learn',
             'pyodbc',
             'requests',
             'requests_cache',
