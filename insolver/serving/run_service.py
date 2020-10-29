@@ -20,10 +20,10 @@ def run():
     os.environ['transforms_path'] = args.transforms
 
     if args.service == 'flask':
-        cmd = 'gunicorn insolver.serving.flask_app:app'
+        cmd = 'gunicorn -b 0.0.0.0:8000 insolver.serving.flask_app:app'
         exec_cmd(cmd)
     elif args.service == 'fastapi':
-        cmd = 'gunicorn insolver.serving.fastapi_app:app -k uvicorn.workers.UvicornWorker'
+        cmd = 'gunicorn -b 0.0.0.0:8000 insolver.serving.fastapi_app:app -k uvicorn.workers.UvicornWorker'
         exec_cmd(cmd)
     else:
         print('wrong service, try "-service flask" or "-service fastapi"')
