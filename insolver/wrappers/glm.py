@@ -10,8 +10,8 @@ from sklearn.linear_model import TweedieRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from .InsolverUtils import is_number
-from .InsolverBaseWrappers import InsolverWrapperMain, InsolverWrapperH2O
+from insolver.InsolverUtils import is_number
+from insolver.wrappers.base import InsolverWrapperMain, InsolverWrapperH2O
 
 
 class InsolverGLMWrapper(InsolverWrapperMain, InsolverWrapperH2O):
@@ -45,6 +45,7 @@ class InsolverGLMWrapper(InsolverWrapperMain, InsolverWrapperH2O):
         else:
             family = family if family is not None else 'gaussian'
             link = link if link is not None else 'family_default' if backend == 'h2o' else 'auto'
+            self.standardize = standardize
             if backend == 'h2o':
                 self._h2o_init(h2o_init_params)
                 self.model = H2OGeneralizedLinearEstimator(family=family, link=link, standardize=standardize, **kwargs)
@@ -57,7 +58,12 @@ class InsolverGLMWrapper(InsolverWrapperMain, InsolverWrapperH2O):
                         raise NotImplementedError('Distribution is not supported with sklearn backend.')
                 self.model = Pipeline([('scaler', StandardScaler(with_mean=standardize, with_std=standardize)),
                                        ('glm', TweedieRegressor(power=family, link=link, **kwargs))])
-        self.standardize = standardize
+
+                def __params_pipe(**glm_pars):
+                    glm_pars = {f'glm__{kwarg}': glm_pars[kwarg] for kwarg in glm_pars}
+                    return self.model.set_params(**glm_pars)
+
+                self.object = __params_pipe
 
     def fit(self, X, y, sample_weight=None, X_valid=None, y_valid=None, sample_weight_valid=None, **kwargs):
         """Fit a Generalized Linear Model.
@@ -192,3 +198,11 @@ class InsolverGLMWrapper(InsolverWrapperMain, InsolverWrapperH2O):
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
         return self.best_params
+
+    def plot_pdp(self, X, features, **kwargs):
+        if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
+            pass
+        elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
+            self.model.partial_plot(H2OFrame(X), features, **kwargs)
+        else:
+            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
