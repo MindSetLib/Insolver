@@ -12,12 +12,10 @@ from h2o.frame import H2OFrame
 
 from hyperopt import STATUS_OK, STATUS_FAIL, Trials, tpe, fmin, space_eval
 
-from insolver import __version__
 
-
-class InsolverWrapperMain:
+class InsolverWrapperBase:
     def __init__(self, backend):
-        self.backend, self._backends = backend, None
+        self.algo, self.backend, self._backends = None, backend, None
         self._back_load_dict, self._back_save_dict = None, None
         self.object, self.model = None, None
         self.features, self.best_params, self.trials = None, None, None
@@ -37,14 +35,6 @@ class InsolverWrapperMain:
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
-    def _pickle_load(self, load_path):
-        with open(load_path, 'rb') as _model:
-            self.model = pickle.load(_model)
-
-    def _pickle_save(self, path, name):
-        with open(os.path.join(path, name), 'wb') as _model:
-            pickle.dump(self.model, _model, pickle.HIGHEST_PROTOCOL)
-
     def save_model(self, path=None, name=None, **kwargs):
         """Saving the model contained in wrapper.
 
@@ -54,13 +44,21 @@ class InsolverWrapperMain:
             **kwargs: Other parameters passed to, e.g. h2o.save_model().
         """
         path = os.getcwd() if path is None else os.path.normpath(path)
-        def_name = f"insolver_{__version__.replace('.', '-')}_glm_{self.backend}_{round(time.time() * 1000)}"
+        def_name = f"insolver_{self.algo}_{self.backend}_{round(time.time() * 1000)}"
         name = name if name is not None else def_name
 
         if self.backend in self._back_save_dict.keys():
             self._back_save_dict[self.backend](path, name, **kwargs)
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
+
+    def _pickle_load(self, load_path):
+        with open(load_path, 'rb') as _model:
+            self.model = pickle.load(_model)
+
+    def _pickle_save(self, path, name):
+        with open(os.path.join(path, name), 'wb') as _model:
+            pickle.dump(self.model, _model, pickle.HIGHEST_PROTOCOL)
 
     def _hyperopt_obj_cv(self, params, X, y, scoring, cv=None, agg=None, **kwargs):
         """Default hyperopt objective performing K-fold cross-validation.

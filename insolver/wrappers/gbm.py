@@ -2,13 +2,13 @@ from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
 
-from insolver.wrappers.base import InsolverWrapperMain
+from insolver.wrappers.base import InsolverWrapperBase
 
 
-class InsolverGBMWrapper(InsolverWrapperMain):
-    def __init__(self, backend, task=None, load_path=None, objective=None, params=None, **kwargs):
+class InsolverGBMWrapper(InsolverWrapperBase):
+    def __init__(self, backend, task=None, load_path=None, objective=None, n_estimators=100,  params=None, **kwargs):
         super(InsolverGBMWrapper, self).__init__(backend)
-        self._backends = ['xgboost', 'lightgbm', 'catboost']
+        self.algo, self._backends = 'gbm', ['xgboost', 'lightgbm', 'catboost']
         self._tasks = ['class', 'reg']
         self._back_load_dict = {'xgboost': self._pickle_load, 'lightgbm': self._pickle_load,
                                 'catboost': self._pickle_load}

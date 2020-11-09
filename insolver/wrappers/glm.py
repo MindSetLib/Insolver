@@ -11,10 +11,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
 from insolver.InsolverUtils import is_number
-from insolver.wrappers.base import InsolverWrapperMain, InsolverWrapperH2O
+from insolver.wrappers.base import InsolverWrapperBase, InsolverWrapperH2O
 
 
-class InsolverGLMWrapper(InsolverWrapperMain, InsolverWrapperH2O):
+class InsolverGLMWrapper(InsolverWrapperBase, InsolverWrapperH2O):
     """Insolver wrapper for Generalized Linear Models.
 
     Attributes:
@@ -32,7 +32,7 @@ class InsolverGLMWrapper(InsolverWrapperMain, InsolverWrapperH2O):
     def __init__(self, backend, family=None, link=None, standardize=True, h2o_init_params=None,
                  load_path=None, **kwargs):
         super(InsolverGLMWrapper, self).__init__(backend)
-        self._backends = ['h2o', 'sklearn']
+        self.algo, self._backends = 'glm', ['h2o', 'sklearn']
         self._back_load_dict = {'sklearn': self._pickle_load, 'h2o': partial(self._h2o_load,
                                                                              h2o_init_params=h2o_init_params)}
         self._back_save_dict = {'sklearn': self._pickle_save, 'h2o': self._h2o_save}
