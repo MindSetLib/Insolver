@@ -6,7 +6,17 @@ from insolver.wrappers.base import InsolverWrapperBase
 
 
 class InsolverGBMWrapper(InsolverWrapperBase):
-    def __init__(self, backend, task=None, load_path=None, objective=None, n_estimators=100,  params=None, **kwargs):
+    """Insolver wrapper for Gradient Boosting Machines.
+
+    Attributes:
+        backend (str): Framework for building GBM, 'xgboost', 'lightgbm' and 'catboost' are supported.
+        task:
+        n_estimators:
+        objective:
+        load_path (:obj:`str`, optional): Path to GBM model to load from disk.
+        **kwargs: Parameters for GBM estimators except `n_estimators` and `objective`. Will not be changed in hyperopt.
+    """
+    def __init__(self, backend, task=None, n_estimators=100, objective=None, load_path=None, **kwargs):
         super(InsolverGBMWrapper, self).__init__(backend)
         self.algo, self._backends = 'gbm', ['xgboost', 'lightgbm', 'catboost']
         self._tasks = ['class', 'reg']
@@ -14,6 +24,7 @@ class InsolverGBMWrapper(InsolverWrapperBase):
                                 'catboost': self._pickle_load}
         self._back_save_dict = {'xgboost': self._pickle_save, 'lightgbm': self._pickle_save,
                                 'catboost': self._pickle_save}
+        self.n_estimators, self.objective, self.params = n_estimators, objective, None
 
         if backend not in self._backends:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
@@ -26,9 +37,25 @@ class InsolverGBMWrapper(InsolverWrapperBase):
                     'class': {'xgboost': XGBClassifier, 'lightgbm': LGBMClassifier, 'catboost': CatBoostClassifier},
                     'reg': {'xgboost': XGBRegressor, 'lightgbm': LGBMRegressor, 'catboost': CatBoostRegressor}
                 }
-                self.object = gbm_init[task][self.backend]
-                self.model = (self.object(**params) if params is not None
-                              else self.object(**(kwargs if kwargs is not None else {})))
+
+                objectives = {
+                    'regression': {'xgboost': 'reg:squarederror', 'lightgbm': 'regression', 'catboost': 'RMSE'},
+                    'binary': {'xgboost': 'binary:logistic', 'lightgbm': 'binary', 'catboost': 'Logloss'},
+                    'multiclass': {'xgboost': 'multi:softmax', 'lightgbm': 'multiclass', 'catboost': 'MultiClass'},
+                    'poisson': {'xgboost': 'count:poisson', 'lightgbm': 'poisson', 'catboost': 'Poisson'},
+                    'gamma': {'xgboost': 'reg:gamma', 'lightgbm': 'gamma',
+                              'catboost': 'Tweedie:variance_power=1.9999999'}
+                }
+                self.objective = (objectives[self.objective][self.backend] if self.objective in objectives.keys()
+                                  else self.objective)
+                kwargs.update({'objective': self.objective, 'n_estimators': self.n_estimators})
+                self.model, self.params = gbm_init[task][self.backend](**(kwargs if kwargs is not None else {})), kwargs
+
+                def __params_gbm(**params):
+                    params.update(self.params)
+                    return gbm_init[task][self.backend](**params)
+
+                self.object = __params_gbm
             else:
                 raise NotImplementedError(f'Task parameter supports values in {self._tasks}.')
 
