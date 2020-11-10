@@ -9,11 +9,26 @@ from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 
 
 class _InsolverWrapperDummy(InsolverWrapperBase):
+    """Dummy wrapper for returning true actuals.
+
+    Attributes:
+        backend (str): Dummy backend.
+        y (:obj:`pd.DataFrame` or :obj:`pd.Series`): Target values.
+        **kwargs: Other arguments.
+    """
     def __init__(self, backend='dummy', y=None, **kwargs):
         super(_InsolverWrapperDummy, self).__init__(backend)
         self.algo, self.y, self.kwargs = 'actual', y, kwargs
 
     def predict(self, X):
+        """Making dummy predictions.
+
+        Args:
+            X (:obj:`pd.DataFrame` or :obj:`pd.Series`): Data.
+
+        Returns:
+            array: Actual values.
+        """
         if len(X) == len(self.y):
             return self.y
 
