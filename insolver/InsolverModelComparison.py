@@ -43,7 +43,7 @@ class ModelCompare:
         elif isinstance(source, (list, tuple)):
             self.models = source
         else:
-            raise NotImplementedError(f'Source of type {type(source)} is not supported.')
+            raise TypeError(f'Source of type {type(source)} is not supported.')
 
     def compare_metrics(self, X, y, metrics=None, stats=None):
         """Computing metrics and statistics for models.
@@ -69,12 +69,12 @@ class ModelCompare:
                             stats_val.append(stat(p))
                             name_stats.append(stat.__name__.replace('_', ' '))
                         else:
-                            raise NotImplementedError(f'Statistics with type {type(stat)} are not supported.')
+                            raise TypeError(f'Statistics with type {type(stat)} are not supported.')
                 elif callable(stats):
                     stats_val.append(stats(p))
                     name_stats.append(stats.__name__.replace('_', ' '))
                 else:
-                    raise NotImplementedError(f'Statistics with type {type(stats)} are not supported.')
+                    raise TypeError(f'Statistics with type {type(stats)} are not supported.')
             stats_df = stats_df.append(DataFrame([stats_val], columns=name_stats))
             model_names.append(f'{model.algo.upper()} {model.backend.capitalize()}')
             stats_df.index = ['Actual'] + model_names[1:]
@@ -87,13 +87,13 @@ class ModelCompare:
                         if callable(metric):
                             m_metrics.append(metric(y, p))
                         else:
-                            raise NotImplementedError(f'Metrics with type {type(metric)} are not supported.')
+                            raise TypeError(f'Metrics with type {type(metric)} are not supported.')
                     model_metrics = model_metrics.append(DataFrame(m_metrics, index=[m.__name__.replace('_', ' ') for m
                                                                                      in metrics]).T)
                 elif callable(metrics):
                     model_metrics = model_metrics.append(DataFrame([metrics(y, p)],
                                                                    index=[metrics.__name__.replace('_', ' ')]).T)
                 else:
-                    raise NotImplementedError(f'Metrics with type {type(metrics)} are not supported.')
+                    raise TypeError(f'Metrics with type {type(metrics)} are not supported.')
                 model_metrics.index = model_names[1:]
                 self.metrics = model_metrics

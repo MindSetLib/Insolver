@@ -6,6 +6,7 @@ import functools
 from numpy import mean
 from pandas import DataFrame, Series, concat
 from sklearn.model_selection import KFold, cross_val_score
+from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
 
 from h2o import no_progress, cluster, init, load_model, save_model
 from h2o.frame import H2OFrame
@@ -69,7 +70,7 @@ class InsolverWrapperBase:
             params (dict): Dictionary of hyperopt parameters.
             X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
             y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
-            scoring (): Metrics passed to cross_val_score calculation.
+            scoring (:obj:`callable`): Metrics passed to cross_val_score calculation.
             cv (:obj:`int, cross-validation generator or an iterable`, optional): Cross-validation strategy from
              sklearn. Performs 5-fold cv by default.
             agg (:obj:`callable`, optional): Function computing the final score out of test cv scores.
@@ -80,7 +81,6 @@ class InsolverWrapperBase:
         """
         agg = mean if agg is None else agg
         cv = KFold(n_splits=5) if cv is None else cv
-        scoring = 'neg_mean_squared_error' if scoring is None else scoring
         params = {key: params[key] if not (isinstance(params[key], float) and params[key].is_integer()) else
                   int(params[key]) for key in params.keys()}
         estimator = self.object(**params)
@@ -109,10 +109,16 @@ class InsolverWrapperBase:
         """
         trials = Trials()
         algo = tpe.suggest if algo is None else algo
-        scoring = (None if not (isinstance(fn_params, dict) and ('scoring' in fn_params.keys()))
-                   else fn_params.pop('scoring'))
-        fn = functools.partial(self._hyperopt_obj_cv, X=X, y=y, scoring=scoring,
-                               **(fn_params if fn_params is not None else {})) if fn is None else fn
+        if fn is None:
+            scoring = (None if not (isinstance(fn_params, dict) and ('scoring' in fn_params.keys()))
+                       else fn_params.pop('scoring'))
+            scoring = make_scorer(mean_squared_error) if scoring is None else scoring
+            try:
+                check_scoring(self, scoring)
+            except ValueError:
+                scoring = make_scorer(scoring)
+            fn = functools.partial(self._hyperopt_obj_cv, X=X, y=y, scoring=scoring,
+                                   **(fn_params if fn_params is not None else {}))
         try:
             best = fmin(fn=fn, space=params, trials=trials, algo=algo, max_evals=max_evals, timeout=timeout,
                         **(fmin_params if fmin_params is not None else {}))
@@ -156,7 +162,7 @@ class InsolverWrapperH2O:
                 X = concat([X, sample_weight], axis=1)
             train_set = H2OFrame(concat([X, y], axis=1))
         else:
-            raise NotImplementedError('X, y are supposed to be pandas DataFrame or Series')
+            raise TypeError('X, y are supposed to be pandas DataFrame or Series')
 
         if (X_valid is not None) & (y_valid is not None):
             if isinstance(X_valid, (DataFrame, Series)) & isinstance(y_valid, (DataFrame, Series)):
@@ -167,5 +173,5 @@ class InsolverWrapperH2O:
                 valid_set = H2OFrame(concat([X_valid, y_valid], axis=1))
                 params['validation_frame'] = valid_set
             else:
-                raise NotImplementedError('X_valid, y_valid are supposed to be pandas DataFrame or Series')
+                raise TypeError('X_valid, y_valid are supposed to be pandas DataFrame or Series')
         return features, target, train_set, params
