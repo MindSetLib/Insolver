@@ -22,8 +22,7 @@ from time import strftime, time
 app = Flask(__name__)
 
 # Load model
-new_iglm = InsolverGLMWrapper(backend='h2o')
-new_iglm.load_model(model_path)
+new_iglm = InsolverGLMWrapper(backend='h2o', load_path=model_path)
 
 # load and init transformations
 with open(transforms_path, 'rb') as file:
