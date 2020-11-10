@@ -35,17 +35,19 @@ class InsolverWrapperBase:
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
-    def save_model(self, path=None, name=None, **kwargs):
+    def save_model(self, path=None, name=None, suffix=None, **kwargs):
         """Saving the model contained in wrapper.
 
         Args:
             path (:obj:`str`, optional): Path to save the model. Using current working directory by default.
             name (:obj:`str`, optional): Optional, name of the model.
+            suffix (:obj:`str`, optional): Optional, suffix in the name of the model.
             **kwargs: Other parameters passed to, e.g. h2o.save_model().
         """
         path = os.getcwd() if path is None else os.path.normpath(path)
         def_name = f"insolver_{self.algo}_{self.backend}_{round(time.time() * 1000)}"
         name = name if name is not None else def_name
+        name = name if suffix is None else f'{name}_{suffix}'
 
         if self.backend in self._back_save_dict.keys():
             self._back_save_dict[self.backend](path, name, **kwargs)
