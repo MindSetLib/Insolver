@@ -10,9 +10,9 @@ class InsolverGBMWrapper(InsolverWrapperBase):
 
     Attributes:
         backend (str): Framework for building GBM, 'xgboost', 'lightgbm' and 'catboost' are supported.
-        task:
-        n_estimators:
-        objective:
+        task (str): Task that GBM should solve: Classification or Regression. Values 'reg' and 'class' are supported.
+        n_estimators (:obj:`int`, optional): Number of boosting rounds. Equals 100 by default.
+        objective (:obj:`str` or :obj:`callable`): Objective function for GBM to optimize.
         load_path (:obj:`str`, optional): Path to GBM model to load from disk.
         **kwargs: Parameters for GBM estimators except `n_estimators` and `objective`. Will not be changed in hyperopt.
     """
@@ -60,9 +60,25 @@ class InsolverGBMWrapper(InsolverWrapperBase):
                 raise NotImplementedError(f'Task parameter supports values in {self._tasks}.')
 
     def fit(self, X, y, **kwargs):
+        """Fit a Gradient Boosting Machine.
+
+        Args:
+            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
+            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
+            **kwargs: Other parameters passed to Scikit-learn API .fit().
+        """
         self.model.fit(X, y, **kwargs)
 
     def predict(self, X, **kwargs):
+        """Predict using GBM with feature matrix X.
+
+        Args:
+            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Samples.
+            **kwargs: Other parameters passed to Scikit-learn API .predict().
+
+        Returns:
+            array: Returns predicted values.
+        """
         return self.model.predict(X, **kwargs)
 
     # def cross_val(self, x_train, y_train, strategy, metrics):
