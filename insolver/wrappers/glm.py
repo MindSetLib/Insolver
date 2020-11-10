@@ -1,7 +1,7 @@
 from functools import partial
 
 from pandas import DataFrame, Series, concat
-from numpy import sum, sqrt
+from numpy import sum, sqrt, repeat
 
 from h2o.frame import H2OFrame
 from h2o.estimators.glm import H2OGeneralizedLinearEstimator
@@ -102,6 +102,9 @@ class InsolverGLMWrapper(InsolverWrapperBase, InsolverWrapperH2O):
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
             predictions = self.model.predict(X)
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
+            offset_name = self.model.parms['offset_column']['actual_value']['column_name']
+            if offset_name is not None and sample_weight is None:
+                sample_weight = Series(repeat(0, len(X)), name=offset_name, index=X.index)
             if sample_weight is not None:
                 # noinspection PyPep8Naming
                 X = concat([X, sample_weight], axis=1)

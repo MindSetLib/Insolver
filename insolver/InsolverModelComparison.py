@@ -9,9 +9,9 @@ from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 
 
 class _InsolverWrapperDummy(InsolverWrapperBase):
-    def __init__(self, backend='dummy', y=None):
+    def __init__(self, backend='dummy', y=None, **kwargs):
         super(_InsolverWrapperDummy, self).__init__(backend)
-        self.algo, self.y = 'actual', y
+        self.algo, self.y, self.kwargs = 'actual', y, kwargs
 
     def predict(self, X):
         if len(X) == len(self.y):
