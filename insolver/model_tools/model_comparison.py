@@ -18,7 +18,7 @@ class _InsolverWrapperDummy(InsolverWrapperBase):
             return self.y
 
 
-class ModelCompare:
+class ModelMetricsCompare:
     """Class for model comparison.
 
     Args:

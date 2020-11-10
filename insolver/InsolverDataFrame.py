@@ -1,7 +1,7 @@
 import pandas as pd
 
 from .InsolverMain import InsolverMain
-from .InsolverUtils import train_val_test_split
+from insolver.model_tools import train_val_test_split
 
 
 class InsolverDataFrame(InsolverMain):
