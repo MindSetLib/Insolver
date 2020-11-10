@@ -102,8 +102,8 @@ class InsolverGLMWrapper(InsolverWrapperBase, InsolverWrapperH2O):
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
             predictions = self.model.predict(X)
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
-            offset_name = self.model.parms['offset_column']['actual_value']['column_name']
-            if offset_name is not None and sample_weight is None:
+            if self.model.parms['offset_column']['actual_value'] is not None and sample_weight is None:
+                offset_name = self.model.parms['offset_column']['actual_value']['column_name']
                 sample_weight = Series(repeat(0, len(X)), name=offset_name, index=X.index)
             if sample_weight is not None:
                 # noinspection PyPep8Naming
