@@ -106,7 +106,6 @@ class InsolverGLMWrapper(InsolverWrapperBase, InsolverWrapperH2O):
                 offset_name = self.model.parms['offset_column']['actual_value']['column_name']
                 sample_weight = Series(repeat(0, len(X)), name=offset_name, index=X.index)
             if sample_weight is not None:
-                # noinspection PyPep8Naming
                 X = concat([X, sample_weight], axis=1)
             h2o_predict = X if isinstance(X, H2OFrame) else H2OFrame(X)
             predictions = self.model.predict(h2o_predict, **kwargs).as_data_frame().values.reshape(-1)
@@ -181,10 +180,7 @@ class InsolverGLMWrapper(InsolverWrapperBase, InsolverWrapperH2O):
             dict: {`hyperparameter_name`: `optimal_choice`}, Dictionary containing optimal hyperparameter choice.
         """
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
-            pass
-        #     if isinstance(X, (DataFrame, Series)):
-        #         self.features = X.columns.tolist() if isinstance(X, DataFrame) else X.name
-        #     self.model.fit(X, y, glm__sample_weight=sample_weight)
+            Exception('optimize_hyperparam is available only for `h2o` backend. Use hyperopt_cv otherwise.')
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
             params = dict() if h2o_train_params is None else h2o_train_params
             features, target, train_set, params = self._x_y_to_h2o_frame(X, y, sample_weight, params, X_valid, y_valid,

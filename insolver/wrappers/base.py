@@ -107,6 +107,9 @@ class InsolverWrapperBase:
         Returns:
             dict: Dictionary of best choice of hyperparameters. Also best model is fitted.
         """
+        if self.backend == 'h2o':
+            raise Exception('hyperopt_cv is not supported by `h2o` backend. Use `optimize_hyperparam`')
+
         trials = Trials()
         algo = tpe.suggest if algo is None else algo
         if fn is None:

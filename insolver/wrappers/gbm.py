@@ -1,6 +1,8 @@
+from pandas import DataFrame, Series
 from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
+from shap import TreeExplainer, summary_plot
 
 from insolver.wrappers.base import InsolverWrapperBase
 
@@ -81,6 +83,21 @@ class InsolverGBMWrapper(InsolverWrapperBase):
         """
         return self.model.predict(X, **kwargs)
 
+    def shap(self, X, plot=False):
+        explainer = TreeExplainer(self.model)
+        X = DataFrame(X).T if isinstance(X, Series) else X
+        shap_values = explainer.shap_values(X)
+
+        shap_values = shap_values[0] if isinstance(shap_values, list) and (len(shap_values) == 2) else shap_values
+        expected_value = (explainer.expected_value[0].tolist()
+                          if isinstance(shap_values, list) and (len(shap_values) == 2) else [explainer.expected_value])
+        variables = ['Intercept'] + list(X.columns)
+        mean_shap = expected_value + shap_values.mean(axis=0).tolist()
+
+        if plot:
+            summary_plot(shap_values, X, plot_type='bar')
+        return {variables[i]: mean_shap[i] for i in range(len(variables))}
+
     # def cross_val(self, x_train, y_train, strategy, metrics):
     #     fold_metrics, shap_coefs = list(), list()
     #     self.fit(x_train, y_train)
@@ -122,21 +139,3 @@ class InsolverGBMWrapper(InsolverWrapperBase):
     #     coefs = DataFrame(array(shap_coefs).T, columns=['Overall'] + [f'Fold {x}' for x in range(strategy.n_splits)],
     #                       index=[['Intercept'] + x_train.columns.tolist()])
     #     return output, coefs
-    #
-    # def explain_shap(self, data):
-    #     self.explainer = TreeExplainer(self.model) if self.model is not None else TreeExplainer(self.booster)
-    #     if isinstance(data, Series):
-    #         data = DataFrame(data).T
-    #     self.shap_values = self.explainer.shap_values(data)
-    #
-    #     if isinstance(self.shap_values, list) and (len(self.shap_values) == 2):
-    #         shap_values = self.shap_values[0]
-    #         expected_value = self.explainer.expected_value[0].tolist()
-    #     else:
-    #         shap_values = self.shap_values
-    #         expected_value = [self.explainer.expected_value]
-    #
-    #     summary_plot(shap_values, data, plot_type='bar')
-    #     variables = ['Intercept'] + list(data.columns)
-    #     mean_shap = expected_value + shap_values.mean(axis=0).tolist()
-    #     return {variables[i]: mean_shap[i] for i in range(len(variables))}
