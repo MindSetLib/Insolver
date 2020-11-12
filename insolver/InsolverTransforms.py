@@ -12,11 +12,11 @@ from .InsolverMain import InsolverTransformMain
 
 class InsolverTransforms(InsolverDataFrame):
     """Class to compose transforms to be done on InsolverDataFrame. Each transform must have the priority param.
-    Priority=0: transforms witch get values from other (TransformAgeGetFromBirthday, TransformRegionGetFromKladr, etc).
+    Priority=0: transforms which get values from other (TransformAgeGetFromBirthday, TransformRegionGetFromKladr, etc).
     Priority=1: main transforms of values (TransformAge, TransformVehPower, ets).
-    Priority=2: transforms witch get intersections of features (TransformAgeGender, ets);
-    transforms witch sort values (TransformParamSortFreq, TransformParamSortAC).
-    Priority=3: transforms witch get functions of values (TransformPolinomizer, TransformGetDummies, ets).
+    Priority=2: transforms which get intersections of features (TransformAgeGender, ets);
+    transforms which sort values (TransformParamSortFreq, TransformParamSortAC).
+    Priority=3: transforms which get functions of values (TransformPolinomizer, TransformGetDummies, ets).
 
     Attributes:
         df: InsolverDataFrame to transform.
