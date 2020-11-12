@@ -1,4 +1,5 @@
 import os
+import traceback
 from glob import glob
 
 from numpy import min, max, mean, var, std, quantile, median
@@ -10,11 +11,16 @@ from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper, InsolverTr
 class ModelMetricsCompare:
     """Class for model comparison.
 
-    Args:
+    Attributes:
+        X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for making predictions.
+        y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Actual target values for X.
         source (:obj:`str`, :obj:`list`, :obj:`tuple`, :ibj:`None`): List or tuple of insolver wrappers or path to the
+        metrics (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Metrics or list of metrics to compute.
+        stats (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Statistics or list of statistics to compute.
         folder with models. If `None`, taking current working directory as source.
+        h2o_init_params (:obj:`dict`, optional): Parameters passed to `h2o.init()`, when `backend` == 'h2o'.
     """
-    def __init__(self, source=None, h2o_init_params=None):
+    def __init__(self, X, y, source=None, metrics=None, stats=None, h2o_init_params=None):
         wrappers = {'glm': InsolverGLMWrapper, 'gbm': InsolverGBMWrapper}
         self.stats, self.metrics = None, None
         if (source is None) or isinstance(source, str):
@@ -35,7 +41,24 @@ class ModelMetricsCompare:
         else:
             raise TypeError(f'Source of type {type(source)} is not supported.')
 
-    def compare_metrics(self, X, y, metrics=None, stats=None):
+        self._calc_metrics(X=X, y=y, metrics=metrics, stats=stats)
+
+    def __repr__(self):
+        stk = traceback.extract_stack()
+        if not ('IPython' in stk[-2][0] and 'info' == stk[-2][2]):
+            import IPython.display
+            print('Model comparison statistics:')
+            IPython.display.display(self.stats)
+            print('Models comparison metrics:')
+            IPython.display.display(self.metrics)
+        else:
+            print('Model comparison statistics:')
+            print(self.stats)
+            print('\nModels comparison metrics:')
+            print(self.metrics)
+        return ''
+
+    def _calc_metrics(self, X, y, metrics=None, stats=None):
         """Computing metrics and statistics for models.
 
         Args:
@@ -90,3 +113,4 @@ class ModelMetricsCompare:
                     raise TypeError(f'Metrics with type {type(metrics)} are not supported.')
                 model_metrics.index = model_names[1:]
                 self.metrics = model_metrics
+        return self
