@@ -190,7 +190,7 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         **kwargs: Other arguments.
     """
     def __init__(self, y=None, column=None, agg=None, **kwargs):
-        super(InsolverWrapperTrivial, self).__init__(backend='trivial')
+        super(InsolverTrivialWrapper, self).__init__(backend='trivial')
         self._backends = ['trivial']
         self._back_load_dict, self._back_save_dict = {'trivial': self._pickle_load}, {'trivial': self._pickle_save}
 
