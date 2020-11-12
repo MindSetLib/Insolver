@@ -11,10 +11,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
 from insolver.InsolverUtils import is_number
-from insolver.wrappers.base import InsolverWrapperBase, InsolverWrapperH2O
+from insolver.wrappers.base import InsolverBaseWrapper, InsolverH2OWrapper
 
 
-class InsolverGLMWrapper(InsolverWrapperBase, InsolverWrapperH2O):
+class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
     """Insolver wrapper for Generalized Linear Models.
 
     Attributes:

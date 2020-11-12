@@ -4,33 +4,7 @@ from glob import glob
 from numpy import min, max, mean, var, std, quantile, median
 from pandas import DataFrame
 
-from insolver.wrappers.base import InsolverWrapperBase
-from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
-
-
-class _InsolverWrapperDummy(InsolverWrapperBase):
-    """Dummy wrapper for returning true actuals.
-
-    Attributes:
-        backend (str): Dummy backend.
-        y (:obj:`pd.DataFrame` or :obj:`pd.Series`): Target values.
-        **kwargs: Other arguments.
-    """
-    def __init__(self, backend='dummy', y=None, **kwargs):
-        super(_InsolverWrapperDummy, self).__init__(backend)
-        self.algo, self.y, self.kwargs = 'actual', y, kwargs
-
-    def predict(self, X):
-        """Making dummy predictions.
-
-        Args:
-            X (:obj:`pd.DataFrame` or :obj:`pd.Series`): Data.
-
-        Returns:
-            array: Actual values.
-        """
-        if len(X) == len(self.y):
-            return self.y
+from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper, InsolverTrivialWrapper
 
 
 class ModelMetricsCompare:
@@ -40,7 +14,7 @@ class ModelMetricsCompare:
         source (:obj:`str`, :obj:`list`, :obj:`tuple`, :ibj:`None`): List or tuple of insolver wrappers or path to the
         folder with models. If `None`, taking current working directory as source.
     """
-    def __init__(self, source=None):
+    def __init__(self, source=None, h2o_init_params=None):
         wrappers = {'glm': InsolverGLMWrapper, 'gbm': InsolverGBMWrapper}
         self.stats, self.metrics = None, None
         if (source is None) or isinstance(source, str):
@@ -51,7 +25,8 @@ class ModelMetricsCompare:
                 model_list = []
                 for file in files:
                     algo, backend = os.path.basename(file).split('_')[1:3]
-                    model_list.append(wrappers[algo](backend=backend, load_path=file))
+                    model_list.append(wrappers[algo](backend=backend, load_path=file) if backend != 'h2o' else
+                                      wrappers[algo](backend=backend, load_path=file, h2o_init_params=h2o_init_params))
                 self.models = model_list
             else:
                 raise Exception('No models with appropriate name format found.')
@@ -73,7 +48,10 @@ class ModelMetricsCompare:
             Returns `None`, but results available in `self.stats`, `self.metrics`.
         """
         stats_df, model_metrics, model_names = DataFrame(), DataFrame(), []
-        for model in [_InsolverWrapperDummy(y=y)] + self.models:
+        default_trivial = [InsolverTrivialWrapper(y=y), InsolverTrivialWrapper(y=y, agg=mean),
+                           InsolverTrivialWrapper(y=y, agg=median)]
+        models = default_trivial + self.models
+        for model in models:
             p = model.predict(X)
             stats_val = [mean(p), var(p), std(p), min(p), quantile(p, 0.25), median(p), quantile(p, 0.75), max(p)]
             name_stats = ['Mean', 'Variance', 'St. Dev.', 'Min', 'Q1', 'Median', 'Q3', 'Max']
@@ -95,7 +73,7 @@ class ModelMetricsCompare:
             stats_df.index = ['Actual'] + model_names[1:]
             self.stats = stats_df
 
-            if (metrics is not None) and not isinstance(model, _InsolverWrapperDummy):
+            if (metrics is not None) and not models.index(model) == 0:
                 if isinstance(metrics, (list, tuple)):
                     m_metrics = []
                     for metric in metrics:

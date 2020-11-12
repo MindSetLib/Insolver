@@ -3,7 +3,7 @@ import time
 import pickle
 import functools
 
-from numpy import mean
+from numpy import array, mean, broadcast_to
 from pandas import DataFrame, Series, concat
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
@@ -14,7 +14,7 @@ from h2o.frame import H2OFrame
 from hyperopt import STATUS_OK, STATUS_FAIL, Trials, tpe, fmin, space_eval
 
 
-class InsolverWrapperBase:
+class InsolverBaseWrapper:
     def __init__(self, backend):
         self.algo, self.backend, self._backends = None, backend, None
         self._back_load_dict, self._back_save_dict = None, None
@@ -138,7 +138,7 @@ class InsolverWrapperBase:
         return self.best_params
 
 
-class InsolverWrapperH2O:
+class InsolverH2OWrapper:
     @staticmethod
     def _h2o_init(h2o_init_params):
         no_progress()
@@ -178,3 +178,54 @@ class InsolverWrapperH2O:
             else:
                 raise TypeError('X_valid, y_valid are supposed to be pandas DataFrame or Series')
         return features, target, train_set, params
+
+
+class InsolverTrivialWrapper(InsolverBaseWrapper):
+    """Dummy wrapper for returning trivial "predictions" or actual values for metric comparison and statistics.
+
+    Attributes:
+        y (:obj:`pd.DataFrame` or :obj:`pd.Series`): Target values.
+        column (:obj:`pd.DataFrame` or :obj:`pd.Series`, optional): Column to perform groupby.
+        agg (:obj:`callable`, optional): Aggregation function.
+        **kwargs: Other arguments.
+    """
+    def __init__(self, y=None, column=None, agg=None, **kwargs):
+        super(InsolverWrapperTrivial, self).__init__(backend='trivial')
+        self._backends = ['trivial']
+        self._back_load_dict, self._back_save_dict = {'trivial': self._pickle_load}, {'trivial': self._pickle_save}
+
+        if isinstance(column, (Series, DataFrame)) or column is None:
+            self.column = column
+        else:
+            raise TypeError(f'Column of type {type(self.column)} is not supported.')
+        self.y, self.agg, self.kwargs = y, agg, kwargs
+
+        if (self.column is None) and (self.agg is None):
+            self.algo = 'actual'
+        elif self.column is None:
+            self.algo = self.agg.__name__.replace('_', ' ')
+        else:
+            self.agg = mean if self.agg is None else self.agg
+            name = self.column.name if isinstance(self.column, Series) else self.column.columns[0]
+            self.algo = f"{self.agg.__name__} target: {name}"
+
+    def predict(self, X):
+        """Making dummy predictions.
+
+        Args:
+            X (:obj:`pd.DataFrame` or :obj:`pd.Series`): Data.
+
+        Returns:
+            array: Trivial model "prediction".
+        """
+        if (self.column is None) and (self.agg is None):
+            output = self.y
+        elif self.column is None:
+            output = broadcast_to(self.agg(self.y), self.y.shape)
+        else:
+            _df = concat([self.y, self.column], axis=1)
+            output = _df.groupby(_df.columns[1]).transform(self.agg)
+        if len(X) == len(output):
+            return array(output)
+        else:
+            raise ValueError(f'Dimension mismatch: input [{len(X)}]; output [{len(output)}]')
