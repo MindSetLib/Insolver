@@ -51,7 +51,7 @@ class InsolverGeoPointsFrame(InsolverDataFrame):
             token: Token for api https://dadata.ru/.
         """
         addresses = []
-        for kladr in self._df[column_kladr]:  # token='Token 79abf89d58871ed1df79b83126f8f8c2362e51db'
+        for kladr in self._df[column_kladr]:
             address = self._get_address_from_kladr(kladr, token)
             addresses.append(address)
         self._df[column_address] = addresses

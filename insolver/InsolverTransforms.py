@@ -16,7 +16,7 @@ class InsolverTransforms(InsolverDataFrame):
     Priority=1: main transforms of values (TransformAge, TransformVehPower, ets).
     Priority=2: transforms which get intersections of features (TransformAgeGender, ets);
     transforms which sort values (TransformParamSortFreq, TransformParamSortAC).
-    Priority=3: transforms which get functions of values (TransformPolinomizer, TransformGetDummies, ets).
+    Priority=3: transforms which get functions of values (TransformPolynomizer, TransformGetDummies, ets).
 
     Attributes:
         df: InsolverDataFrame to transform.
