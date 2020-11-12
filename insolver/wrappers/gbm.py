@@ -4,7 +4,7 @@ from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
 from shap import TreeExplainer, summary_plot
 
-from insolver.wrappers.base import InsolverBaseWrapper
+from .base import InsolverBaseWrapper
 
 
 class InsolverGBMWrapper(InsolverBaseWrapper):

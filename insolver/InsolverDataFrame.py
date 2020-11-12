@@ -1,20 +1,20 @@
-import pandas as pd
+from pandas import DataFrame
 
 from .InsolverMain import InsolverMain
-from insolver.model_tools import train_val_test_split
+from .model_tools import train_val_test_split
 
 
 class InsolverDataFrame(InsolverMain):
-    """
-    Primary dataframe class for Insolver.
+    """Primary DataFrame class for Insolver.
 
-    :param df: Pandas' DataFrame.
+    Args:
+        df (:obj:`pd.DataFrame`): pandas DataFrame.
     """
 
     def __init__(self, df):
-        self._df = pd.DataFrame
+        self._df = DataFrame
         self._is_frame = False
-        if isinstance(df, pd.DataFrame):
+        if isinstance(df, DataFrame):
             self._df = df
             if self._df is not None:
                 self._is_frame = True
@@ -22,11 +22,13 @@ class InsolverDataFrame(InsolverMain):
             raise NotImplementedError("'df' should be the Pandas' DataFrame.")
 
     def get_data(self, columns=None):
-        """
-        Gets data as Pandas' DataFrame.
+        """Gets data as pandas DataFrame.
 
-        :param columns: Columns to get.
-        :returns: Pandas' DataFrame.
+        Args:
+            columns: Columns to get.
+
+        Returns:
+            :obj:`pd.DataFrame`.
         """
         if self._is_frame is None:
             return None
@@ -35,13 +37,17 @@ class InsolverDataFrame(InsolverMain):
         return self._df[columns].copy()
 
     def save_data_to_csv(self, path, sep=',', columns=None, *args, **kwargs):
-        """
-        Saves data to .csv file. Uses Pandas' 'to_csv'.
+        """Saves data to .csv file. Uses pandas 'to_csv'.
 
-        :param path: Path to the output file.
-        :param sep: Field delimiter for the output file, ',' by default..
-        :param columns: Columns to get.
-        :returns: Path.
+        Args:
+            path (str): Path to the output file.
+            sep (str): Field delimiter for the output file, ',' by default.
+            columns: Columns to get.
+            *args:
+            **kwargs:
+
+        Returns:
+            str: Path to the output file.
         """
         if self._is_frame is None:
             return None
@@ -51,20 +57,18 @@ class InsolverDataFrame(InsolverMain):
         return path
 
     def get_meta_info(self):
-        """
-        Gets JSON with Insolver meta information.
+        """Gets JSON with Insolver meta information.
 
-        :return: JSON.
+        Returns:
+            dict: Meta information JSON.
         """
         if self._is_frame is False:
-            meta_json = {
-                'type': 'No data loaded'
-            }
+            meta_json = {'type': 'No data loaded'}
         else:
             meta_json = {
                 'type': 'InsolverDataFrame',
                 'len': len(self._df),
-                'columns': [],
+                'columns': []
             }
             for column in self._df.columns:
                 meta_json['columns'].append({'name': column, 'dtype': self._df[column].dtypes, 'use': 'unknown'})
@@ -79,11 +83,12 @@ class InsolverDataFrame(InsolverMain):
     # ---------------------------------------------------
 
     def columns_match(self, match_from_to, *args, **kwargs):
-        """
-        Matches columns in InsolverDataFrame. Uses Pandas' 'rename'.
+        """Matches columns in InsolverDataFrame. Uses Pandas' 'rename'.
 
-        :param match_from_to: Matching dict.
-        :returns: None.
+        Args:
+            match_from_to (dict): Matching dict.
+            *args: Other arguments.
+            **kwargs: Other keyword arguments.
         """
         self._df.rename(columns=match_from_to, inplace=True, *args, **kwargs)
 
