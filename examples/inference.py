@@ -23,7 +23,7 @@ InsTransforms.transform()
 
 # Load saved model
 new_iglm = InsolverGLMWrapper()
-new_iglm.load_model('glm/Grid_GLM_Key_Frame__upload_bc8c5426d434271babbab66fe6674036.hex_model_python_1600342855792_1_model_78')
+new_iglm.load_model('glm/Grid_GLM_Key_Frame__upload_9858f14024c5b32ece1cfbf1f6cd4fd9.hex_model_python_1600949592589_1_model_78')
 
 predict_glm = new_iglm.predict(df)
 print(predict_glm)

@@ -9,27 +9,27 @@ from insolver.InsolverTransforms import (
     TransformPolynomizer,
     TransformAgeGender,
     EncoderTransforms,
+    AutoFillNATransforms,
+    OneHotEncoderTransforms,
 )
 from insolver.InsolverWrapperGLM import InsolverGLMWrapper
 
 df = pd.read_csv('freMPL-R.csv', low_memory=False)
-df = df[df.Dataset.isin([5, 6, 7, 8, 9])]
-df.dropna(how='all', axis=1, inplace=True)
+# df = df[df.Dataset.isin([5, 6, 7, 8, 9])]
+# df.dropna(how='all', axis=1, inplace=True)
 df = df[df.ClaimAmount > 0]
 
-InsDataFrame = InsolverDataFrame(df)
-
-# df['Gender'] = InsDataFrame.encode_column(df['Gender'])
-
-InsTransforms = InsolverTransforms(InsDataFrame.get_data(), [
-    TransformAge('DrivAge', 18, 75),
-    TransformExp('LicAge', 57),
+InsTransforms = InsolverTransforms(df, [
+    AutoFillNATransforms(),
+    # TransformAge('DrivAge', 18, 75),
+    # TransformExp('LicAge', 57),
     # TransformMapValues('Gender', {'Male': 0, 'Female': 1}),
-    EncoderTransforms('Gender'),
-    TransformMapValues('MariStat', {'Other': 0, 'Alone': 1}),
-    TransformAgeGender('DrivAge', 'Gender', 'Age_m', 'Age_f', age_default=18, gender_male=0, gender_female=1),
-    TransformPolynomizer('Age_m'),
-    TransformPolynomizer('Age_f'),
+    # TransformMapValues('MariStat', {'Other': 0, 'Alone': 1}),
+    # EncoderTransforms(['Gender', 'MariStat']),
+    OneHotEncoderTransforms(['MariStat', 'Gender']),
+    # TransformAgeGender('DrivAge', 'Gender', 'Age_m', 'Age_f', age_default=18, gender_male=0, gender_female=1),
+    # TransformPolynomizer('Age_m'),
+    # TransformPolynomizer('Age_f'),
 ])
 
 InsTransforms.transform()
@@ -42,7 +42,10 @@ iglm = InsolverGLMWrapper()
 
 params = {'lambda': [1, 0.5, 0.1, 0.01, 0.001, 0.0001, 0.00001, 0],
           'alpha': [i * 0.1 for i in range(0, 11)]}
-features = ['LicAge', 'Gender', 'MariStat', 'DrivAge', 'HasKmLimit', 'BonusMalus', 'RiskArea',
+features = ['LicAge',
+            # 'Gender',
+            # 'MariStat',
+            'DrivAge', 'HasKmLimit', 'BonusMalus', 'RiskArea',
             'Age_m', 'Age_f', 'Age_m_2', 'Age_f_2']
 target = 'ClaimAmount'
 

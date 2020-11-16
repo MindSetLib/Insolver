@@ -2,7 +2,6 @@ import datetime
 import json
 import pickle
 import re
-import traceback
 
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
@@ -50,14 +49,12 @@ class InsolverTransforms(InsolverDataFrame):
             for priority in range(priority_max + 1):
                 for transform in self.transforms:
                     if transform.priority == priority:
-                        print(transform)
                         self._df = transform(self._df)
                         attributes = {}
                         for attribute in dir(transform):
                             if attribute[0] != '_':
                                 exec("attributes.update({attribute: transform.%s})" % attribute)
                         self.transforms_done.update({type(transform).__name__: attributes})
-
         return self._df
 
     def save(self, filename):
@@ -662,7 +659,7 @@ class TransformGetDummies(InsolverTransformMain):
 
 class AutoFillNATransforms(InsolverTransformMain):
     def __init__(self, numerical_columns=None, categorical_columns=None, medians=None, freq_categories=None):
-        self.priority = 1
+        self.priority = 0
         super().__init__()
         self.numerical_columns = numerical_columns
         self.categorical_columns = categorical_columns
@@ -680,7 +677,7 @@ class AutoFillNATransforms(InsolverTransformMain):
         self.medians = {}
         for column in self.numerical_columns:
             if df[column].isnull().all():
-                self.medians[column] = 0
+                self.medians[column] = 1
             else:
                 self.medians[column] = df[column].median()
             df[column].fillna(self.medians[column], axis=0, inplace=True)
@@ -694,7 +691,7 @@ class AutoFillNATransforms(InsolverTransformMain):
             if df[column].mode().values.size > 0:
                 most_frequent_category = df[column].mode()[0]
             else:
-                most_frequent_category = 0
+                most_frequent_category = 1
             self.freq_categories[column] = most_frequent_category
             df[column].fillna(most_frequent_category, inplace=True)
 
@@ -707,7 +704,7 @@ class AutoFillNATransforms(InsolverTransformMain):
 
 class EncoderTransforms(InsolverTransformMain):
     def __init__(self, column_names, le_classes=None):
-        self.priority = 1
+        self.priority = 3
         super().__init__()
         self.column_names = column_names
         self.le_classes = le_classes
@@ -729,14 +726,16 @@ class EncoderTransforms(InsolverTransformMain):
 
 class OneHotEncoderTransforms(InsolverTransformMain):
     def __init__(self, column_names, encoder_dict=None):
-        self.priority = 1
+        self.priority = 3
         super().__init__()
         self.column_names = column_names
         self.encoder_dict = encoder_dict
 
     def _encode_column(self, df, column_name):
         encoder = OneHotEncoder(sparse=False)
-        encoder_params = encoder.fit(df[[column_name]])
+        encoder.fit(df[[column_name]])
+        encoder_params = encoder.categories_
+        encoder_params = [x.tolist() for x in encoder_params]
         column_encoded = pd.DataFrame(encoder.transform(df[[column_name]]))
         column_encoded.columns = encoder.get_feature_names([column_name])
         df.drop([column_name], axis=1, inplace=True)
