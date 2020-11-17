@@ -42,6 +42,11 @@ def index():
     return "API for predict service"
 
 
+@app.route('/favicon.ico')
+def favicon():
+    return ''
+
+
 @app.route("/predict", methods=['POST'])
 def predict():
     # Request logging
