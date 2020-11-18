@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify
 from insolver.InsolverDataFrame import InsolverDataFrame
 from insolver.InsolverTransforms import InsolverTransforms
 from insolver.InsolverUtils import init_transforms
-from insolver.wrappers.glm import InsolverGLMWrapper
+from insolver.wrappers import InsolverGLMWrapper
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
