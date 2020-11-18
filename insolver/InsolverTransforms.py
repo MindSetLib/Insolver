@@ -641,18 +641,3 @@ class TransformGetDummies(InsolverTransformMain):
     def __call__(self, df):
         df = pd.get_dummies(df, columns=self.column_param)
         return df
-
-
-class TransformCarFleet(InsolverTransformMain):
-    """Calculate the size of the fleet for a given policyholder.
-
-    Attributes:
-        column_id:
-    """
-    def __init__(self, column_id):
-        self.priority = 3
-        super().__init__()
-        self.column_id = column_id
-
-    def __call__(self, df):
-        return df

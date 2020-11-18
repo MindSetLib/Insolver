@@ -49,7 +49,7 @@ class ModelMetricsCompare:
             import IPython.display
             print('Model comparison statistics:')
             IPython.display.display(self.stats)
-            print('Models comparison metrics:')
+            print('\nModels comparison metrics:')
             IPython.display.display(self.metrics)
         else:
             print('Model comparison statistics:')
@@ -104,11 +104,11 @@ class ModelMetricsCompare:
                             m_metrics.append(metric(y, p))
                         else:
                             raise TypeError(f'Metrics with type {type(metric)} are not supported.')
-                    model_metrics = model_metrics.append(DataFrame(m_metrics, index=[m.__name__.replace('_', ' ') for m
-                                                                                     in metrics]).T)
+                    names = [m.__name__.replace('_', ' ') for m in metrics]
+                    model_metrics = model_metrics.append(DataFrame.from_dict(dict(zip(names, m_metrics))))
                 elif callable(metrics):
-                    model_metrics = model_metrics.append(DataFrame([metrics(y, p)],
-                                                                   index=[metrics.__name__.replace('_', ' ')]).T)
+                    name = [metrics.__name__.replace('_', ' ')]
+                    model_metrics = model_metrics.append(DataFrame.from_dict(dict(zip(name, [metrics(y, p)]))))
                 else:
                     raise TypeError(f'Metrics with type {type(metrics)} are not supported.')
                 model_metrics.index = model_names[1:]

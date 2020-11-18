@@ -10,6 +10,7 @@ h2o==3.30.1.3
 hyperopt==0.2.5
 idna==2.10
 joblib==0.17.0
+kaleido==0.0.3.post1
 kiwisolver==1.3.1
 lightgbm==3.0.0
 llvmlite==0.34.0
@@ -32,8 +33,8 @@ scipy==1.5.4
 seaborn==0.11.0
 shap==0.37.0
 six==1.15.0
-slicer==0.0.5
+slicer==0.0.3
 threadpoolctl==2.1.0
-tqdm==4.51.0
+tqdm==4.52.0
 urllib3==1.26.1
 xgboost==1.2.1

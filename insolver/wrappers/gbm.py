@@ -1,8 +1,15 @@
+from base64 import b64encode
+
+from numpy import cumsum, diff, exp, true_divide, add, append, nan
 from pandas import DataFrame, Series
+
 from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
 from shap import TreeExplainer, summary_plot
+
+from plotly.graph_objects import Figure, Waterfall
+from plotly.io import to_image
 
 from .base import InsolverBaseWrapper
 
@@ -18,7 +25,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         load_path (:obj:`str`, optional): Path to GBM model to load from disk.
         **kwargs: Parameters for GBM estimators except `n_estimators` and `objective`. Will not be changed in hyperopt.
     """
-    def __init__(self, backend, task=None, n_estimators=100, objective=None, load_path=None, **kwargs):
+    def __init__(self, backend, task=None, objective=None, n_estimators=100, load_path=None, **kwargs):
         super(InsolverGBMWrapper, self).__init__(backend)
         self.algo, self._backends = 'gbm', ['xgboost', 'lightgbm', 'catboost']
         self._tasks = ['class', 'reg']
@@ -83,7 +90,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         """
         return self.model.predict(X, **kwargs)
 
-    def shap(self, X, plot=False):
+    def shap(self, X, plot=False, plot_type='bar'):
         explainer = TreeExplainer(self.model)
         X = DataFrame(X).T if isinstance(X, Series) else X
         shap_values = explainer.shap_values(X)
@@ -95,8 +102,61 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         mean_shap = expected_value + shap_values.mean(axis=0).tolist()
 
         if plot:
-            summary_plot(shap_values, X, plot_type='bar')
+            summary_plot(shap_values, X, plot_type=plot_type)
         return {variables[i]: mean_shap[i] for i in range(len(variables))}
+
+    def shap_explain(self, data, instance=None, link=None, show=True, layout_dict=None):
+
+        def logit(x):
+            return true_divide(1, add(1, exp(-x)))
+
+        explainer = TreeExplainer(self.model)
+        if isinstance(self.model, (XGBClassifier, XGBRegressor)):
+            feature_names = self.model.get_booster().feature_names
+        elif isinstance(self.model, (LGBMClassifier, LGBMRegressor)):
+            feature_names = self.model.feature_name_
+        elif isinstance(self.model, (CatBoostClassifier, CatBoostRegressor)):
+            feature_names = self.model.feature_names_
+        else:
+            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
+
+        instance = instance if (isinstance(data, DataFrame)) and (instance is not None) else None
+        data = DataFrame(data).T[feature_names] if isinstance(data, Series) else data[feature_names]
+        data = data if instance is None else DataFrame(data.loc[instance, :]).T
+        shap_values = explainer.shap_values(data)
+        cond_bool = isinstance(shap_values, list) and (len(shap_values) == 2)
+        shap_values = shap_values[0] if cond_bool else shap_values
+        expected_value = explainer.expected_value[0] if cond_bool else explainer.expected_value
+
+        prediction = DataFrame([expected_value] + shap_values.reshape(-1).tolist(), index=['Intercept'] + feature_names,
+                               columns=['SHAP Value'])
+        prediction['CumSum'] = cumsum(prediction['SHAP Value'])
+        prediction['Value'] = append(nan, data.values.reshape(-1))
+
+        if (self.objective is not None) and (link is None):
+            link = exp if self.objective in ['poisson', 'gamma'] else logit if self.objective == 'binary' else None
+        if link is not None:
+            prediction['Link'] = link(prediction['CumSum'])
+            prediction['Contribution'] = [link(expected_value)] + list(diff(prediction['Link']))
+        else:
+            prediction['Contribution'] = [expected_value] + list(diff(prediction['CumSum']))
+
+        fig = Figure(Waterfall(name=f'Prediction {instance}',
+                               orientation='h',
+                               measure=['relative'] * len(prediction),
+                               y=[prediction.index[i] if i == 0
+                                  else f'{prediction.index[i]}={data.values.reshape(-1)[i-1]}' for i
+                                  in range(len(prediction.index))],
+                               x=prediction['Contribution']))
+        fig.update_layout(**(layout_dict if layout_dict is not None else {}))
+
+        if show:
+            fig.show()
+        else:
+            json_ = prediction[['Value', 'SHAP Value', 'Contribution']].T.to_dict()
+            fig_base64 = b64encode(to_image(fig, format='jpeg', engine='kaleido')).decode('ascii')
+            json_.update({'id': data.index, 'predict': prediction['Link'][-1], "ShapValuesPlot": fig_base64})
+            return json_
 
     # def cross_val(self, x_train, y_train, strategy, metrics):
     #     fold_metrics, shap_coefs = list(), list()

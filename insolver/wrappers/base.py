@@ -11,7 +11,7 @@ from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
 from h2o import no_progress, cluster, init, load_model, save_model
 from h2o.frame import H2OFrame
 
-from hyperopt import STATUS_OK, STATUS_FAIL, Trials, tpe, fmin, space_eval
+from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval
 
 
 class InsolverBaseWrapper:
@@ -122,11 +122,8 @@ class InsolverBaseWrapper:
                 scoring = make_scorer(scoring)
             fn = functools.partial(self._hyperopt_obj_cv, X=X, y=y, scoring=scoring,
                                    **(fn_params if fn_params is not None else {}))
-        try:
-            best = fmin(fn=fn, space=params, trials=trials, algo=algo, max_evals=max_evals, timeout=timeout,
-                        **(fmin_params if fmin_params is not None else {}))
-        except Exception as e:
-            return {'status': STATUS_FAIL, 'exception': str(e)}
+        best = fmin(fn=fn, space=params, trials=trials, algo=algo, max_evals=max_evals, timeout=timeout,
+                    **(fmin_params if fmin_params is not None else {}))
         best_params = space_eval(params, best)
         best_params = {key: best_params[key] if not (isinstance(best_params[key], float) and
                                                      best_params[key].is_integer()) else int(best_params[key])
@@ -189,9 +186,9 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         agg (:obj:`callable`, optional): Aggregation function.
         **kwargs: Other arguments.
     """
-    def __init__(self, y=None, column=None, agg=None, **kwargs):
+    def __init__(self, y=None, column=None, agg=None, x_train=None, y_train=None, **kwargs):
         super(InsolverTrivialWrapper, self).__init__(backend='trivial')
-        self._backends = ['trivial']
+        self._backends, self.x_train, self.y_train = ['trivial'], None, None
         self._back_load_dict, self._back_save_dict = {'trivial': self._pickle_load}, {'trivial': self._pickle_save}
 
         if isinstance(column, (Series, DataFrame)) or column is None:
@@ -208,6 +205,9 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
             self.agg = mean if self.agg is None else self.agg
             name = self.column.name if isinstance(self.column, Series) else self.column.columns[0]
             self.algo = f"{self.agg.__name__} target: {name}"
+
+    def fit(self, X, y):
+        self.x_train, self.y_train = X, y
 
     def predict(self, X):
         """Making dummy predictions.
