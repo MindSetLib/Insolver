@@ -1,5 +1,5 @@
 import pandas as pd
-from insolver.frame import InsolverDataFrame
+from insolver import InsolverDataFrame
 
 from insolver.InsolverTransforms import (
     TransformExp,
