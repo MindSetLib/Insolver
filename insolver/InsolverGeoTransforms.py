@@ -4,7 +4,7 @@ import math
 import geocoder
 import requests
 
-from .InsolverDataFrame import InsolverDataFrame
+from insolver import InsolverDataFrame
 from .InsolverMain import InsolverTransformMain
 
 

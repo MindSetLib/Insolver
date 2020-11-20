@@ -1,8 +1,8 @@
 class InsolverMain:
 
-    def get_data(self):
+    def get_batch(self):
         """Gets data as InsolverDataFrame."""
-        raise NotImplementedError("Class should implement 'get_data'.")
+        raise NotImplementedError("Class should implement 'get_batch'.")
 
     def get_meta_info(self):
         """Gets JSON with Insolver meta information."""
@@ -10,7 +10,6 @@ class InsolverMain:
 
 
 class InsolverTransformMain:
-
     def __init__(self):
         if not hasattr(self, 'priority'):
             raise NotImplementedError("Transformation class should have the 'priority' property.")

@@ -6,8 +6,8 @@ import json
 
 import pandas as pd
 
-from .InsolverDataFrame import InsolverDataFrame
-from .InsolverMain import InsolverTransformMain
+from insolver import InsolverDataFrame
+from insolver.InsolverMain import InsolverTransformMain
 
 
 class InsolverTransforms(InsolverDataFrame):
@@ -25,32 +25,31 @@ class InsolverTransforms(InsolverDataFrame):
     Returns:
         Transformed InsolverDataFrame.
     """
+    _metadata = ['transforms', 'transforms_done']
+
     def __init__(self, df, transforms):
         super().__init__(df)
         if isinstance(transforms, list):
             self.transforms = transforms
         self.transforms_done = {}
 
-    def transform(self):
+    def get_batch(self):
+        pass
+
+    def ins_transform(self):
         """Transforms data in InsolverDataFrame.
 
         Returns:
             list: List of transforms have been done.
         """
-        if self._is_frame is None:
-            raise NotImplementedError("No data loaded.")
-
         if self.transforms:
             try:
-                priority_max = 0
-                for transform in self.transforms:
-                    if transform.priority > priority_max:
-                        priority_max = transform.priority
+                priority_max = max([transform.priority for transform in self.transforms])
 
                 for priority in range(priority_max + 1):
                     for transform in self.transforms:
                         if transform.priority == priority:
-                            self._df = transform(self._df)
+                            transform(self)
                             attributes = {}
                             for attribute in dir(transform):
                                 if attribute[0] != '_':

@@ -1,5 +1,5 @@
 import pandas as pd
-from insolver.InsolverDataFrame import InsolverDataFrame
+from insolver.frame import InsolverDataFrame
 
 
 df = pd.read_csv('tests/data/freMPL-R_100.csv')
