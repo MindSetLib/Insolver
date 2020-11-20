@@ -9,7 +9,7 @@ from insolver.InsolverTransforms import (
     TransformPolynomizer,
     TransformAgeGender,
 )
-from insolver.wrappers.glm import InsolverGLMWrapper
+from insolver.wrappers import InsolverGLMWrapper
 
 df = pd.read_csv('freMPL-R.csv', low_memory=False)
 df = df[df.Dataset.isin([5, 6, 7, 8, 9])]
