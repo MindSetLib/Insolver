@@ -18,8 +18,8 @@ with open('transforms.pkl', 'rb') as file:
 transforms = init_transforms(transforms)
 
 # Apply transformations
-InsTransforms = InsolverTransforms(InsDataFrame.get_data(), transforms)
-InsTransforms.transform()
+InsTransforms = InsolverTransforms(InsDataFrame, transforms)
+InsTransforms.ins_transform()
 
 # Load saved model
 new_iglm = InsolverGLMWrapper(backend='h2o', load_path='./insolver_glm_h2o_1605026853331')

@@ -18,7 +18,7 @@ df = df[df.ClaimAmount > 0]
 
 InsDataFrame = InsolverDataFrame(df)
 
-InsTransforms = InsolverTransforms(InsDataFrame.get_data(), [
+InsTransforms = InsolverTransforms(InsDataFrame, [
     TransformAge('DrivAge', 18, 75),
     TransformExp('LicAge', 57),
     TransformMapValues('Gender', {'Male': 0, 'Female': 1}),
@@ -28,7 +28,7 @@ InsTransforms = InsolverTransforms(InsDataFrame.get_data(), [
     TransformPolynomizer('Age_f'),
 ])
 
-InsTransforms.transform()
+InsTransforms.ins_transform()
 InsTransforms.save('transforms.pkl')
 
 train, valid, test = InsTransforms.split_frame(val_size=0.15, test_size=0.15, random_state=0, shuffle=True)
