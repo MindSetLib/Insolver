@@ -105,12 +105,14 @@ class ModelMetricsCompare:
                         else:
                             raise TypeError(f'Metrics with type {type(metric)} are not supported.')
                     names = [m.__name__.replace('_', ' ') for m in metrics]
-                    model_metrics = model_metrics.append(DataFrame.from_dict(dict(zip(names, m_metrics))))
+                    model_metrics = model_metrics.append(DataFrame(dict(zip(names, m_metrics), index=[0])))
                 elif callable(metrics):
                     name = [metrics.__name__.replace('_', ' ')]
-                    model_metrics = model_metrics.append(DataFrame.from_dict(dict(zip(name, [metrics(y, p)]))))
+                    model_metrics = model_metrics.append(DataFrame(dict(zip(name, [metrics(y, p)])), index=[0]))
                 else:
                     raise TypeError(f'Metrics with type {type(metrics)} are not supported.')
+                model_metrics = model_metrics.reset_index(drop=True)
                 model_metrics.index = model_names[1:]
-                self.metrics = model_metrics
+                self.metrics = (model_metrics if 'index' not in model_metrics.columns
+                                else model_metrics.drop(['index'], axis=1))
         return self
