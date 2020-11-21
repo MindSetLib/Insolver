@@ -657,7 +657,8 @@ class TransformCarFleetSize(InsolverTransformMain):
         self.policy_start = policy_start
 
     def __call__(self, df):
-        cp = pd.merge(df, df[[self.column_id, self.policy_start]], on=self.column_id, how='left')
+        cp = pd.merge(df[[self.column_id, self.policy_start]], df[[self.column_id, self.policy_start]],
+                      on=self.column_id, how='left')
         cp = cp[(cp[f'{self.policy_start}_x'] >= cp[f'{self.policy_start}_y'] - np.timedelta64(1, 'Y')) &
                  (cp[f'{self.policy_start}_x'] <= cp[f'{self.policy_start}_y'] + np.timedelta64(1, 'Y'))]
         cp = cp.groupby(self.column_id).size().to_dict()
