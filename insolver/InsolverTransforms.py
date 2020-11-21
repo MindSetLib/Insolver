@@ -647,7 +647,8 @@ class TransformCarFleetSize(InsolverTransformMain):
     """Calculate the size of the fleet for a given policyholder.
 
     Attributes:
-        column_id (str): Column in InsolverDataFrame with policyholder ID.
+        column_id (str): Column name in InsolverDataFrame containing policyholder ID.
+        policy_start (str): Column name in InsolverDataFrame containing start date of the policy.
     """
     def __init__(self, column_id, policy_start):
         self.priority = 3
