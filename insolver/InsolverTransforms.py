@@ -4,6 +4,7 @@ import re
 import traceback
 import json
 
+import numpy as np
 import pandas as pd
 
 from insolver import InsolverDataFrame
@@ -56,7 +57,7 @@ class InsolverTransforms(InsolverDataFrame):
                                     exec("attributes.update({attribute: transform.%s})" % attribute)
                             self.transforms_done.update({type(transform).__name__: attributes})
 
-            except Exception:
+            except (Exception, TypeError, ValueError, AttributeError):
                 traceback.print_last()
 
         return self.transforms_done
@@ -639,4 +640,25 @@ class TransformGetDummies(InsolverTransformMain):
 
     def __call__(self, df):
         df = pd.get_dummies(df, columns=self.column_param)
+        return df
+
+
+class TransformCarFleetSize(InsolverTransformMain):
+    """Calculate the size of the fleet for a given policyholder.
+
+    Attributes:
+        column_id (str): Column in InsolverDataFrame with policyholder ID.
+    """
+    def __init__(self, column_id, policy_start):
+        self.priority = 3
+        super().__init__()
+        self.column_id = column_id
+        self.policy_start = policy_start
+
+    def __call__(self, df):
+        cp = pd.merge(df, df[[self.column_id, self.policy_start]], on=self.column_id, how='left')
+        cp = cp[(cp[f'{self.policy_start}_x'] >= cp[f'{self.policy_start}_y'] - np.timedelta64(1, 'Y')) &
+                 (cp[f'{self.policy_start}_x'] <= cp[f'{self.policy_start}_y'] + np.timedelta64(1, 'Y'))]
+        cp = cp.groupby(self.column_id).size().to_dict()
+        df['CarFleetSize'] = df[self.column_id].map(cp)
         return df
