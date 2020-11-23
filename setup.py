@@ -23,6 +23,7 @@ setup(name='insolver',
             'catboost',
             'hyperopt',
             'scikit-learn',
+            'pdpbox'
             'pyodbc',
             'requests',
             'requests_cache',
