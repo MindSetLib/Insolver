@@ -1,8 +1,9 @@
 from base64 import b64encode
 
-from numpy import cumsum, diff, exp, true_divide, add, append, nan
+from numpy import cumsum, diff, exp, true_divide, add, append, nan, concatenate, array
 from pandas import DataFrame, Series
 
+from sklearn.metrics import mean_squared_error, SCORERS
 from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
@@ -159,44 +160,29 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
                           "ShapValuesPlot": fig_base64})
             return json_
 
-    # def cross_val(self, x_train, y_train, strategy, metrics):
-    #     fold_metrics, shap_coefs = list(), list()
-    #     self.fit(x_train, y_train)
-    #     if isinstance(metrics, (list, tuple)):
-    #         for metric in metrics:
-    #             fold_metrics.append(metric(y_train, self.model.predict(x_train)))
-    #     else:
-    #         fold_metrics.append(metrics(y_train, self.model.predict(x_train)))
-    #     explainer = TreeExplainer(self.model)
-    #     shap_coefs.append(explainer.expected_value.tolist() +
-    #                       explainer.shap_values(x_train).mean(axis=0).tolist())
-    #
-    #     for train_index, test_index in strategy.split(x_train):
-    #         if isinstance(x_train, DataFrame):
-    #             x_train_cv, x_test_cv = x_train.iloc[train_index], x_train.iloc[test_index]
-    #             y_train_cv, y_test_cv = y_train.iloc[train_index], y_train.iloc[test_index]
-    #         else:
-    #             x_train_cv, x_test_cv = x_train[train_index], x_train[test_index]
-    #             y_train_cv, y_test_cv = y_train[train_index], y_train[test_index]
-    #         self.fit(x_train_cv, y_train_cv)
-    #         predict = self.model.predict(x_test_cv)
-    #
-    #         if isinstance(metrics, (list, tuple)):
-    #             for metric in metrics:
-    #                 fold_metrics.append(metric(y_test_cv, predict))
-    #         else:
-    #             fold_metrics.append(metrics(y_test_cv, predict))
-    #
-    #         explainer = TreeExplainer(self.model)
-    #         shap_coefs.append(explainer.expected_value.tolist() +
-    #                           explainer.shap_values(x_test_cv).mean(axis=0).tolist())
-    #
-    #     if isinstance(metrics, (list, tuple)):
-    #         output = DataFrame(array(fold_metrics).reshape(-1, len(metrics)).T, index=[x.__name__ for x in metrics],
-    #                            columns=['Overall'] + [f'Fold {x}' for x in range(strategy.n_splits)])
-    #     else:
-    #         output = DataFrame(array([fold_metrics]), index=[metrics.__name__],
-    #                            columns=['Overall'] + [f'Fold {x}' for x in range(strategy.n_splits)])
-    #     coefs = DataFrame(array(shap_coefs).T, columns=['Overall'] + [f'Fold {x}' for x in range(strategy.n_splits)],
-    #                       index=[['Intercept'] + x_train.columns.tolist()])
-    #     return output, coefs
+    def cross_val(self, X, y, scoring=None, cv=None, **kwargs):
+        models, metrics = self._cross_val(X, y, scoring=scoring, cv=cv, **kwargs)
+        scoring = mean_squared_error if scoring is None else scoring
+        if callable(scoring):
+            scorers = {scoring.__name__.replace('_', ' '): array([scoring(y, self.model.predict(X))])}
+        elif isinstance(scoring, (tuple, list)):
+            scorers = {scorer.__name__.replace('_', ' '): array([scorer(y, self.model.predict(X))]) for
+                       scorer in scoring}
+        elif isinstance(scoring, str):
+            if scoring in SCORERS:
+                scorers = {scoring.replace('_', ' '): array([SCORERS[scoring](self.model, X=X, y=y)])}
+            else:
+                raise ValueError(f'Scorer {scoring} is not supported.')
+        else:
+            raise NotImplementedError(f'Scoring of type {scoring} is not supported')
+        metrics = DataFrame({key: concatenate((scorers[key], metrics[key])) for key in scorers.keys()}).T
+        metrics.columns = [f'Fold {i}' if i != 0 else 'Overall' for i in range(metrics.shape[1])]
+        shap_coefs = []
+        explainer = TreeExplainer(self.model)
+        shap_coefs.append(explainer.expected_value.tolist() + explainer.shap_values(X).mean(axis=0).tolist())
+        for model in models:
+            explainer = TreeExplainer(model)
+            shap_coefs.append(explainer.expected_value.tolist() + explainer.shap_values(X).mean(axis=0).tolist())
+        shapdf = DataFrame(array(shap_coefs).T, columns=['Overall'] + [f'Fold {x}' for x in range(1, len(models) + 1)],
+                           index=['Intercept'] + X.columns.tolist())
+        return metrics, shapdf

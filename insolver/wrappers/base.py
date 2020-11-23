@@ -6,7 +6,7 @@ import functools
 from matplotlib.pyplot import show, tight_layout
 from numpy import array, mean, broadcast_to
 from pandas import DataFrame, Series, concat
-from sklearn.model_selection import KFold, cross_val_score
+from sklearn.model_selection import KFold, cross_val_score, cross_validate
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
 from sklearn.inspection import plot_partial_dependence
 from pdpbox.pdp import pdp_isolate, pdp_plot
@@ -153,6 +153,40 @@ class InsolverBaseWrapper:
                 show()
             else:
                 raise NotImplementedError(f'Plot backend {plot_backend} is not implemented.')
+
+    def _cross_val(self, X, y, scoring=None, cv=None, **kwargs):
+        if self.backend != 'h2o':
+            cv = KFold(n_splits=5) if cv is None else cv
+            njobs = -1 if 'n_jobs' not in kwargs else kwargs.pop('n_jobs')
+            if 'return_estimator' in kwargs:
+                kwargs.pop('return_estimator')
+            scoring = make_scorer(mean_squared_error) if scoring is None else scoring
+
+            if callable(scoring) or isinstance(scoring, str):
+                scorers = scoring
+                try:
+                    check_scoring(self.model, scorers)
+                except ValueError:
+                    scorers = make_scorer(scorers)
+            elif isinstance(scoring, (tuple, list)):
+                scorers = []
+                for scorer in scoring:
+                    try:
+                        check_scoring(self.model, scorer)
+                        scorers.append([scorer.__name__.replace('_', ' '), scorer])
+                    except ValueError:
+                        scorers.append([scorer.__name__.replace('_', ' '), make_scorer(scorer)])
+                scorers = {scorer[0]: scorer[1] for scorer in scorers}
+            else:
+                raise NotImplementedError(f'Scoring of type {type(scoring)} is not supported.')
+
+            cv_results = cross_validate(self.model, X, y=y, scoring=scorers, cv=cv, n_jobs=njobs,
+                                        return_estimator=True, **kwargs)
+            estimators = cv_results.pop('estimator')
+            cv_results = {key.split('test_')[1]: cv_results[key] for key in cv_results if key.startswith('test_')}
+            return estimators, cv_results
+        else:
+            pass  # TODO: CV for h2o. nfolds...
 
 
 class InsolverH2OWrapper:
