@@ -3,10 +3,13 @@ import time
 import pickle
 import functools
 
+from matplotlib.pyplot import show, tight_layout
 from numpy import array, mean, broadcast_to
 from pandas import DataFrame, Series, concat
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
+from sklearn.inspection import plot_partial_dependence
+from pdpbox.pdp import pdp_isolate, pdp_plot
 
 from h2o import no_progress, cluster, init, load_model, save_model
 from h2o.frame import H2OFrame
@@ -134,6 +137,22 @@ class InsolverBaseWrapper:
         self.model.fit(X, y, **({} if not ((fn_params is not None) and ('fit_params' in fn_params))
                                 else fn_params['fit_params']))
         return self.best_params
+
+    def pdp(self, X, features, feature_name, plot_backend='sklearn', **kwargs):
+        if self.backend == 'h2o':
+            pass
+        else:
+            if plot_backend == 'sklearn':
+                if self.backend in ['catboost', 'lightgbm']:
+                    self.model.dummy_ = True
+                plot_partial_dependence(self.model, X, features=features, **kwargs)
+                tight_layout()
+                show()
+            elif plot_backend == 'pdpbox':
+                pdp_plot(pdp_isolate(self.model, X, features, feature_name), feature_name, **kwargs)
+                show()
+            else:
+                raise NotImplementedError(f'Plot backend {plot_backend} is not implemented.')
 
 
 class InsolverH2OWrapper:
