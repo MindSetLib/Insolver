@@ -161,8 +161,8 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
             return json_
 
     def cross_val(self, X, y, scoring=None, cv=None, **kwargs):
-        models, metrics = self._cross_val(X, y, scoring=scoring, cv=cv, **kwargs)
         scoring = mean_squared_error if scoring is None else scoring
+        models, metrics = self._cross_val(X, y, scoring=scoring, cv=cv, **kwargs)
         if callable(scoring):
             scorers = {scoring.__name__.replace('_', ' '): array([scoring(y, self.model.predict(X))])}
         elif isinstance(scoring, (tuple, list)):
@@ -179,10 +179,13 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         metrics.columns = [f'Fold {i}' if i != 0 else 'Overall' for i in range(metrics.shape[1])]
         shap_coefs = []
         explainer = TreeExplainer(self.model)
-        shap_coefs.append(explainer.expected_value.tolist() + explainer.shap_values(X).mean(axis=0).tolist())
+
+        shap_coefs.append(([explainer.expected_value] if explainer.expected_value is None
+                           else explainer.expected_value.tolist()) + explainer.shap_values(X).mean(axis=0).tolist())
         for model in models:
             explainer = TreeExplainer(model)
-            shap_coefs.append(explainer.expected_value.tolist() + explainer.shap_values(X).mean(axis=0).tolist())
+            shap_coefs.append(([explainer.expected_value] if explainer.expected_value is None
+                               else explainer.expected_value.tolist()) + explainer.shap_values(X).mean(axis=0).tolist())
         shapdf = DataFrame(array(shap_coefs).T, columns=['Overall'] + [f'Fold {x}' for x in range(1, len(models) + 1)],
                            index=['Intercept'] + X.columns.tolist())
         return metrics, shapdf

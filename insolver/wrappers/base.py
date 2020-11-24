@@ -1,4 +1,5 @@
 import os
+import types
 import time
 import pickle
 import functools
@@ -166,6 +167,9 @@ class InsolverBaseWrapper:
                 scorers = scoring
                 try:
                     check_scoring(self.model, scorers)
+                    scorers = (make_scorer(scorers) if
+                               isinstance(scorers, (types.FunctionType, types.BuiltinFunctionType, functools.partial))
+                               else scorers)
                 except ValueError:
                     scorers = make_scorer(scorers)
             elif isinstance(scoring, (tuple, list)):
@@ -173,7 +177,10 @@ class InsolverBaseWrapper:
                 for scorer in scoring:
                     try:
                         check_scoring(self.model, scorer)
-                        scorers.append([scorer.__name__.replace('_', ' '), scorer])
+                        scorers.append([scorer.__name__.replace('_', ' '),
+                                        (make_scorer(scorer) if
+                                         isinstance(scorer, (types.FunctionType, types.BuiltinFunctionType,
+                                                             functools.partial)) else scorer)])
                     except ValueError:
                         scorers.append([scorer.__name__.replace('_', ' '), make_scorer(scorer)])
                 scorers = {scorer[0]: scorer[1] for scorer in scorers}
