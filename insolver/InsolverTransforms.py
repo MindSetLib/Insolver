@@ -1,8 +1,7 @@
-import datetime
-import pickle
 import re
-import traceback
 import json
+import pickle
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -44,22 +43,16 @@ class InsolverTransforms(InsolverDataFrame):
             list: List of transforms have been done.
         """
         if self.transforms:
-            try:
-                priority_max = max([transform.priority for transform in self.transforms])
-
-                for priority in range(priority_max + 1):
-                    for transform in self.transforms:
-                        if transform.priority == priority:
-                            transform(self)
-                            attributes = {}
-                            for attribute in dir(transform):
-                                if attribute[0] != '_':
-                                    exec("attributes.update({attribute: transform.%s})" % attribute)
-                            self.transforms_done.update({type(transform).__name__: attributes})
-
-            except (Exception, TypeError, ValueError, AttributeError):
-                traceback.print_last()
-
+            priority_max = max([transform.priority for transform in self.transforms])
+            for priority in range(priority_max + 1):
+                for transform in self.transforms:
+                    if transform.priority == priority:
+                        transform(self)
+                        attributes = {}
+                        for attribute in dir(transform):
+                            if attribute[0] != '_':
+                                exec("attributes.update({attribute: transform.%s})" % attribute)
+                        self.transforms_done.update({type(transform).__name__: attributes})
         return self.transforms_done
 
     def save(self, filename):
@@ -660,7 +653,7 @@ class TransformCarFleetSize(InsolverTransformMain):
         cp = pd.merge(df[[self.column_id, self.policy_start]], df[[self.column_id, self.policy_start]],
                       on=self.column_id, how='left')
         cp = cp[(cp[f'{self.policy_start}_x'] >= cp[f'{self.policy_start}_y'] - np.timedelta64(1, 'Y')) &
-                 (cp[f'{self.policy_start}_x'] <= cp[f'{self.policy_start}_y'] + np.timedelta64(1, 'Y'))]
+                (cp[f'{self.policy_start}_x'] <= cp[f'{self.policy_start}_y'] + np.timedelta64(1, 'Y'))]
         cp = cp.groupby(self.column_id).size().to_dict()
         df['CarFleetSize'] = df[self.column_id].map(cp)
         return df
