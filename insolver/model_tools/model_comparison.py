@@ -27,7 +27,7 @@ class ModelMetricsCompare:
             source = os.getcwd() if source is None else source
             files = glob(os.path.join(source, '*'))
             files = [file for file in files if os.path.basename(file).split('_')[0] == 'insolver']
-            if len(files) > 0:
+            if files:
                 model_list = []
                 for file in files:
                     algo, backend = os.path.basename(file).split('_')[1:3]
@@ -115,4 +115,3 @@ class ModelMetricsCompare:
                 model_metrics.index = model_names[1:]
                 self.metrics = (model_metrics if 'index' not in model_metrics.columns
                                 else model_metrics.drop(['index'], axis=1))
-        return self

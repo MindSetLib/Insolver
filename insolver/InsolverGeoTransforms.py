@@ -62,7 +62,7 @@ class InsolverGeoPointsFrame(InsolverDataFrame):
 
         Args:
             address (str): Address.
-            provider:
+            provider: sputnik or arcgis
 
         Returns:
             list: Coordinates ['latitude', 'longitude'].

@@ -141,7 +141,7 @@ class InsolverBaseWrapper:
 
     def pdp(self, X, features, feature_name, plot_backend='sklearn', **kwargs):
         if self.backend == 'h2o':
-            pass
+            return
         else:
             if plot_backend == 'sklearn':
                 if self.backend in ['catboost', 'lightgbm']:

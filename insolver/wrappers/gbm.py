@@ -106,7 +106,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
             summary_plot(shap_values, X, plot_type=plot_type)
         return {variables[i]: mean_shap[i] for i in range(len(variables))}
 
-    def shap_explain(self, data, instance=None, link=None, show=True, layout_dict=None):
+    def shap_explain(self, data, index=None, link=None, show=True, layout_dict=None):
 
         def logit(x):
             return true_divide(1, add(1, exp(-x)))
