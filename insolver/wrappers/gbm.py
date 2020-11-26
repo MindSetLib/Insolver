@@ -121,9 +121,9 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
-        instance = instance if (isinstance(data, DataFrame)) and (instance is not None) else None
+        index = index if (isinstance(data, DataFrame)) and (index is not None) else None
         data = DataFrame(data).T[feature_names] if isinstance(data, Series) else data[feature_names]
-        data = data if instance is None else DataFrame(data.loc[instance, :]).T
+        data = data if index is None else DataFrame(data.loc[index, :]).T
         shap_values = explainer.shap_values(data)
         cond_bool = isinstance(shap_values, list) and (len(shap_values) == 2)
         shap_values = shap_values[0] if cond_bool else shap_values
@@ -142,7 +142,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         else:
             prediction['Contribution'] = [expected_value] + list(diff(prediction['CumSum']))
 
-        fig = Figure(Waterfall(name=f'Prediction {instance}',
+        fig = Figure(Waterfall(name=f'Prediction {index}',
                                orientation='h',
                                measure=['relative'] * len(prediction),
                                y=[prediction.index[i] if i == 0

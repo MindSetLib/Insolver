@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 setup(name='insolver',
@@ -8,7 +8,7 @@ setup(name='insolver',
       author='Mindset',
       author_email='request@mind-set.ru',
       license='MIT',
-      packages=['insolver', 'insolver.serving'],
+      packages=find_packages(),
       entry_points={
             "console_scripts": [
                   "insolver_serving = insolver.serving.run_service:run"
