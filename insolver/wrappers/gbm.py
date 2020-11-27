@@ -92,6 +92,16 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         return self.model.predict(X, **kwargs)
 
     def shap(self, X, plot=False, plot_type='bar'):
+        """Method for shap values calculation and corresponding plot of feature importances.
+
+        Args:
+            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for shap values calculation.
+            plot (:obj:`boolean`, optional): Whether to plot a graph.
+            plot_type (:obj:`str`, optional): Type of feature importance graph, takes value in ['dot', 'bar'].
+
+        Returns:
+            JSON containing shap values.
+        """
         explainer = TreeExplainer(self.model)
         X = DataFrame(X).T if isinstance(X, Series) else X
         shap_values = explainer.shap_values(X)
@@ -107,6 +117,19 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         return {variables[i]: mean_shap[i] for i in range(len(variables))}
 
     def shap_explain(self, data, index=None, link=None, show=True, layout_dict=None):
+        """Method for plotting a waterfall graph or return corresponding JSON if show=False.
+
+        Args:
+            data (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for shap values calculation.
+            index (:obj:`int`, optional): Index of the observation of interest, if data is pd.DataFrame.
+            link (:obj:`callable`, optional): A function for transforming shap values into predictions.
+            Unnecessary if self.objective is present and it takes values in ['binary', 'poisson', 'gamma'].
+            show (:obj:`boolean`, optional): Whether to plot a graph or return a json.
+            layout_dict (:obj:`boolean`, optional): Dictionary containing the parameters of plotly figure layout.
+
+        Returns:
+            None or dict: Waterfall graph or corresponding JSON.
+        """
 
         def logit(x):
             return true_divide(1, add(1, exp(-x)))
@@ -161,6 +184,19 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
             return json_
 
     def cross_val(self, X, y, scoring=None, cv=None, **kwargs):
+        """Method for performing cross-validation given the hyperparameters of initialized or fitted model.
+
+        Args:
+            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
+            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
+            scoring (:obj:`callable`): Metrics passed to sklearn.model_selection.cross_validate calculation.
+            cv (:obj:`int, cross-validation generator or an iterable`, optional): Cross-validation strategy from
+             sklearn. Performs 5-fold cv by default.
+            **kwargs: Other parameters passed to sklearn.model_selection.cross_validate.
+
+        Returns:
+            pd.DataFrame, pd.DataFrame: DataFrame with metrics on folds, DataFrame with shap values on folds.
+        """
         scoring = mean_squared_error if scoring is None else scoring
         models, metrics = self._cross_val(X, y, scoring=scoring, cv=cv, **kwargs)
         if callable(scoring):
