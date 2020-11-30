@@ -1,6 +1,6 @@
 import pandas as pd
 
-from insolver.InsolverDataFrame import InsolverDataFrame
+from insolver import InsolverDataFrame
 from insolver.InsolverTransforms import (
     TransformExp,
     InsolverTransforms,
@@ -9,7 +9,7 @@ from insolver.InsolverTransforms import (
     TransformPolynomizer,
     TransformAgeGender,
 )
-from insolver.InsolverWrapperGLM import InsolverGLMWrapper
+from insolver.wrappers import InsolverGLMWrapper
 
 df = pd.read_csv('freMPL-R.csv', low_memory=False)
 df = df[df.Dataset.isin([5, 6, 7, 8, 9])]
@@ -18,7 +18,7 @@ df = df[df.ClaimAmount > 0]
 
 InsDataFrame = InsolverDataFrame(df)
 
-InsTransforms = InsolverTransforms(InsDataFrame.get_data(), [
+InsTransforms = InsolverTransforms(InsDataFrame, [
     TransformAge('DrivAge', 18, 75),
     TransformExp('LicAge', 57),
     TransformMapValues('Gender', {'Male': 0, 'Female': 1}),
@@ -28,23 +28,24 @@ InsTransforms = InsolverTransforms(InsDataFrame.get_data(), [
     TransformPolynomizer('Age_f'),
 ])
 
-InsTransforms.transform()
+InsTransforms.ins_transform()
 InsTransforms.save('transforms.pkl')
 
 train, valid, test = InsTransforms.split_frame(val_size=0.15, test_size=0.15, random_state=0, shuffle=True)
-
-iglm = InsolverGLMWrapper()
-
-params = {'lambda': [1, 0.5, 0.1, 0.01, 0.001, 0.0001, 0.00001, 0],
-          'alpha': [i * 0.1 for i in range(0, 11)]}
 features = ['LicAge', 'Gender', 'MariStat', 'DrivAge', 'HasKmLimit', 'BonusMalus', 'RiskArea',
             'Age_m', 'Age_f', 'Age_m_2', 'Age_f_2']
 target = 'ClaimAmount'
+x_train, x_valid, x_test = train[features], valid[features], test[features]
+y_train, y_valid, y_test = train[target], valid[target], test[target]
 
-test.sample(1).to_json('request_example.json')
+params = {'lambda': [1, 0.5, 0.1, 0.01, 0.001, 0.0001, 0.00001, 0],
+          'alpha': [i * 0.1 for i in range(0, 11)]}
 
-iglm.model_init(train, valid, family='gamma', link='log')
-iglm.grid_search_cv(features, target, params, search_criteria={'strategy': "Cartesian"})
-predict_glm = iglm.predict(test)
-iglm.save_model('glm')
+x_test.sample(1).to_json('request_example.json')
+
+iglm = InsolverGLMWrapper(backend='h2o', family='gamma', link='log')
+iglm.optimize_hyperparam(params, x_train, y_train, X_valid=x_valid, y_valid=y_valid)
+
+predict_glm = iglm.predict(x_test)
+iglm.save_model()
 print(predict_glm)
