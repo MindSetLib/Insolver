@@ -55,3 +55,9 @@ insolver_serving -model glm/Grid_GLM_Key_Frame__upload_a685662cd198b4799aee7e181
 (new_env) (base) andrey@mindset1:~$ python -m ipykernel install --user --name new_env --display-name "new_env"
 (new_env) (base) andrey@mindset1:~$ pip install "git+ssh://git@github.com/MindSetLib/MS-InsuranceScoring.git@InsolverPackage#egg=insolver"
 ```
+
+
+## Если не отображаются рисунки (plotly) в jupyterlab (например, в shap_explain), поставить расширение:
+```
+jupyter labextension install jupyterlab-plotly
+```
