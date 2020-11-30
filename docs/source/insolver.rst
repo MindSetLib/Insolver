@@ -1,16 +1,18 @@
 insolver package
 ================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   insolver.frame
+   insolver.model_tools
+   insolver.wrappers
+
 Submodules
 ----------
-
-insolver.InsolverDataFrame module
----------------------------------
-
-.. automodule:: insolver.InsolverDataFrame
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 insolver.InsolverGeoTransforms module
 -------------------------------------
@@ -48,22 +50,6 @@ insolver.InsolverUtils module
 -----------------------------
 
 .. automodule:: insolver.InsolverUtils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-insolver.InsolverWrapperGBM module
-----------------------------------
-
-.. automodule:: insolver.InsolverWrapperGBM
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-insolver.InsolverWrapperGLM module
-----------------------------------
-
-.. automodule:: insolver.InsolverWrapperGLM
    :members:
    :undoc-members:
    :show-inheritance:
