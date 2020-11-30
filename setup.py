@@ -1,14 +1,14 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 setup(name='insolver',
-      version='0.3.dev1',
-      description='Mindset insurance scoring ',
+      version='0.4.dev2',
+      description='Mindset insurance scoring',
       url='https://github.com/MindSetLib/MS-InsuranceScoring',
       author='Mindset',
       author_email='request@mind-set.ru',
       license='MIT',
-      packages=['insolver', 'insolver.serving'],
+      packages=find_packages(),
       entry_points={
             "console_scripts": [
                   "insolver_serving = insolver.serving.run_service:run"
@@ -22,8 +22,10 @@ setup(name='insolver',
             'lightgbm',
             'catboost',
             'hyperopt',
-            'sklearn',
+            'scikit-learn',
+            'pdpbox',
             'pyodbc',
+            'kaleido',
             'requests',
             'requests_cache',
             'plotly',
