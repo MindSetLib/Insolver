@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from insolver import InsolverDataFrame
-from insolver.InsolverTransforms import InsolverTransforms
+from insolver.transforms.InsolverTransforms import InsolverTransforms
 from insolver.InsolverUtils import init_transforms
 from insolver.wrappers import InsolverGLMWrapper
 

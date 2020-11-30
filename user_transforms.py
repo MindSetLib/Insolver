@@ -1,6 +1,6 @@
 import pandas as pd
 
-from insolver.InsolverTransforms import InsolverTransformMain
+from insolver.transforms.InsolverTransforms import InsolverTransformMain
 
 
 class TransformSocioCateg(InsolverTransformMain):

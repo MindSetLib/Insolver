@@ -6,7 +6,7 @@ import pandas as pd
 from flask import Flask, request, jsonify
 
 from insolver import InsolverDataFrame
-from insolver.InsolverTransforms import InsolverTransforms
+from insolver.transforms.InsolverTransforms import InsolverTransforms
 from insolver.InsolverUtils import init_transforms
 from insolver.wrappers import InsolverGLMWrapper
 

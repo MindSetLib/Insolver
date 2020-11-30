@@ -1,7 +1,7 @@
 import pandas as pd
 
 from insolver import InsolverDataFrame
-from insolver.InsolverTransforms import (
+from insolver.transforms.InsolverTransforms import (
     TransformExp,
     InsolverTransforms,
     TransformAge,

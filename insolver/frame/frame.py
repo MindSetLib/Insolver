@@ -1,10 +1,9 @@
 from pandas import DataFrame
 
-from insolver.InsolverMain import InsolverMain
 from insolver.model_tools import train_val_test_split
 
 
-class InsolverDataFrame(DataFrame, InsolverMain):
+class InsolverDataFrame(DataFrame):
     """Primary DataFrame class for Insolver.
 
     Attributes:
