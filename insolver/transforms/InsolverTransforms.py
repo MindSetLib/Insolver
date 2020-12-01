@@ -623,7 +623,7 @@ class TransformGetDummies:
 
     def __call__(self, df):
         if not self.inference:
-            df = pd.get_dummies(df, prefix_sep='_', columns=self.column_param, drop_first=self.drop_first)
+            df = pd.get_dummies(df, prefix_sep='_', columns=[self.column_param], drop_first=self.drop_first)
             self.dummy_columns = [column for column in df.columns if column.startswith(self.column_param + '_')]
         else:
             for column in self.dummy_columns:
