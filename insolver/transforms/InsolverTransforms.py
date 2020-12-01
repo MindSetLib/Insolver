@@ -611,7 +611,8 @@ class TransformGetDummies:
     """
     def __init__(self, column_param, drop_first=False, inference=False, dummy_columns=None):
         self.priority = 3
-        self.column_param = [column_param, ]
+        self.column_param = []
+        self.column_param.append(column_param)
         self.drop_first = drop_first
         self.inference = inference
         if inference:
