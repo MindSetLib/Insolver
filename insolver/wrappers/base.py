@@ -6,7 +6,7 @@ import functools
 
 from matplotlib.pyplot import show, tight_layout
 from numpy import array, mean, broadcast_to
-from pandas import DataFrame, Series, concat
+from pandas import DataFrame, Series, concat, merge
 from sklearn.model_selection import KFold, cross_val_score, cross_validate
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
 from sklearn.inspection import plot_partial_dependence
@@ -193,7 +193,7 @@ class InsolverBaseWrapper:
             cv_results = {key.split('test_')[1]: cv_results[key] for key in cv_results if key.startswith('test_')}
             return estimators, cv_results
         else:
-            pass  # TODO: CV for h2o. nfolds...
+            raise NotImplementedError('_cross_val method is not implemented for backend=`h2o`')
 
 
 class InsolverH2OWrapper:
@@ -242,33 +242,35 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
     """Dummy wrapper for returning trivial "predictions" or actual values for metric comparison and statistics.
 
     Attributes:
-        y (:obj:`pd.DataFrame` or :obj:`pd.Series`): Target values.
-        column (:obj:`pd.DataFrame` or :obj:`pd.Series`, optional): Column to perform groupby.
+        col_name (:obj:`str`, optional): Column name to perform groupby.
         agg (:obj:`callable`, optional): Aggregation function.
         **kwargs: Other arguments.
     """
-    def __init__(self, y=None, column=None, agg=None, x_train=None, y_train=None, **kwargs):
+    def __init__(self, col_name=None, agg=None, **kwargs):
         super(InsolverTrivialWrapper, self).__init__(backend='trivial')
         self._backends, self.x_train, self.y_train = ['trivial'], None, None
         self._back_load_dict, self._back_save_dict = {'trivial': self._pickle_load}, {'trivial': self._pickle_save}
 
-        if isinstance(column, (Series, DataFrame)) or column is None:
-            self.column = column
+        if isinstance(col_name, str) or col_name is None:
+            self.col_name = col_name
         else:
-            raise TypeError(f'Column of type {type(self.column)} is not supported.')
-        self.y, self.agg, self.kwargs = y, agg, kwargs
+            raise TypeError(f'Column of type {type(self.col_name)} is not supported.')
+        self.fitted, self.agg, self.kwargs = None, agg, kwargs
+        self.agg = mean if self.agg is None else self.agg
 
-        if (self.column is None) and (self.agg is None):
-            self.algo = 'actual'
-        elif self.column is None:
+        if self.col_name is None:
             self.algo = self.agg.__name__.replace('_', ' ')
         else:
-            self.agg = mean if self.agg is None else self.agg
-            name = self.column.name if isinstance(self.column, Series) else self.column.columns[0]
-            self.algo = f"{self.agg.__name__} target: {name}"
+            self.algo = f"{self.agg.__name__} target: {self.col_name}"
 
     def fit(self, X, y):
         self.x_train, self.y_train = X, y
+        if self.col_name is None:
+            self.fitted = self.agg(self.y_train)
+        else:
+            _df = concat([self.y_train, self.x_train[self.col_name]], axis=1)
+            self.fitted = _df.groupby(_df.columns[1]).transform(self.agg).reset_index().rename({'index': self.col_name},
+                                                                                               axis=1)
 
     def predict(self, X):
         """Making dummy predictions.
@@ -279,13 +281,12 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         Returns:
             array: Trivial model "prediction".
         """
-        if (self.column is None) and (self.agg is None):
-            output = self.y
-        elif self.column is None:
-            output = broadcast_to(self.agg(self.y), self.y.shape)
+        if self.col_name is None:
+            output = broadcast_to(self.fitted, X.shape[0])
         else:
-            _df = concat([self.y, self.column], axis=1)
-            output = _df.groupby(_df.columns[1]).transform(self.agg)
+            output = merge(X[[self.col_name]], self.fitted, how='left', on=self.col_name)[self.y_train.name].fillna(
+                self.agg(self.y_train))
+
         if len(X) == len(output):
             return array(output)
         else:
