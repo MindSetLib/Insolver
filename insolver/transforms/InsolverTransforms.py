@@ -623,7 +623,8 @@ class TransformGetDummies:
 
     def __call__(self, df):
         if not self.inference:
-            _df_dummy = pd.get_dummies(df[[self.column_param]], prefix_sep='_', drop_first=self.drop_first)
+            _df_dummy = pd.get_dummies(df[[self.column_param]], columns=None, prefix_sep='_',
+                                       drop_first=self.drop_first)
             self.dummy_columns = _df_dummy.columns
             df = pd.concat([df, _df_dummy], axis=1)
         else:

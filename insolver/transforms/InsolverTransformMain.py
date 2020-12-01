@@ -45,6 +45,8 @@ class InsolverTransform(InsolverDataFrame):
                                       'Transforms with higher priority should be done first.', PriorityWarning)
                     else:
                         priority = transform.priority
+                else:
+                    pass
 
             n = 0
             for transform in self.transforms:
