@@ -4,15 +4,13 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from insolver.transforms import InsolverTransformMain
-
 
 # ---------------------------------------------------
 # Person data methods
 # ---------------------------------------------------
 
 
-class TransformGenderGetFromName(InsolverTransformMain):
+class TransformGenderGetFromName:
     """Gets clients' genders from theirs russian second names.
 
     Attributes:
@@ -23,7 +21,6 @@ class TransformGenderGetFromName(InsolverTransformMain):
     """
     def __init__(self, column_name, column_gender, gender_male='male', gender_female='female'):
         self.priority = 0
-        super().__init__()
         self.column_name = column_name
         self.column_gender = column_gender
         self.gender_male = gender_male
@@ -48,7 +45,7 @@ class TransformGenderGetFromName(InsolverTransformMain):
         return df
 
 
-class TransformAgeGetFromBirthday(InsolverTransformMain):
+class TransformAgeGetFromBirthday:
     """Gets clients' ages in years from theirs birth dates and policies' start dates.
 
     Attributes:
@@ -58,7 +55,6 @@ class TransformAgeGetFromBirthday(InsolverTransformMain):
     """
     def __init__(self, column_date_birth, column_date_start, column_age):
         self.priority = 0
-        super().__init__()
         self.column_date_birth = column_date_birth
         self.column_date_start = column_date_start
         self.column_age = column_age
@@ -86,19 +82,18 @@ class TransformAgeGetFromBirthday(InsolverTransformMain):
         return df
 
 
-class TransformAge(InsolverTransformMain):
+class TransformAge:
     """Transforms values of drivers' minimum ages in years.
     Values under 'age_min' are invalid. Values over 'age_max' will be grouped.
 
     Attributes:
         column_driver_minage (str): Column name in InsolverDataFrame containing drivers' minimum ages in years,
-        column type is integer.
+            column type is integer.
         age_min (int): Minimum value of drivers' age in years, lower values are invalid, 18 by default.
         age_max (int): Maximum value of drivers' age in years, bigger values will be grouped, 70 by default.
     """
     def __init__(self, column_driver_minage, age_min=18, age_max=70):
         self.priority = 1
-        super().__init__()
         self.column_driver_minage = column_driver_minage
         self.age_min = age_min
         self.age_max = age_max
@@ -119,16 +114,16 @@ class TransformAge(InsolverTransformMain):
         return df
 
 
-class TransformAgeGender(InsolverTransformMain):
+class TransformAgeGender:
     """Gets intersections of drivers' minimum ages and genders.
 
     Attributes:
         column_age (str): Column name in InsolverDataFrame containing clients' ages in years, column type is integer.
         column_gender (str): Column name in InsolverDataFrame containing clients' genders.
         column_age_m (str): Column name in InsolverDataFrame for males' ages, for females default value is applied,
-        column type is integer.
+            column type is integer.
         column_age_f (str): Column name in InsolverDataFrame for females' ages, for males default value is applied,
-        column type is integer.
+            column type is integer.
         age_default (int): Default value of the age in years,18 by default.
         gender_male: Value for male gender in InsolverDataFrame, 'male' by default.
         gender_female: Value for male gender in InsolverDataFrame, 'female' by default.
@@ -136,7 +131,6 @@ class TransformAgeGender(InsolverTransformMain):
     def __init__(self, column_age, column_gender, column_age_m, column_age_f, age_default=18,
                  gender_male='male', gender_female='female'):
         self.priority = 2
-        super().__init__()
         self.column_age = column_age
         self.column_gender = column_gender
         self.column_age_m = column_age_m
@@ -172,17 +166,16 @@ class TransformAgeGender(InsolverTransformMain):
         return df
 
 
-class TransformExp(InsolverTransformMain):
+class TransformExp:
     """Transforms values of drivers' minimum experiences in years with values over 'exp_max' grouped.
 
     Attributes:
         column_driver_minexp (str): Column name in InsolverDataFrame containing drivers' minimum experiences in years,
-        column type is integer.
+            column type is integer.
         exp_max (int): Maximum value of drivers' experience in years, bigger values will be grouped, 52 by default.
     """
     def __init__(self, column_driver_minexp, exp_max=52):
         self.priority = 1
-        super().__init__()
         self.column_driver_minexp = column_driver_minexp
         self.exp_max = exp_max
 
@@ -201,20 +194,19 @@ class TransformExp(InsolverTransformMain):
         return df
 
 
-class TransformAgeExpDiff(InsolverTransformMain):
+class TransformAgeExpDiff:
     """Transforms records with difference between drivers' minimum age and minimum experience less then 'diff_min'
      years, sets drivers' minimum experience equal to drivers' minimum age minus 'diff_min' years.
 
     Attributes:
         column_driver_minage (str): Column name in InsolverDataFrame containing drivers' minimum ages in years,
-        column type is integer.
+            column type is integer.
         column_driver_minexp (str): Column name in InsolverDataFrame containing drivers' minimum experiences in years,
-        column type is integer.
+            column type is integer.
         diff_min (int): Minimum allowed difference between age and experience in years.
     """
     def __init__(self, column_driver_minage, column_driver_minexp, diff_min=18):
         self.priority = 2
-        super().__init__()
         self.column_driver_minage = column_driver_minage
         self.column_driver_minexp = column_driver_minexp
         self.diff_min = diff_min
@@ -226,7 +218,7 @@ class TransformAgeExpDiff(InsolverTransformMain):
         return df
 
 
-class TransformNameCheck(InsolverTransformMain):
+class TransformNameCheck:
     """Checks if clients' first names are in special list.
     Names may concatenate surnames, first names and last names.
 
@@ -238,7 +230,6 @@ class TransformNameCheck(InsolverTransformMain):
     """
     def __init__(self, column_name, column_name_check, names_list, name_full=False):
         self.priority = 1
-        super().__init__()
         self.column_name = column_name
         self.name_full = name_full
         self.column_name_check = column_name_check
@@ -266,22 +257,21 @@ class TransformNameCheck(InsolverTransformMain):
 # ---------------------------------------------------
 
 
-class TransformVehPower(InsolverTransformMain):
+class TransformVehPower:
     """Transforms values of vehicles' powers.
     Values under 'power_min' and over 'power_max' will be grouped.
     Values between 'power_min' and 'power_max' will be grouped with step 'power_step'.
 
     Attributes:
         column_veh_power (str): Column name in InsolverDataFrame containing vehicles' powers,
-        column type is float.
+            column type is float.
         power_min (float): Minimum value of vehicles' power, lower values will be grouped, 10 by default.
         power_max (float): Maximum value of vehicles' power, bigger values will be grouped, 500 by default.
         power_step (int): Values of vehicles' power will be divided by this parameter, rounded to integers,
-        10 by default.
+            10 by default.
     """
     def __init__(self, column_veh_power, power_min=10, power_max=500, power_step=10):
         self.priority = 1
-        super().__init__()
         self.column_veh_power = column_veh_power
         self.power_min = power_min
         self.power_max = power_max
@@ -305,18 +295,17 @@ class TransformVehPower(InsolverTransformMain):
         return df
 
 
-class TransformVehAgeGetFromIssueYear(InsolverTransformMain):
+class TransformVehAgeGetFromIssueYear:
     """Gets vehicles' ages in years from issue years and policies' start dates.
 
     Attributes:
         column_veh_issue_year (str): Column name in InsolverDataFrame containing vehicles' issue years,
-        column type is integer.
+            column type is integer.
         column_date_start (str): Column name in InsolverDataFrame containing policies' start dates, column type is date.
         column_veh_age (str): Column name in InsolverDataFrame for vehicles' ages in years, column type is integer.
     """
     def __init__(self, column_veh_issue_year, column_date_start, column_veh_age):
         self.priority = 0
-        super().__init__()
         self.column_veh_issue_year = column_veh_issue_year
         self.column_date_start = column_date_start
         self.column_veh_age = column_veh_age
@@ -345,17 +334,16 @@ class TransformVehAgeGetFromIssueYear(InsolverTransformMain):
         return df
 
 
-class TransformVehAge(InsolverTransformMain):
+class TransformVehAge:
     """Transforms values of vehicles' ages in years. Values over 'veh_age_max' will be grouped.
 
     Attributes:
         column_veh_age (str): Column name in InsolverDataFrame containing vehicles' ages in years,
-        column type is integer.
+            column type is integer.
         veh_age_max (int): Maximum value of vehicles' age in years, bigger values will be grouped, 25 by default.
     """
     def __init__(self, column_veh_age, veh_age_max=25):
         self.priority = 1
-        super().__init__()
         self.column_veh_age = column_veh_age
         self.veh_age_max = veh_age_max
 
@@ -379,7 +367,7 @@ class TransformVehAge(InsolverTransformMain):
 # ---------------------------------------------------
 
 
-class TransformRegionGetFromKladr(InsolverTransformMain):
+class TransformRegionGetFromKladr:
     """Gets regions' numbers from KLADRs.
 
     Attributes:
@@ -388,7 +376,6 @@ class TransformRegionGetFromKladr(InsolverTransformMain):
     """
     def __init__(self, column_kladr, column_region_num):
         self.priority = 0
-        super().__init__()
         self.column_kladr = column_kladr
         self.column_region_num = column_region_num
 
@@ -416,7 +403,7 @@ class TransformRegionGetFromKladr(InsolverTransformMain):
 # ---------------------------------------------------
 
 
-class TransformParamUselessGroup(InsolverTransformMain):
+class TransformParamUselessGroup:
     """Groups all parameter's values with few data to one group.
 
     Attributes:
@@ -428,7 +415,6 @@ class TransformParamUselessGroup(InsolverTransformMain):
     """
     def __init__(self, column_param, size_min=1000, group_name=0, inference=False, param_useless=None):
         self.priority = 1
-        super().__init__()
         self.column_param = column_param
         self.size_min = size_min
         self.group_name = group_name
@@ -463,73 +449,92 @@ class TransformParamUselessGroup(InsolverTransformMain):
         return df
 
 
-class TransformParamSortFreq(InsolverTransformMain):
+class TransformParamSortFreq:
     """Gets sorted by claims' frequency parameter's values.
 
     Attributes:
         column_param (str): Column name in InsolverDataFrame containing parameter.
         column_param_sort_freq (str): Column name in InsolverDataFrame for sorted values of parameter,
-        column type is integer.
+            column type is integer.
         column_policies_count (str): Column name in InsolverDataFrame containing numbers of policies,
-        column type is integer or float.
+            column type is integer or float.
         column_claims_count (str): Column name in InsolverDataFrame containing numbers of claims,
-        column type is integer or float.
+            column type is integer or float.
+        inference (bool): Sign if the transformation is used for inference, False by default.
+        param_freq_dict (dict): The dictionary of sorted values of the parameter, for inference only.
     """
-    def __init__(self, column_param, column_param_sort_freq, column_policies_count, column_claims_count):
+    def __init__(self, column_param, column_param_sort_freq, column_policies_count, column_claims_count,
+                 inference=False, param_freq_dict=None):
         self.priority = 2
-        super().__init__()
         self.column_param = column_param
         self.column_param_sort_freq = column_param_sort_freq
         self.column_policies_count = column_policies_count
         self.column_claims_count = column_claims_count
         self.param_freq = pd.DataFrame
-        self.param_freq_dict = {}
+        self.inference = inference
+        if inference:
+            if param_freq_dict is None:
+                raise NotImplementedError("'param_freq_dict' should contain the dictionary of sorted values.")
+            self.param_freq_dict = param_freq_dict
+        else:
+            self.param_freq_dict = {}
 
     def __call__(self, df):
-        self.param_freq = df.groupby([self.column_param]).sum()[[self.column_claims_count, self.column_policies_count]]
-        self.param_freq['freq'] = (self.param_freq[self.column_claims_count] /
-                                   self.param_freq[self.column_policies_count])
-        keys = []
-        values = []
-        for i in enumerate(self.param_freq.sort_values('freq', ascending=False).index.values):
-            keys.append(i[1])
-            values.append(float(i[0]))
-        self.param_freq_dict = dict(zip(keys, values))
+        if not self.inference:
+            self.param_freq = df.groupby([self.column_param]).sum()[[self.column_claims_count,
+                                                                     self.column_policies_count]]
+            self.param_freq['freq'] = (self.param_freq[self.column_claims_count] /
+                                       self.param_freq[self.column_policies_count])
+            keys = []
+            values = []
+            for i in enumerate(self.param_freq.sort_values('freq', ascending=False).index.values):
+                keys.append(i[1])
+                values.append(float(i[0]))
+            self.param_freq_dict = dict(zip(keys, values))
         df[self.column_param_sort_freq] = df[self.column_param].map(self.param_freq_dict)
         return df
 
 
-class TransformParamSortAC(InsolverTransformMain):
+class TransformParamSortAC:
     """Gets sorted by claims' average sum parameter's values.
 
     Attributes:
         column_param (str): Column name in InsolverDataFrame containing parameter.
         column_param_sort_ac (str): Column name in InsolverDataFrame for sorted values of parameter,
-        column type is integer.
+            column type is integer.
         column_claims_count (str): Column name in InsolverDataFrame containing numbers of claims,
-        column type is integer or float.
+            column type is integer or float.
         column_claims_sum (str): Column name in InsolverDataFrame containing sums of claims,
-        column type is integer or float.
+            column type is integer or float.
+        inference (bool): Sign if the transformation is used for inference, False by default.
+        param_ac_dict (dict): The dictionary of sorted values of the parameter, for inference only.
     """
-    def __init__(self, column_param, column_param_sort_ac, column_claims_count, column_claims_sum):
+    def __init__(self, column_param, column_param_sort_ac, column_claims_count, column_claims_sum,
+                 inference=False, param_ac_dict=None):
         self.priority = 2
-        super().__init__()
         self.column_param = column_param
         self.column_param_sort_ac = column_param_sort_ac
         self.column_claims_count = column_claims_count
         self.column_claims_sum = column_claims_sum
         self.param_ac = pd.DataFrame
-        self.param_ac_dict = {}
+        self.inference = inference
+        if inference:
+            if param_ac_dict is None:
+                raise NotImplementedError("'param_ac_dict' should contain the dictionary of sorted values.")
+            self.param_ac_dict = param_ac_dict
+        else:
+            self.param_ac_dict = {}
 
     def __call__(self, df):
-        self.param_ac = df.groupby([self.column_param]).sum()[[self.column_claims_sum, self.column_claims_count]]
-        self.param_ac['avg_claim'] = self.param_ac[self.column_claims_sum] / self.param_ac[self.column_claims_count]
-        keys = []
-        values = []
-        for i in enumerate(self.param_ac.sort_values('avg_claim', ascending=False).index.values):
-            keys.append(i[1])
-            values.append(float(i[0]))
-        self.param_ac_dict = dict(zip(keys, values))
+        if not self.inference:
+            self.param_ac = df.groupby([self.column_param]).sum()[[self.column_claims_sum, self.column_claims_count]]
+            self.param_ac['avg_claim'] = self.param_ac[self.column_claims_sum] / self.param_ac[self.column_claims_count]
+            keys = []
+            values = []
+            for i in enumerate(self.param_ac.sort_values('avg_claim', ascending=False).index.values):
+                keys.append(i[1])
+                values.append(float(i[0]))
+            self.param_ac_dict = dict(zip(keys, values))
         df[self.column_param_sort_ac] = df[self.column_param].map(self.param_ac_dict)
         return df
 
@@ -539,7 +544,7 @@ class TransformParamSortAC(InsolverTransformMain):
 # ---------------------------------------------------
 
 
-class TransformToNumeric(InsolverTransformMain):
+class TransformToNumeric:
     """Transforms parameter's values to numeric types, uses Pandas' 'to_numeric'.
 
     Attributes:
@@ -548,7 +553,6 @@ class TransformToNumeric(InsolverTransformMain):
     """
     def __init__(self, column_param, downcast='integer'):
         self.priority = 0
-        super().__init__()
         self.column_param = column_param
         self.downcast = downcast
 
@@ -557,7 +561,7 @@ class TransformToNumeric(InsolverTransformMain):
         return df
 
 
-class TransformMapValues(InsolverTransformMain):
+class TransformMapValues:
     """Transforms parameter's values according to the dictionary.
 
     Attributes:
@@ -566,7 +570,6 @@ class TransformMapValues(InsolverTransformMain):
     """
     def __init__(self, column_param, dictionary):
         self.priority = 1
-        super().__init__()
         self.column_param = column_param
         self.dictionary = dictionary
 
@@ -575,7 +578,7 @@ class TransformMapValues(InsolverTransformMain):
         return df
 
 
-class TransformPolynomizer(InsolverTransformMain):
+class TransformPolynomizer:
     """Gets polynomials of parameter's values.
 
     Attributes:
@@ -584,7 +587,6 @@ class TransformPolynomizer(InsolverTransformMain):
     """
     def __init__(self, column_param, n=2):
         self.priority = 3
-        super().__init__()
         self.column_param = column_param
         self.n = n
 
@@ -597,32 +599,39 @@ class TransformPolynomizer(InsolverTransformMain):
         return df
 
 
-class TransformGetDummies(InsolverTransformMain):
+class TransformGetDummies:
     """Gets dummy columns of the parameter, uses Pandas' 'get_dummies'.
 
     Attributes:
         column_param (str): Column name in InsolverDataFrame containing parameter to transform.
+        drop_first (bool): Whether to get k-1 dummies out of k categorical levels by removing the first level,
+            False by default.
+        inference (bool): Sign if the transformation is used for inference, False by default.
+        dummy_columns (list): List of the dummy columns, for inference only.
     """
-    def __init__(self, column_param, prefix=None, prefix_sep='_', dummy_na=False, sparse=False, drop_first=False,
-                 dtype=None):
+    def __init__(self, column_param, drop_first=False, inference=False, dummy_columns=None):
         self.priority = 3
-        super().__init__()
         self.column_param = column_param
-        self.prefix = prefix
-        self.prefix_sep = prefix_sep
-        self.dummy_na = dummy_na
-        self.sparse = sparse
         self.drop_first = drop_first
-        self.dtype = dtype
+        self.inference = inference
+        if inference:
+            if dummy_columns is None:
+                raise NotImplementedError("'dummy_columns' should contain the list of dummy columns.")
+            self.dummy_columns = dummy_columns
+        else:
+            self.dummy_columns = []
 
     def __call__(self, df):
-        df = pd.get_dummies(df, prefix=self.prefix, prefix_sep=self.prefix_sep, dummy_na=self.dummy_na,
-                            columns=self.column_param, sparse=self.sparse, drop_first=self.drop_first,
-                            dtype=self.dtype)
+        if not self.inference:
+            df = pd.get_dummies(df, prefix_sep='_', columns=self.column_param, drop_first=self.drop_first)
+            self.dummy_columns = [column for column in df.columns if column.startswith(self.column_param + '_')]
+        else:
+            for column in self.dummy_columns:
+                df[column] = 1 * ((self.column_param + '_' + df[self.column_param]) == column)
         return df
 
 
-class TransformCarFleetSize(InsolverTransformMain):
+class TransformCarFleetSize:
     """Calculates fleet sizes for policyholders.
 
     Attributes:
@@ -632,7 +641,6 @@ class TransformCarFleetSize(InsolverTransformMain):
     """
     def __init__(self, column_id, column_date_start, column_fleet_size):
         self.priority = 3
-        super().__init__()
         self.column_id = column_id
         self.column_date_start = column_date_start
         self.column_fleet_size = column_fleet_size

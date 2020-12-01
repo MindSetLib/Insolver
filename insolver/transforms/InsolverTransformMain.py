@@ -1,18 +1,16 @@
 import json
 import pickle
+import warnings
 
-from insolver import InsolverDataFrame
+from insolver.frame import InsolverDataFrame
 
 
-class InsolverTransformMain:
-    def __init__(self):
-        self.inference = True
-        if not hasattr(self, 'priority'):
-            raise NotImplementedError("Transformation class should have the 'priority' property.")
+class PriorityWarning(UserWarning):
+    pass
 
 
 class InsolverTransforms(InsolverDataFrame):
-    """Class to compose transforms to be done on InsolverDataFrame. Each transform must have the priority param.
+    """Class to compose transforms to be done on InsolverDataFrame. Transforms may have the priority param.
     Priority=0: transforms which get values from other (TransformAgeGetFromBirthday, TransformRegionGetFromKladr, etc).
     Priority=1: main transforms of values (TransformAge, TransformVehPower, ets).
     Priority=2: transforms which get intersections of features (TransformAgeGender, ets);
@@ -22,9 +20,6 @@ class InsolverTransforms(InsolverDataFrame):
     Attributes:
         df: InsolverDataFrame to transform.
         transforms: List of transforms to be done.
-
-    Returns:
-        Transformed InsolverDataFrame.
     """
     _metadata = ['transforms', 'transforms_done']
 
@@ -41,18 +36,26 @@ class InsolverTransforms(InsolverDataFrame):
             list: List of transforms have been done.
         """
         if self.transforms:
-            i = 0
-            priority_max = max([transform.priority for transform in self.transforms])
-            for priority in range(priority_max + 1):
-                for transform in self.transforms:
-                    if transform.priority == priority:
-                        transform(self)
-                        attributes = {}
-                        for attribute in dir(transform):
-                            if attribute[0] != '_':
-                                exec("attributes.update({attribute: transform.%s})" % attribute)
-                        self.transforms_done.update({i: {'name': type(transform).__name__, 'attributes': attributes}})
-                        i += 1
+
+            priority = 0
+            for transform in self.transforms:
+                if hasattr(transform, 'priority'):
+                    if transform.priority < priority:
+                        warnings.warn('Check the order of transforms.'
+                                      'Transforms with higher priority should be done first.', PriorityWarning)
+                    else:
+                        priority = transform.priority
+
+            n = 0
+            for transform in self.transforms:
+                transform(self)
+                attributes = {}
+                for attribute in dir(transform):
+                    if attribute[0] != '_':
+                        exec("attributes.update({attribute: transform.%s})" % attribute)
+                self.transforms_done.update({n: {'name': type(transform).__name__, 'attributes': attributes}})
+                n += 1
+
         return self.transforms_done
 
     def save(self, filename):
@@ -62,3 +65,41 @@ class InsolverTransforms(InsolverDataFrame):
     def save_json(self, filename):
         with open(filename, 'w') as file:
             json.dump(self.transforms_done, file, separators=(',', ':'), sort_keys=True, indent=4)
+
+
+def load_class(module_list, transform_name):
+    for module in module_list:
+        try:
+            transform_class = getattr(module, transform_name)
+            return transform_class
+        except AttributeError:
+            pass
+
+
+def init_transforms(transforms, inference):
+    """Function for creation transformations objects from the dictionary.
+
+    Args:
+        transforms (list): Dictionary with classes and their init parameters.
+        inference (bool): Should be 'False' if transforms are applied while preparing data for modeling.
+            Should be 'True' if transforms are applied on inference.
+
+    Returns:
+        list: List of transformations objects.
+    """
+    transforms_list = []
+    module_list = [InsolverTransforms]
+
+    try:
+        import user_transforms
+        module_list.append(user_transforms)
+
+    except ModuleNotFoundError:
+        pass
+
+    for transform_name in transforms:
+        transform_class = load_class(module_list, transform_name)
+        if transform_class:
+            transforms_list.append(transform_class(**transforms[transform_name]))
+
+    return transforms_list
