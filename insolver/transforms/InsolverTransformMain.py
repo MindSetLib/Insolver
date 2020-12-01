@@ -9,7 +9,7 @@ class PriorityWarning(UserWarning):
     pass
 
 
-class InsolverTransforms(InsolverDataFrame):
+class InsolverTransform(InsolverDataFrame):
     """Class to compose transforms to be done on InsolverDataFrame. Transforms may have the priority param.
     Priority=0: transforms which get values from other (TransformAgeGetFromBirthday, TransformRegionGetFromKladr, etc).
     Priority=1: main transforms of values (TransformAge, TransformVehPower, ets).
