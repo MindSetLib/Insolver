@@ -592,10 +592,10 @@ class TransformPolynomizer:
 
     def __call__(self, df):
         for i in range(2, self.n + 1):
-            _a = self.column_param + '_' + str(i)
-            while _a in list(df.columns):
-                _a = _a + '_'
-            df[_a] = df[self.column_param] ** i
+            a = self.column_param + '_' + str(i)
+            while a in list(df.columns):
+                a = a + '_'
+            df[a] = df[self.column_param] ** i
         return df
 
 
@@ -623,10 +623,9 @@ class TransformGetDummies:
 
     def __call__(self, df):
         if not self.inference:
-            _df_dummy = pd.get_dummies(df[[self.column_param]], columns=None, prefix_sep='_',
-                                       drop_first=self.drop_first)
-            self.dummy_columns = _df_dummy.columns
-            df = pd.concat([df, _df_dummy], axis=1)
+            df_dummy = pd.get_dummies(df[[self.column_param]], prefix_sep='_', drop_first=self.drop_first)
+            self.dummy_columns = list(df_dummy.columns)
+            df = pd.concat([df, df_dummy], axis=1)
         else:
             for column in self.dummy_columns:
                 df[column] = 1 * ((self.column_param + '_' + df[self.column_param]) == column)
