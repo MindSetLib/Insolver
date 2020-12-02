@@ -41,8 +41,9 @@ class InsolverTransform(InsolverDataFrame):
             for transform in self.transforms:
                 if hasattr(transform, 'priority'):
                     if transform.priority < priority:
-                        print('!!! WARNING !!!'
-                              'Check the order of transforms. Transforms with higher priority should be done first.')
+                        print('!!! WARNING !!!')
+                        print('Check the order of transforms. Transforms with higher priority should be done first.')
+                        break
                     else:
                         priority = transform.priority
                 else:

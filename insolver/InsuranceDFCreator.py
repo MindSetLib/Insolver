@@ -1,10 +1,10 @@
 import pandas as pd
 import datetime
 
-from .InsolverDataFrame import InsolverDataFrame
+from insolver.frame import InsolverDataFrame
 
 
-class InsolverDFCreator:
+class InsuranceDFCreator:
 
     def __init__(self,
                  df_policies=None,
