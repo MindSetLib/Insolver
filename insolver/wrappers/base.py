@@ -137,6 +137,8 @@ class InsolverBaseWrapper:
         self.model = self.object(**self.best_params)
         self.model.fit(X, y, **({} if not ((fn_params is not None) and ('fit_params' in fn_params))
                                 else fn_params['fit_params']))
+        if not hasattr(self.model, 'feature_name_'):
+            self.model.feature_name_ = X.columns if isinstance(X, DataFrame) else [X.name]
         return self.best_params
 
     def pdp(self, X, features, feature_name, plot_backend='sklearn', **kwargs):
@@ -264,6 +266,12 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
             self.algo = f"{self.agg.__name__} target: {self.col_name}"
 
     def fit(self, X, y):
+        """Fitting dummy model.
+
+        Args:
+            X (:obj:`pd.DataFrame`): Data.
+            y (:obj:`pd.Series`): Target values.
+        """
         self.x_train, self.y_train = X, y
         if self.col_name is None:
             self.fitted = self.agg(self.y_train)
@@ -286,8 +294,4 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         else:
             output = merge(X[[self.col_name]], self.fitted, how='left', on=self.col_name)[self.y_train.name].fillna(
                 self.agg(self.y_train))
-
-        if len(X) == len(output):
-            return array(output)
-        else:
-            raise ValueError(f'Dimension mismatch: input [{len(X)}]; output [{len(output)}]')
+        return array(output)

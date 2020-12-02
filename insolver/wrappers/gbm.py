@@ -78,6 +78,8 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
             **kwargs: Other parameters passed to Scikit-learn API .fit().
         """
         self.model.fit(X, y, **kwargs)
+        if not hasattr(self.model, 'feature_name_'):
+            self.model.feature_name_ = X.columns if isinstance(X, DataFrame) else [X.name]
 
     def predict(self, X, **kwargs):
         """Predict using GBM with feature matrix X.
@@ -89,7 +91,8 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         Returns:
             array: Returns predicted values.
         """
-        return self.model.predict(X, **kwargs)
+        return self.model.predict(X if not hasattr(self.model, 'feature_name_')
+                                  else X[self.model.feature_name_], **kwargs)
 
     def shap(self, X, plot=False, plot_type='bar'):
         """Method for shap values calculation and corresponding plot of feature importances.
