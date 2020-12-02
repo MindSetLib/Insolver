@@ -101,9 +101,15 @@ def init_transforms(transforms, inference):
     except ModuleNotFoundError:
         pass
 
-    for transform_name in transforms:
-        transform_class = load_class(module_list, transform_name)
+    for n in transforms:
+        try:
+            del transforms[n]['attributes']['priority']
+        except KeyError:
+            pass
+
+        transform_class = load_class(module_list, transforms[n]['name'])
         if transform_class:
-            transforms_list.append(transform_class(**transforms[transform_name]))
+            transforms_list.append(transform_class(**transforms[n]['attributes']))
+
 
     return transforms_list
