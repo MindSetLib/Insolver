@@ -107,10 +107,8 @@ def init_transforms(transforms, inference):
         except KeyError:
             pass
 
-        try:
+        if inference in transforms[n]['attributes'].keys():
             transforms[n]['attributes']['inference'] = inference
-        except KeyError:
-            pass
 
         transform_class = load_class(module_list, transforms[n]['name'])
         if transform_class:
