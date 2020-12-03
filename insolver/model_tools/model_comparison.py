@@ -71,9 +71,9 @@ class ModelMetricsCompare:
             Returns `None`, but results available in `self.stats`, `self.metrics`.
         """
         stats_df, model_metrics, model_names = DataFrame(), DataFrame(), []
-        default_trivial = [InsolverTrivialWrapper(y=y), InsolverTrivialWrapper(y=y, agg=mean),
-                           InsolverTrivialWrapper(y=y, agg=median)]
-        models = default_trivial + self.models
+        trivial = InsolverTrivialWrapper(agg=lambda x: x)
+        trivial.fit(X, y)
+        models = [trivial] + self.models
         for model in models:
             p = model.predict(X)
             stats_val = [mean(p), var(p), std(p), min(p), quantile(p, 0.25), median(p), quantile(p, 0.75), max(p)]

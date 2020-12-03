@@ -79,8 +79,9 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
         """
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
             if isinstance(X, (DataFrame, Series)):
-                self.features = X.columns.tolist() if isinstance(X, DataFrame) else X.name
+                self.features = X.columns.tolist() if isinstance(X, DataFrame) else [X.name]
             self.model.fit(X, y, glm__sample_weight=sample_weight)
+            self.model.feature_name_ = self.features
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
             features, target, train_set, params = self._x_y_to_h2o_frame(X, y, sample_weight, {**kwargs}, X_valid,
                                                                          y_valid, sample_weight_valid)
@@ -100,7 +101,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
             array: Returns predicted values.
         """
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
-            predictions = self.model.predict(X)
+            predictions = self.model.predict(X if not hasattr(self.model, 'feature_name_')
+                                             else X[self.model.feature_name_])
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
             if self.model.parms['offset_column']['actual_value'] is not None and sample_weight is None:
                 offset_name = self.model.parms['offset_column']['actual_value']['column_name']
