@@ -89,7 +89,9 @@ class InsolverBaseWrapper:
                   int(params[key]) for key in params.keys()}
         estimator = self.object(**params)
         njobs = -1 if 'n_jobs' not in kwargs else kwargs.pop('n_jobs')
-        score = agg(cross_val_score(estimator, X, y=y, scoring=scoring, cv=cv, n_jobs=njobs, **kwargs))
+        error_score = 'raise' if 'error_score' not in kwargs else kwargs.pop('error_score')
+        score = agg(cross_val_score(estimator, X, y=y, scoring=scoring, cv=cv, n_jobs=njobs,
+                                    error_score=error_score, **kwargs))
         return {'status': STATUS_OK, 'loss': score}
 
     def hyperopt_cv(self, X, y, params, fn=None, algo=None, max_evals=10, timeout=None,
