@@ -171,11 +171,11 @@ class InsolverBaseWrapper:
                 scorers = scoring
                 try:
                     check_scoring(self.model, scorers)
-                    scorers = (make_scorer(scorers) if
+                    scorers = {scorers.__name__.replace('_', ' '): (make_scorer(scorers) if
                                isinstance(scorers, (types.FunctionType, types.BuiltinFunctionType, functools.partial))
-                               else scorers)
+                               else scorers)}
                 except ValueError:
-                    scorers = make_scorer(scorers)
+                    scorers = {scorers.__name__.replace('_', ' '): make_scorer(scorers)}
             elif isinstance(scoring, (tuple, list)):
                 scorers = []
                 for scorer in scoring:
