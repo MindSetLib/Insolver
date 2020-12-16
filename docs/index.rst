@@ -3,22 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Insolver Projects' documentation!
+Insolver Documentation
 ========================================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+Insolver is insurance scoring ML package
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents
+
+   source/overview
    source/installation
    source/create_df
-   source/user_transforms
+   source/transformations
    source/serving
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

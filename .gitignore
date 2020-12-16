@@ -131,3 +131,8 @@ dmypy.json
 # IDE
 .idea
 .vscode
+
+# Docs build files
+docs/_build
+docs/_static
+docs/_templates
