@@ -1,4 +1,4 @@
-# Create Insolver DataFrame
+# Insolver DataFrame
 
 Create from pandas df:
 
