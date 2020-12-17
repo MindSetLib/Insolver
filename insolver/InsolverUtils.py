@@ -4,14 +4,6 @@ import pyodbc
 from pandas import read_sql
 
 
-def is_number(x):
-    try:
-        complex(x)
-        return True
-    except ValueError:
-        return False
-
-
 class PostgresConnection:
     """Class for setting the connection to PostreSQL database.
 

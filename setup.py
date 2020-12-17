@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='insolver',
-      version='0.4.dev2',
+      version='0.4.dev3',
       description='Mindset insurance scoring',
       url='https://github.com/MindSetLib/MS-InsuranceScoring',
       author='Mindset',
