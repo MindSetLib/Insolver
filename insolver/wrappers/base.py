@@ -255,7 +255,8 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         self._backends, self.x_train, self.y_train = ['trivial'], None, None
         self._back_load_dict, self._back_save_dict = {'trivial': self._pickle_load}, {'trivial': self._pickle_save}
 
-        if isinstance(col_name, str) or col_name is None:
+        if (isinstance(col_name, (str, list, tuple)) or col_name is None or
+                (isinstance(col_name, (list, tuple)) and all([isinstance(element, str) for element in col_name]))):
             self.col_name = col_name
         else:
             raise TypeError(f'Column of type {type(self.col_name)} is not supported.')
@@ -279,8 +280,7 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
             self.fitted = self.agg(self.y_train)
         else:
             _df = concat([self.y_train, self.x_train[self.col_name]], axis=1)
-            self.fitted = _df.groupby(_df.columns[1]).transform(self.agg).reset_index().rename({'index': self.col_name},
-                                                                                               axis=1)
+            self.fitted = _df.groupby(self.col_name).aggregate(self.agg).reset_index()
 
     def predict(self, X):
         """Making dummy predictions.
@@ -294,6 +294,6 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         if self.col_name is None:
             output = broadcast_to(self.fitted, X.shape[0])
         else:
-            output = merge(X[[self.col_name]], self.fitted, how='left', on=self.col_name)[self.y_train.name].fillna(
+            output = merge(X[self.col_name], self.fitted, how='left', on=self.col_name)[self.y_train.name].fillna(
                 self.agg(self.y_train))
         return array(output)
