@@ -5,7 +5,7 @@ import geocoder
 import requests
 
 from insolver import InsolverDataFrame
-from .InsolverMain import InsolverTransformMain
+from insolver.transforms import InsolverTransformMain
 
 
 # ---------------------------------------------------

@@ -3,8 +3,6 @@ import platform
 import pyodbc
 from pandas import read_sql
 
-import insolver
-
 
 def is_number(x):
     try:
@@ -12,47 +10,6 @@ def is_number(x):
         return True
     except ValueError:
         return False
-
-
-def load_class(module_list, transform_name):
-    for module in module_list:
-        try:
-            transform_class = getattr(module, transform_name)
-            return transform_class
-        except AttributeError:
-            pass
-
-
-def init_transforms(transforms):
-    """Function for creation transformations objects from the dictionary.
-
-    Args:
-        transforms: dictionary with classes and their init parameters
-
-    Returns:
-        list: List of transformations objects.
-    """
-    transforms_list = []
-    module_list = [insolver.InsolverTransforms]
-
-    try:
-        import user_transforms
-        module_list.append(user_transforms)
-
-    except ModuleNotFoundError:
-        pass
-
-    for transform_name in transforms:
-        try:
-            del transforms[transform_name]['priority']
-        except KeyError:
-            pass
-
-        transform_class = load_class(module_list, transform_name)
-        if transform_class:
-            transforms_list.append(transform_class(**transforms[transform_name]))
-
-    return transforms_list
 
 
 class PostgresConnection:
