@@ -10,8 +10,15 @@ from sklearn.linear_model import TweedieRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from insolver.InsolverUtils import is_number
 from .base import InsolverBaseWrapper, InsolverH2OWrapper
+
+
+def is_number(x):
+    try:
+        float(x)
+        return True
+    except ValueError:
+        return False
 
 
 class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):

@@ -6,14 +6,6 @@ from pandas import read_sql
 import insolver
 
 
-def is_number(x):
-    try:
-        complex(x)
-        return True
-    except ValueError:
-        return False
-
-
 def load_class(module_list, transform_name):
     for module in module_list:
         try:
