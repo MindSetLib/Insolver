@@ -17,7 +17,7 @@ with open('transforms.pkl', 'rb') as file:
 transforms = init_transforms(transforms)
 
 # Apply transformations
-InsTransforms = InsolverTransforms(InsDataFrame, transforms)
+InsTransforms = InsolverTransform(InsDataFrame, transforms)
 InsTransforms.ins_transform()
 
 # Load saved model
