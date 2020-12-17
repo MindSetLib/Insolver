@@ -22,7 +22,7 @@ copyright = '2020, MindSet Team'
 author = 'MindSet Team'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '0.4.dev2'
 
 
 # -- General configuration ---------------------------------------------------
@@ -42,6 +42,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
+    'recommonmark',
 ]
 
 # Napoleon settings
@@ -80,3 +81,8 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+source_suffix = {
+    '.md': 'markdown',
+    '.rst': 'restructuredtext'
+}
