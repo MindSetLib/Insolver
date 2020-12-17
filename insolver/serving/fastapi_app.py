@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from insolver import InsolverDataFrame
-from insolver.transforms.InsolverTransforms import InsolverTransforms
+from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper
 
 model_path = os.environ['model_path']
@@ -41,7 +41,7 @@ async def predict(data: Data):
 
     InsDataFrame = InsolverDataFrame(df)
     # Apply transformations
-    InsTransforms = InsolverTransforms(InsDataFrame.get_data(), tranforms)
+    InsTransforms = InsolverTransform(InsDataFrame.get_data(), tranforms)
     InsTransforms.transform()
 
     # Prediction
