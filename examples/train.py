@@ -1,9 +1,9 @@
 import pandas as pd
 
 from insolver import InsolverDataFrame
-from insolver.transforms.InsolverTransforms import (
+from insolver.transforms import (
     TransformExp,
-    InsolverTransforms,
+    InsolverTransform,
     TransformAge,
     TransformMapValues,
     TransformPolynomizer,

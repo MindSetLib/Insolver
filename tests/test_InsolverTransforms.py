@@ -1,6 +1,6 @@
 import pandas as pd
 
-from insolver.transforms.InsolverTransforms import (
+from insolver.transforms import (
     TransformExp,
     TransformAge,
 )

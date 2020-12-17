@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 from insolver import InsolverDataFrame
 from insolver.transforms.InsolverTransforms import InsolverTransforms
-from insolver.InsolverUtils import init_transforms
 from insolver.wrappers import InsolverGLMWrapper
 
 model_path = os.environ['model_path']

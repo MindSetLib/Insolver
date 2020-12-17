@@ -3,8 +3,7 @@ import pickle
 import pandas as pd
 
 from insolver import InsolverDataFrame
-from insolver.transforms.InsolverTransforms import InsolverTransforms
-from insolver.InsolverUtils import init_transforms
+from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper
 
 # load data

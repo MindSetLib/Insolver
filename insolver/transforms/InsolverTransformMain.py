@@ -2,7 +2,6 @@ import json
 import pickle
 
 from insolver.frame import InsolverDataFrame
-from insolver.transforms import InsolverTransforms
 
 
 class PriorityWarning(UserWarning):
