@@ -41,8 +41,8 @@ async def predict(data: Data):
 
     InsDataFrame = InsolverDataFrame(df)
     # Apply transformations
-    InsTransforms = InsolverTransform(InsDataFrame.get_data(), tranforms)
-    InsTransforms.transform()
+    InsTransforms = InsolverTransform(InsDataFrame, tranforms)
+    InsTransforms.ins_transform()
 
     # Prediction
     predict_glm = new_iglm.predict(df)
