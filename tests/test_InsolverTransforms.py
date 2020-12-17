@@ -1,12 +1,8 @@
 import pandas as pd
-from insolver import InsolverDataFrame
 
-from insolver.InsolverTransforms import (
+from insolver.transforms import (
     TransformExp,
     TransformAge,
-    TransformMapValues,
-    TransformPolynomizer,
-    TransformAgeGender,
 )
 
 df = pd.read_csv('tests/data/freMPL-R_100.csv')

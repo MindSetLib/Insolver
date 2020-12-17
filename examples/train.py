@@ -1,9 +1,9 @@
 import pandas as pd
 
 from insolver import InsolverDataFrame
-from insolver.InsolverTransforms import (
+from insolver.transforms import (
     TransformExp,
-    InsolverTransforms,
+    InsolverTransform,
     TransformAge,
     TransformMapValues,
     TransformPolynomizer,
@@ -18,7 +18,7 @@ df = df[df.ClaimAmount > 0]
 
 InsDataFrame = InsolverDataFrame(df)
 
-InsTransforms = InsolverTransforms(InsDataFrame, [
+InsTransforms = InsolverTransform(InsDataFrame, [
     TransformAge('DrivAge', 18, 75),
     TransformExp('LicAge', 57),
     TransformMapValues('Gender', {'Male': 0, 'Female': 1}),

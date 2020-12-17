@@ -6,8 +6,7 @@ import pandas as pd
 from flask import Flask, request, jsonify
 
 from insolver import InsolverDataFrame
-from insolver.InsolverTransforms import InsolverTransforms
-from insolver.InsolverUtils import init_transforms
+from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper
 
 model_path = os.environ['model_path']
@@ -59,8 +58,8 @@ def predict():
     df = pd.read_json(json_str)
     InsDataFrame = InsolverDataFrame(df)
     # Apply transformations
-    InsTransforms = InsolverTransforms(InsDataFrame.get_data(), tranforms)
-    InsTransforms.transform()
+    InsTransforms = InsolverTransform(InsDataFrame, tranforms)
+    InsTransforms.ins_transform()
 
     # Prediction
     predict_glm = new_iglm.predict(df)
