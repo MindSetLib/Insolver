@@ -5,10 +5,9 @@ import pickle
 import pandas as pd
 from flask import Flask, request, jsonify
 
-from insolver.InsolverDataFrame import InsolverDataFrame
-from insolver.InsolverTransforms import InsolverTransforms
-from insolver.InsolverUtils import init_transforms
-from insolver.InsolverWrapperGLM import InsolverGLMWrapper
+from insolver import InsolverDataFrame
+from insolver.transforms import InsolverTransform, init_transforms
+from insolver.wrappers import InsolverGLMWrapper
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
@@ -22,8 +21,7 @@ from time import strftime, time
 app = Flask(__name__)
 
 # Load model
-new_iglm = InsolverGLMWrapper()
-new_iglm.load_model(model_path)
+new_iglm = InsolverGLMWrapper(backend='h2o', load_path=model_path)
 
 # load and init transformations
 with open(transforms_path, 'rb') as file:
@@ -42,6 +40,11 @@ def index():
     return "API for predict service"
 
 
+@app.route('/favicon.ico')
+def favicon():
+    return ''
+
+
 @app.route("/predict", methods=['POST'])
 def predict():
     # Request logging
@@ -55,8 +58,8 @@ def predict():
     df = pd.read_json(json_str)
     InsDataFrame = InsolverDataFrame(df)
     # Apply transformations
-    InsTransforms = InsolverTransforms(InsDataFrame.get_data(), tranforms)
-    InsTransforms.transform()
+    InsTransforms = InsolverTransform(InsDataFrame, tranforms)
+    InsTransforms.ins_transform()
 
     # Prediction
     predict_glm = new_iglm.predict(df)
