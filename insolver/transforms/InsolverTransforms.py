@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 # ---------------------------------------------------
 # Person data methods
@@ -653,4 +654,97 @@ class TransformCarFleetSize:
                 (cp[f'{self.column_date_start}_y'] <= cp[f'{self.column_date_start}_y'])]
         cp = cp.groupby(self.column_id).size().to_dict()
         df[self.column_fleet_size] = df[self.column_id].map(cp)
+        return df
+
+
+class AutoFillNATransforms:
+    def __init__(self, numerical_columns=None, categorical_columns=None, medians=None, freq_categories=None):
+        self.priority = 0
+        super().__init__()
+        self.numerical_columns = numerical_columns
+        self.categorical_columns = categorical_columns
+        self.medians = medians
+        self.freq_categories = freq_categories
+
+    def _find_num_cat_features(self, df):
+        self.categorical_columns = [c for c in df.columns if df[c].dtype.name == 'object']
+        self.numerical_columns = [c for c in df.columns if df[c].dtype.name != 'object']
+
+    def _fillna_numerical(self, df):
+        """Replace nan values with median values"""
+        if not self.numerical_columns:
+            return
+        self.medians = {}
+        for column in self.numerical_columns:
+            if df[column].isnull().all():
+                self.medians[column] = 1
+            else:
+                self.medians[column] = df[column].median()
+            df[column].fillna(self.medians[column], axis=0, inplace=True)
+
+    def _fillnan_categorical(self, df):
+        """Replace nan values with most occured category"""
+        if not self.categorical_columns:
+            return
+        self.freq_categories = {}
+        for column in self.categorical_columns:
+            if df[column].mode().values.size > 0:
+                most_frequent_category = df[column].mode()[0]
+            else:
+                most_frequent_category = 1
+            self.freq_categories[column] = most_frequent_category
+            df[column].fillna(most_frequent_category, inplace=True)
+
+    def __call__(self, df):
+        self._find_num_cat_features(df)
+        self._fillna_numerical(df)
+        self._fillnan_categorical(df)
+        return df
+
+
+class EncoderTransforms:
+    def __init__(self, column_names, le_classes=None):
+        self.priority = 3
+        super().__init__()
+        self.column_names = column_names
+        self.le_classes = le_classes
+
+    @staticmethod
+    def _encode_column(column):
+        le = LabelEncoder()
+        le.fit(column)
+        le_classes = le.classes_.tolist()
+        column = le.transform(column)
+        return column, le_classes
+
+    def __call__(self, df):
+        self.le_classes = {}
+        for column_name in self.column_names:
+            df[column_name], self.le_classes[column_name] = self._encode_column(df[column_name])
+        return df
+
+
+class OneHotEncoderTransforms:
+    def __init__(self, column_names, encoder_dict=None):
+        self.priority = 3
+        super().__init__()
+        self.column_names = column_names
+        self.encoder_dict = encoder_dict
+
+    def _encode_column(self, df, column_name):
+        encoder = OneHotEncoder(sparse=False)
+        encoder.fit(df[[column_name]])
+        encoder_params = encoder.categories_
+        encoder_params = [x.tolist() for x in encoder_params]
+        column_encoded = pd.DataFrame(encoder.transform(df[[column_name]]))
+        column_encoded.columns = encoder.get_feature_names([column_name])
+        df.drop([column_name], axis=1, inplace=True)
+        df = pd.concat([df, column_encoded], axis=1)
+        return df, encoder_params
+
+    def __call__(self, df):
+        self.encoder_dict = {}
+        for column in self.column_names:
+            df, encoder_params = self._encode_column(df, column)
+            self.encoder_dict[column] = encoder_params
         return df
