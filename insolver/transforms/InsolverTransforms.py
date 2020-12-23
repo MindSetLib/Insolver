@@ -660,7 +660,6 @@ class TransformCarFleetSize:
 class AutoFillNATransforms:
     def __init__(self, numerical_columns=None, categorical_columns=None, medians=None, freq_categories=None):
         self.priority = 0
-        super().__init__()
         self.numerical_columns = numerical_columns
         self.categorical_columns = categorical_columns
         self.medians = medians
@@ -705,7 +704,6 @@ class AutoFillNATransforms:
 class EncoderTransforms:
     def __init__(self, column_names, le_classes=None):
         self.priority = 3
-        super().__init__()
         self.column_names = column_names
         self.le_classes = le_classes
 
@@ -727,7 +725,6 @@ class EncoderTransforms:
 class OneHotEncoderTransforms:
     def __init__(self, column_names, encoder_dict=None):
         self.priority = 3
-        super().__init__()
         self.column_names = column_names
         self.encoder_dict = encoder_dict
 
