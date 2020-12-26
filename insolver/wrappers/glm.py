@@ -47,12 +47,12 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
         if backend not in self._backends:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
+        self.standardize = standardize
         if load_path is not None:
             self.load_model(load_path)
         else:
             family = family if family is not None else 'gaussian'
             link = link if link is not None else 'family_default' if backend == 'h2o' else 'auto'
-            self.standardize = standardize
             if backend == 'h2o':
                 self._h2o_init(h2o_init_params)
                 self.model = H2OGeneralizedLinearEstimator(family=family, link=link, standardize=standardize, **kwargs)
