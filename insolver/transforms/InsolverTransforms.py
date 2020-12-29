@@ -658,6 +658,14 @@ class TransformCarFleetSize:
 
 
 class AutoFillNATransforms:
+    """Fill NA values
+
+    Attributes:
+        numerical_columns (list): List of numerical columns
+        categorical_columns (list): List of categorical columns
+        medians (dict): Dictionary of median for each numerical column
+        freq_categories (dict): Dictionary of frequency for each categorical column
+    """
     def __init__(self, numerical_columns=None, categorical_columns=None, medians=None, freq_categories=None):
         self.priority = 0
         self.numerical_columns = numerical_columns
@@ -682,7 +690,7 @@ class AutoFillNATransforms:
             df[column].fillna(self.medians[column], axis=0, inplace=True)
 
     def _fillnan_categorical(self, df):
-        """Replace nan values with most occured category"""
+        """Replace nan values with most occurred category"""
         if not self.categorical_columns:
             return
         self.freq_categories = {}
@@ -702,6 +710,12 @@ class AutoFillNATransforms:
 
 
 class EncoderTransforms:
+    """Label Encoder
+
+     Attributes:
+         column_names (list):
+
+    """
     def __init__(self, column_names, le_classes=None):
         self.priority = 3
         self.column_names = column_names
