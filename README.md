@@ -5,9 +5,9 @@ Mindset insurance scoring - product repository
 ## Installation:
 
 ```shell
-pip install "git+ssh://git@github.com/MindSetLib/MS-InsuranceScoring.git"
+pip install insolver
 ```
-### Post-install cavets:
+### Post-install:
 
 To fix displaying plotly figs in jyputerlab install:
 ```shell
@@ -68,5 +68,3 @@ python -m pytest --cov=insolver; coverage html; xdg-open htmlcov/index.html
 ## Contributing to Insolver:
 
 Please, feel free to open an issue or/and suggest PR, if you find any bugs or any enhancements.
-
-[link to CONTRIBUTING.md]()
