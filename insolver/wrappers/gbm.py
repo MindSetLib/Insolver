@@ -149,7 +149,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
 
         index = index if (isinstance(data, DataFrame)) and (index is not None) else None
         data = DataFrame(data).T[feature_names] if isinstance(data, Series) else data[feature_names]
-        data = data if index is None else DataFrame(data.loc[index, :]).T
+        data = data if index is None else data.loc[[index], :]
         shap_values = explainer.shap_values(data)
         cond_bool = isinstance(shap_values, list) and (len(shap_values) == 2)
         shap_values = shap_values[0] if cond_bool else shap_values
