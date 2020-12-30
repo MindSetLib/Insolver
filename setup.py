@@ -1,15 +1,13 @@
 from setuptools import setup, find_packages
 
-
 with open("requirements.txt") as f:
     required = f.read().splitlines()
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-
 setup(name='insolver',
-      version='0.4.dev4',
+      version='0.4.2.dev4',
       description='Mindset insurance scoring',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -20,15 +18,17 @@ setup(name='insolver',
       license='MIT',
       packages=find_packages(),
       entry_points={
-            'console_scripts': [
-                  'insolver_serving = insolver.serving.run_service:run'
-            ]
+          'console_scripts': [
+              'insolver_serving = insolver.serving.run_service:run'
+          ]
       },
       install_requires=required,
       zip_safe=False,
       classifiers=[
-            'Programming Language :: Python :: 3',
-            'License :: OSI Approved :: MIT License',
+          'Programming Language :: Python :: 3',
+          'License :: OSI Approved :: MIT License',
       ],
       python_requires='>=3.6',
+      package_data={'': ['requirements.txt']},
+      include_package_data=True
       )
