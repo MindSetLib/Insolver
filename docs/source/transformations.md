@@ -10,25 +10,25 @@ Example of using transformations
 import pandas as pd
 
 from insolver import InsolverDataFrame
-from insolver.InsolverTransforms import (
+from insolver.transforms import (
     TransformExp,
-    InsolverTransforms,
+    InsolverTransform,
     TransformAge,
     TransformMapValues,
     TransformPolynomizer,
-    TransformAgeGender,
+    TransformAgeGender
 )
 
 InsDataFrame = InsolverDataFrame(pd.read_csv('freMPL-R.csv', low_memory=False))
 
-InsTransforms = InsolverTransforms(InsDataFrame, [
+InsTransforms = InsolverTransform(InsDataFrame, [
     TransformAge('DrivAge', 18, 75),
     TransformExp('LicAge', 57),
     TransformMapValues('Gender', {'Male': 0, 'Female': 1}),
     TransformMapValues('MariStat', {'Other': 0, 'Alone': 1}),
     TransformAgeGender('DrivAge', 'Gender', 'Age_m', 'Age_f', age_default=18, gender_male=0, gender_female=1),
     TransformPolynomizer('Age_m'),
-    TransformPolynomizer('Age_f'),
+    TransformPolynomizer('Age_f')
 ])
 
 InsTransforms.ins_transform()
@@ -46,7 +46,7 @@ The custom class must inherit from the `InsolverTransformMain` class and have `_
 ```python
 # user_transforms.py
 import pandas as pd
-from insolver.InsolverTransforms import InsolverTransformMain
+from insolver.transforms import InsolverTransformMain
 
 class TransformToNumeric(InsolverTransformMain):
     def __init__(self, column_param, downcast='integer'):

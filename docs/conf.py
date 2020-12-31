@@ -12,17 +12,19 @@
 #
 import os
 import sys
+from datetime import datetime
 sys.path.insert(0, os.path.abspath('../insolver/'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Insolver'
-copyright = '2020, MindSet Team'
+copyright = f'2020-{datetime.now().year}, MindSet Team'
 author = 'MindSet Team'
 
 # The full version, including alpha/beta/rc tags
-release = '0.4.dev2'
+release = '0.4.dev3'
+version = '0.4.dev3'
 
 
 # -- General configuration ---------------------------------------------------
