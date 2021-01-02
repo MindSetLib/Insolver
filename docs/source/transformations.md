@@ -35,6 +35,34 @@ InsTransforms.ins_transform()
 InsTransforms.save('transforms.pkl')
 ```
 
+## AutoFill NA Transforms
+
+The AutoFillNATransforms allows to fill NA values in dataset. 
+For numerical columns, it fills NA values with median values and for categorical columns - with most frequently used values.
+
+```python
+import pandas as pd
+from insolver.transforms.InsolverTransforms import AutoFillNATransforms
+
+InsDataFrame = InsolverDataFrame(pd.read_csv('freMPL-R.csv', low_memory=False))
+
+InsTransforms = InsolverTransforms(InsDataFrame, [
+    AutoFillNATransforms(),
+])
+
+InsTransforms.ins_transform()
+InsTransforms.save('transforms.pkl')
+
+```
+
+## Encoder Transforms
+
+EncoderTransforms based on [sklearn's LabelEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html). Encode target labels with value between 0 and n_classes-1.
+
+## OneHotEncoder Transforms
+
+OneHotEncoderTransforms based on [sklearn's OneHotEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html). Encode categorical features as a one-hot numeric array.
+
 ## Create users' transformations
 
 Users' transformations can be created in special module `user_transforms.py`, which must be create in your project directory (exact name also required).
