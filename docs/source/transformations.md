@@ -10,9 +10,9 @@ Example of using transformations
 import pandas as pd
 
 from insolver import InsolverDataFrame
-from insolver.InsolverTransforms import (
+from insolver.transforms import (
     TransformExp,
-    InsolverTransforms,
+    InsolverTransform,
     TransformAge,
     TransformMapValues,
     TransformPolynomizer,
@@ -21,7 +21,7 @@ from insolver.InsolverTransforms import (
 
 InsDataFrame = InsolverDataFrame(pd.read_csv('freMPL-R.csv', low_memory=False))
 
-InsTransforms = InsolverTransforms(InsDataFrame, [
+InsTransforms = InsolverTransform(InsDataFrame, [
     TransformAge('DrivAge', 18, 75),
     TransformExp('LicAge', 57),
     TransformMapValues('Gender', {'Male': 0, 'Female': 1}),
@@ -42,11 +42,14 @@ For numerical columns, it fills NA values with median values and for categorical
 
 ```python
 import pandas as pd
-from insolver.transforms.InsolverTransforms import AutoFillNATransforms
+
+from insolver.frame import InsolverDataFrame
+from insolver.transforms import InsolverTransform, AutoFillNATransforms
+
 
 InsDataFrame = InsolverDataFrame(pd.read_csv('freMPL-R.csv', low_memory=False))
 
-InsTransforms = InsolverTransforms(InsDataFrame, [
+InsTransforms = InsolverTransform(InsDataFrame, [
     AutoFillNATransforms(),
 ])
 
@@ -74,7 +77,7 @@ The custom class must inherit from the `InsolverTransformMain` class and have `_
 ```python
 # user_transforms.py
 import pandas as pd
-from insolver.InsolverTransforms import InsolverTransformMain
+from insolver.transforms import InsolverTransformMain
 
 class TransformToNumeric(InsolverTransformMain):
     def __init__(self, column_param, downcast='integer'):
