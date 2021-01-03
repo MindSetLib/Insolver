@@ -713,7 +713,8 @@ class EncoderTransforms:
     """Label Encoder
 
      Attributes:
-         column_names (list):
+         column_names (list): columns for label encoding
+         le_classes (dict): dictionary with label encoding classes for each column
 
     """
     def __init__(self, column_names, le_classes=None):
@@ -737,6 +738,12 @@ class EncoderTransforms:
 
 
 class OneHotEncoderTransforms:
+    """OneHotEncoder Transformations
+
+    Attributes:
+        column_names (list): columns for one hot encoding
+        encoder_dict (dict): dictionary with encoder_params for each column
+    """
     def __init__(self, column_names, encoder_dict=None):
         self.priority = 3
         self.column_names = column_names
