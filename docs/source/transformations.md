@@ -42,7 +42,7 @@ For numerical columns, it fills NA values with median values and for categorical
 
 ```python
 import pandas as pd
-from insolver.InsolverTransforms import AutoFillNATransforms
+from insolver.transforms.InsolverTransforms import AutoFillNATransforms
 
 InsDataFrame = InsolverDataFrame(pd.read_csv('freMPL-R.csv', low_memory=False))
 
