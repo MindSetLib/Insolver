@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 
+from insolver.frame import InsolverDataFrame
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 # ---------------------------------------------------
@@ -756,13 +757,14 @@ class OneHotEncoderTransforms:
         encoder_params = [x.tolist() for x in encoder_params]
         column_encoded = pd.DataFrame(encoder.transform(df[[column_name]]))
         column_encoded.columns = encoder.get_feature_names([column_name])
-        df.drop([column_name], axis=1, inplace=True)
-        df = pd.concat([df, column_encoded], axis=1)
-        return df, encoder_params
+        for column in column_encoded.columns:
+            df[column] = column_encoded[column]
+        return encoder_params
 
     def __call__(self, df):
         self.encoder_dict = {}
         for column in self.column_names:
-            df, encoder_params = self._encode_column(df, column)
+            encoder_params = self._encode_column(df, column)
             self.encoder_dict[column] = encoder_params
+            df.drop([column], axis=1, inplace=True)
         return df
