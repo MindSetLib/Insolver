@@ -35,7 +35,7 @@ InsTransforms.ins_transform()
 InsTransforms.save('transforms.pkl')
 ```
 
-## AutoFill NA Transforms
+### AutoFill NA Transforms
 
 The AutoFillNATransforms allows to fill NA values in dataset. 
 For numerical columns, it fills NA values with median values and for categorical columns - with most frequently used values.
@@ -67,7 +67,7 @@ print(df_transformed)
 # 2   1.5
 ```
 
-## Encoder Transforms
+### Encoder Transforms
 
 EncoderTransforms based on [sklearn's LabelEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html). Encode target labels with value between 0 and n_classes-1.
 
@@ -100,7 +100,7 @@ print(df_transformed)
 # 3     0
 ```
 
-## OneHotEncoder Transforms
+### OneHotEncoder Transforms
 
 OneHotEncoderTransforms based on [sklearn's OneHotEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html). Encode categorical features as a one-hot numeric array.
 
@@ -133,27 +133,66 @@ print(df_transformed)
 # 3     1.0     0.0     0.0
 ```
 
-## Create users' transformations
+## Custom transformations
 
-Users' transformations can be created in special module `user_transforms.py`, which must be create in your project directory (exact name also required).
+Users' transformations can be created in special module `user_transforms.py`, which must be created in your project directory (exact name also required).
 
 In this module you can create you own transformation classes.
 
-The custom class must inherit from the `InsolverTransformMain` class and have `__call__` method:
+The custom class must have `__call__` method, which gets initial dataframe and returns transformed one:
 
 ```python
 # user_transforms.py
 import pandas as pd
-from insolver.transforms import InsolverTransformMain
 
-class TransformToNumeric(InsolverTransformMain):
-    def __init__(self, column_param, downcast='integer'):
-        self.priority = 0
-        super().__init__()
-        self.column_param = column_param
+class TransformToNumeric:
+    """Example of user-defined transformations. Transform values to numeric.
+
+    Attributes:
+        column_names (list): List of columns for transformations
+        downcast (str): parameter from pd.to_numeric, default: 'float'
+    """
+    def __init__(self, column_names, downcast='float'):
+        self.column_names = column_names
         self.downcast = downcast
 
     def __call__(self, df):
-        df[self.column_param] = pd.to_numeric(df[self.column_param], downcast=self.downcast)
+        for column in self.column_names:
+            df[column] = pd.to_numeric(df[column], downcast=self.downcast)
         return df
+```
+
+After that you can user-defined transformations the same way as the build-in transformations:
+
+```python
+import pandas as pd
+
+from insolver.frame import InsolverDataFrame
+from insolver.transforms import InsolverTransform
+from user_transforms import TransformToNumeric
+
+df = InsolverDataFrame(pd.DataFrame(data={'col1': ['1.0', '2', -3]}))
+
+print(df)
+print(df.dtypes)
+#   col1
+# 0  1.0
+# 1    2
+# 2   -3
+# col1    object
+# dtype: object
+
+df_transformed = InsolverTransform(df, [
+    TransformToNumeric(['col1']),
+])
+df_transformed.ins_transform()
+
+print(df_transformed)
+print(df_transformed.dtypes)
+#    col1
+# 0   1.0
+# 1   2.0
+# 2  -3.0
+# col1    float32
+# dtype: object
 ```
