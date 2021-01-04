@@ -18,7 +18,7 @@ new_iglm = InsolverGLMWrapper(backend='h2o', load_path=model_path)
 # load and init transformations
 with open(transforms_path, 'rb') as file:
     tranforms = pickle.load(file)
-tranforms = init_transforms(tranforms)
+tranforms = init_transforms(tranforms, inference=True)
 
 
 app = FastAPI()
