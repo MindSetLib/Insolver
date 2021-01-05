@@ -13,9 +13,10 @@ from plotly.graph_objects import Figure, Waterfall
 from plotly.io import to_image
 
 from .base import InsolverBaseWrapper
+from .extensions import InsolverCVHPExtension, InsolverPDPExtension
 
 
-class InsolverGBMWrapper(InsolverBaseWrapper):
+class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPExtension):
     """Insolver wrapper for Gradient Boosting Machines.
 
     Attributes:

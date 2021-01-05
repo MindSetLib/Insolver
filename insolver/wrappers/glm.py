@@ -10,7 +10,8 @@ from sklearn.linear_model import TweedieRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from .base import InsolverBaseWrapper, InsolverH2OWrapper
+from .base import InsolverBaseWrapper
+from .extensions import InsolverH2OExtension, InsolverCVHPExtension, InsolverPDPExtension
 
 
 def is_number(x):
@@ -21,7 +22,7 @@ def is_number(x):
         return False
 
 
-class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
+class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHPExtension, InsolverPDPExtension):
     """Insolver wrapper for Generalized Linear Models.
 
     Attributes:

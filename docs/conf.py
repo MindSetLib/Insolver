@@ -23,8 +23,8 @@ copyright = f'2020-{datetime.now().year}, MindSet Team'
 author = 'MindSet Team'
 
 # The full version, including alpha/beta/rc tags
-release = '0.4.dev3'
-version = '0.4.dev3'
+release = '0.4.4'
+version = '0.4.4'
 
 
 # -- General configuration ---------------------------------------------------
