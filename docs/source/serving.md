@@ -1,7 +1,67 @@
 # Serving ML models
 
-Create API server with the saved model
+## Run serving service
+
+To start serving a ML model you need the pickle files with trained ML model and saved transformations.
+
+The following CLI command will create the API server with the saved model:
 
 ```shell
 insolver_serving -model path_to_model -transforms path_to_transforms  -service flask
 ```
+
+You can choose the server based on Flask or FastApi with the option `service`:
+- `-service flask`
+- `-service fastapi`
+
+## Using serving service
+
+After starting the ML serving service you can use it via REST API.
+
+
+Example of the request to `http://127.0.0.1:8000/predict` endpoint:
+```json
+{
+    "df": {
+        "LicAge": {
+            "162849": 57
+        },
+        "Gender": {
+            "162849": 0
+        },
+        "MariStat": {
+            "162849": 0
+        },
+        "DrivAge": {
+            "162849": 31
+        },
+        "HasKmLimit": {
+            "162849": 0
+        },
+        "BonusMalus": {
+            "162849": 80
+        },
+        "RiskArea": {
+            "162849": 6
+        },
+        "Age_m": {
+            "162849": 31
+        },
+        "Age_f": {
+            "162849": 18
+        },
+        "Age_m_2": {
+            "162849": 961
+        },
+        "Age_f_2": {
+            "162849": 324
+        },
+        "ClaimAmount": {
+            "162849": 349.4447129909
+        }
+    }
+}
+
+```
+
+You can find full example with model training and serving [here](examples.md).
