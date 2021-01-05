@@ -3,6 +3,7 @@ import functools
 
 from numpy import mean
 from pandas import DataFrame
+from sklearn.pipeline import Pipeline
 from sklearn.model_selection import KFold, cross_val_score, cross_validate
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
 from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval
@@ -37,7 +38,7 @@ class InsolverCVHPExtension:
         return {'status': STATUS_OK, 'loss': score}
 
     def hyperopt_cv(self, X, y, params, fn=None, algo=None, max_evals=10, timeout=None,
-                    fmin_params=None, fn_params=None):
+                    fmin_params=None, fn_params=None, p_last=True):
         """Hyperparameter optimization using hyperopt. Using cross-validation to evaluate hyperparameters by default.
 
         Args:
@@ -52,6 +53,8 @@ class InsolverCVHPExtension:
             If None, then the search process has no time constraint. None by default.
             fmin_params (:obj:`dict`, optional): Dictionary of supplementary arguments for hyperopt.fmin function.
             fn_params (:obj:`dict`, optional):  Dictionary of supplementary arguments for custom fn objective function.
+            p_last (:obj:`str`, optional): If model object is a sklearn.Pipeline then apply fit parameters to the last
+             step. True by default.
 
         Returns:
             dict: Dictionary of best choice of hyperparameters. Also best model is fitted.
@@ -61,6 +64,9 @@ class InsolverCVHPExtension:
 
         trials = Trials()
         algo = tpe.suggest if algo is None else algo
+        if isinstance(self.model, Pipeline) and ((fn_params is not None) and ('fit_params' in fn_params)) and p_last:
+            fn_params['fit_params'] = {f'{self.model.steps[-1][0]}__{key}': fn_params['fit_params'].get(key)
+                                       for key in fn_params['fit_params'].keys()}
         if fn is None:
             scoring = (None if not (isinstance(fn_params, dict) and ('scoring' in fn_params.keys()))
                        else fn_params.pop('scoring'))

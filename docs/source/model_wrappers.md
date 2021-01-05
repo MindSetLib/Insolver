@@ -52,27 +52,40 @@ values. These functions should implement the process of saving the model from th
 
 * `self.object`: A callable function returning a new model object with parameters specified at class instance
   initialization of the wrapper. This function should take keyword arguments for other parameters of the model object 
-  that were not defined at class instance initialization.
+  that were not defined at class instance initialization. The idea behind this object is somehow similar to the
+  following. Assume you want to use `GridSearchCV` from `sklearn.model_selection` using `SVC()` from `sklearn.svm` with
+  specific kernel type. Then you likely to create some object, say, `clf = SVC(kernel='rbf')` and then pass it to 
+  `GridSearchCV(clf, ...)`. You may do whatever you want with `GridSearchCV`, but `clf` will not change due to this
+  operations. Analogously, `self.object` protects initial model object from being changed. An example of usage
+  `self.object` you can find below under `self.model` attribute.
   
+* `self.model`: A model object, probably initialized using `self.object` attribute function. This attribute serves as a 
+  placeholder for a resulting model. This attribute is used for most of the operations with wrappers, including calls.
+
   Example:
   ```python
-  'example here'
+  from sklearn.pipeline import Pipeline
+  from sklearn.preprocessing import StandardScaler
+  from sklearn.linear_model import LinearRegression
+  from insolver.wrappers.base import InsolverBaseWrapper
+
+  class CustomWrapper(InsolverBaseWrapper):
+      def __init__(self, backend, ..., kwargs):
+          super(CustomWrapper, self).__init__(backend)
+          self.algo, self._backends = 'custom', ['sklearn']
+          self._back_load_dict = {'sklearn': self._pickle_load}
+          self._back_save_dict = {'sklearn': self._pickle_save} 
+          self.params = kwargs
+        
+          def __params_pipe(**parameters):
+              parameters.update(self.params)
+              return Pipeline([('scaler', StandardScaler()),
+                               ('reg', LinearRegression(**parameters))])
+          self.model, self.object = __params_pipe(**self.params), __params_pipe 
   ```
-
-* `self.model`: 
-
-
-```python
-from insolver.wrappers.base import InsolverBaseWrapper
-
-class CustomWrapper(InsolverBaseWrapper):
-    def __init__(self, backend, ...):
-        super(CustomWrapper, self).__init__(backend)
-        self.algo, self._backends = 'custom', ['custom1', 'custom2']
-        self._back_load_dict = {'custom1': self._pickle_load, 'custom2': self._pickle_load}
-        self._back_save_dict = {'custom1': self._pickle_save, 'custom2': self._pickle_save}        
-        ...
-```
+  
+The functionality of a `InsolverBaseWrapper` is quite limited. However, it allows adding extensions to the wrappers 
+for performing routines such as cross-validation and hyperparameter optimization.  
 
 ## TrivialWrapper
 
