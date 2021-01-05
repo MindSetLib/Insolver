@@ -47,6 +47,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
         if backend not in self._backends:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
+        self.features = None
         self.standardize = standardize
         if load_path is not None:
             self.load_model(load_path)

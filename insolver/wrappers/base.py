@@ -23,7 +23,7 @@ class InsolverBaseWrapper:
         self.algo, self.backend, self._backends = None, backend, None
         self._back_load_dict, self._back_save_dict = None, None
         self.object, self.model = None, None
-        self.features, self.best_params, self.trials = None, None, None
+        self.best_params, self.trials = None, None
 
     def __call__(self):
         return self.model
