@@ -21,7 +21,7 @@ It should be set at class instance initialization, the usage example is provided
 from insolver.wrappers.base import InsolverBaseWrapper
 
 class CustomWrapper(InsolverBaseWrapper):
-    def __init__(self, backend, ...):
+    def __init__(self, backend):
         super(CustomWrapper, self).__init__(backend)
         ...
 ```
@@ -70,7 +70,7 @@ values. These functions should implement the process of saving the model from th
   from insolver.wrappers.base import InsolverBaseWrapper
 
   class CustomWrapper(InsolverBaseWrapper):
-      def __init__(self, backend, ..., kwargs):
+      def __init__(self, backend, kwargs):
           super(CustomWrapper, self).__init__(backend)
           self.algo, self._backends = 'custom', ['sklearn']
           self._back_load_dict = {'sklearn': self._pickle_load}
@@ -88,6 +88,20 @@ The functionality of a `InsolverBaseWrapper` is quite limited. However, it allow
 for performing routines such as cross-validation and hyperparameter optimization.  
 
 ## TrivialWrapper
+Although `InsolverTrivialWrapper` does not provide a real model, it may be a useful benchmark in model comparison. 
+
+`InsolverTrivialWrapper` requires two optional arguments: `col_name` and `agg`. If `col_name` argument is absent, fitted
+`InsolverTrivialWrapper` make "predictions" by returning the value of applied `agg` callable function on the training
+data. If `agg` argument is not specified, `np.mean` is used. The `col_name` argument take strings or list of strings as 
+values. 
+
+
+Resulting "predictions" are obtained as follows:
+1. On `fit` step, groupby operation (w.r.t. columns in `col_name`) with `agg` aggregation function is applied
+   to the target values.
+2. On `predict` step, results from the first step are mapped to the values in `X` of `predict` method using `col_name`
+   argument as a key. In cases when there are no matches with `col_name` values in training data, the value of `agg` is
+   used taken over the whole training set.
 
 ## Generalized Linear Models
 

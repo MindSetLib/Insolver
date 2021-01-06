@@ -8,6 +8,11 @@ from pandas import concat, merge
 
 class InsolverBaseWrapper:
     def __init__(self, backend):
+        """Base wrapper serving as a building block for other wrappers.
+
+        Attributes:
+            backend (str): Name of the backend to built the model.
+        """
         self.algo, self.backend, self._backends = None, backend, None
         self._back_load_dict, self._back_save_dict = None, None
         self.object, self.model = None, None
@@ -57,10 +62,11 @@ class InsolverBaseWrapper:
 
 
 class InsolverTrivialWrapper(InsolverBaseWrapper):
-    """Dummy wrapper for returning trivial "predictions" or actual values for metric comparison and statistics.
+    """Dummy wrapper for returning trivial "predictions" for metric comparison and statistics.
 
     Attributes:
-        col_name (:obj:`str`, optional): Column name to perform groupby.
+        col_name (:obj:`str` or :obj:`list`, optional): String or list of strings containing column name(s) to perform
+         groupby operation.
         agg (:obj:`callable`, optional): Aggregation function.
         **kwargs: Other arguments.
     """
