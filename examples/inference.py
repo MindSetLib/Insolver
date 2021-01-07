@@ -14,7 +14,7 @@ InsDataFrame = InsolverDataFrame(df)
 with open('transforms.pkl', 'rb') as file:
     transforms = pickle.load(file)
 
-transforms = init_transforms(transforms)
+transforms = init_transforms(transforms, inference=True)
 
 # Apply transformations
 InsTransforms = InsolverTransform(InsDataFrame, transforms)
