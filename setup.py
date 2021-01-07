@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 
 setup(name='insolver',
-      version='0.4.dev4',
+      version='0.4.4',
       description='Mindset insurance scoring',
       long_description=long_description,
       long_description_content_type='text/markdown',
