@@ -104,8 +104,12 @@ Resulting "predictions" are obtained as follows:
    used taken over the whole training set.
 
 ## Generalized Linear Models
+`InsolverGLMWrapper` implements Generalized Linear Models with support of `h2o` and `scikit-learn` packages.
+
+### GLM using `sklearn` backend
+
+### GLM using `h2o` backend
 
 ## Gradient Boosting Machines
-
-## InsolverH2OExtension
-`'h2o': partial(self._h2o_load, h2o_init_params=h2o_init_params)}`
+`InsolverGLMWrapper` implements Gradient Boosting Machines with support of `xgboost`, `lightgbm` and `catboost`
+packages.
