@@ -1,6 +1,6 @@
 # Overview
 
-Insolver is low-code machine learning library, initally created for insurance industry.
+Insolver is low-code machine learning library, initally created for insurance industry, but can be used in any other.
 
 Data Science and Machine Learning are very popular nowadays. More and more industries begin to use models in their business processes. But an adaptation of general algorithms for exact situations is not a simple deal. For many small companies, specific specialists could be very expensive. Our project Insolver is a low-code solution that simplifies building machine learning models focused primarily on the use of insurance companies. 
 
