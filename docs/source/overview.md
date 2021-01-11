@@ -27,8 +27,8 @@ Many small-sized insurance companies and medium-sized insurance companies often 
 
 In addition to typical business problems, insurers are faced with fairly typical problems related to dirty data, incomprehensibly filled fields, failures resulting from failures in systems. Incomplete description of data and fields in their data. We understand such problems and provide techniques to fill NA data with saving distributions.
 
-# mset.space cloud
-One of the problems faced by analysts in insurance companies is the problem of too much data and a lack of resources to process it. Companies are struggling with these problems using various methods. We also want to offer a solution related to resources for computing via cloud mset.space. Insolver is naturally implemented in the mset cloud servers.
+# https://mset.space cloud
+One of the problems faced by analysts in insurance companies is the problem of too much data and a lack of resources to process it. Companies are struggling with these problems using various methods. We also want to offer a solution related to resources for computing via cloud https://mset.space. Insolver is naturally implemented in the mset cloud servers.
 
 # Deployment
 Flask and Fast API servers implementation with Insolver allows using such product during production.
@@ -54,6 +54,6 @@ Basic part - Insolver community open source library.
 
 We also provide Insover enterprise solution the proprietary part based on Insolver community and allowed you to solve highly specialized tasks that can be built for a specific customer and includes, among other things, the implement modern state-of-the-art algorithms. Now it is unnecessary to spend time implementing these technologies on your own.
 
-Overall, Insolver library is open source library that automates calculation and implementation of ML models, first of all in the insurance industry. You can use Insolver community on your servers or use cloud mset.space where Insolver installed and can be used naturally.
+Overall, Insolver library is open source library that automates calculation and implementation of ML models, first of all in the insurance industry. You can use Insolver community on your servers or use cloud https://mset.space where Insolver installed and can be used naturally.
 
 
