@@ -41,19 +41,19 @@ To solve such challenges we offer analysts the product Insolver, which is design
 
 Basic part - Insolver community open source library.
 
-## Insolver key parts:
+## Insolver community key parts:
 
 1. The first part of insolver community is the idea of an updated pandas dataframe as InsolverDataFrame with additional functionality.
-2. Deployable transformations that allow to create and register data transformation before the model start to work.
-3. Simplified interface for model development
-4. Model comparison part
-5. Model quality estimation via shap values
-6. Model deployment as a service
+2. Deployable transformations that allow to create and register data transformation before the model start to work in production.
+3. Simplified low-code interface for model train and development
+4. Models comparison part
+5. Models quality estimation via shap values
+6. Model deployment as a microservice
 
-Insolver is open source, which allows you to use it anywhere you want.
+**Insolver is open source, which allows you to use it anywhere you want.**
 
-We also provide Insover enterprise solution the proprietary part based on insolver community and allowed you to solve highly specialized tasks that can be built for a specific customer and includes, among other things, the implement modern state-of-the-art algorithms. Now it is unnecessary to spend time implementing these technologies on your own.
+We also provide Insover enterprise solution the proprietary part based on Insolver community and allowed you to solve highly specialized tasks that can be built for a specific customer and includes, among other things, the implement modern state-of-the-art algorithms. Now it is unnecessary to spend time implementing these technologies on your own.
 
-Overall, Insolver library is open source library that automates calculation and implementation of ML models, first of all in the insurance industry. You can use Insolver community on your side or use our cloud mset.space where Insolver installed and can be used naturally.
+Overall, Insolver library is open source library that automates calculation and implementation of ML models, first of all in the insurance industry. You can use Insolver community on your servers or use cloud mset.space where Insolver installed and can be used naturally.
 
 
