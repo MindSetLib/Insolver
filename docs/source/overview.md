@@ -14,11 +14,11 @@ Insolver python library should help insurance and other industries companies to 
 
 # Key parts
 
-In our solution, we implemented such things as data transformations that work in production, model validation techniques business need, Gradient boosting model quality assurance via shap vales, comparison of GLM and boosting models, and other things.
+In our solution, we implemented such things as data transformations that work in production, model validation techniques as business need, Gradient boosting model quality assurance via shap vales, comparison of GLM and boosting models, and other things.
 
 Insolver works as an additional wrapper for modern open-source libraries such as sklearn, h2o and others. 
 
-In general, you can create you own wrapper interface for any library you like usng insolver template. This can be quite powerful in terms of industry-specific tasks and significantly decrease time to market for ML models.
+In general, you can create you own wrapper interface for any library you like using insolver template. This can be quite powerful in terms of industry-specific tasks and significantly decrease time to market for ML models.
 
 We are welcome specialists from other industries to improve insolver for their industrial tasks.
 
