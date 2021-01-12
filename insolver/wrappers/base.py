@@ -1,21 +1,21 @@
-import os
-import types
-import time
-import pickle
 import functools
-
-from matplotlib.pyplot import show, tight_layout
-from numpy import array, mean, broadcast_to
-from pandas import DataFrame, Series, concat, merge
-from sklearn.model_selection import KFold, cross_val_score, cross_validate
-from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
-from sklearn.inspection import plot_partial_dependence
-from pdpbox.pdp import pdp_isolate, pdp_plot
+import json
+import os
+import pickle
+import time
+import types
+import zipfile
 
 from h2o import no_progress, cluster, init, load_model, save_model
 from h2o.frame import H2OFrame
-
 from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval
+from matplotlib.pyplot import show, tight_layout
+from numpy import array, mean, broadcast_to
+from pandas import DataFrame, Series, concat, merge
+from pdpbox.pdp import pdp_isolate, pdp_plot
+from sklearn.inspection import plot_partial_dependence
+from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
+from sklearn.model_selection import KFold, cross_val_score, cross_validate
 
 
 class InsolverBaseWrapper:
@@ -58,6 +58,15 @@ class InsolverBaseWrapper:
             self._back_save_dict[self.backend](path, name, **kwargs)
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
+
+        # save model parameters to json
+        with open(os.path.join(path, name+'.json'), 'w') as file:
+            file.write(json.dumps({'algo': self.algo, 'backend': self.backend}, sort_keys=True, indent=4))
+
+        # pack json and model to zip file
+        with zipfile.ZipFile(os.path.join(path, name+'.zip'), 'w') as zip_model:
+            zip_model.write(name+'.json')
+            zip_model.write(name)
 
     def _pickle_load(self, load_path):
         with open(load_path, 'rb') as _model:
