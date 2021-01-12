@@ -106,6 +106,10 @@ Resulting "predictions" are obtained as follows:
 ## Generalized Linear Models
 `InsolverGLMWrapper` implements Generalized Linear Models with support of `h2o` and `scikit-learn` packages.
 
+`InsolverGLMWrapper` supports methods `coef()` and `norm_coef()` that output all the model coefficients. Although the
+models are fitted using standardized dataset, the coefficients in `coef()` are recalculated, so the prediction may be
+obtained as an inverse link function applied to a linear combination of coefficients and factors in `X`. 
+
 ### GLM using `sklearn` backend
 Insolver uses the functionality of
 [`TweedieRegressor`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.TweedieRegressor.html) class
