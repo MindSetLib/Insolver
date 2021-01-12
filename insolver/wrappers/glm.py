@@ -48,7 +48,6 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         if backend not in self._backends:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
-        self.features = None
         self.params, self.standardize = None, standardize
         if load_path is not None:
             self.load_model(load_path)
@@ -66,6 +65,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
                         family = family_power[family]
                     else:
                         raise NotImplementedError('Distribution is not supported with sklearn backend.')
+                elif isinstance(family, (float, int)) and (0 < family < 1):
+                    raise ValueError('No distribution exists for Tweedie power in range (0, 1).')
                 kwargs.update({'power': family, 'link': link})
                 self.params = kwargs
 
@@ -90,9 +91,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         """
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
             if isinstance(X, (DataFrame, Series)):
-                self.features = X.columns.tolist() if isinstance(X, DataFrame) else [X.name]
+                self.model.feature_name_ = X.columns.tolist() if isinstance(X, DataFrame) else [X.name]
             self.model.fit(X, y, glm__sample_weight=sample_weight)
-            self.model.feature_name_ = self.features
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
             features, target, train_set, params = self._x_y_to_h2o_frame(X, y, sample_weight, {**kwargs}, X_valid,
                                                                          y_valid, sample_weight_valid)
@@ -134,9 +134,10 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         """
         if self.standardize:
             if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
-                if self.features is None:
-                    self.features = [f'Variable_{i}' for i in range(len(list(self.model.named_steps['glm'].coef_)))]
-                coefs = zip(['Intercept'] + self.features,
+                if self.model.feature_name_ is None:
+                    self.model.feature_name_ = [f'Variable_{i}' for i
+                                                in range(len(list(self.model.named_steps['glm'].coef_)))]
+                coefs = zip(['Intercept'] + self.model.feature_name_,
                             [self.model.named_steps['glm'].intercept_] + list(self.model.named_steps['glm'].coef_))
                 coefs = {x[0]: x[1] for x in coefs}
             elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
@@ -156,16 +157,17 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
             dict: {:obj:`str`: :obj:`float`}m Dictionary containing GLM coefficients for non-standardized data.
         """
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
-            if self.features is None:
-                self.features = [f'Variable_{i}' for i in range(len(list(self.model.named_steps['glm'].coef_)))]
+            if self.model.feature_name_ is None:
+                self.model.feature_name_ = [f'Variable_{i}' for i
+                                            in range(len(list(self.model.named_steps['glm'].coef_)))]
             if self.standardize:
                 intercept = self.model.named_steps['glm'].intercept_ - sum(self.model.named_steps['glm'].coef_ *
                                                                            self.model.named_steps['scaler'].mean_ /
                                                                            sqrt(self.model.named_steps['scaler'].var_))
                 coefs = self.model.named_steps['glm'].coef_ / sqrt(self.model.named_steps['scaler'].var_)
-                coefs = zip(['Intercept'] + self.features, [intercept] + list(coefs))
+                coefs = zip(['Intercept'] + self.model.feature_name_, [intercept] + list(coefs))
             else:
-                coefs = zip(['Intercept'] + self.features,
+                coefs = zip(['Intercept'] + self.model.feature_name_,
                             [self.model.named_steps['glm'].intercept_] + list(self.model.named_steps['glm'].coef_))
             coefs = {x[0]: x[1] for x in coefs}
         elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
@@ -210,11 +212,3 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
         return self.best_params
-
-    def plot_pdp(self, X, features, **kwargs):
-        if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
-            pass
-        elif (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator):
-            self.model.partial_plot(H2OFrame(X), features, **kwargs)
-        else:
-            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')

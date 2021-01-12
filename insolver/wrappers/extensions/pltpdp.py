@@ -1,12 +1,14 @@
-from matplotlib.pyplot import show, tight_layout
 from sklearn.inspection import plot_partial_dependence
+from h2o.frame import H2OFrame
+
+from matplotlib.pyplot import show, tight_layout
 from pdpbox.pdp import pdp_isolate, pdp_plot
 
 
 class InsolverPDPExtension:
     def pdp(self, X, features, feature_name, plot_backend='sklearn', **kwargs):
         if self.backend == 'h2o':
-            return
+            self.model.partial_plot(H2OFrame(X), features, **kwargs)
         else:
             if plot_backend == 'sklearn':
                 if self.backend in ['catboost', 'lightgbm']:
