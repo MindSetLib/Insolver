@@ -16,7 +16,7 @@ from insolver.transforms import (
     TransformAge,
     TransformMapValues,
     TransformPolynomizer,
-    TransformAgeGender,
+    TransformAgeGender
 )
 
 InsDataFrame = InsolverDataFrame(pd.read_csv('freMPL-R.csv', low_memory=False))
@@ -28,7 +28,7 @@ InsTransforms = InsolverTransform(InsDataFrame, [
     TransformMapValues('MariStat', {'Other': 0, 'Alone': 1}),
     TransformAgeGender('DrivAge', 'Gender', 'Age_m', 'Age_f', age_default=18, gender_male=0, gender_female=1),
     TransformPolynomizer('Age_m'),
-    TransformPolynomizer('Age_f'),
+    TransformPolynomizer('Age_f')
 ])
 
 InsTransforms.ins_transform()
@@ -144,6 +144,7 @@ The custom class must have `__call__` method, which gets initial dataframe and r
 ```python
 # user_transforms.py
 import pandas as pd
+
 
 class TransformToNumeric:
     """Example of user-defined transformations. Transform values to numeric.

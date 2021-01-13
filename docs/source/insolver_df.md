@@ -2,8 +2,9 @@
 
 Create from pandas df:
 
-```shell
-from insolver.InsolverDataFrame import InsolverDataFrame
+```python
+import pandas as pd
+from insolver import InsolverDataFrame
 
 df = pd.read_csv(file_path)
 

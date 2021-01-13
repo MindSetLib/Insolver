@@ -10,7 +10,8 @@ from sklearn.linear_model import TweedieRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from .base import InsolverBaseWrapper, InsolverH2OWrapper
+from .base import InsolverBaseWrapper
+from .extensions import InsolverH2OExtension, InsolverCVHPExtension, InsolverPDPExtension
 
 
 def is_number(x):
@@ -21,7 +22,7 @@ def is_number(x):
         return False
 
 
-class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
+class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHPExtension, InsolverPDPExtension):
     """Insolver wrapper for Generalized Linear Models.
 
     Attributes:
@@ -47,7 +48,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
         if backend not in self._backends:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
-        self.standardize = standardize
+        self.features = None
+        self.params, self.standardize = None, standardize
         if load_path is not None:
             self.load_model(load_path)
         else:
@@ -55,7 +57,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
             link = link if link is not None else 'family_default' if backend == 'h2o' else 'auto'
             if backend == 'h2o':
                 self._h2o_init(h2o_init_params)
-                self.model = H2OGeneralizedLinearEstimator(family=family, link=link, standardize=standardize, **kwargs)
+                self.model = H2OGeneralizedLinearEstimator(family=family, link=link, standardize=self.standardize,
+                                                           **kwargs)
             elif backend == 'sklearn':
                 if isinstance(family, str):
                     family_power = {'gaussian': 0, 'normal': 0, 'poisson': 1, 'gamma': 2, 'inverse_gaussian': 3}
@@ -63,14 +66,15 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OWrapper):
                         family = family_power[family]
                     else:
                         raise NotImplementedError('Distribution is not supported with sklearn backend.')
-                self.model = Pipeline([('scaler', StandardScaler(with_mean=standardize, with_std=standardize)),
-                                       ('glm', TweedieRegressor(power=family, link=link, **kwargs))])
+                kwargs.update({'power': family, 'link': link})
+                self.params = kwargs
 
                 def __params_pipe(**glm_pars):
-                    glm_pars = {f'glm__{kwarg}': glm_pars[kwarg] for kwarg in glm_pars}
-                    return self.model.set_params(**glm_pars)
+                    glm_pars.update(self.params)
+                    return Pipeline([('scaler', StandardScaler(with_mean=self.standardize, with_std=self.standardize)),
+                                     ('glm', TweedieRegressor(**glm_pars))])
 
-                self.object = __params_pipe
+                self.model, self.object = __params_pipe(**self.params), __params_pipe
 
     def fit(self, X, y, sample_weight=None, X_valid=None, y_valid=None, sample_weight_valid=None, **kwargs):
         """Fit a Generalized Linear Model.
