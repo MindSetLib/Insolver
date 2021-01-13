@@ -47,6 +47,9 @@ class InsolverBaseWrapper:
         name = name if name is not None else def_name
         name = name if suffix is None else f'{name}_{suffix}'
 
+        self.model.algo = self.algo
+        self.model.backend = self.backend
+
         if self.backend in self._back_save_dict.keys():
             self._back_save_dict[self.backend](path, name, **kwargs)
         else:
