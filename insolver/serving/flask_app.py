@@ -73,7 +73,7 @@ def predict():
     predicted = model.predict(df)
 
     result = {
-        'predicted': str(predicted)
+        'predicted': predicted.tolist()
     }
 
     # Response logging

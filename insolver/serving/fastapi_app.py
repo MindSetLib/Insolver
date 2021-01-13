@@ -55,6 +55,6 @@ async def predict(data: Data):
     predicted = model.predict(df)
 
     result = {
-        'predicted': str(predicted)
+        'predicted': predicted.tolist()
     }
     return result
