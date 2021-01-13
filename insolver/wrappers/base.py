@@ -54,19 +54,22 @@ class InsolverBaseWrapper:
         name = name if name is not None else def_name
         name = name if suffix is None else f'{name}_{suffix}'
 
+        self.model.algo = self.algo
+        self.model.backend = self.backend
+
         if self.backend in self._back_save_dict.keys():
             self._back_save_dict[self.backend](path, name, **kwargs)
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
-        # save model parameters to json
-        with open(os.path.join(path, name+'.json'), 'w') as file:
-            file.write(json.dumps({'algo': self.algo, 'backend': self.backend}, sort_keys=True, indent=4))
-
-        # pack json and model to zip file
-        with zipfile.ZipFile(os.path.join(path, name+'.zip'), 'w') as zip_model:
-            zip_model.write(name+'.json')
-            zip_model.write(name)
+        # # save model parameters to json
+        # with open(os.path.join(path, name+'.json'), 'w') as file:
+        #     file.write(json.dumps({'algo': self.algo, 'backend': self.backend}, sort_keys=True, indent=4))
+        #
+        # # pack json and model to zip file
+        # with zipfile.ZipFile(os.path.join(path, name+'.zip'), 'w') as zip_model:
+        #     zip_model.write(name+'.json')
+        #     zip_model.write(name)
 
     def _pickle_load(self, load_path):
         with open(load_path, 'rb') as _model:

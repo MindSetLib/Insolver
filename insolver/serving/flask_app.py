@@ -7,7 +7,8 @@ from flask import Flask, request, jsonify
 
 from insolver import InsolverDataFrame
 from insolver.transforms import InsolverTransform, init_transforms
-from insolver.wrappers import InsolverGLMWrapper
+from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
+from insolver.serving import utils
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
@@ -18,21 +19,28 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from time import strftime, time
 
-app = Flask(__name__)
-
-# Load model
-new_iglm = InsolverGLMWrapper(backend='h2o', load_path=model_path)
-
-# load and init transformations
-with open(transforms_path, 'rb') as file:
-    tranforms = pickle.load(file)
-tranforms = init_transforms(tranforms, inference=True)
-
 # Logging
 handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
+
+app = Flask(__name__)
+
+# Load model
+model = utils.load_pickle_model(model_path)
+if model and model.algo == 'gbm':
+    model = InsolverGBMWrapper(backend=model.backend, load_path=model_path)
+elif model and model.algo == 'glm':
+    model = InsolverGLMWrapper(backend='sklearn', load_path=model_path)
+else:
+    model = InsolverGLMWrapper(backend='h2o', load_path=model_path)
+
+
+# load and init transformations
+with open(transforms_path, 'rb') as file:
+    tranforms = pickle.load(file)
+tranforms = init_transforms(tranforms, inference=True)
 
 
 @app.route("/")
@@ -62,10 +70,10 @@ def predict():
     InsTransforms.ins_transform()
 
     # Prediction
-    predict_glm = new_iglm.predict(df)
+    predicted = model.predict(df)
 
     result = {
-        'predict_glm': str(predict_glm)
+        'predicted': str(predicted)
     }
 
     # Response logging
