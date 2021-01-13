@@ -1,10 +1,8 @@
 import functools
-import json
 import os
 import pickle
 import time
 import types
-import zipfile
 
 from h2o import no_progress, cluster, init, load_model, save_model
 from h2o.frame import H2OFrame
@@ -61,15 +59,6 @@ class InsolverBaseWrapper:
             self._back_save_dict[self.backend](path, name, **kwargs)
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
-
-        # # save model parameters to json
-        # with open(os.path.join(path, name+'.json'), 'w') as file:
-        #     file.write(json.dumps({'algo': self.algo, 'backend': self.backend}, sort_keys=True, indent=4))
-        #
-        # # pack json and model to zip file
-        # with zipfile.ZipFile(os.path.join(path, name+'.zip'), 'w') as zip_model:
-        #     zip_model.write(name+'.json')
-        #     zip_model.write(name)
 
     def _pickle_load(self, load_path):
         with open(load_path, 'rb') as _model:
