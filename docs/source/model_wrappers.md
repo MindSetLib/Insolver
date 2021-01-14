@@ -106,9 +106,24 @@ Resulting "predictions" are obtained as follows:
 ## Generalized Linear Models
 `InsolverGLMWrapper` implements Generalized Linear Models with support of `h2o` and `scikit-learn` packages.
 
+`InsolverGLMWrapper` supports methods `coef()` and `norm_coef()` that output all the model coefficients. Although the
+models are fitted using standardized dataset, the coefficients in `coef()` are recalculated, so the prediction may be
+obtained as an inverse link function applied to a linear combination of coefficients and factors in `X`. 
+
 ### GLM using `sklearn` backend
+Insolver uses the functionality of
+[`TweedieRegressor`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.TweedieRegressor.html) class
+from [scikit-learn](https://scikit-learn.org/stable/modules/linear_model.html#generalized-linear-regression). 
+However, insolver fits a pipeline consisting of two steps, the first step with `StandardScaler` and the second with 
+`TweedieRegressor` itself. By default, `StandardScaler` is used with `with_mean` and `with_std` arguments equal to 
+`True`, since optimization procedure for non-standardized data may fail. Also, insolver makes available string names of
+the distributions for `family` parameter; the available names are: `gaussian` or `normal`, `poisson`, `gamma` and
+`inverse_gaussian`. This parameter can also accept numeric value for Tweedie power, if :math:`family \notin (0, 1)`.
 
 ### GLM using `h2o` backend
+Insolver uses the functionality of
+[`H2OGeneralizedLinearEstimator`](http://docs.h2o.ai/h2o/latest-stable/h2o-py/docs/modeling.html#h2ogeneralizedlinearestimator) 
+class from [H2O](https://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/glm.html).
 
 ## Gradient Boosting Machines
 `InsolverGLMWrapper` implements Gradient Boosting Machines with support of `xgboost`, `lightgbm` and `catboost`

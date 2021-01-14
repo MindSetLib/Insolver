@@ -88,7 +88,7 @@ class InsolverCVHPExtension:
         self.model.fit(X, y, **({} if not ((fn_params is not None) and ('fit_params' in fn_params))
                                 else fn_params['fit_params']))
         if not hasattr(self.model, 'feature_name_'):
-            self.model.feature_name_ = X.columns if isinstance(X, DataFrame) else [X.name]
+            self.model.feature_name_ = X.columns.tolist() if isinstance(X, DataFrame) else [X.name]
         return self.best_params
 
     def _cross_val(self, X, y, scoring=None, cv=None, **kwargs):

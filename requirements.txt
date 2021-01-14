@@ -1,3 +1,4 @@
+wheel
 numpy
 pandas
 xgboost
@@ -5,6 +6,7 @@ lightgbm
 catboost
 hyperopt
 scikit-learn
+matplotlib
 pdpbox
 pyodbc
 kaleido
