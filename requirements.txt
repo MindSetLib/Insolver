@@ -8,7 +8,6 @@ hyperopt
 scikit-learn
 matplotlib
 pdpbox
-pyodbc
 kaleido
 requests
 requests_cache
