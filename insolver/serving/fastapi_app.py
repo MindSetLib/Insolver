@@ -6,19 +6,26 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from insolver import InsolverDataFrame
+from insolver.serving import utils
 from insolver.transforms import InsolverTransform, init_transforms
-from insolver.wrappers import InsolverGLMWrapper
+from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
 
 # Load model
-new_iglm = InsolverGLMWrapper(backend='h2o', load_path=model_path)
+model = utils.load_pickle_model(model_path)
+if model and model.algo == 'gbm':
+    model = InsolverGBMWrapper(backend=model.backend, load_path=model_path)
+elif model and model.algo == 'glm':
+    model = InsolverGLMWrapper(backend='sklearn', load_path=model_path)
+else:
+    model = InsolverGLMWrapper(backend='h2o', load_path=model_path)
 
 # load and init transformations
 with open(transforms_path, 'rb') as file:
     tranforms = pickle.load(file)
-tranforms = init_transforms(tranforms)
+tranforms = init_transforms(tranforms, inference=True)
 
 
 app = FastAPI()
@@ -45,9 +52,9 @@ async def predict(data: Data):
     InsTransforms.ins_transform()
 
     # Prediction
-    predict_glm = new_iglm.predict(df)
+    predicted = model.predict(df)
 
     result = {
-        'predict_glm': str(predict_glm)
+        'predicted': predicted.tolist()
     }
     return result

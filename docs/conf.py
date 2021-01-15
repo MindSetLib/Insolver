@@ -12,17 +12,19 @@
 #
 import os
 import sys
+from datetime import datetime
 sys.path.insert(0, os.path.abspath('../insolver/'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Insolver'
-copyright = '2020, MindSet Team'
+copyright = f'2020-{datetime.now().year}, MindSet Team'
 author = 'MindSet Team'
 
 # The full version, including alpha/beta/rc tags
-release = '0.4.dev2'
+release = '0.4.4'
+version = '0.4.4'
 
 
 # -- General configuration ---------------------------------------------------
@@ -80,7 +82,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 source_suffix = {
     '.md': 'markdown',
