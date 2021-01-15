@@ -25,6 +25,9 @@ setup(name='insolver',
             ]
       },
       install_requires=required,
+      extras_require={
+            'db-connects': ['pyodbc']
+      },
       zip_safe=False,
       classifiers=[
             'Programming Language :: Python :: 3',
