@@ -11,3 +11,9 @@ pip install "git+ssh://git@github.com/MindSetLib/MS-InsuranceScoring.git"
 ```shell
 pip install insolver
 ```
+
+### Install with addons:
+
+```shell
+pip install insolver[db-connects]
+```
