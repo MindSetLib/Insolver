@@ -7,6 +7,12 @@ Mindset insurance scoring - product repository
 ```shell
 pip install insolver
 ```
+### Install with addons:
+
+```shell
+pip install insolver[db-connects]
+```
+
 ### Post-install:
 
 To fix displaying plotly figs in jyputerlab install:
