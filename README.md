@@ -1,9 +1,10 @@
-![PyPI](https://img.shields.io/pypi/v/insolver?style=flat)
+[![PyPI](https://img.shields.io/pypi/v/insolver?style=flat)](https://pypi.org/project/insolver/)
 [![Documentation Status](https://readthedocs.org/projects/insolver/badge/?version=latest)](https://insolver.readthedocs.io/en/latest/?badge=latest)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MindSetLib/Insolver/Python%20application?logo=github&label=tests)](https://github.com/MindSetLib/Insolver/actions)
 
 # Insolver
 
-Mindset insurance scoring - product repository
+Insolver is low-code machine learning library, initially created for the insurance industry, but can be used in any other. A more detailed overview you can find [here](https://insolver.readthedocs.io/en/latest/source/overview.html).
 
 ## Installation:
 
