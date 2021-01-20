@@ -1,5 +1,39 @@
+import os
+from io import BytesIO
+from urllib.request import urlopen
+from zipfile import ZipFile
+
 from numpy import log, sum
 from sklearn.model_selection import train_test_split
+
+
+def download_dataset(name, folder='datasets'):
+    """Function for downloading and unzipping example datasets
+
+    Args:
+        name (str): Dataset name. Available datasets are freMPL-R and US_Accidents
+        folder (str): Path to the folder to dataset saving
+
+    Returns:
+        str: Information about saved dataset
+
+    """
+    datasets = {
+        'freMPL-R': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/freMPL-R.zip',
+        'US_Accidents': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/US_Accidents_June20.zip',
+    }
+    if name not in datasets.keys():
+        return f'Dataset {name} is not found. Available datasets are {", ".join(datasets.keys())}'
+
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    url = datasets[name]
+    with urlopen(url) as file:
+        with ZipFile(BytesIO(file.read())) as zfile:
+            zfile.extractall(folder)
+
+    return f'Dataset {name} saved to "{folder}" folder'
 
 
 def train_val_test_split(*arrays, val_size, test_size, random_state=0, shuffle=True, stratify=None):
