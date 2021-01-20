@@ -1,3 +1,6 @@
+![PyPI](https://img.shields.io/pypi/v/insolver?style=flat)
+[![Documentation Status](https://readthedocs.org/projects/insolver/badge/?version=latest)](https://insolver.readthedocs.io/en/latest/?badge=latest)
+
 # Insolver
 
 Mindset insurance scoring - product repository
@@ -26,20 +29,14 @@ sudo apt install unixodbc-dev
 ```
 
 
-## Quickstart:
-
-```python
-# short example
-```
-
 ## Examples:
 
-- [private motor French insurer dataset](https://github.com/MindSetLib/MS-InsuranceScoring/blob/master/examples/Insolver_FreMPL.ipynb)
-- [US  traffic accident dataset](https://github.com/MindSetLib/MS-InsuranceScoring/blob/master/examples/Insolver_US_Accidents.ipynb)
+- [private motor French insurer dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_FreMPL.ipynb)
+- [US  traffic accident dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_US_Accidents.ipynb)
 
 ## Documentation:
 
-will be here soon
+available [here](https://insolver.readthedocs.io/)
 
 ## Supported libraries:
 
