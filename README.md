@@ -4,7 +4,7 @@
 
 # Insolver
 
-Mindset insurance scoring - product repository
+Insolver is low-code machine learning library, initially created for the insurance industry, but can be used in any other. A more detailed overview you can find [here](https://insolver.readthedocs.io/en/latest/source/overview.html).
 
 ## Installation:
 
