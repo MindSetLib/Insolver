@@ -8,36 +8,36 @@ Insolver is low-code machine learning library, initially created for the insuran
 
 ## Installation:
 
-```shell
+```Shell
 pip install insolver
 ```
 ### Install with addons:
 
-```shell
+```Shell
 pip install insolver[db-connects]
 ```
 
 ### Post-install:
 
 To fix displaying plotly figs in jyputerlab install:
-```shell
+```Shell
 jupyter labextension install jupyterlab-plotly
 ```
 
 In case of problem with `pyodbc` you may need to install:
-```shell
+```Shell
 sudo apt install unixodbc-dev
 ```
 
 
 ## Examples:
 
-- [private motor French insurer dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_FreMPL.ipynb)
+- [Private motor French insurer dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_FreMPL.ipynb)
 - [US  traffic accident dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_US_Accidents.ipynb)
 
 ## Documentation:
 
-available [here](https://insolver.readthedocs.io/)
+Available [here](https://insolver.readthedocs.io/)
 
 ## Supported libraries:
 
