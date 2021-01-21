@@ -28,7 +28,7 @@ In case of problem with `pyodbc` you may need to install:
 ```shell
 sudo apt install unixodbc-dev
 ```
-### Insolver is already installed in the easy access cloud via GitHub login. https://mset.space with a familiar notebook-style environment.
+### Insolver is already installed in the easy access cloud via GitHub login. Try https://mset.space with a familiar notebook-style environment.
 
 ## Examples:
 
