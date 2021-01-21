@@ -45,6 +45,11 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
                                                                              h2o_init_params=h2o_init_params)}
         self._back_save_dict = {'sklearn': self._pickle_save, 'h2o': self._h2o_save}
 
+        self.meta = {'algo': self.algo,
+                     'backend': self.backend,
+                     'best_params': self.best_params,
+                     **kwargs}
+
         if backend not in self._backends:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 

@@ -7,6 +7,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import KFold, cross_val_score, cross_validate
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
 from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval
+from catboost import CatBoostClassifier, CatBoostRegressor
 
 
 class InsolverCVHPExtension:
@@ -32,9 +33,11 @@ class InsolverCVHPExtension:
         cv = KFold(n_splits=5) if cv is None else cv
         params = {key: params[key] if not (isinstance(params[key], float) and params[key].is_integer()) else
                   int(params[key]) for key in params.keys()}
-        estimator = self.object(**params)
         njobs = -1 if 'n_jobs' not in kwargs else kwargs.pop('n_jobs')
         error_score = 'raise' if 'error_score' not in kwargs else kwargs.pop('error_score')
+        params.update({'thread_count': 1} if isinstance(self.object(), (CatBoostClassifier, CatBoostRegressor))
+                      else {'n_jobs': 1})
+        estimator = self.object(**params)
         score = agg(cross_val_score(estimator, X, y=y, scoring=scoring, cv=cv, n_jobs=njobs,
                                     error_score=error_score, **kwargs))
         score = -score if maximize else score
