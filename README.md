@@ -32,12 +32,12 @@ sudo apt install unixodbc-dev
 
 ## Examples:
 
-- [private motor French insurer dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_FreMPL.ipynb)
+- [Private motor French insurer dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_FreMPL.ipynb)
 - [US  traffic accident dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_US_Accidents.ipynb)
 
 ## Documentation:
 
-available [here](https://insolver.readthedocs.io/)
+Available [here](https://insolver.readthedocs.io/)
 
 ## Supported libraries:
 
