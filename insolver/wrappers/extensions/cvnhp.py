@@ -10,7 +10,7 @@ from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval
 
 
 class InsolverCVHPExtension:
-    def _hyperopt_obj_cv(self, params, X, y, scoring, cv=None, agg=None, **kwargs):
+    def _hyperopt_obj_cv(self, params, X, y, scoring, cv=None, agg=None, maximize=False, **kwargs):
         """Default hyperopt objective performing K-fold cross-validation.
 
         Args:
@@ -21,6 +21,8 @@ class InsolverCVHPExtension:
             cv (:obj:`int, cross-validation generator or an iterable`, optional): Cross-validation strategy from
              sklearn. Performs 5-fold cv by default.
             agg (:obj:`callable`, optional): Function computing the final score out of test cv scores.
+            maximize (:obj:`bool`, optional): Indicator whether to maximize or minimize objective.
+             Minimizing by default.
             **kwargs: Other parameters passed to sklearn.model_selection.cross_val_score().
 
         Returns:
@@ -35,6 +37,7 @@ class InsolverCVHPExtension:
         error_score = 'raise' if 'error_score' not in kwargs else kwargs.pop('error_score')
         score = agg(cross_val_score(estimator, X, y=y, scoring=scoring, cv=cv, n_jobs=njobs,
                                     error_score=error_score, **kwargs))
+        score = -score if maximize else score
         return {'status': STATUS_OK, 'loss': score}
 
     def hyperopt_cv(self, X, y, params, fn=None, algo=None, max_evals=10, timeout=None,
