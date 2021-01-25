@@ -27,7 +27,7 @@ insolver_serving -model path_to_model -transforms path_to_transforms  -service f
 After starting the ML serving service you can use it via REST API.
 
 
-Example of the request to `http://127.0.0.1:8000/predict` endpoint:
+Example of the request to `http://127.0.0.10:5000/predict` endpoint:
 ```json
 {
     "df": {
@@ -71,5 +71,18 @@ Example of the request to `http://127.0.0.1:8000/predict` endpoint:
 }
 
 ```
+
+You can also create a request from by a random sample from InsolverDataFrame:
+
+```python
+import pandas as pd
+
+from insolver import InsolverDataFrame
+
+df = pd.read_csv('datasets/US_Accidents_June20.csv', low_memory=False)
+InsDataFrame = InsolverDataFrame(df)
+request_data = InsDataFrame.sample_request(batch_size=1)
+```
+
 
 You can find full example with model training and serving [here](examples.md).
