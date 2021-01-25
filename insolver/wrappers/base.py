@@ -64,6 +64,11 @@ class InsolverBaseWrapper:
         with open(os.path.join(path, name), 'wb') as _model:
             pickle.dump(self.model, _model, pickle.HIGHEST_PROTOCOL)
 
+    def _update_meta(self):
+        self.meta = self.__dict__.copy()
+        for key in ['_backends', '_back_load_dict', '_back_save_dict', 'object', 'model', 'meta']:
+            self.meta.pop(key)
+
 
 class InsolverTrivialWrapper(InsolverBaseWrapper):
     """Dummy wrapper for returning trivial "predictions" for metric comparison and statistics.
