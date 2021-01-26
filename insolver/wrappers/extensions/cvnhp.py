@@ -7,6 +7,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import KFold, cross_val_score, cross_validate
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
 from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval
+from xgboost import XGBModel
+from catboost import CatBoost
+from lightgbm import LGBMModel
+
 
 
 class InsolverCVHPExtension:
@@ -32,9 +36,13 @@ class InsolverCVHPExtension:
         cv = KFold(n_splits=5) if cv is None else cv
         params = {key: params[key] if not (isinstance(params[key], float) and params[key].is_integer()) else
                   int(params[key]) for key in params.keys()}
-        estimator = self.object(**params)
         njobs = -1 if 'n_jobs' not in kwargs else kwargs.pop('n_jobs')
         error_score = 'raise' if 'error_score' not in kwargs else kwargs.pop('error_score')
+        if isinstance(self.object(), CatBoost):
+            params.update({'thread_count': 1})
+        elif isinstance(self.object(), (XGBModel, LGBMModel)):
+            params.update({'n_jobs': 1})
+        estimator = self.object(**params)
         score = agg(cross_val_score(estimator, X, y=y, scoring=scoring, cv=cv, n_jobs=njobs,
                                     error_score=error_score, **kwargs))
         score = -score if maximize else score
@@ -92,6 +100,7 @@ class InsolverCVHPExtension:
                                 else fn_params['fit_params']))
         if not hasattr(self.model, 'feature_name_'):
             self.model.feature_name_ = X.columns.tolist() if isinstance(X, DataFrame) else [X.name]
+        self._update_meta()
         return self.best_params
 
     def _cross_val(self, X, y, scoring=None, cv=None, **kwargs):

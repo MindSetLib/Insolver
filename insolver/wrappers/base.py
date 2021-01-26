@@ -15,7 +15,7 @@ class InsolverBaseWrapper:
         """
         self.algo, self.backend, self._backends = None, backend, None
         self._back_load_dict, self._back_save_dict = None, None
-        self.object, self.model = None, None
+        self.meta, self.object, self.model = None, None, None
         self.best_params, self.trials = None, None
 
     def __call__(self):
@@ -47,6 +47,7 @@ class InsolverBaseWrapper:
         name = name if name is not None else def_name
         name = name if suffix is None else f'{name}_{suffix}'
 
+        self.model.insolver_meta = self.meta
         self.model.algo = self.algo
         self.model.backend = self.backend
 
@@ -62,6 +63,11 @@ class InsolverBaseWrapper:
     def _pickle_save(self, path, name):
         with open(os.path.join(path, name), 'wb') as _model:
             pickle.dump(self.model, _model, pickle.HIGHEST_PROTOCOL)
+
+    def _update_meta(self):
+        self.meta = self.__dict__.copy()
+        for key in ['_backends', '_back_load_dict', '_back_save_dict', 'object', 'model', 'meta']:
+            self.meta.pop(key)
 
 
 class InsolverTrivialWrapper(InsolverBaseWrapper):
