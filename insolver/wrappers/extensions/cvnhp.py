@@ -12,7 +12,6 @@ from catboost import CatBoost
 from lightgbm import LGBMModel
 
 
-
 class InsolverCVHPExtension:
     def _hyperopt_obj_cv(self, params, X, y, scoring, cv=None, agg=None, maximize=False, **kwargs):
         """Default hyperopt objective performing K-fold cross-validation.
@@ -38,9 +37,9 @@ class InsolverCVHPExtension:
                   int(params[key]) for key in params.keys()}
         njobs = -1 if 'n_jobs' not in kwargs else kwargs.pop('n_jobs')
         error_score = 'raise' if 'error_score' not in kwargs else kwargs.pop('error_score')
-        if isinstance(self.object(), CatBoost):
+        if isinstance(self.object(), CatBoost) and 'thread_count' not in self.params.keys():
             params.update({'thread_count': 1})
-        elif isinstance(self.object(), (XGBModel, LGBMModel)):
+        elif isinstance(self.object(), (XGBModel, LGBMModel)) and 'n_jobs' not in self.params.keys():
             params.update({'n_jobs': 1})
         estimator = self.object(**params)
         score = agg(cross_val_score(estimator, X, y=y, scoring=scoring, cv=cv, n_jobs=njobs,
