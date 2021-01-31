@@ -6,6 +6,6 @@ Insolver package consists of several modules:
 - Wrappers and models tools help to build and evaluate ML models.
 - The serving module provides the way to launch a simple API server with saved ML model.
 
-![insolver architecture](insolves_architecture.png)
+![insolver architecture](insolver_architecture.png)
 
 More detailed information of insolver package modules you can find in [API References](api_ref.md).
