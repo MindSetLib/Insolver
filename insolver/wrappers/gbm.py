@@ -69,6 +69,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
                 self.object = __params_gbm
             else:
                 raise NotImplementedError(f'Task parameter supports values in {self._tasks}.')
+        self._update_meta()
 
     def fit(self, X, y, **kwargs):
         """Fit a Gradient Boosting Machine.
@@ -81,6 +82,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         self.model.fit(X, y, **kwargs)
         if not hasattr(self.model, 'feature_name_'):
             self.model.feature_name_ = X.columns if isinstance(X, DataFrame) else [X.name]
+        self._update_meta()
 
     def predict(self, X, **kwargs):
         """Predict using GBM with feature matrix X.

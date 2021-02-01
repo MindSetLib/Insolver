@@ -3,7 +3,7 @@
 ## Install from Github
 
 ```shell
-pip install "git+ssh://git@github.com/MindSetLib/MS-InsuranceScoring.git"
+pip install "git+ssh://git@github.com/MindSetLib/Insolver.git"
 ```
 
 ## Install from PyPi

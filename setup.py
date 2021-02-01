@@ -9,12 +9,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 
 setup(name='insolver',
-      version='0.4.5',
-      description='Mindset insurance scoring',
+      version='0.4.6',
+      description='Insolver is low-code machine learning library, initially created for the insurance industry, '
+                  'but can be used in any other.\n You can find a detailed overview at '
+                  'https://insolver.readthedocs.io/en/latest/source/overview.html.',
       long_description=long_description,
       long_description_content_type='text/markdown',
       url='https://github.com/MindSetLib/Insolver',
-      keywords='ML insurance scoring',
+      keywords=['insurance', 'machine learning'],
       author='Mindset',
       author_email='request@mind-set.ru',
       license='MIT',
@@ -33,5 +35,5 @@ setup(name='insolver',
             'Programming Language :: Python :: 3',
             'License :: OSI Approved :: MIT License',
       ],
-      python_requires='>=3.6',
+      python_requires='>=3.7',
       )
