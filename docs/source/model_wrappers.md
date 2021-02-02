@@ -93,8 +93,8 @@ Although `InsolverTrivialWrapper` does not provide a real model, it may be a use
 `InsolverTrivialWrapper` requires two optional arguments: `col_name` and `agg`. If `col_name` argument is absent, fitted
 `InsolverTrivialWrapper` make "predictions" by returning the value of applied `agg` callable function on the training
 data. If `agg` argument is not specified, `np.mean` is used. The `col_name` argument take strings or list of strings as 
-values. 
-
+values. This object makes sense mainly in the case of regression problem. In case of classification problem, 
+it is not very useful, since such object does not support predicting labels.
 
 Resulting "predictions" are obtained as follows:
 1. On `fit` step, groupby operation (w.r.t. columns in `col_name`) with `agg` aggregation function is applied
@@ -106,10 +106,40 @@ Resulting "predictions" are obtained as follows:
 ## Generalized Linear Models
 `InsolverGLMWrapper` implements Generalized Linear Models with support of `h2o` and `scikit-learn` packages.
 
+`InsolverGLMWrapper` supports methods `coef()` and `norm_coef()` that output all the model coefficients. Although the
+models are fitted using standardized dataset, the coefficients in `coef()` are recalculated, so the prediction may be
+obtained as an inverse link function applied to a linear combination of coefficients and factors in `X`. 
+
 ### GLM using `sklearn` backend
+Insolver uses the functionality of
+[`TweedieRegressor`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.TweedieRegressor.html) class
+from [scikit-learn](https://scikit-learn.org/stable/modules/linear_model.html#generalized-linear-regression). 
+However, insolver fits a pipeline consisting of two steps, the first step with `StandardScaler` and the second with 
+`TweedieRegressor` itself. By default, `StandardScaler` is used with `with_mean` and `with_std` arguments equal to 
+`True`, since optimization procedure for non-standardized data may fail. Also, insolver makes available string names of
+the distributions for `family` parameter; the available names are: `gaussian` or `normal`, `poisson`, `gamma` and
+`inverse_gaussian`. This parameter can also accept numeric value for Tweedie power, if :math:`family \notin (0, 1)`.
+
+GLM with `sklearn` backend also supports hyperparameter optimization using `hyperopt_cv()` method.
 
 ### GLM using `h2o` backend
+Insolver uses the functionality of
+[`H2OGeneralizedLinearEstimator`](http://docs.h2o.ai/h2o/latest-stable/h2o-py/docs/modeling.html#h2ogeneralizedlinearestimator) 
+class from [H2O](https://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/glm.html).
+
+`InsolverGLMWrapper` with `h2o` backend supports training data on train, validation sets and also an sample weight
+parameter via `offset_column` from `h2o`.
+
+GLM with `h2o` backend also supports hyperparameter optimization using `optimize_hyperparam()` method.
 
 ## Gradient Boosting Machines
 `InsolverGLMWrapper` implements Gradient Boosting Machines with support of `xgboost`, `lightgbm` and `catboost`
-packages.
+packages. This object supports only classification and regression problems, that is why objective functions for ranking 
+may not work well.
+
+Gradient boosting wrapper may also interpret feature importance of the fitted models on the given dataset via `shap`
+using `shap()` method and interpret factor contributions with waterfall charts using `shap_explain()`.
+
+It is also possible to examine metrics and shap values changes on cross-validation folds with `cross_val()`.
+
+`InsolverGLMWrapper` with all three backends supports hyperparameter optimization using `hyperopt_cv()` method.

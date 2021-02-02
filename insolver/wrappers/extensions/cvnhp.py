@@ -7,10 +7,13 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import KFold, cross_val_score, cross_validate
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
 from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval
+from xgboost import XGBModel
+from catboost import CatBoost
+from lightgbm import LGBMModel
 
 
 class InsolverCVHPExtension:
-    def _hyperopt_obj_cv(self, params, X, y, scoring, cv=None, agg=None, **kwargs):
+    def _hyperopt_obj_cv(self, params, X, y, scoring, cv=None, agg=None, maximize=False, **kwargs):
         """Default hyperopt objective performing K-fold cross-validation.
 
         Args:
@@ -21,6 +24,8 @@ class InsolverCVHPExtension:
             cv (:obj:`int, cross-validation generator or an iterable`, optional): Cross-validation strategy from
              sklearn. Performs 5-fold cv by default.
             agg (:obj:`callable`, optional): Function computing the final score out of test cv scores.
+            maximize (:obj:`bool`, optional): Indicator whether to maximize or minimize objective.
+             Minimizing by default.
             **kwargs: Other parameters passed to sklearn.model_selection.cross_val_score().
 
         Returns:
@@ -30,11 +35,16 @@ class InsolverCVHPExtension:
         cv = KFold(n_splits=5) if cv is None else cv
         params = {key: params[key] if not (isinstance(params[key], float) and params[key].is_integer()) else
                   int(params[key]) for key in params.keys()}
-        estimator = self.object(**params)
         njobs = -1 if 'n_jobs' not in kwargs else kwargs.pop('n_jobs')
         error_score = 'raise' if 'error_score' not in kwargs else kwargs.pop('error_score')
+        if isinstance(self.object(), CatBoost) and 'thread_count' not in self.params.keys():
+            params.update({'thread_count': 1})
+        elif isinstance(self.object(), (XGBModel, LGBMModel)) and 'n_jobs' not in self.params.keys():
+            params.update({'n_jobs': 1})
+        estimator = self.object(**params)
         score = agg(cross_val_score(estimator, X, y=y, scoring=scoring, cv=cv, n_jobs=njobs,
                                     error_score=error_score, **kwargs))
+        score = -score if maximize else score
         return {'status': STATUS_OK, 'loss': score}
 
     def hyperopt_cv(self, X, y, params, fn=None, algo=None, max_evals=10, timeout=None,
@@ -88,7 +98,8 @@ class InsolverCVHPExtension:
         self.model.fit(X, y, **({} if not ((fn_params is not None) and ('fit_params' in fn_params))
                                 else fn_params['fit_params']))
         if not hasattr(self.model, 'feature_name_'):
-            self.model.feature_name_ = X.columns if isinstance(X, DataFrame) else [X.name]
+            self.model.feature_name_ = X.columns.tolist() if isinstance(X, DataFrame) else [X.name]
+        self._update_meta()
         return self.best_params
 
     def _cross_val(self, X, y, scoring=None, cv=None, **kwargs):

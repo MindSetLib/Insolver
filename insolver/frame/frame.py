@@ -1,5 +1,5 @@
+import json
 from pandas import DataFrame
-
 from insolver.model_tools import train_val_test_split
 
 
@@ -35,3 +35,17 @@ class InsolverDataFrame(DataFrame):
     def split_frame(self, val_size, test_size, random_state=0, shuffle=True, stratify=None):
         return train_val_test_split(self, val_size=val_size, test_size=test_size, random_state=random_state,
                                     shuffle=shuffle, stratify=stratify)
+
+    def sample_request(self, batch_size=1):
+        """Create json request by a random sample from InsolverDataFrame
+
+        Args:
+            batch_size: number of random samples
+
+        Returns:
+            request (dict)
+        """
+        data_str = self.sample(batch_size).to_json()
+        data = json.loads(data_str)
+        request = {'df': data}
+        return request
