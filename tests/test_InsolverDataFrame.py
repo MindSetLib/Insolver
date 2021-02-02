@@ -12,6 +12,19 @@ def test_InsolverDataFrame():
     assert hasattr(InsDataFrame, 'sample_request')
 
 
+def test_get_meta_info():
+    InsDataFrame = InsolverDataFrame(df)
+    meta_info = InsDataFrame.get_meta_info()
+    assert meta_info['type'] == 'InsolverDataFrame'
+    assert meta_info['len'] == 1
+    assert meta_info['columns'][0]['name'] == 'col1'
+    assert meta_info['columns'][1]['name'] == 'col2'
+    assert meta_info['columns'][0]['use'] == 'unknown'
+    assert meta_info['columns'][1]['use'] == 'unknown'
+    assert meta_info['columns'][0]['dtype'] == df.col1.dtypes
+    assert meta_info['columns'][1]['dtype'] == df.col2.dtypes
+
+
 def test_sample_request():
     InsDataFrame = InsolverDataFrame(df)
     request = InsDataFrame.sample_request()
