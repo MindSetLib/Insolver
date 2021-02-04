@@ -72,3 +72,7 @@ python -m pytest --cov=insolver; coverage html; xdg-open htmlcov/index.html
 ## Contributing to Insolver:
 
 Please, feel free to open an issue or/and suggest PR, if you find any bugs or any enhancements.
+
+## Demo
+
+![](InsolverDemo.gif)

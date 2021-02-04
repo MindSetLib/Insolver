@@ -57,9 +57,9 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
                     'gamma': {'xgboost': 'reg:gamma', 'lightgbm': 'gamma',
                               'catboost': 'Tweedie:variance_power=1.9999999'}
                 }
-                self.objective = (objectives[self.objective][self.backend] if self.objective in objectives.keys()
-                                  else self.objective)
-                kwargs.update({'objective': self.objective, 'n_estimators': self.n_estimators})
+                self.objective_ = (objectives[self.objective][self.backend] if self.objective in objectives.keys()
+                                   else self.objective)
+                kwargs.update({'objective': self.objective_, 'n_estimators': self.n_estimators})
                 self.model, self.params = gbm_init[task][self.backend](**(kwargs if kwargs is not None else {})), kwargs
 
                 def __params_gbm(**params):
