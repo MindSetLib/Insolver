@@ -74,5 +74,11 @@ python -m pytest --cov=insolver; coverage html; xdg-open htmlcov/index.html
 Please, feel free to open an issue or/and suggest PR, if you find any bugs or any enhancements.
 
 ## Demo
-
+### Example of models creation using insolver
 ![](InsolverDemo.gif)
+
+### Example of model production service
+![](Insolver implementation.gif)
+
+### Example of elyra pipeline built with insolver inside
+![](Insolver elyra pipeline.gif)
