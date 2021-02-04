@@ -52,7 +52,7 @@ async def predict(data: Data):
     InsTransforms.ins_transform()
 
     # Prediction
-    predicted = model.predict(df)
+    predicted = model.predict(InsTransforms)
 
     result = {
         'predicted': predicted.tolist()
