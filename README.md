@@ -78,7 +78,7 @@ Please, feel free to open an issue or/and suggest PR, if you find any bugs or an
 ![](InsolverDemo.gif)
 
 ### Example of model production service
-![](Insolver implementation.gif)
+![](InsolverImplementation.gif)
 
 ### Example of elyra pipeline built with insolver inside
-![](Insolver elyra pipeline.gif)
+![](InsolverElyraPipeline.gif)
