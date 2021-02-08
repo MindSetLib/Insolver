@@ -34,6 +34,7 @@ sudo apt install unixodbc-dev
 
 - [Private motor French insurer dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_FreMPL.ipynb)
 - [US  traffic accident dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_US_Accidents.ipynb)
+- [Landing club dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_LendingClub.ipynb)
 
 ## Documentation:
 
