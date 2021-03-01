@@ -123,7 +123,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         """Output GLM coefficients for standardized data.
 
         Returns:
-            dict: {:obj:`str`: :obj:`float`}m Dictionary containing GLM coefficients for standardized data.
+            dict: {:obj:`str`: :obj:`float`} Dictionary containing GLM coefficients for standardized data.
         """
         if self.standardize:
             if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
@@ -139,15 +139,14 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
                 raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
         else:
-            Exception('Normalized coefficients unavailable since model fitted on non-standardized data.')
-            coefs = dict()
+            raise Exception('Normalized coefficients unavailable since model fitted on non-standardized data.')
         return coefs
 
     def coef(self):
         """Output GLM coefficients for non-standardized data. Also calculated when GLM fitted on standardized data.
 
         Returns:
-            dict: {:obj:`str`: :obj:`float`}m Dictionary containing GLM coefficients for non-standardized data.
+            dict: {:obj:`str`: :obj:`float`} Dictionary containing GLM coefficients for non-standardized data.
         """
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
             if self.model.feature_name_ is None:

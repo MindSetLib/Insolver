@@ -92,7 +92,11 @@ class ModelMetricsCompare:
                 else:
                     raise TypeError(f'Statistics with type {type(stats)} are not supported.')
             stats_df = stats_df.append(DataFrame([stats_val], columns=name_stats))
-            model_names.append(f'{model.algo.upper()} {model.backend.capitalize()}')
+
+            if hasattr(model, 'algo') and hasattr(model, 'backend'):
+                model_names.append(f'{model.algo.upper()} {model.backend.capitalize()}')
+            else:
+                model_names.append(model.__class__.__name__)
             stats_df.index = ['Actual'] + model_names[1:]
             self.stats = stats_df
 
