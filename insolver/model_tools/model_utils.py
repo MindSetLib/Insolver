@@ -109,9 +109,9 @@ def deviance_poisson(y_hat, y, weight=None):
     """
     t_hat, t = y_hat + 1, y + 1
     if weight:
-        return 2 * sum(weight*(t * log(t / t_hat) - (t - t_hat)))
+        return sum(2 * weight * (t * log(t / t_hat) - (t - t_hat)))
     else:
-        return 2 * sum(t * log(t / t_hat) - (t - t_hat))
+        return sum(2 * (t * log(t / t_hat) - (t - t_hat)))
 
 
 def deviance_gamma(y_hat, y, weight=None):
@@ -126,6 +126,6 @@ def deviance_gamma(y_hat, y, weight=None):
         float, value of the Gamma deviance.
     """
     if weight:
-        return 2 * sum(weight*(-log(y/y_hat) + (y-y_hat)/y_hat))
+        return sum(2 * weight * (-log(y/y_hat) + (y-y_hat)/y_hat))
     else:
-        return 2 * sum(-log(y/y_hat) + (y-y_hat)/y_hat)
+        return sum(2 * (-log(y/y_hat) + (y-y_hat)/y_hat))
