@@ -71,18 +71,24 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
                 raise NotImplementedError(f'Task parameter supports values in {self._tasks}.')
         self._update_meta()
 
-    def fit(self, X, y, **kwargs):
+    def fit(self, X, y, report=None, **kwargs):
         """Fit a Gradient Boosting Machine.
 
         Args:
             X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
             y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
+            report (:obj:`list`, :obj:`tuple`, optional): A list of metrics to report after model fitting, optional.
             **kwargs: Other parameters passed to Scikit-learn API .fit().
         """
         self.model.fit(X, y, **kwargs)
         if not hasattr(self.model, 'feature_name_'):
             self.model.feature_name_ = X.columns if isinstance(X, DataFrame) else [X.name]
         self._update_meta()
+        if report is not None:
+            if isinstance(report, (list, tuple)):
+                prediction = self.model.predict(X)
+                print(DataFrame([[x.__name__, x(y, prediction)] for x
+                                 in report]).rename({0: 'Metrics', 1: 'Value'}, axis=1).set_index('Metrics'))
 
     def predict(self, X, **kwargs):
         """Predict using GBM with feature matrix X.
