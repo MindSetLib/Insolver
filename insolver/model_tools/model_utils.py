@@ -3,7 +3,8 @@ from io import BytesIO
 from urllib.request import urlopen
 from zipfile import ZipFile
 
-from numpy import log, sum
+from numpy import log, sum, maximum, unique
+from pandas import DataFrame, Series, concat, qcut
 from sklearn.model_selection import train_test_split
 
 
@@ -129,3 +130,39 @@ def deviance_gamma(y_hat, y, weight=None):
         return sum(2 * weight * (-log(y/y_hat) + (y-y_hat)/y_hat))
     else:
         return sum(2 * (-log(y/y_hat) + (y-y_hat)/y_hat))
+
+
+def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
+    """Function for Information value and Weight of Evidence computation.
+
+    Args:
+        data (pd.DataFrame): DataFrame with data to compute IV and WoE.
+        target (:obj:`str` or :obj:`pd.Series`): Target variable to compute IV and WoE.
+        bins (:obj:`int`, optional): Number of bins for WoE calculation for continuous variables.
+        cat_thresh (:obj:`int`, optional): Maximum number of categories for non-binned WoE calculation.
+        detail (:obj:`bool`, optional):  Whether to return detailed results DataFrame or not. Short by default.
+
+    Returns:
+        pd.DataFrame, DataFrame containing the data on Information Value (depends on detail argument).
+    """
+    detailed_result, short_result = DataFrame(), DataFrame()
+    target = target.name if isinstance(target, Series) else target
+    cols = data.columns
+    for ivars in cols[~cols.isin([target])]:
+        if (data[ivars].dtype.kind in 'bifc') and (len(unique(data[ivars])) > cat_thresh):
+            binned_x = qcut(data[ivars], bins,  duplicates='drop')
+            d0 = DataFrame({'x': binned_x, 'y': data[target]})
+        else:
+            d0 = DataFrame({'x': data[ivars], 'y': data[target]})
+        d = d0.groupby("x", as_index=False).agg({"y": ["count", "sum"]})
+        d.columns = ['Cutoff', 'N', 'Events']
+        d['% of Events'] = maximum(d['Events'], 0.5) / d['Events'].sum()
+        d['Non-Events'] = d['N'] - d['Events']
+        d['% of Non-Events'] = maximum(d['Non-Events'], 0.5) / d['Non-Events'].sum()
+        d['WoE'] = log(d['% of Events'] / d['% of Non-Events'])
+        d['IV'] = d['WoE'] * (d['% of Events'] - d['% of Non-Events'])
+        d.insert(loc=0, column='Variable', value=ivars)
+        temp = DataFrame({"Variable": [ivars], "IV": [d['IV'].sum()]}, columns=["Variable", "IV"])
+        detailed_result = concat([detailed_result, temp], axis=0)
+        short_result = concat([short_result, d], axis=0)
+    return short_result if detail else detailed_result
