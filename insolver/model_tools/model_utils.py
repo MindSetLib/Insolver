@@ -3,7 +3,10 @@ from io import BytesIO
 from urllib.request import urlopen
 from zipfile import ZipFile
 
-from numpy import log, sum, maximum, unique
+from numpy import log, sum, maximum, unique, true_divide, linspace, ndarray
+
+import matplotlib.pyplot as plt
+
 from pandas import DataFrame, Series, concat, qcut
 from sklearn.model_selection import train_test_split
 
@@ -166,3 +169,43 @@ def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
         detailed_result = concat([detailed_result, temp], axis=0)
         short_result = concat([short_result, d], axis=0)
     return short_result if detail else detailed_result
+
+
+def gain_curve(predict, exposure):
+    if isinstance(predict, (Series, ndarray)) and isinstance(exposure, Series):
+        temp_df = concat([Series(predict, name='Predict').reset_index(drop=True),
+                          exposure.reset_index(drop=True)], axis=1)
+        temp_df = temp_df.sort_values('Predict', ascending=False).reset_index(drop=True)
+        normalized_df = temp_df.cumsum()/temp_df.sum()
+        w = sum(temp_df[exposure.name])
+        m = true_divide(sum(temp_df[exposure.name] * temp_df['Predict']), sum(temp_df[exposure.name]))
+        temp_df['Rank'] = 0
+        temp_df.loc[0, 'Rank'] = 1 + 0.5 * (temp_df.loc[0, exposure.name] - 1)
+        for x in range(1, len(temp_df)):
+            temp_df.loc[x, 'Rank'] = (temp_df.loc[x-1, 'Rank'] + 0.5 * (temp_df.loc[x-1, exposure.name] + 1)
+                                      + 0.5 * (temp_df.loc[x, exposure.name] - 1))
+        gini = 1 + 1/w - 2/(w**2 * m) * sum(temp_df[exposure.name] * temp_df['Predict'] * temp_df['Rank'])
+        plt.plot(normalized_df[exposure.name], normalized_df['Predict'], label=f'Predict (Gini: {round(gini, 3)})')
+    elif isinstance(predict, DataFrame) and isinstance(exposure, Series):
+        temp_df = concat([predict.reset_index(drop=True), exposure.reset_index(drop=True)], axis=1)
+        for pred_col in temp_df.columns[:-1]:
+            temp_df2 = temp_df[[pred_col, exposure.name]].sort_values(pred_col, ascending=False).reset_index(drop=True)
+            normalized_df = temp_df2.cumsum()/temp_df2.sum()
+            w = sum(temp_df2[exposure.name])
+            m = true_divide(sum(temp_df2[exposure.name] * temp_df2[pred_col]), sum(temp_df2[exposure.name]))
+            temp_df2['Rank'] = 0
+            temp_df2.loc[0, 'Rank'] = 1 + 0.5 * (temp_df2.loc[0, exposure.name] - 1)
+            for x in range(1, len(temp_df2)):
+                temp_df2.loc[x, 'Rank'] = (temp_df2.loc[x-1, 'Rank'] + 0.5 * (temp_df2.loc[x-1, exposure.name] + 1)
+                                           + 0.5 * (temp_df2.loc[x, exposure.name] - 1))
+            gini = 1 + 1/w - 2/(w**2 * m) * sum(temp_df2[exposure.name] * temp_df2[pred_col] * temp_df2['Rank'])
+            plt.plot(normalized_df[exposure.name], normalized_df[pred_col],
+                     label=f'{pred_col} (Gini: {round(gini, 3)})')
+    else:
+        raise Exception
+    plt.legend()
+    plt.plot(linspace(0, 1, 2), linspace(0, 1, 2), c='red', linestyle='--', linewidth=0.7)
+    plt.title('Gains curve')
+    plt.xlabel('Cumulative exposure')
+    plt.ylabel('Cumulative response')
+    plt.show()
