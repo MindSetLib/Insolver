@@ -3,7 +3,11 @@ from io import BytesIO
 from urllib.request import urlopen
 from zipfile import ZipFile
 
-from numpy import log, sum
+from numpy import log, sum, maximum, unique, true_divide, linspace, ndarray
+
+import matplotlib.pyplot as plt
+
+from pandas import DataFrame, Series, concat, qcut
 from sklearn.model_selection import train_test_split
 
 
@@ -129,3 +133,79 @@ def deviance_gamma(y_hat, y, weight=None):
         return sum(2 * weight * (-log(y/y_hat) + (y-y_hat)/y_hat))
     else:
         return sum(2 * (-log(y/y_hat) + (y-y_hat)/y_hat))
+
+
+def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
+    """Function for Information value and Weight of Evidence computation.
+
+    Args:
+        data (pd.DataFrame): DataFrame with data to compute IV and WoE.
+        target (:obj:`str` or :obj:`pd.Series`): Target variable to compute IV and WoE.
+        bins (:obj:`int`, optional): Number of bins for WoE calculation for continuous variables.
+        cat_thresh (:obj:`int`, optional): Maximum number of categories for non-binned WoE calculation.
+        detail (:obj:`bool`, optional):  Whether to return detailed results DataFrame or not. Short by default.
+
+    Returns:
+        pd.DataFrame, DataFrame containing the data on Information Value (depends on detail argument).
+    """
+    detailed_result, short_result = DataFrame(), DataFrame()
+    target = target.name if isinstance(target, Series) else target
+    cols = data.columns
+    for ivars in cols[~cols.isin([target])]:
+        if (data[ivars].dtype.kind in 'bifc') and (len(unique(data[ivars])) > cat_thresh):
+            binned_x = qcut(data[ivars], bins,  duplicates='drop')
+            d0 = DataFrame({'x': binned_x, 'y': data[target]})
+        else:
+            d0 = DataFrame({'x': data[ivars], 'y': data[target]})
+        d = d0.groupby("x", as_index=False).agg({"y": ["count", "sum"]})
+        d.columns = ['Cutoff', 'N', 'Events']
+        d['% of Events'] = maximum(d['Events'], 0.5) / d['Events'].sum()
+        d['Non-Events'] = d['N'] - d['Events']
+        d['% of Non-Events'] = maximum(d['Non-Events'], 0.5) / d['Non-Events'].sum()
+        d['WoE'] = log(d['% of Events'] / d['% of Non-Events'])
+        d['IV'] = d['WoE'] * (d['% of Events'] - d['% of Non-Events'])
+        d.insert(loc=0, column='Variable', value=ivars)
+        temp = DataFrame({"Variable": [ivars], "IV": [d['IV'].sum()]}, columns=["Variable", "IV"])
+        detailed_result = concat([detailed_result, temp], axis=0)
+        short_result = concat([short_result, d], axis=0)
+    return short_result if detail else detailed_result
+
+
+def gain_curve(predict, exposure):
+    if isinstance(predict, (Series, ndarray)) and isinstance(exposure, Series):
+        temp_df = concat([Series(predict, name='Predict').reset_index(drop=True),
+                          exposure.reset_index(drop=True)], axis=1)
+        temp_df = temp_df.sort_values('Predict', ascending=False).reset_index(drop=True)
+        normalized_df = temp_df.cumsum()/temp_df.sum()
+        w = sum(temp_df[exposure.name])
+        m = true_divide(sum(temp_df[exposure.name] * temp_df['Predict']), sum(temp_df[exposure.name]))
+        temp_df['Rank'] = 0
+        temp_df.loc[0, 'Rank'] = 1 + 0.5 * (temp_df.loc[0, exposure.name] - 1)
+        for x in range(1, len(temp_df)):
+            temp_df.loc[x, 'Rank'] = (temp_df.loc[x-1, 'Rank'] + 0.5 * (temp_df.loc[x-1, exposure.name] + 1)
+                                      + 0.5 * (temp_df.loc[x, exposure.name] - 1))
+        gini = 1 + 1/w - 2/(w**2 * m) * sum(temp_df[exposure.name] * temp_df['Predict'] * temp_df['Rank'])
+        plt.plot(normalized_df[exposure.name], normalized_df['Predict'], label=f'Predict (Gini: {round(gini, 3)})')
+    elif isinstance(predict, DataFrame) and isinstance(exposure, Series):
+        temp_df = concat([predict.reset_index(drop=True), exposure.reset_index(drop=True)], axis=1)
+        for pred_col in temp_df.columns[:-1]:
+            temp_df2 = temp_df[[pred_col, exposure.name]].sort_values(pred_col, ascending=False).reset_index(drop=True)
+            normalized_df = temp_df2.cumsum()/temp_df2.sum()
+            w = sum(temp_df2[exposure.name])
+            m = true_divide(sum(temp_df2[exposure.name] * temp_df2[pred_col]), sum(temp_df2[exposure.name]))
+            temp_df2['Rank'] = 0
+            temp_df2.loc[0, 'Rank'] = 1 + 0.5 * (temp_df2.loc[0, exposure.name] - 1)
+            for x in range(1, len(temp_df2)):
+                temp_df2.loc[x, 'Rank'] = (temp_df2.loc[x-1, 'Rank'] + 0.5 * (temp_df2.loc[x-1, exposure.name] + 1)
+                                           + 0.5 * (temp_df2.loc[x, exposure.name] - 1))
+            gini = 1 + 1/w - 2/(w**2 * m) * sum(temp_df2[exposure.name] * temp_df2[pred_col] * temp_df2['Rank'])
+            plt.plot(normalized_df[exposure.name], normalized_df[pred_col],
+                     label=f'{pred_col} (Gini: {round(gini, 3)})')
+    else:
+        raise Exception
+    plt.legend()
+    plt.plot(linspace(0, 1, 2), linspace(0, 1, 2), c='red', linestyle='--', linewidth=0.7)
+    plt.title('Gains curve')
+    plt.xlabel('Cumulative exposure')
+    plt.ylabel('Cumulative response')
+    plt.show()
