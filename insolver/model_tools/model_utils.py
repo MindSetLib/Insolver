@@ -229,13 +229,18 @@ def gain_curve(predict, exposure, step=1, figsize=(10, 6), gini_exact=False, out
         return gini_df
 
 
-def lift(predict, column, lift_type='groupby', q=10, output=False):
+def lift(predict, column, lift_type='groupby', q=10, output=False, reference='mean'):
     df = concat([column.reset_index(drop=True), Series(predict, name='Predict')], axis=1)
     if lift_type == 'groupby':
-        df = df.groupby(column.name).mean()/np.mean(predict)
+        pass
     elif lift_type == 'quantile':
         df[column.name] = qcut(column, q=q).reset_index(drop=True)
-        df = df.groupby(column.name).mean()/np.mean(predict)
+    else:
+        raise Exception
+    if reference == 'mean':
+        df = df.groupby(column.name).mean() / np.mean(predict)
+    elif reference == 'min':
+        df = df.groupby(column.name).mean() / df.groupby(column.name).min()
     else:
         raise Exception
     plt.bar(df.index.astype(str), height=df['Predict'])
