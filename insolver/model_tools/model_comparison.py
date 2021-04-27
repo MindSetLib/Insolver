@@ -81,7 +81,7 @@ class ModelMetricsCompare:
         trivial = InsolverTrivialWrapper(agg=lambda x: x)
         trivial.fit(X, y)
         models = [trivial] + self.models
-        features = [None] + features
+        features = [None] + features if features is not None else None
         for model in models:
             p = model.predict(X if (features is None) or (features[models.index(model)] is None)
                               else X[features[models.index(model)]],
