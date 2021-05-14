@@ -6,6 +6,7 @@ from zipfile import ZipFile
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy.special import xlogy
 from pandas import DataFrame, Series, concat, qcut
 from sklearn.model_selection import train_test_split
 
@@ -99,39 +100,44 @@ def train_test_column_split(x, y, df_column):
             y1[y1[col_name] == 'train'].drop(col_name, axis=1), y1[y1[col_name] == 'test'].drop(col_name, axis=1))
 
 
-def deviance_poisson(y_hat, y, weight=None):
+def deviance_poisson(y, y_pred, weight=None, agg='sum'):
     """Function for Poisson Deviance evaluation.
 
     Args:
-        y_hat: Array with predictions.
         y: Array with target variable.
+        y_pred: Array with predictions.
         weight: Weights for weighted metric.
+        agg: Function to calculate deviance ['sum', 'mean'] or callable are supported.
 
     Returns:
         float, value of the Poisson deviance.
     """
-    t_hat, t = y_hat + 1, y + 1
-    if weight:
-        return sum(2 * weight * (t * np.log(t / t_hat) - (t - t_hat)))
-    else:
-        return sum(2 * (t * np.log(t / t_hat) - (t - t_hat)))
+    dict_func = {'sum': np.sum, 'mean': np.mean}
+    func = dict_func[agg] if agg in ['sum', 'mean'] else agg if isinstance(agg, callable) else None
+    if func is None:
+        raise ValueError
+    weight = 1 if weight is None else weight
+    return func(2 * weight * (xlogy(y, y / y_pred) - (y - y_pred)))
 
 
-def deviance_gamma(y_hat, y, weight=None):
+def deviance_gamma(y, y_pred, weight=None, agg='sum'):
     """Function for Gamma Deviance evaluation.
 
     Args:
-        y_hat: Array with predictions.
         y: Array with target variable.
+        y_pred: Array with predictions.
         weight: Weights for weighted metric.
+        agg: Function to calculate deviance ['sum', 'mean'] or callable are supported.
 
     Returns:
         float, value of the Gamma deviance.
     """
-    if weight:
-        return sum(2 * weight * (-np.log(y/y_hat) + (y-y_hat)/y_hat))
-    else:
-        return sum(2 * (-np.log(y/y_hat) + (y-y_hat)/y_hat))
+    dict_func = {'sum': np.sum, 'mean': np.mean}
+    func = dict_func[agg] if agg in ['sum', 'mean'] else agg if isinstance(agg, callable) else None
+    if func is None:
+        raise ValueError
+    weight = 1 if weight is None else weight
+    return func(2 * weight * (np.log(y_pred/y) + y/y_pred - 1))
 
 
 def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):

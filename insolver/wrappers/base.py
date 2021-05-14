@@ -1,6 +1,7 @@
 import os
 import time
 import pickle
+import joblib
 
 from numpy import array, mean, broadcast_to
 from pandas import concat, merge
@@ -63,6 +64,12 @@ class InsolverBaseWrapper:
     def _pickle_save(self, path, name):
         with open(os.path.join(path, name), 'wb') as _model:
             pickle.dump(self.model, _model, pickle.HIGHEST_PROTOCOL)
+
+    def _joblib_load(self, load_path):
+        self.model = joblib.load(load_path)
+
+    def _joblib_save(self, path, name):
+        joblib.dump(self.model, os.path.join(path, name))
 
     def _update_meta(self):
         self.meta = self.__dict__.copy()
