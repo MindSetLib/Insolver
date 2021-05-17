@@ -1,6 +1,7 @@
 [![PyPI](https://img.shields.io/pypi/v/insolver?style=flat)](https://pypi.org/project/insolver/)
 [![Documentation Status](https://readthedocs.org/projects/insolver/badge/?version=latest)](https://insolver.readthedocs.io/en/latest/?badge=latest)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MindSetLib/Insolver/Python%20application?logo=github&label=tests)](https://github.com/MindSetLib/Insolver/actions)
+[![Downloads](https://pepy.tech/badge/insolver/week)](https://pepy.tech/project/insolver)
 
 # Insolver
 
@@ -34,6 +35,7 @@ sudo apt install unixodbc-dev
 
 - [Private motor French insurer dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_FreMPL.ipynb)
 - [US  traffic accident dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_US_Accidents.ipynb)
+- [Landing club dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_LendingClub.ipynb)
 
 ## Documentation:
 
@@ -72,3 +74,13 @@ python -m pytest --cov=insolver; coverage html; xdg-open htmlcov/index.html
 ## Contributing to Insolver:
 
 Please, feel free to open an issue or/and suggest PR, if you find any bugs or any enhancements.
+
+## Demo
+### Example of models creation using insolver
+![](InsolverDemo.gif)
+
+### Example of model production service
+![](InsolverImplementation.gif)
+
+### Example of elyra pipeline built with insolver inside
+![](InsolverElyraPipeline.gif)

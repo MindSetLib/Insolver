@@ -5,7 +5,7 @@ from glob import glob
 from numpy import min, max, mean, var, std, quantile, median
 from pandas import DataFrame
 
-from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper, InsolverTrivialWrapper
+from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper, InsolverRFWrapper, InsolverTrivialWrapper
 
 
 class ModelMetricsCompare:
@@ -19,9 +19,13 @@ class ModelMetricsCompare:
         stats (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Statistics or list of statistics to compute.
         folder with models. If `None`, taking current working directory as source.
         h2o_init_params (:obj:`dict`, optional): Parameters passed to `h2o.init()`, when `backend` == 'h2o'.
+        predict_params (:obj:`list`, optional): List of dictionaries containing parameters passed to predict methods
+         for each model.
+        features (:obj:`list`, optional): List of lists containing features for predict method for each model.
     """
-    def __init__(self, X, y, source=None, metrics=None, stats=None, h2o_init_params=None):
-        wrappers = {'glm': InsolverGLMWrapper, 'gbm': InsolverGBMWrapper}
+    def __init__(self, X, y, source=None, metrics=None, stats=None, h2o_init_params=None, predict_params=None,
+                 features=None):
+        wrappers = {'glm': InsolverGLMWrapper, 'gbm': InsolverGBMWrapper, 'rf': InsolverRFWrapper}
         self.stats, self.metrics = None, None
         if (source is None) or isinstance(source, str):
             source = os.getcwd() if source is None else source
@@ -41,7 +45,7 @@ class ModelMetricsCompare:
         else:
             raise TypeError(f'Source of type {type(source)} is not supported.')
 
-        self._calc_metrics(X=X, y=y, metrics=metrics, stats=stats)
+        self._calc_metrics(X=X, y=y, metrics=metrics, stats=stats, predict_params=predict_params, features=features)
 
     def __repr__(self):
         stk = traceback.extract_stack()
@@ -58,7 +62,7 @@ class ModelMetricsCompare:
             print(self.metrics)
         return ''
 
-    def _calc_metrics(self, X, y, metrics=None, stats=None):
+    def _calc_metrics(self, X, y, metrics=None, stats=None, predict_params=None, features=None):
         """Computing metrics and statistics for models.
 
         Args:
@@ -66,6 +70,9 @@ class ModelMetricsCompare:
             y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Actual target values for X.
             metrics (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Metrics or list of metrics to compute.
             stats (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Statistics or list of statistics to compute.
+            predict_params (:obj:`list`, optional): List of dictionaries containing parameters passed to predict methods
+         for each model.
+            features (:obj:`list`, optional): List of lists containing features for predict method for each model.
 
         Returns:
             Returns `None`, but results available in `self.stats`, `self.metrics`.
@@ -74,8 +81,12 @@ class ModelMetricsCompare:
         trivial = InsolverTrivialWrapper(agg=lambda x: x)
         trivial.fit(X, y)
         models = [trivial] + self.models
+        features = [None] + features if features is not None else None
         for model in models:
-            p = model.predict(X)
+            p = model.predict(X if (features is None) or (features[models.index(model)] is None)
+                              else X[features[models.index(model)]],
+                              **({} if (predict_params is None) or (predict_params[models.index(model)] is None)
+                                 else predict_params[models.index(model)]))
             stats_val = [mean(p), var(p), std(p), min(p), quantile(p, 0.25), median(p), quantile(p, 0.75), max(p)]
             name_stats = ['Mean', 'Variance', 'St. Dev.', 'Min', 'Q1', 'Median', 'Q3', 'Max']
             if stats is not None:
@@ -92,7 +103,11 @@ class ModelMetricsCompare:
                 else:
                     raise TypeError(f'Statistics with type {type(stats)} are not supported.')
             stats_df = stats_df.append(DataFrame([stats_val], columns=name_stats))
-            model_names.append(f'{model.algo.upper()} {model.backend.capitalize()}')
+
+            if hasattr(model, 'algo') and hasattr(model, 'backend'):
+                model_names.append(f'{model.algo.upper()} {model.backend.capitalize()}')
+            else:
+                model_names.append(model.__class__.__name__)
             stats_df.index = ['Actual'] + model_names[1:]
             self.stats = stats_df
 

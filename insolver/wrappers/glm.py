@@ -69,7 +69,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
                 self.model, self.object = __params_pipe(**self.params), __params_pipe
         self._update_meta()
 
-    def fit(self, X, y, sample_weight=None, X_valid=None, y_valid=None, sample_weight_valid=None, **kwargs):
+    def fit(self, X, y, sample_weight=None, X_valid=None, y_valid=None, sample_weight_valid=None,
+            report=None, **kwargs):
         """Fit a Generalized Linear Model.
 
         Args:
@@ -79,6 +80,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
             X_valid (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Validation data (only h2o supported).
             y_valid (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Validation target values (only h2o supported).
             sample_weight_valid (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Validation sample weights.
+            report (:obj:`list`, :obj:`tuple`, optional): A list of metrics to report after model fitting, optional.
             **kwargs: Other parameters passed to H2OGeneralizedLinearEstimator.
         """
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
@@ -92,6 +94,14 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
         self._update_meta()
+        if report is not None:
+            if isinstance(report, (list, tuple)):
+                if self.backend == 'h2o':
+                    prediction = self.model.predict(train_set).as_data_frame().values.reshape(-1)
+                else:
+                    prediction = self.model.predict(X)
+                print(DataFrame([[x.__name__, x(y, prediction)] for x
+                                 in report]).rename({0: 'Metrics', 1: 'Value'}, axis=1).set_index('Metrics'))
 
     def predict(self, X, sample_weight=None, **kwargs):
         """Predict using GLM with feature matrix X.
@@ -123,7 +133,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         """Output GLM coefficients for standardized data.
 
         Returns:
-            dict: {:obj:`str`: :obj:`float`}m Dictionary containing GLM coefficients for standardized data.
+            dict: {:obj:`str`: :obj:`float`} Dictionary containing GLM coefficients for standardized data.
         """
         if self.standardize:
             if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
@@ -139,15 +149,14 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
                 raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
 
         else:
-            Exception('Normalized coefficients unavailable since model fitted on non-standardized data.')
-            coefs = dict()
+            raise Exception('Normalized coefficients unavailable since model fitted on non-standardized data.')
         return coefs
 
     def coef(self):
         """Output GLM coefficients for non-standardized data. Also calculated when GLM fitted on standardized data.
 
         Returns:
-            dict: {:obj:`str`: :obj:`float`}m Dictionary containing GLM coefficients for non-standardized data.
+            dict: {:obj:`str`: :obj:`float`} Dictionary containing GLM coefficients for non-standardized data.
         """
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
             if self.model.feature_name_ is None:
