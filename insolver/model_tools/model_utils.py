@@ -237,7 +237,7 @@ def gain_curve(predict, exposure, step=1, figsize=(10, 6), gini_exact=False, out
         return gini_df
 
 
-def lift_score(predict, column, lift_type='groupby', q=10, output=False, reference='mean', kind='line'):
+def lift_score(predict, column, lift_type='groupby', q=10, output=False, reference='mean', kind='line', show=True):
     df = concat([column.reset_index(drop=True), Series(predict, name='Predict')], axis=1)
     if lift_type == 'groupby':
         pass
@@ -254,11 +254,12 @@ def lift_score(predict, column, lift_type='groupby', q=10, output=False, referen
     if kind == 'bar':
         plt.bar(df.index.astype(str), height=df['Predict'])
     else:
-        plt.plot(df.index.astype(str), height=df['Predict'])
+        plt.plot(df.index.astype(str), df['Predict'])
     plt.title('Lift Metrics')
     plt.xlabel(column.name)
     plt.ylabel('Lift Score')
     plt.xticks(rotation=90)
-    plt.show()
+    if show:
+        plt.show()
     if output:
         return df
