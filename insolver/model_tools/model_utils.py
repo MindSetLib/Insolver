@@ -183,7 +183,8 @@ def gain_curve(predict, exposure, step=1, figsize=(10, 6), gini_exact=False, out
         temp_df = concat([Series(predict, name='Predict').reset_index(drop=True),
                           exposure.reset_index(drop=True)], axis=1)
         temp_df = temp_df.sort_values('Predict', ascending=False).reset_index(drop=True)
-        normalized_df = temp_df.cumsum()/temp_df.sum()
+        cumsum = temp_df.cumsum()
+        normalized_df = cumsum/cumsum.loc[cumsum.index[-1]]
         if gini_exact:
             w = sum(temp_df[exposure.name])
             m = np.true_divide(sum(temp_df[exposure.name] * temp_df['Predict']), sum(temp_df[exposure.name]))
@@ -194,9 +195,9 @@ def gain_curve(predict, exposure, step=1, figsize=(10, 6), gini_exact=False, out
                                           + 0.5 * (temp_df.loc[x, exposure.name] - 1))
             gini = 1 + 1/w - 2/(w**2 * m) * sum(temp_df[exposure.name] * temp_df['Predict'] * temp_df['Rank'])
         else:
-            auc = (np.sum(normalized_df['Predict'] * np.append(np.diff(normalized_df['Exposure']), 0))
+            auc = (np.sum(normalized_df['Predict'] * np.append(np.diff(normalized_df[exposure.name]), 0))
                    + np.sum(np.append(np.diff(normalized_df['Predict']), 0) *
-                            np.append(np.diff(normalized_df['Exposure']), 0))/2)
+                            np.append(np.diff(normalized_df[exposure.name]), 0))/2)
             gini = 2 * auc - 1
         gini_df = gini_df.append(DataFrame.from_dict({'Gini': {'Predict': gini}}))
         plt.plot(normalized_df[exposure.name].values[::step], normalized_df['Predict'].values[::step],
@@ -205,7 +206,8 @@ def gain_curve(predict, exposure, step=1, figsize=(10, 6), gini_exact=False, out
         temp_df = concat([predict.reset_index(drop=True), exposure.reset_index(drop=True)], axis=1)
         for pred_col in temp_df.columns[:-1]:
             temp_df2 = temp_df[[pred_col, exposure.name]].sort_values(pred_col, ascending=False).reset_index(drop=True)
-            normalized_df = temp_df2.cumsum()/temp_df2.sum()
+            cumsum = temp_df2.cumsum()
+            normalized_df = cumsum / cumsum.loc[cumsum.index[-1]]
             if gini_exact:
                 w = sum(temp_df2[exposure.name])
                 m = np.true_divide(sum(temp_df2[exposure.name] * temp_df2[pred_col]), sum(temp_df2[exposure.name]))
@@ -235,7 +237,7 @@ def gain_curve(predict, exposure, step=1, figsize=(10, 6), gini_exact=False, out
         return gini_df
 
 
-def lift(predict, column, lift_type='groupby', q=10, output=False, reference='mean'):
+def lift_score(predict, column, lift_type='groupby', q=10, output=False, reference='mean', kind='line'):
     df = concat([column.reset_index(drop=True), Series(predict, name='Predict')], axis=1)
     if lift_type == 'groupby':
         pass
@@ -249,7 +251,10 @@ def lift(predict, column, lift_type='groupby', q=10, output=False, reference='me
         df = df.groupby(column.name).mean() / df.groupby(column.name).min()
     else:
         raise Exception
-    plt.bar(df.index.astype(str), height=df['Predict'])
+    if kind == 'bar':
+        plt.bar(df.index.astype(str), height=df['Predict'])
+    else:
+        plt.plot(df.index.astype(str), height=df['Predict'])
     plt.title('Lift Metrics')
     plt.xlabel(column.name)
     plt.ylabel('Lift Score')
