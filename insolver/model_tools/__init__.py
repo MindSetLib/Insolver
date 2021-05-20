@@ -1,3 +1,4 @@
 from .model_comparison import ModelMetricsCompare
 from .model_utils import train_val_test_split, train_test_column_split, deviance_poisson, deviance_gamma
 from .model_utils import download_dataset
+from .model_utils import inforamtion_value_woe, gain_curve, lift_score
