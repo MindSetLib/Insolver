@@ -248,7 +248,7 @@ def lift_score(predict, column, lift_type='groupby', q=10, output=False, referen
     if reference == 'mean':
         df = df.groupby(column.name).mean() / np.mean(predict)
     elif reference == 'min':
-        df = df.groupby(column.name).mean() / df.groupby(column.name).min()
+        df = df.groupby(column.name).mean() / df.groupby(column.name).mean().min()
     else:
         raise Exception
     if kind == 'bar':
