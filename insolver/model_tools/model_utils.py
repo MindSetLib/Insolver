@@ -238,7 +238,7 @@ def gain_curve(predict, exposure, step=1, figsize=(10, 6), gini_exact=False, out
 
 
 def lift_score(predict, column, lift_type='groupby', q=10, output=False, reference='mean', kind='line', show=True):
-    df = concat([column.reset_index(drop=True), Series(predict, name='Predict')], axis=1)
+    df = concat([column.reset_index(drop=True), Series(predict, name='Predict').reset_index(drop=True)], axis=1)
     if lift_type == 'groupby':
         pass
     elif lift_type == 'quantile':
