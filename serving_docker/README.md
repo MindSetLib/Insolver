@@ -9,3 +9,6 @@
 ```shell
 docker run -p 5000:5000 insolver
 ```
+## OpenAPI and ReDoc:
+- http://127.0.0.1:5000/docs
+- http://127.0.0.1:5000/redoc
