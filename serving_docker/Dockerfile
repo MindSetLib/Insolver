@@ -2,7 +2,8 @@ FROM python:3.8
 
 # Setup build arguments
 ARG INSOLVER_VER=0.4.11
-ARG PORT=5000
+ARG MODEL
+ARG TRANSFORMS
 
 RUN pip install --no-cache-dir insolver==$INSOLVER_VER
 
@@ -15,8 +16,9 @@ RUN useradd --create-home appuser
 WORKDIR /home/appuser
 USER appuser
 
-COPY insolver_glm_h2o_1610467176142 ./
-COPY transforms.pkl ./
+COPY $MODEL ./insolver.model
+COPY $TRANSFORMS ./transforms.pkl
 
-EXPOSE $PORT
-ENTRYPOINT insolver_serving -model insolver_glm_h2o_1610467176142 -transforms transforms.pkl -service fastapi -ip 0.0.0.0 -port 5000
+EXPOSE 5000
+ENTRYPOINT ["insolver_serving", "-model", "insolver.model", "-transforms", "transforms.pkl", "-ip", "0.0.0.0", "-port", "5000"]
+CMD ["-service", "fastapi"]
