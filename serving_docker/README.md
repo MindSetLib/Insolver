@@ -6,7 +6,7 @@ You need to set your model and transformations files as build args:
 docker build -t insolver --build-arg MODEL=insolver_glm_h2o_1610467176142 --build-arg TRANSFORMS=transforms.pkl .
 ```
 
-### Default version of insolver package is 0.4.10, but you can overwrite it with `INSOLVER_VER` arg:
+### Default version of insolver package is 0.4.11, but you can overwrite it with `INSOLVER_VER` arg:
 docker build -t insolver \
     --build-arg MODEL=insolver_glm_h2o_1610467176142 \
     --build-arg TRANSFORMS=transforms.pkl \
