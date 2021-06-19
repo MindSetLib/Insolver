@@ -84,3 +84,7 @@ Please, feel free to open an issue or/and suggest PR, if you find any bugs or an
 
 ### Example of elyra pipeline built with insolver inside
 ![](InsolverElyraPipeline.gif)
+
+### Contacts
+frank@mind-set.ru
++79263790123
