@@ -10,8 +10,15 @@ from insolver.serving import utils
 from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 
+
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
+
+# add new features
+models_folder = os.environ['models_folder']
+transforms_folder = os.environ['transforms_folder']
+config_file = os.environ['config_file']
+
 
 # Load model
 model = utils.load_pickle_model(model_path)
@@ -21,6 +28,7 @@ elif model and model.algo == 'glm':
     model = InsolverGLMWrapper(backend='sklearn', load_path=model_path)
 else:
     model = InsolverGLMWrapper(backend='h2o', load_path=model_path)
+
 
 # load and init transformations
 with open(transforms_path, 'rb') as file:

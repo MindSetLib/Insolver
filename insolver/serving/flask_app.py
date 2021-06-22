@@ -13,6 +13,11 @@ from insolver.serving import utils
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
 
+# add new features
+models_folder = os.environ['models_folder']
+transforms_folder = os.environ['transforms_folder']
+config_file = os.environ['config_file']
+
 # For logging
 import logging
 import traceback
