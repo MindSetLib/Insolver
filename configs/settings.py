@@ -3,7 +3,7 @@ Insolver settings for project.
 """
 
 #Will ot work with formula from settings file?
-FORMULA_CALCULATION = False
+FORMULA_CALCULATION = True
 
 #Variables list from formula
 VARIABLES_LIST = ['cf1', 'ac1', 'cf2', 'ac2', 'cf3', 'ac3', 'cf4', 'ac4', 'cf5', 'ac51', 'ac52', 'cf6', 'ac6']
@@ -15,6 +15,7 @@ VARIABLES_LIST = ['cf1', 'ac1', 'cf2', 'ac2', 'cf3', 'ac3', 'cf4', 'ac4', 'cf5',
 
 #Final formula for calculation, variables should be from variables list
 FORMULA = "cf1 * ac1 + cf2 * ac2 + cf3 * ac3 + cf4 * ac4 + cf5 * (ac51 + ac52) + cf6 * ac6"
+#FORMULA = "cf1 + cf2"
 
 
 
