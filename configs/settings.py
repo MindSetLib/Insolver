@@ -17,5 +17,9 @@ VARIABLES_LIST = ['cf1', 'ac1', 'cf2', 'ac2', 'cf3', 'ac3', 'cf4', 'ac4', 'cf5',
 FORMULA = "cf1 * ac1 + cf2 * ac2 + cf3 * ac3 + cf4 * ac4 + cf5 * (ac51 + ac52) + cf6 * ac6"
 #FORMULA = "cf1 + cf2"
 
+#Number of cores for model inference
+N_CORES = 10
+
+
 
 

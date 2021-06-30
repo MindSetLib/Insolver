@@ -1,3 +1,18 @@
+import os
+import pickle
+
+import pandas as pd
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from insolver import InsolverDataFrame
+from insolver.serving import utils
+from insolver.transforms import InsolverTransform, init_transforms
+from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
+
+
+#-----
+
 import json
 import pickle
 
@@ -25,6 +40,9 @@ from datetime import datetime
 import multiprocessing as mp
 from multiprocessing import Pool
 
+import uvicorn
+
+
 # /home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model
 model_path = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model'  # os.environ['model_path']
 transforms_path = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms/cf1_model.pkl'  # os.environ['transforms_path']
@@ -34,14 +52,14 @@ models_folder = '/home/frank/PycharmProjects/Insolver/drafts/several_models/mode
 transforms_folder = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms'  # os.environ['transforms_folder']
 config_file = '/home/frank/PycharmProjects/Insolver/configs/settings.py'  # drafts/several_models/transforms#os.environ['config_file']
 
+
 # Logging
 handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
-app = Flask(__name__)
-app.debug = True
+
 
 print(FORMULA_CALCULATION)
 print(FORMULA)
@@ -118,125 +136,99 @@ for i, model_path in enumerate(models):
 
 
 # --------------------
+
+
+# def f(pack):
+#     i = pack[1]
+#     print('index', i)
+#     df = pack[0]
+#     InsDataFrame = InsolverDataFrame(df)
+#     InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
+#     InsTransforms.ins_transform()
+#     predicted = mlist[i].predict(InsTransforms)
+#     return [i, predicted[0]]
+
 def f(pack):
-    # i = pack[1]
-    # print('index', i)
-    df = pd.read_json(pack[0])
+    i = pack[1]
+    print('index', i)
+    df = pack[0]
     InsDataFrame = InsolverDataFrame(df)
     InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
     InsTransforms.ins_transform()
-    predicted = mlist[i].predict(InsTransforms)
-    return [i, predicted[0]]
+    #predicted = mlist[i].predict(InsTransforms)
+    return i #[i, predicted[0]]
 
-@app.route("/")
+
+# def run_map():
+#     with Pool(5) as p:
+#         print(p.map(f, [1, 2, 3]))
+
+
+
+app = FastAPI()
+
+
+
+class Data(BaseModel):
+    df: dict
+
+
+@app.get("/")
 def index():
     return "API for predict service"
 
 
-@app.route('/favicon.ico')
-def favicon():
-    return ''
+@app.post("/predict")
+async def predict(data: Data):
 
-
-@app.route("/predict", methods=['POST'])
-def predict():
-    # Request logging
-    current_datatime = strftime('[%Y-%b-%d %H:%M:%S]')
-    ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
-    logger.info(f'{current_datatime} request from {ip_address}: {request.json}')
+    #
+    #
+    # current_datatime = strftime('[%Y-%b-%d %H:%M:%S]')
+    # ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
+    # logger.info(f'{current_datatime} request from {ip_address}: {request.json}')
     start_prediction = time()
-
-    json_input = request.json
-    json_str = json.dumps(json_input['df'])
-
-    # result = {
     #
-    # }
-
-
-    pack = list(zip([json_str for i in range(0, len(mlist))], [i for i in range(0, len(mlist))]))
+    # #json_input = request.json
+    # #json_str = json.dumps(json_input['df'])
     #
-    with Pool(N_CORES) as p:
-        result_pool = p.map(f, pack)
+    # # Extract data in correct order
+    data_dict = data.dict()
+    df = pd.DataFrame(data_dict['df'])
     # #
-    # print('RESULT POOL', result_pool)
+    # #
+    #print(len(mlist))
+    pack = list(zip([df for i in range(0, len(mlist))], [i for i in range(0, len(mlist))]))
+    # #
+    # with Pool(1) as p:
+    #     result_pool = p.map(f, pack)
 
+    for i in range(0, len(mlist)):
+        #i = pack[i][1]
+        # print('index', i)
 
-    # def f(x):
-    #     print(x)
-    #
-    # pool = Pool(processes=1)
-    #
-    # def sentence_numfound():
-    #     return jsonify(pool.map(f, [1,2]))
-    #
-    # print(sentence_numfound())
+        df = pd.DataFrame(data_dict['df'])
 
-    for i, vari in enumerate(vlist):
-
-        # # print(i)
-        #
-        # df = pd.read_json(json_str)
-        # # print('InsDataFrame', InsDataFrame.T)
-        #
-        # # Apply transformations
-        # # itlist.append(InsolverTransform(InsDataFrame, tlist[i]))
-        # # itlist[i].ins_transform()
-        # InsDataFrame = InsolverDataFrame(df)
-        # InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
-        # InsTransforms.ins_transform()
-        #
-        # # print('InsTransforms', InsTransforms.T)
-        # #
-        # # # Prediction
-        # predicted = mlist[i].predict(InsTransforms)
-        # # del InsTransforms
-        #
-        # # #
-        # # result = {
-        # #     'predicted': predicted.tolist()
-        # # }
-        #
-        # # print(i, models[i], result, vari)
-        #
-        # dict_variables[vari] = predicted[0]
-        #
-        # # print(dict_variables)
-        # print(result_pool[i][1])
-        dict_variables[vari] = result_pool[i][1]
-    # print(dict_variables)
-
-    # Response logging
-
-    formula_sympy = sympify(FORMULA)
-    result = float(formula_sympy.subs(dict_variables).evalf())
-    # print(datetime.now() - start_time)
-
-    # print(formula_sympy)
-    # print(result)
-
+        # df = pack[i][0]
+        InsDataFrame = InsolverDataFrame(df)
+        InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
+        InsTransforms.ins_transform()
+        predicted = mlist[i].predict(InsTransforms)
+        # print(predicted)
+    # #
+    # #
+    # for i, vari in enumerate(vlist):
+    #     dict_variables[vari] = result_pool[i][1]
+    # #
+    # #
+    # formula_sympy = sympify(FORMULA)
+    # result = float(formula_sympy.subs(dict_variables).evalf())
     end_prediction = time()
     duration = round(end_prediction - start_prediction, 6)
-    current_datatime = strftime('[%Y-%b-%d %H:%M:%S]')
+
     print(duration)
-    logger.info(f'{current_datatime} predicted for {duration} msec: {result}\n')
 
-    return jsonify(result)
-
-
-@app.errorhandler(Exception)
-def exceptions(e):
-    current_datatime = strftime('[%Y-%b-%d %H:%M:%S]')
-    error_message = traceback.format_exc()
-    logger.error('%s %s %s %s %s 5xx INTERNAL SERVER ERROR\n%s',
-                 current_datatime,
-                 request.remote_addr,
-                 request.method,
-                 request.scheme,
-                 request.full_path,
-                 error_message)
-    return jsonify({'error': 'Internal Server Error'}), 500
+    return duration
 
 
-if __name__ == '__main__':
-    app.run(debug=True, threaded=True, port = 5000)
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=6000, log_level="info")
