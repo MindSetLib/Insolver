@@ -1,9 +1,7 @@
 from multiprocessing import Pool
 
 from fastapi import FastAPI
-from flask import Flask
 
-import uvicorn
 
 app = FastAPI()
 
@@ -21,7 +19,3 @@ def run_map():
 async def predict():
     run_map()
     return 'Index'
-
-
-if __name__ == '__main__':
-    uvicorn.run(app, host="127.0.0.1", port=7000, log_level="debug")

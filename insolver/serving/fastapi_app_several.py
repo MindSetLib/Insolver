@@ -17,7 +17,7 @@ import json
 import pickle
 
 import pandas as pd
-from flask import Flask, request, jsonify
+from fastapi.encoders import jsonable_encoder
 from sympy import sympify
 
 from insolver import InsolverDataFrame
@@ -43,14 +43,22 @@ from multiprocessing import Pool
 import uvicorn
 
 
+os.environ['model_path'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model'  #
+os.environ['transforms_path'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms/cf1_model.pkl'
+
+# add new config file and models
+os.environ['config_file'] = '/home/frank/PycharmProjects/Insolver/configs/settings.py'
+os.environ['transforms_folder'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms'
+os.environ['models_folder'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models'
+
 # /home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model
-model_path = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model'  # os.environ['model_path']
-transforms_path = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms/cf1_model.pkl'  # os.environ['transforms_path']
+model_path = os.environ['model_path']
+transforms_path = os.environ['transforms_path']
 
 # add new features
-models_folder = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models'  # os.environ['models_folder']
-transforms_folder = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms'  # os.environ['transforms_folder']
-config_file = '/home/frank/PycharmProjects/Insolver/configs/settings.py'  # drafts/several_models/transforms#os.environ['config_file']
+models_folder = os.environ['models_folder']
+transforms_folder = os.environ['transforms_folder']
+config_file = os.environ['config_file'] #drafts/several_models/transforms#
 
 
 # Logging
@@ -61,10 +69,10 @@ logger.addHandler(handler)
 
 
 
-print(FORMULA_CALCULATION)
-print(FORMULA)
-print(VARIABLES_LIST)
-print(N_CORES)
+# print(FORMULA_CALCULATION)
+# print(FORMULA)
+# print(VARIABLES_LIST)
+# print(N_CORES)
 
 
 def load_pickle_model(model_path):
@@ -90,8 +98,8 @@ models.sort()
 transforms = [f for f in glob.glob(path_transforms + '/*')]
 transforms.sort()
 
-print('models:', models)
-print('transforms:', transforms)
+# print('models:', models)
+# print('transforms:', transforms)
 
 dict_variables = {}
 if FORMULA_CALCULATION:
@@ -106,7 +114,7 @@ itlist = []
 # Load models once
 for i, model_path in enumerate(models):
     # Load model
-    print(i, model_path, models[i], transforms[i])
+    # print(i, model_path, models[i], transforms[i])
 
     model = load_pickle_model(models[i])
     if model and model.algo == 'gbm':
@@ -132,21 +140,12 @@ for i, model_path in enumerate(models):
     current_variable_transform = list(filter(None, regex))[-2]
 
     vlist.append(current_variable_model)
-    print(vlist)
+    # print(vlist)
 
 
 # --------------------
 
 
-# def f(pack):
-#     i = pack[1]
-#     print('index', i)
-#     df = pack[0]
-#     InsDataFrame = InsolverDataFrame(df)
-#     InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
-#     InsTransforms.ins_transform()
-#     predicted = mlist[i].predict(InsTransforms)
-#     return [i, predicted[0]]
 
 def f(pack):
     i = pack[1]
@@ -157,11 +156,6 @@ def f(pack):
     InsTransforms.ins_transform()
     predicted = mlist[i].predict(InsTransforms)
     return [i, predicted[0]]
-
-
-# def run_map():
-#     with Pool(5) as p:
-#         print(p.map(f, [1, 2, 3]))
 
 
 
@@ -181,56 +175,34 @@ def index():
 @app.post("/predict")
 def predict(data: Data):
 
-    #
-    #
-    # current_datatime = strftime('[%Y-%b-%d %H:%M:%S]')
-    # ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
-    # logger.info(f'{current_datatime} request from {ip_address}: {request.json}')
+
     start_prediction = time()
-    #
-    # #json_input = request.json
-    # #json_str = json.dumps(json_input['df'])
-    #
-    # # Extract data in correct order
+
     data_dict = data.dict()
     df = pd.DataFrame(data_dict['df'])
-    # #
-    # #
-    #print(len(mlist))
+
     pack = list(zip([df for i in range(0, len(mlist))], [i for i in range(0, len(mlist))]))
-    # #
-    with Pool(12) as p:
+
+    with Pool(N_CORES) as p:
         result_pool = p.map(f, pack)
 
-    # for i in range(0, len(mlist)):
-    #     #i = pack[i][1]
-    #     # print('index', i)
-    #
-    #     df = pd.DataFrame(data_dict['df'])
-    #
-    #     # df = pack[i][0]
-    #     InsDataFrame = InsolverDataFrame(df)
-    #     InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
-    #     InsTransforms.ins_transform()
-    #     predicted = mlist[i].predict(InsTransforms)
-    #     # print(predicted)
-    # # #
-    # # #
+
     for i, vari in enumerate(vlist):
         dict_variables[vari] = result_pool[i][1]
-    # for i, vari in enumerate(vlist):
-    #     dict_variables[vari] = predicted[0]
-    # #
-    # #
+
     formula_sympy = sympify(FORMULA)
-    result = float(formula_sympy.subs(dict_variables).evalf())
+
     end_prediction = time()
     duration = round(end_prediction - start_prediction, 6)
 
-    # print(duration)
+    result = {
+        'result': float(formula_sympy.subs(dict_variables).evalf()),
+        'duration': duration
+    }
 
-    return duration
+
+    return jsonable_encoder(result)
 
 
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="127.0.0.1", port=6000, log_level="debug", debug=True)
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=6001, log_level="debug", debug=True)

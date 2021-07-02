@@ -29,9 +29,9 @@ def run():
     os.environ['transforms_path'] = args.transforms
     
     #add new config file and models
-    os.environ['config_file'] = args.transforms
-    os.environ['transforms_folder'] = args.transforms
-    os.environ['models_folder'] = args.transforms
+    os.environ['config_file'] = args.configfile
+    os.environ['transforms_folder'] = args.transforms_folder
+    os.environ['models_folder'] = args.models_folder
     
     
     if args.service == 'flask':
@@ -39,6 +39,12 @@ def run():
         exec_cmd(cmd)
     elif args.service == 'fastapi':
         cmd = f'gunicorn -b {args.ip}:{args.port} insolver.serving.fastapi_app:app -k uvicorn.workers.UvicornWorker'
+        exec_cmd(cmd)
+    if args.service == 'sflask':
+        cmd = f'gunicorn -b {args.ip}:{args.port} insolver.serving.flask_app_several:app'
+        exec_cmd(cmd)
+    elif args.service == 'sfastapi':
+        cmd = f'gunicorn -b {args.ip}:{args.port} insolver.serving.fastapi_app_several:app -k uvicorn.workers.UvicornWorker'
         exec_cmd(cmd)
     else:
         print('wrong service, try "-service flask" or "-service fastapi"')
