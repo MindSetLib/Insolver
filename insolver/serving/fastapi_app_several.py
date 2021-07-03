@@ -1,19 +1,12 @@
 import os
-import pickle
 
-import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
-
-from insolver import InsolverDataFrame
-from insolver.serving import utils
-from insolver.transforms import InsolverTransform, init_transforms
-from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 
 
 #-----
 
-import json
+
 import pickle
 
 import pandas as pd
@@ -23,24 +16,20 @@ from sympy import sympify
 from insolver import InsolverDataFrame
 from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
-from insolver.serving import utils
 
-from configs import settings
 from configs.settings import *
 import re
 import glob
 
 # For logging
 import logging
-import traceback
+
 from logging.handlers import RotatingFileHandler
 from time import strftime, time
-from datetime import datetime
 
-import multiprocessing as mp
 from multiprocessing import Pool
 
-import uvicorn
+
 
 
 os.environ['model_path'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model'  #
@@ -147,7 +136,7 @@ for i, model_path in enumerate(models):
 
 
 
-def f(pack):
+def pool_inference(pack):
     i = pack[1]
     df = pack[0]
     # print('index', i)
@@ -184,7 +173,7 @@ def predict(data: Data):
     pack = list(zip([df for i in range(0, len(mlist))], [i for i in range(0, len(mlist))]))
 
     with Pool(N_CORES) as p:
-        result_pool = p.map(f, pack)
+        result_pool = p.map(pool_inference, pack)
 
 
     for i, vari in enumerate(vlist):
@@ -204,5 +193,4 @@ def predict(data: Data):
     return jsonable_encoder(result)
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=6001, log_level="debug", debug=True)
+

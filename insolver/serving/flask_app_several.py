@@ -9,9 +9,7 @@ from sympy import sympify
 from insolver import InsolverDataFrame
 from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
-from insolver.serving import utils
 
-from configs import settings
 from configs.settings import *
 import re
 import glob
@@ -21,18 +19,11 @@ import logging
 import traceback
 from logging.handlers import RotatingFileHandler
 from time import strftime, time
-from datetime import datetime
 
-import multiprocessing as mp
+
+
 from multiprocessing import Pool
 
-os.environ['model_path'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model'  #
-os.environ['transforms_path'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms/cf1_model.pkl'
-
-# add new config file and models
-os.environ['config_file'] = '/home/frank/PycharmProjects/Insolver/configs/settings.py'
-os.environ['transforms_folder'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms'
-os.environ['models_folder'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models'
 
 # /home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model
 model_path = os.environ['model_path']
@@ -49,13 +40,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
-app = Flask(__name__)
-app.debug = True
 
-# print(FORMULA_CALCULATION)
-# print(FORMULA)
-# print(VARIABLES_LIST)
-# print(N_CORES)
+
 
 
 def load_pickle_model(model_path):
@@ -127,15 +113,19 @@ for i, model_path in enumerate(models):
 
 
 # --------------------
-def f(pack):
+def pool_inference(pack):
     i = pack[1]
-    print('index', i)
+    # print('index', i)
     df = pd.read_json(pack[0])
     InsDataFrame = InsolverDataFrame(df)
     InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
     InsTransforms.ins_transform()
     predicted = mlist[i].predict(InsTransforms)
     return [i, predicted[0]]
+
+
+app = Flask(__name__)
+app.debug = True
 
 @app.route("/")
 def index():
@@ -158,13 +148,16 @@ def predict():
     json_input = request.json
     json_str = json.dumps(json_input['df'])
 
-    print(json_input)
+    # print(json_input)
 
 
-    pack = list(zip([json_str for i in range(0, len(mlist))], [i for i in range(0, len(mlist))]))
-    #
-    with Pool(5) as p:
-        result_pool = p.map(f, pack)
+    pack = list(zip([json_str for i in range(0, len(mlist))],
+                    [i for i in range(0, len(mlist))]
+                    )
+                )
+
+    with Pool(N_CORES) as p:
+        result_pool = p.map(pool_inference, pack)
 
     for i, vari in enumerate(vlist):
         dict_variables[vari] = result_pool[i][1]
@@ -175,7 +168,7 @@ def predict():
     formula_sympy = sympify(FORMULA)
     result = float(formula_sympy.subs(dict_variables).evalf())
 
-    print(result)
+    # print(result)
 
 
     end_prediction = time()
@@ -206,4 +199,4 @@ def exceptions(e):
 
 
 if __name__ == '__main__':
-    app.run(debug = True) #threaded=True, port = 5000
+    app.run() #threaded=True, port = 5000
