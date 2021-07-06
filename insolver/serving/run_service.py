@@ -27,16 +27,21 @@ def run():
 
 
     if args.model is not None:
+        print(args.model)
         os.environ['model_path'] = args.model
     if args.transforms is not None:
+        print(args.transforms)
         os.environ['transforms_path'] = args.transforms
 
     # add new config file and models
     if args.configfile is not None:
+        print(args.configfile)
         os.environ['config_file'] = args.configfile
-    if args.transforms_folder  is not None:
+    if args.transforms_folder is not None:
+        print(args.transforms_folder)
         os.environ['transforms_folder'] = args.transforms_folder
-    if args.models_folder  is not None:
+    if args.models_folder is not None:
+        print(args.models_folder)
         os.environ['models_folder'] = args.models_folder
 
     if args.service == 'flask':
