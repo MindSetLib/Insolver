@@ -23,22 +23,22 @@ def run():
     parser.add_argument('-ip', action='store', default='0.0.0.0', required=True)
     parser.add_argument('-port', action='store', default=8000, type=int, required=True)
 
-    args, leftovers = parser.parse_known_args()
+    args = parser.parse_args()
 
-    if hasattr(args, 'model'):
+
+    if args.model is not None:
         os.environ['model_path'] = args.model
-    if hasattr(args, 'transforms'):
+    if args.transforms is not None:
         os.environ['transforms_path'] = args.transforms
-    
-    #add new config file and models
-    if hasattr(args, 'configfile'):
+
+    # add new config file and models
+    if args.configfile is not None:
         os.environ['config_file'] = args.configfile
-    if hasattr(args, 'transforms_folder'):
+    if args.transforms_folder  is not None:
         os.environ['transforms_folder'] = args.transforms_folder
-    if hasattr(args, 'models_folder'):
+    if args.models_folder  is not None:
         os.environ['models_folder'] = args.models_folder
-    
-    
+
     if args.service == 'flask':
         cmd = f'gunicorn -b {args.ip}:{args.port} insolver.serving.flask_app:app'
         exec_cmd(cmd)
