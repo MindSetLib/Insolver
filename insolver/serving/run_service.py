@@ -25,13 +25,18 @@ def run():
 
     args = parser.parse_args()
 
-    os.environ['model_path'] = args.model
-    os.environ['transforms_path'] = args.transforms
+    if args.model is not None:
+        os.environ['model_path'] = args.model
+    if args.model is not None:
+        os.environ['transforms_path'] = args.transforms
     
     #add new config file and models
-    os.environ['config_file'] = args.configfile
-    os.environ['transforms_folder'] = args.transforms_folder
-    os.environ['models_folder'] = args.models_folder
+    if args.model is not None:
+        os.environ['config_file'] = args.configfile
+    if args.model is not None:
+        os.environ['transforms_folder'] = args.transforms_folder
+    if args.model is not None:
+        os.environ['models_folder'] = args.models_folder
     
     
     if args.service == 'flask':
