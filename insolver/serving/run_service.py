@@ -10,18 +10,18 @@ def exec_cmd(cmd):
 
 def run():
     parser = argparse.ArgumentParser(description='ML API service')
-    parser.add_argument('-model', action='store')
-    parser.add_argument('-transforms', action='store')
-    parser.add_argument('-service', action='store')
+    parser.add_argument('-model', action='store', required=False)
+    parser.add_argument('-transforms', action='store', required=False)
+    parser.add_argument('-service', action='store', required=False)
     
     #add new parameter config file and models and transforms
-    parser.add_argument('-configfile', action='store')
-    parser.add_argument('-transforms_folder', action='store')
-    parser.add_argument('-models_folder', action='store')
+    parser.add_argument('-configfile', action='store', required=False)
+    parser.add_argument('-transforms_folder', action='store', required=False)
+    parser.add_argument('-models_folder', action='store', required=False)
 
     # gunicorn config
-    parser.add_argument('-ip', action='store', default='0.0.0.0')
-    parser.add_argument('-port', action='store', default=8000, type=int)
+    parser.add_argument('-ip', action='store', default='0.0.0.0', required=True)
+    parser.add_argument('-port', action='store', default=8000, type=int, required=True)
 
     args = parser.parse_args()
 
