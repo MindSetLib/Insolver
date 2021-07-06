@@ -56,7 +56,6 @@ Example of the request to `http://127.0.0.10:5040/predict` endpoint:
 
 ```
 
-You can also create a request from by a random sample from InsolverDataFrame:
 
 LightGBM Models to this example can be found here:
-[a link](!https://drive.google.com/file/d/1fZ-93xghPBfoxxHAGZaduAh7qVdED0Pk/view?usp=sharing)
+https://drive.google.com/file/d/1fZ-93xghPBfoxxHAGZaduAh7qVdED0Pk/view?usp=sharing
