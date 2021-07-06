@@ -30,32 +30,32 @@ def run():
         print(args.model)
         os.environ['model_path'] = args.model
     else:
-        os.environ['model_path'] = None
+        os.environ['model_path'] = ''
 
     if args.transforms is not None:
         print(args.transforms)
         os.environ['transforms_path'] = args.transforms
     else:
-        os.environ['transforms_path'] = None
+        os.environ['transforms_path'] = ''
 
     # add new config file and models
     if args.configfile is not None:
         print(args.configfile)
         os.environ['config_file'] = args.configfile
     else:
-        os.environ['config_file'] = None
+        os.environ['config_file'] = ''
 
     if args.transforms_folder is not None:
         print(args.transforms_folder)
         os.environ['transforms_folder'] = args.transforms_folder
     else:
-        os.environ['transforms_folder'] = None
+        os.environ['transforms_folder'] = ''
 
     if args.models_folder is not None:
         print(args.models_folder)
         os.environ['models_folder'] = args.models_folder
     else:
-        os.environ['models_folder'] = None
+        os.environ['models_folder'] = ''
 
     if args.service == 'flask':
         cmd = f'gunicorn -b {args.ip}:{args.port} insolver.serving.flask_app:app'

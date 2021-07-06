@@ -25,11 +25,6 @@ from time import strftime, time
 from multiprocessing import Pool
 
 
-if os.environ['model_path'] is not None:
-    model_path = os.environ['model_path']
-if os.environ['transforms_path'] is not None:
-    transforms_path = os.environ['transforms_path']
-
 # add new features
 if os.environ['models_folder'] is not None:
     models_folder = os.environ['models_folder']
