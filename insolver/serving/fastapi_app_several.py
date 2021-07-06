@@ -28,14 +28,18 @@ from time import strftime, time
 from multiprocessing import Pool
 
 
-# /home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model
-model_path = os.environ['model_path']
-transforms_path = os.environ['transforms_path']
+if os.environ['model_path'] is not None:
+    model_path = os.environ['model_path']
+if os.environ['transforms_path'] is not None:
+    transforms_path = os.environ['transforms_path']
 
 # add new features
-models_folder = os.environ['models_folder']
-transforms_folder = os.environ['transforms_folder']
-config_file = os.environ['config_file'] #drafts/several_models/transforms#
+if os.environ['models_folder'] is not None:
+    models_folder = os.environ['models_folder']
+if os.environ['transforms_folder'] is not None:
+    transforms_folder = os.environ['transforms_folder']
+if os.environ['config_file'] is not None:
+    config_file = os.environ['config_file']
 
 
 # Logging
