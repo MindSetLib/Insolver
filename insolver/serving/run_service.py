@@ -23,7 +23,7 @@ def run():
     parser.add_argument('-ip', action='store', default='0.0.0.0', required=True)
     parser.add_argument('-port', action='store', default=8000, type=int, required=True)
 
-    args = parser.parse_args()
+    args = parser.parse_known_args()
 
     if args.model is not None:
         os.environ['model_path'] = args.model
