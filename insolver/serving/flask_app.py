@@ -36,7 +36,6 @@ elif model and model.algo == 'glm':
 else:
     model = InsolverGLMWrapper(backend='h2o', load_path=model_path)
 
-
 # load and init transformations
 with open(transforms_path, 'rb') as file:
     tranforms = pickle.load(file)
@@ -61,6 +60,7 @@ def predict():
     logger.info(f'{current_datatime} request from {ip_address}: {request.json}')
     start_prediction = time()
 
+    # json request
     json_input = request.json
     json_str = json.dumps(json_input['df'])
     df = pd.read_json(json_str)

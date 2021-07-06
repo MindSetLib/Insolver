@@ -16,29 +16,17 @@ from sympy import sympify
 from insolver import InsolverDataFrame
 from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
+from insolver.configs.settings import *
 
-from configs.settings import *
 import re
 import glob
 
 # For logging
 import logging
-
 from logging.handlers import RotatingFileHandler
 from time import strftime, time
-
 from multiprocessing import Pool
 
-
-
-
-os.environ['model_path'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model'  #
-os.environ['transforms_path'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms/cf1_model.pkl'
-
-# add new config file and models
-os.environ['config_file'] = '/home/frank/PycharmProjects/Insolver/configs/settings.py'
-os.environ['transforms_folder'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/transforms'
-os.environ['models_folder'] = '/home/frank/PycharmProjects/Insolver/drafts/several_models/models'
 
 # /home/frank/PycharmProjects/Insolver/drafts/several_models/models/cf1_model
 model_path = os.environ['model_path']

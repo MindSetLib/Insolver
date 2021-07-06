@@ -9,8 +9,8 @@ from sympy import sympify
 from insolver import InsolverDataFrame
 from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
+from insolver.configs.settings import *
 
-from configs.settings import *
 import re
 import glob
 
