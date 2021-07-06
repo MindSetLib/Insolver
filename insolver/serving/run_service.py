@@ -27,15 +27,15 @@ def run():
 
     if args.model is not None:
         os.environ['model_path'] = args.model
-    if args.model is not None:
+    if args.transforms is not None:
         os.environ['transforms_path'] = args.transforms
     
     #add new config file and models
-    if args.model is not None:
+    if args.configfile is not None:
         os.environ['config_file'] = args.configfile
-    if args.model is not None:
+    if args.transforms_folder is not None:
         os.environ['transforms_folder'] = args.transforms_folder
-    if args.model is not None:
+    if args.models_folder is not None:
         os.environ['models_folder'] = args.models_folder
     
     
