@@ -25,17 +25,17 @@ def run():
 
     args, leftovers = parser.parse_known_args()
 
-    if args.model is not None:
+    if hasattr(args, 'model'):
         os.environ['model_path'] = args.model
-    if args.transforms is not None:
+    if hasattr(args, 'transforms'):
         os.environ['transforms_path'] = args.transforms
     
     #add new config file and models
-    if args.configfile is not None:
+    if hasattr(args, 'configfile'):
         os.environ['config_file'] = args.configfile
-    if args.transforms_folder is not None:
+    if hasattr(args, 'transforms_folder'):
         os.environ['transforms_folder'] = args.transforms_folder
-    if args.models_folder is not None:
+    if hasattr(args, 'models_folder'):
         os.environ['models_folder'] = args.models_folder
     
     
