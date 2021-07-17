@@ -7,8 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy.special import xlogy
-from pandas import DataFrame, Series, concat, qcut
+from pandas import DataFrame, Series, concat, qcut, cut
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import auc
 
 
 def download_dataset(name, folder='datasets'):
@@ -176,69 +177,67 @@ def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
     return short_result if detail else detailed_result
 
 
-def gain_curve(predict, exposure, step=1, figsize=(10, 6), gini_exact=False, output=False):
-    gini_df = DataFrame()
+def gain_curve(y_true, y_pred, exposure, step=1, figsize=(10, 6)):
+    """ Plot gains curve and calculate Gini coefficient. Mostly making use of
+            https://scikit-learn.org/stable/auto_examples/linear_model/plot_tweedie_regression_insurance_claims.html
+
+    Args:
+        y_true: Array with target variable.
+        y_pred: Array with predictions.
+        exposure: Array with corresponding exposure
+        step: Integer value which determines the increment between data indexes on which the gain curve will be
+         evaluated.
+        figsize: Tuple corresponding to matplotlib figsize.
+    """
+    def lorenz_curve(true, pred, exp):
+        true, pred = np.asarray(true), np.asarray(pred)
+        exp = np.asarray(exp)
+        ranking = np.argsort(-pred)
+        ranked_exposure, ranked_pure_premium = exp[ranking], true[ranking]
+        cumulated_claim_amount = np.cumsum(ranked_pure_premium * ranked_exposure)
+        cumulated_claim_amount /= cumulated_claim_amount[-1]
+        cumulated_samples = np.linspace(0, 1, len(cumulated_claim_amount))
+        minus_gini_coef = 1 - 2 * auc(cumulated_samples, cumulated_claim_amount)
+        return cumulated_samples, cumulated_claim_amount, -minus_gini_coef
+
     plt.figure(figsize=figsize)
-    if isinstance(predict, (Series, np.ndarray)) and isinstance(exposure, Series):
-        temp_df = concat([Series(predict, name='Predict').reset_index(drop=True),
-                          exposure.reset_index(drop=True)], axis=1)
-        temp_df = temp_df.sort_values('Predict', ascending=False).reset_index(drop=True)
-        cumsum = temp_df.cumsum()
-        normalized_df = cumsum/cumsum.loc[cumsum.index[-1]]
-        if gini_exact:
-            w = sum(temp_df[exposure.name])
-            m = np.true_divide(sum(temp_df[exposure.name] * temp_df['Predict']), sum(temp_df[exposure.name]))
-            temp_df['Rank'] = 0
-            temp_df.loc[0, 'Rank'] = 1 + 0.5 * (temp_df.loc[0, exposure.name] - 1)
-            for x in range(1, len(temp_df)):
-                temp_df.loc[x, 'Rank'] = (temp_df.loc[x-1, 'Rank'] + 0.5 * (temp_df.loc[x-1, exposure.name] + 1)
-                                          + 0.5 * (temp_df.loc[x, exposure.name] - 1))
-            gini = 1 + 1/w - 2/(w**2 * m) * sum(temp_df[exposure.name] * temp_df['Predict'] * temp_df['Rank'])
-        else:
-            auc = (np.sum(normalized_df['Predict'] * np.append(np.diff(normalized_df[exposure.name]), 0))
-                   + np.sum(np.append(np.diff(normalized_df['Predict']), 0) *
-                            np.append(np.diff(normalized_df[exposure.name]), 0))/2)
-            gini = 2 * auc - 1
-        gini_df = gini_df.append(DataFrame.from_dict({'Gini': {'Predict': gini}}))
-        plt.plot(normalized_df[exposure.name].values[::step], normalized_df['Predict'].values[::step],
-                 label=f'Predict (Gini: {round(gini, 3)})')
-    elif isinstance(predict, DataFrame) and isinstance(exposure, Series):
-        temp_df = concat([predict.reset_index(drop=True), exposure.reset_index(drop=True)], axis=1)
-        for pred_col in temp_df.columns[:-1]:
-            temp_df2 = temp_df[[pred_col, exposure.name]].sort_values(pred_col, ascending=False).reset_index(drop=True)
-            cumsum = temp_df2.cumsum()
-            normalized_df = cumsum / cumsum.loc[cumsum.index[-1]]
-            if gini_exact:
-                w = sum(temp_df2[exposure.name])
-                m = np.true_divide(sum(temp_df2[exposure.name] * temp_df2[pred_col]), sum(temp_df2[exposure.name]))
-                temp_df2['Rank'] = 0
-                temp_df2.loc[0, 'Rank'] = 1 + 0.5 * (temp_df2.loc[0, exposure.name] - 1)
-                for x in range(1, len(temp_df2)):
-                    temp_df2.loc[x, 'Rank'] = (temp_df2.loc[x-1, 'Rank'] + 0.5 * (temp_df2.loc[x-1, exposure.name] + 1)
-                                               + 0.5 * (temp_df2.loc[x, exposure.name] - 1))
-                gini = 1 + 1/w - 2/(w**2 * m) * sum(temp_df2[exposure.name] * temp_df2[pred_col] * temp_df2['Rank'])
-            else:
-                auc = (np.sum(normalized_df[pred_col] * np.append(np.diff(normalized_df[exposure.name]), 0))
-                       + np.sum(np.append(np.diff(normalized_df[pred_col]), 0) *
-                                np.append(np.diff(normalized_df[exposure.name]), 0))/2)
-                gini = 2 * auc - 1
-            gini_df = gini_df.append(DataFrame.from_dict({'Gini': {pred_col: gini}}))
-            plt.plot(normalized_df[exposure.name].values[::step], normalized_df[pred_col].values[::step],
-                     label=f'{pred_col} (Gini: {round(gini, 3)})')
-    else:
-        raise Exception
-    plt.legend()
-    plt.plot(np.linspace(0, 1, 2), np.linspace(0, 1, 2), c='red', linestyle='--', linewidth=0.7)
     plt.title('Gains curve')
-    plt.xlabel('Cumulative exposure')
-    plt.ylabel('Cumulative response')
+    plt.xlabel('Fraction of policyholders\n (ordered by model from riskiest to safest)')
+    plt.ylabel('Fraction of total claim amount')
+
+    y_true = y_true[::step]
+
+    # Random Baseline
+    plt.plot([0, 1], [0, 1], c='red', linestyle='--', linewidth=0.5, label=f'Random Baseline')
+
+    # Ideal Model
+    cumul_samples, cumul_claim_amt, gini = lorenz_curve(y_true, y_true, exposure)
+    plt.plot(cumul_samples, cumul_claim_amt, c='black', linestyle='-.', linewidth=0.5,
+             label='Ideal Model (Gini: {:.3f})'.format(gini))
+
+    # Fitted Models
+    if isinstance(y_pred, list):
+        names = [i for i in range(len(y_pred))]
+        y_pred = [pred[::step] for pred in y_pred]
+    elif isinstance(y_pred, DataFrame):
+        names = y_pred.columns.tolist()
+        y_pred = [y_pred[col].values[::step] for col in y_pred.columns]
+    else:
+        names = y_pred.name if (isinstance(y_pred, Series) and y_pred.name is not None) else '0'
+        y_pred = y_pred[::step]
+    if isinstance(y_pred, list):
+        for i in range(len(y_pred)):
+            cumul_samples, cumul_claim_amt, gini = lorenz_curve(y_true, y_pred[i], exposure)
+            plt.plot(cumul_samples, cumul_claim_amt, label='Model {} (Gini: {:.3f})'.format(names[i], gini))
+    else:
+        cumul_samples, cumul_claim_amt, gini = lorenz_curve(y_true, y_pred, exposure)
+        plt.plot(cumul_samples, cumul_claim_amt, label='Model {} (Gini: {:.3f})'.format(names, gini))
+    plt.legend()
     plt.show()
-    if output:
-        return gini_df
 
 
-def lift_score(predict, column, lift_type='groupby', q=10, output=False, reference='mean', kind='line'):
-    df = concat([column.reset_index(drop=True), Series(predict, name='Predict')], axis=1)
+def lift_score(predict, column, lift_type='groupby', q=10, output=False, reference='mean', kind='line', show=True):
+    df = concat([column.reset_index(drop=True), Series(predict, name='Predict').reset_index(drop=True)], axis=1)
     if lift_type == 'groupby':
         pass
     elif lift_type == 'quantile':
@@ -248,17 +247,41 @@ def lift_score(predict, column, lift_type='groupby', q=10, output=False, referen
     if reference == 'mean':
         df = df.groupby(column.name).mean() / np.mean(predict)
     elif reference == 'min':
-        df = df.groupby(column.name).mean() / df.groupby(column.name).min()
+        df = df.groupby(column.name).mean() / df.groupby(column.name).mean().min()
+    elif reference == 'max':
+        df = df.groupby(column.name).mean() / df.groupby(column.name).mean().max()
     else:
         raise Exception
     if kind == 'bar':
         plt.bar(df.index.astype(str), height=df['Predict'])
     else:
-        plt.plot(df.index.astype(str), height=df['Predict'])
+        plt.plot(df.index.astype(str), df['Predict'])
     plt.title('Lift Metrics')
     plt.xlabel(column.name)
     plt.ylabel('Lift Score')
     plt.xticks(rotation=90)
-    plt.show()
+    if show:
+        plt.show()
     if output:
         return df
+
+
+def stability_index(scoring_variable, dev, oot, kind='psi', bins=10, detail=True):
+    assert kind in ['psi', 'csi'], '"kind" argument must be in ["psi", "csi"]'
+    if kind == 'psi':
+        oot_bins = cut(oot[scoring_variable], bins=bins)
+        dev_bins = cut(dev[scoring_variable], bins=oot_bins.cat.categories)
+    else:
+        dev_bins = cut(dev[scoring_variable], bins=bins)
+        oot_bins = cut(oot[scoring_variable], bins=dev_bins.cat.categories)
+    psi = concat([(oot_bins.value_counts().sort_index(ascending=False)/oot_bins.shape[0]*100).rename('OOT'),
+                  (dev_bins.value_counts().sort_index(ascending=False)/dev_bins.shape[0]*100).rename('DEV')], axis=1)
+    psi['Diff'] = psi['OOT'] - psi['DEV']
+    psi['ln_OOT_DEV'] = np.log(psi['OOT']/psi['DEV'])
+    psi['PSI'] = psi['Diff'] * psi['ln_OOT_DEV']
+    total, total.loc[['ln_OOT_DEV', 'Diff']] = Series(np.sum(psi), name='Total'), '-'
+    psi = psi.append(total)
+    if detail:
+        return psi
+    else:
+        return total['PSI']
