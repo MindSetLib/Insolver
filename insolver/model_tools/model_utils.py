@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy.special import xlogy
-from pandas import DataFrame, Series, concat, qcut
+from pandas import DataFrame, Series, concat, qcut, cut
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import auc
 
@@ -264,3 +264,24 @@ def lift_score(predict, column, lift_type='groupby', q=10, output=False, referen
         plt.show()
     if output:
         return df
+
+
+def stability_index(scoring_variable, dev, oot, kind='psi', bins=10, detail=True):
+    assert kind in ['psi', 'csi'], '"kind" argument must be in ["psi", "csi"]'
+    if kind == 'psi':
+        oot_bins = cut(oot[scoring_variable], bins=bins)
+        dev_bins = cut(dev[scoring_variable], bins=oot_bins.cat.categories)
+    else:
+        dev_bins = cut(dev[scoring_variable], bins=bins)
+        oot_bins = cut(oot[scoring_variable], bins=dev_bins.cat.categories)
+    psi = concat([(oot_bins.value_counts().sort_index(ascending=False)/oot_bins.shape[0]*100).rename('OOT'),
+                  (dev_bins.value_counts().sort_index(ascending=False)/dev_bins.shape[0]*100).rename('DEV')], axis=1)
+    psi['Diff'] = psi['OOT'] - psi['DEV']
+    psi['ln_OOT_DEV'] = np.log(psi['OOT']/psi['DEV'])
+    psi['PSI'] = psi['Diff'] * psi['ln_OOT_DEV']
+    total, total.loc[['ln_OOT_DEV', 'Diff']] = Series(np.sum(psi), name='Total'), '-'
+    psi = psi.append(total)
+    if detail:
+        return psi
+    else:
+        return total['PSI']
