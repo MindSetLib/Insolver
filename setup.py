@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 
 setup(name='insolver',
-      version='0.4.12',
+      version='0.4.13',
       description='Insolver is low-code machine learning library, initially created for the insurance industry, '
                   'but can be used in any other.\n You can find a detailed overview at '
                   'https://insolver.readthedocs.io/en/latest/source/overview.html.',

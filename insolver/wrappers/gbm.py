@@ -29,6 +29,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
     """
     def __init__(self, backend, task=None, objective=None, n_estimators=100, load_path=None, **kwargs):
         super(InsolverGBMWrapper, self).__init__(backend)
+        self.init_args = self.get_init_args(vars())
         self.algo, self._backends = 'gbm', ['xgboost', 'lightgbm', 'catboost']
         self._tasks = ['class', 'reg']
         self._back_load_dict = {'xgboost': self._pickle_load, 'lightgbm': self._pickle_load,

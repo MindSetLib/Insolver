@@ -1,8 +1,8 @@
 import os
+import copy
 import time
 import pickle
 import joblib
-
 from numpy import array, mean, broadcast_to
 from pandas import concat, merge
 
@@ -21,6 +21,13 @@ class InsolverBaseWrapper:
 
     def __call__(self):
         return self.model
+
+    @staticmethod
+    def get_init_args(vars_):
+        c_vars = copy.deepcopy(vars_)
+        for key in ['__class__', 'self']:
+            del c_vars[key]
+        return c_vars
 
     def load_model(self, load_path):
         """Loading a model to the wrapper.
@@ -62,14 +69,14 @@ class InsolverBaseWrapper:
             self.model = pickle.load(_model)
 
     def _pickle_save(self, path, name):
-        with open(os.path.join(path, name), 'wb') as _model:
+        with open(os.path.join(path, f'{name}.pickle'), 'wb') as _model:
             pickle.dump(self.model, _model, pickle.HIGHEST_PROTOCOL)
 
     def _joblib_load(self, load_path):
         self.model = joblib.load(load_path)
 
     def _joblib_save(self, path, name):
-        joblib.dump(self.model, os.path.join(path, name))
+        joblib.dump(self.model, os.path.join(path, f'{name}.joblib'))
 
     def _update_meta(self):
         self.meta = self.__dict__.copy()
@@ -88,6 +95,7 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
     """
     def __init__(self, col_name=None, agg=None, **kwargs):
         super(InsolverTrivialWrapper, self).__init__(backend='trivial')
+        self.init_args = self.get_init_args(vars())
         self._backends, self.x_train, self.y_train = ['trivial'], None, None
         self._back_load_dict, self._back_save_dict = {'trivial': self._pickle_load}, {'trivial': self._pickle_save}
 
