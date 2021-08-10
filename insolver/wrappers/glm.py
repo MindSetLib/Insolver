@@ -31,6 +31,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
     def __init__(self, backend, family=None, link=None, standardize=True, h2o_init_params=None,
                  load_path=None, **kwargs):
         super(InsolverGLMWrapper, self).__init__(backend)
+        self.init_args = self.get_init_args(vars())
         self.algo, self._backends = 'glm', ['h2o', 'sklearn']
         self._back_load_dict = {'sklearn': self._pickle_load, 'h2o': partial(self._h2o_load,
                                                                              h2o_init_params=h2o_init_params)}

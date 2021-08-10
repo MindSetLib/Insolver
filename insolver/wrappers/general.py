@@ -1,5 +1,5 @@
-from numpy import cumsum, diff, exp, true_divide, add, append, nan, concatenate, array
-from pandas import DataFrame, Series
+from numpy import concatenate, array
+from pandas import DataFrame
 
 from sklearn.metrics import mean_squared_error, SCORERS
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -20,7 +20,8 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
     """
     def __init__(self, backend, task=None, n_estimators=100, load_path=None, **kwargs):
         super(InsolverRFWrapper, self).__init__(backend)
-        self.algo, self._backends = 'Random Forest', ['sklearn']
+        self.init_args = self.get_init_args(vars())
+        self.algo, self._backends = 'rf', ['sklearn']
         self._tasks = ['class', 'reg']
         self._back_load_dict = {'sklearn': self._pickle_load}
         self._back_save_dict = {'sklearn': self._pickle_save}

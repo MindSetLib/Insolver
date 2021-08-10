@@ -28,7 +28,7 @@ class InsolverH2OExtension:
 
     def _h2o_save(self, path, name, **kwargs):
         model_path = save_model(model=self.model, path=path, **kwargs)
-        os.rename(model_path, os.path.join(os.path.dirname(model_path), name))
+        os.rename(model_path, os.path.join(os.path.dirname(model_path), f'{name}.h2o'))
 
     @staticmethod
     def _x_y_to_h2o_frame(X, y, sample_weight, params, X_valid, y_valid, sample_weight_valid):
