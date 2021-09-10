@@ -22,9 +22,12 @@ class ModelMetricsCompare:
         predict_params (:obj:`list`, optional): List of dictionaries containing parameters passed to predict methods
          for each model.
         features (:obj:`list`, optional): List of lists containing features for predict method for each model.
+        names (:obj:`list`, optional): List of model names.
     """
+
     def __init__(self, X, y, source=None, metrics=None, stats=None, h2o_init_params=None, predict_params=None,
-                 features=None):
+                 features=None, names=None):
+        assert True if names is None else len(names) == len(source), 'Check length of list containing model names.'
         wrappers = {'glm': InsolverGLMWrapper, 'gbm': InsolverGBMWrapper, 'rf': InsolverRFWrapper}
         self.stats, self.metrics = None, None
         if (source is None) or isinstance(source, str):
@@ -45,7 +48,8 @@ class ModelMetricsCompare:
         else:
             raise TypeError(f'Source of type {type(source)} is not supported.')
 
-        self._calc_metrics(X=X, y=y, metrics=metrics, stats=stats, predict_params=predict_params, features=features)
+        self._calc_metrics(X=X, y=y, metrics=metrics, stats=stats, predict_params=predict_params, features=features,
+                           names=names)
 
     def __repr__(self):
         stk = traceback.extract_stack()
@@ -62,7 +66,7 @@ class ModelMetricsCompare:
             print(self.metrics)
         return ''
 
-    def _calc_metrics(self, X, y, metrics=None, stats=None, predict_params=None, features=None):
+    def _calc_metrics(self, X, y, metrics=None, stats=None, predict_params=None, features=None, names=None):
         """Computing metrics and statistics for models.
 
         Args:
@@ -73,16 +77,20 @@ class ModelMetricsCompare:
             predict_params (:obj:`list`, optional): List of dictionaries containing parameters passed to predict methods
          for each model.
             features (:obj:`list`, optional): List of lists containing features for predict method for each model.
+            names (:obj:`list`, optional): List of model names.
 
         Returns:
             Returns `None`, but results available in `self.stats`, `self.metrics`.
         """
-        stats_df, model_metrics, model_names = DataFrame(), DataFrame(), []
+        stats_df, model_metrics, algos, backend = DataFrame(), DataFrame(), [], []
         trivial = InsolverTrivialWrapper(agg=lambda x: x)
         trivial.fit(X, y)
         models = [trivial] + self.models
         features = [None] + features if features is not None else None
         for model in models:
+            algos.append(model.algo.upper()) if hasattr(model, 'algo') else algos.append('-')
+            backend.append(model.backend.capitalize()) if hasattr(model, 'backend') else backend.append(
+                model.__class__.__name__)
             p = model.predict(X if (features is None) or (features[models.index(model)] is None)
                               else X[features[models.index(model)]],
                               **({} if (predict_params is None) or (predict_params[models.index(model)] is None)
@@ -104,13 +112,6 @@ class ModelMetricsCompare:
                     raise TypeError(f'Statistics with type {type(stats)} are not supported.')
             stats_df = stats_df.append(DataFrame([stats_val], columns=name_stats))
 
-            if hasattr(model, 'algo') and hasattr(model, 'backend'):
-                model_names.append(f'{model.algo.upper()} {model.backend.capitalize()}')
-            else:
-                model_names.append(model.__class__.__name__)
-            stats_df.index = ['Actual'] + model_names[1:]
-            self.stats = stats_df
-
             if (metrics is not None) and not models.index(model) == 0:
                 if isinstance(metrics, (list, tuple)):
                     m_metrics = []
@@ -119,14 +120,23 @@ class ModelMetricsCompare:
                             m_metrics.append(metric(y, p))
                         else:
                             raise TypeError(f'Metrics with type {type(metric)} are not supported.')
-                    names = [m.__name__.replace('_', ' ') for m in metrics]
-                    model_metrics = model_metrics.append(DataFrame(dict(zip(names, m_metrics), index=[0])))
+                    metrics_names = [m.__name__.replace('_', ' ') for m in metrics]
+                    model_metrics = model_metrics.append(DataFrame(dict(zip(metrics_names, m_metrics), index=[0])))
                 elif callable(metrics):
                     name = [metrics.__name__.replace('_', ' ')]
                     model_metrics = model_metrics.append(DataFrame(dict(zip(name, [metrics(y, p)])), index=[0]))
                 else:
                     raise TypeError(f'Metrics with type {type(metrics)} are not supported.')
                 model_metrics = model_metrics.reset_index(drop=True)
-                model_metrics.index = model_names[1:]
-                self.metrics = (model_metrics if 'index' not in model_metrics.columns
-                                else model_metrics.drop(['index'], axis=1))
+                model_metrics = (model_metrics if 'index' not in model_metrics.columns
+                                 else model_metrics.drop(['index'], axis=1))
+
+        model_metrics.index = (list(range(len(model_metrics))) if names is None else names)
+        stats_df.index = ['Actual'] + model_metrics.index.tolist()
+        stats_df[['Algo', 'Backend']] = DataFrame({'Algo': ['-'] + algos[1:], 'Backend': ['-'] + backend[1:]},
+                                                  index=stats_df.index)
+        model_metrics[['Algo', 'Backend']] = DataFrame({'Algo': algos[1:], 'Backend': backend[1:]},
+                                                       index=model_metrics.index)
+        stats_df = stats_df[list(stats_df.columns[-2:]) + list(stats_df.columns[:-2])]
+        model_metrics = model_metrics[list(model_metrics.columns[-2:]) + list(model_metrics.columns[:-2])]
+        self.stats, self.metrics = stats_df, model_metrics
