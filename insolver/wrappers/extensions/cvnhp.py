@@ -6,7 +6,7 @@ from pandas import DataFrame
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import KFold, cross_val_score, cross_validate
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
-from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval
+from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval, hp
 from xgboost import XGBModel
 from catboost import CatBoost
 from lightgbm import LGBMModel
@@ -141,3 +141,27 @@ class InsolverCVHPExtension:
             return estimators, cv_results
         else:
             raise NotImplementedError('_cross_val method is not implemented for backend=`h2o`')
+
+
+AUTO_SPACE_CONFIG = {"xgboost": {"max_depth": hp.choice('max_depth', [5, 8, 10, 12, 15]),
+                                 "min_child_weight": hp.uniform('min_child_weight', 0, 50),
+                                 "subsample": hp.uniform('subsample', 0.5, 1),
+                                 "colsample_bytree": hp.uniform('colsample_bytree', 0.5, 1),
+                                 "alpha": hp.uniform('alpha', 0, 1),
+                                 "lambda": hp.uniform('lambda', 0, 1),
+                                 "eta": hp.uniform('eta', 0.01, 1),
+                                 "gamma": hp.uniform('gamma', 0.01, 1000)},
+                     "lightgbm": {"max_depth": hp.choice('max_depth', [5, 8, 10, 12, 15]),
+                                  "min_child_weight": hp.uniform('min_child_weight', 0, 50),
+                                  "subsample": hp.uniform('subsample', 0.5, 1),
+                                  "colsample_bytree": hp.uniform('colsample_bytree', 0.5, 1),
+                                  "alpha": hp.uniform('alpha', 0, 1),
+                                  "num_leaves": hp.quniform('num_leaves', 31, 10000, 1),
+                                  "reg_lambda": hp.uniform('reg_lambda', 0, 1),
+                                  "learning_rate": hp.uniform('learning_rate', 0.01, 1)},
+                     "catboost": {"max_depth": hp.choice('max_depth', [5, 8, 10, 12, 15]),
+                                  "min_child_samples": hp.uniform('min_child_samples', 0, 50),
+                                  "subsample": hp.uniform('subsample', 0.5, 1),
+                                  "colsample_bylevel": hp.uniform('colsample_bylevel', 0.5, 1),
+                                  "reg_lambda": hp.uniform('reg_lambda', 2, 30),
+                                  "learning_rate": hp.uniform('learning_rate', 0.01, 1)}}
