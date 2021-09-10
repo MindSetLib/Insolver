@@ -83,7 +83,7 @@ class ModelMetricsCompare:
             Returns `None`, but results available in `self.stats`, `self.metrics`.
         """
         stats_df, model_metrics, algos, backend = DataFrame(), DataFrame(), [], []
-        trivial = InsolverTrivialWrapper(agg=lambda x: x)
+        trivial = InsolverTrivialWrapper(task='reg', agg=lambda x: x)
         trivial.fit(X, y)
         models = [trivial] + self.models
         features = [None] + features if features is not None else None
