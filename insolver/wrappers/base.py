@@ -91,6 +91,7 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         col_name (:obj:`str` or :obj:`list`, optional): String or list of strings containing column name(s) to perform
          groupby operation.
         agg (:obj:`callable`, optional): Aggregation function.
+        thresh (:obj:`float`, optional): Threshold for continuous prediction in dummy classification.
         **kwargs: Other arguments.
     """
     def __init__(self, task=None, col_name=None, agg=None, thresh=0.5, **kwargs):
