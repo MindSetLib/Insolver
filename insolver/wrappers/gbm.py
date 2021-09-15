@@ -1,6 +1,6 @@
 from base64 import b64encode
 
-from numpy import cumsum, diff, exp, true_divide, add, append, nan, concatenate, array
+from numpy import cumsum, diff, exp, true_divide, add, append, nan, concatenate, array, abs as npabs
 from pandas import DataFrame, Series
 
 from sklearn.metrics import mean_squared_error, SCORERS
@@ -13,7 +13,7 @@ from plotly.graph_objects import Figure, Waterfall
 from plotly.io import to_image
 
 from .base import InsolverBaseWrapper
-from .extensions import InsolverCVHPExtension, InsolverPDPExtension
+from .extensions import InsolverCVHPExtension, InsolverPDPExtension, AUTO_SPACE_CONFIG
 
 
 class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPExtension):
@@ -104,12 +104,12 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         return self.model.predict(X if not hasattr(self.model, 'feature_name_')
                                   else X[self.model.feature_name_], **kwargs)
 
-    def shap(self, X, plot=False, plot_type='bar'):
+    def shap(self, X, show=False, plot_type='bar'):
         """Method for shap values calculation and corresponding plot of feature importances.
 
         Args:
             X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for shap values calculation.
-            plot (:obj:`boolean`, optional): Whether to plot a graph.
+            show (:obj:`boolean`, optional): Whether to plot a graph.
             plot_type (:obj:`str`, optional): Type of feature importance graph, takes value in ['dot', 'bar'].
 
         Returns:
@@ -118,14 +118,11 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         explainer = TreeExplainer(self.model)
         X = DataFrame(X).T if isinstance(X, Series) else X
         shap_values = explainer.shap_values(X)
-
         shap_values = shap_values[0] if isinstance(shap_values, list) and (len(shap_values) == 2) else shap_values
-        expected_value = (explainer.expected_value[0].tolist()
-                          if isinstance(shap_values, list) and (len(shap_values) == 2) else [explainer.expected_value])
-        variables = ['Intercept'] + list(X.columns)
-        mean_shap = expected_value + shap_values.mean(axis=0).tolist()
+        variables = list(X.columns)
+        mean_shap = npabs(shap_values).mean(axis=0).tolist()
 
-        if plot:
+        if show:
             summary_plot(shap_values, X, plot_type=plot_type)
         return {variables[i]: mean_shap[i] for i in range(len(variables))}
 
@@ -238,3 +235,14 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         shapdf = DataFrame(array(shap_coefs).T, columns=['Overall'] + [f'Fold {x}' for x in range(1, len(models) + 1)],
                            index=['Intercept'] + X.columns.tolist())
         return metrics, shapdf
+
+    def auto(self, x_train, y_train, metric, offset=None, selection='shap', selection_thresh=0.05):
+        self.hyperopt_cv(x_train, y_train, AUTO_SPACE_CONFIG[self.backend], max_evals=50,
+                         fn_params={'scoring': metric, 'fit_params': {'sample_weight': offset}})
+        if selection:
+            shaps = self.shap(x_train)
+            shaps = DataFrame.from_dict({'shap': shaps}).abs().sort_values('shap', ascending=False)
+            shaps = shaps / shaps.sum()
+            columns = shaps[shaps['shap'] >= selection_thresh].index.tolist()
+            self.hyperopt_cv(x_train[columns], y_train, AUTO_SPACE_CONFIG[self.backend], max_evals=50,
+                             fn_params={'scoring': metric, 'fit_params': {'sample_weight': offset}})

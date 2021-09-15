@@ -1,5 +1,6 @@
 import json
 import pickle
+import warnings
 
 from insolver.frame import InsolverDataFrame
 from insolver.transforms import InsolverTransforms
@@ -41,8 +42,9 @@ class InsolverTransform(InsolverDataFrame):
             for transform in self.transforms:
                 if hasattr(transform, 'priority'):
                     if transform.priority < priority:
-                        print('!!! WARNING !!!')
-                        print('Check the order of transforms. Transforms with higher priority should be done first.')
+                        warnings.warn('!!! WARNING !!!')
+                        warnings.warn('Check the order of transforms. '
+                                      'Transforms with higher priority should be done first.')
                         break
                     else:
                         priority = transform.priority

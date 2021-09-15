@@ -3,7 +3,7 @@ import copy
 import time
 import pickle
 import joblib
-from numpy import array, mean, broadcast_to
+from numpy import array, mean, broadcast_to, where
 from pandas import concat, merge
 
 
@@ -91,13 +91,20 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         col_name (:obj:`str` or :obj:`list`, optional): String or list of strings containing column name(s) to perform
          groupby operation.
         agg (:obj:`callable`, optional): Aggregation function.
+        thresh (:obj:`float`, optional): Threshold for continuous prediction in dummy classification.
         **kwargs: Other arguments.
     """
-    def __init__(self, col_name=None, agg=None, **kwargs):
+    def __init__(self, task=None, col_name=None, agg=None, thresh=0.5, **kwargs):
         super(InsolverTrivialWrapper, self).__init__(backend='trivial')
+        self._tasks = ['class', 'reg']
         self.init_args = self.get_init_args(vars())
         self._backends, self.x_train, self.y_train = ['trivial'], None, None
         self._back_load_dict, self._back_save_dict = {'trivial': self._pickle_load}, {'trivial': self._pickle_save}
+        if task in self._tasks:
+            self.task = task
+            self.thresh = thresh if task == 'class' else None
+        else:
+            raise NotImplementedError(f'Task parameter supports values in {self._tasks}.')
 
         if (isinstance(col_name, (str, list, tuple)) or col_name is None or
                 (isinstance(col_name, (list, tuple)) and all([isinstance(element, str) for element in col_name]))):
@@ -140,4 +147,4 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         else:
             output = merge(X[self.col_name], self.fitted, how='left', on=self.col_name)[self.y_train.name].fillna(
                 self.agg(self.y_train))
-        return array(output)
+        return array(output) if self.task != 'class' else where(array(output) >= self.thresh, 1, 0)
