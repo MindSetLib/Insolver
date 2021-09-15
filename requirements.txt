@@ -18,8 +18,9 @@ seaborn==0.11.2
 shap==0.39.0
 geocoder==1.38.1
 h2o==3.32.0.3
-flask==2.0.1
-fastapi==0.68.1
-uvicorn[standard]==0.15.0
-pydantic==1.8.2
-gunicorn==20.1.0
+flask==1.1.2
+fastapi==0.65.2
+uvicorn[standard]==0.13.3
+pydantic==1.7.4
+gunicorn==20.0.4
+sympy==1.8
