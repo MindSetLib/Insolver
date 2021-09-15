@@ -115,7 +115,9 @@ for i, model_path in enumerate(models):
 def pool_inference(pack):
     i = pack[1]
     # print('index', i)
-    df = pd.read_json(pack[0])
+    a_json = json.loads(pack[0])
+    df = pd.DataFrame.from_dict(a_json, orient='index').T
+    #df = pd.read_json(pack[0])
     InsDataFrame = InsolverDataFrame(df)
     InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
     InsTransforms.ins_transform()
