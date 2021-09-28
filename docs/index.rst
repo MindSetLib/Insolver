@@ -13,12 +13,14 @@ Insolver is insurance scoring ML package
    :caption: Contents
 
    source/overview
-   source/package_architecture
    source/installation
+   source/package_architecture
    source/insolver_df
    source/transformations
    source/model_wrappers
    source/model_comparison
    source/serving
+   source/several_models_serving
+   source/load_tests
    source/examples
    source/api_ref

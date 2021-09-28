@@ -47,7 +47,5 @@ Also, we need to define json file, for example test.json:
 To run vegeta test you can use this code.
 
 ```bash
-
 ./vegeta attack -workers 1 -duration=5s -rate=10 -targets=target.lst -output=results-veg-httpbin-get.bin && cat results-veg-httpbin-get.bin | ./vegeta plot --title="HTTP Bin GET n rps for k seconds" > http-bin-get-nrps-kseconds.html
-
 ```

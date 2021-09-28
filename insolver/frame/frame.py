@@ -33,6 +33,19 @@ class InsolverDataFrame(DataFrame):
         return meta_json
 
     def split_frame(self, val_size, test_size, random_state=0, shuffle=True, stratify=None):
+        """Function for splitting dataset into train/validation/test partitions.
+
+        Args:
+            val_size (float): The proportion of the dataset to include in validation partition.
+            test_size (float): The proportion of the dataset to include in test partition.
+            random_state (:obj:`int`, optional): Random state, passed to train_test_split() from scikit-learn
+             (default=0).
+            shuffle (:obj:`bool`, optional): Passed to train_test_split() from scikit-learn (default=True).
+            stratify (:obj:`array_like`, optional): Passed to train_test_split() from scikit-learn (default=None).
+
+            Returns:
+                tuple: (train, valid, test). A tuple of partitions of the initial dataset.
+            """
         return train_val_test_split(self, val_size=val_size, test_size=test_size, random_state=random_state,
                                     shuffle=shuffle, stratify=stratify)
 
