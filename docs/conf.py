@@ -13,6 +13,8 @@
 import os
 import sys
 from datetime import datetime
+from recommonmark.transform import AutoStructify
+
 sys.path.insert(0, os.path.abspath('../insolver/'))
 
 
@@ -23,8 +25,8 @@ copyright = f'2020-{datetime.now().year}, MindSet Team'
 author = 'MindSet Team'
 
 # The full version, including alpha/beta/rc tags
-release = '0.4.6'
-version = '0.4.6'
+release = '0.4.15a2'
+version = '0.4.15a2'
 
 
 # -- General configuration ---------------------------------------------------
@@ -88,3 +90,10 @@ source_suffix = {
     '.md': 'markdown',
     '.rst': 'restructuredtext'
 }
+
+
+def setup(app):
+    app.add_config_value('recommonmark_config', {
+            'enable_eval_rst': True,
+            }, True)
+    app.add_transform(AutoStructify)

@@ -56,6 +56,5 @@ Example of the request to `http://127.0.0.10:5040/predict` endpoint:
 
 ```
 
-
 LightGBM Models to this example can be found here:
 https://drive.google.com/file/d/1fZ-93xghPBfoxxHAGZaduAh7qVdED0Pk/view?usp=sharing
