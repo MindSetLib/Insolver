@@ -40,7 +40,7 @@ InsTransforms.save('transforms.pkl')
 These classes are used to encode categorical values.
 
 * class `TransformToNumeric`
-    Transforms parameter values to numeric types, uses [`pandas.to_numeric`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_numeric.html).
+    Transforms parameter values to numeric types, uses [`pandas.to_numeric`](https://pandas.pydata.org/docs/reference/api/pandas.to_numeric.html).
 
 * class `TransformGetDummies`
     Gets dummy columns of the parameter, uses [`pandas.get_dummies`](https://pandas.pydata.org/docs/reference/api/pandas.get_dummies.html).
