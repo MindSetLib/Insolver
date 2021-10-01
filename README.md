@@ -12,11 +12,6 @@ Insolver is low-code machine learning library, initially created for the insuran
 ```shell
 pip install insolver
 ```
-### Install with addons:
-
-```shell
-pip install insolver[db-connects]
-```
 
 ### Post-install:
 
@@ -25,10 +20,6 @@ To fix displaying plotly figs in jyputerlab install:
 jupyter labextension install jupyterlab-plotly
 ```
 
-In case of problem with `pyodbc` you may need to install:
-```shell
-sudo apt install unixodbc-dev
-```
 ### Insolver is already installed in the easy access cloud via GitHub login. Try https://mset.space with a familiar notebook-style environment.
 
 ## Examples:
