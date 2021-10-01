@@ -1,6 +1,6 @@
 # Insolver DataFrame
 
-Insolver provides some tools for data manipulation. In order to apply most of the transformations, we need to use `InsolverDataFrame` object, which inherits the common `pd.DataFrame`, extending it with some specific methods. 
+Insolver provides some data manipulation tools. To apply most of the transformations, we need to use the `InsolverDataFrame` object, which inherits the `pandas.DataFrame`, extending it with some specific methods. 
 
 ```eval_rst
  .. autoclass:: insolver.frame.InsolverDataFrame
@@ -9,7 +9,7 @@ Insolver provides some tools for data manipulation. In order to apply most of th
  ```
 
 ## Example
-Creation of `InsolverDataFrame`
+An example of creating `InsolverDataFrame` from pandas `DataFrame`:
 
 ```python
 import pandas as pd
