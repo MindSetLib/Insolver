@@ -3,7 +3,7 @@
 Insolver provides some tools for data manipulation. In order to apply most of the transformations, we need to use `InsolverDataFrame` object, which inherits the common `pd.DataFrame`, extending it with some specific methods. 
 
 ```eval_rst
- .. autoclass:: insolver.InsolverDataFrame
+ .. autoclass:: insolver.frame.InsolverDataFrame
    :members:
  
  ```
