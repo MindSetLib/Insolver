@@ -43,9 +43,9 @@ class InsolverDataFrame(DataFrame):
             shuffle (:obj:`bool`, optional): Passed to train_test_split() from scikit-learn (default=True).
             stratify (:obj:`array_like`, optional): Passed to train_test_split() from scikit-learn (default=None).
 
-            Returns:
-                tuple: (train, valid, test). A tuple of partitions of the initial dataset.
-            """
+        Returns:
+            tuple: (train, valid, test). A tuple of partitions of the initial dataset.
+        """
         return train_val_test_split(self, val_size=val_size, test_size=test_size, random_state=random_state,
                                     shuffle=shuffle, stratify=stratify)
 

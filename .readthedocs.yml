@@ -18,3 +18,9 @@ python:
    version: 3.8
    install:
    - requirements: docs/requirements-docs.txt
+   - method: setuptools
+     path: .
+
+submodules:
+  include: all
+  recursive: true
