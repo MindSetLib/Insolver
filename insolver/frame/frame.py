@@ -6,7 +6,7 @@ from insolver.model_tools import train_val_test_split
 class InsolverDataFrame(DataFrame):
     """Primary DataFrame class for Insolver.
 
-    Attributes:
+    Parameters:
         df (:obj:`pd.DataFrame`): pandas DataFrame.
     """
     def __init__(self, df):

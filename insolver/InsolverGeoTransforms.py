@@ -102,7 +102,7 @@ class InsolverGeoPointsFrame(InsolverDataFrame):
 class InsolverGeoPointsToPointsFrame(InsolverDataFrame):
     """Dataframe class with relations geo points to geo points for Insolver Geo module.
 
-    Attributes:
+    Parameters:
         geo_points_main: InsolverGeoPointsFrame with geo points.
         geo_points_rel: InsolverGeoPointsFrame with geo points to make relations with.
     """
@@ -122,7 +122,7 @@ class InsolverGeoPointsToPointsFrame(InsolverDataFrame):
 class TransformGeoDistGet(InsolverTransformMain):
     """Gets geographical distance between two points in kilometers.
 
-    Attributes:
+    Parameters:
         column_start_lat: Column in InsolverGeoPointsToPointsFrame with start points' latitudes.
         column_start_lon: Column in InsolverGeoPointsToPointsFrame with start points' longitudes.
         column_dst_lat: Column in InsolverGeoPointsToPointsFrame with destination points' latitudes.
@@ -163,7 +163,7 @@ class TransformGeoDistGet(InsolverTransformMain):
 class TransformParamsSumAround(InsolverTransformMain):
     """Gets sum of numeric parameter's values in surround of each point.
 
-    Attributes:
+    Parameters:
         column_link_p: Link column in InsolverGeoPointsFrame.
         column_link_ptp: Link column in InsolverGeoPointsToPointsFrame.
         columns_params_ptp: List of columns in InsolverGeoPointsToPointsFrame to calculate sums of values.
@@ -196,7 +196,7 @@ class TransformParamsSumAround(InsolverTransformMain):
 class TransformAddParams(InsolverTransformMain):
     """Adds parameters' values from InsolverGeoPointsFrame to InsolverDataFrame.
 
-    Attributes:
+    Parameters:
         column_link_df: Link column in InsolverDataFrame.
         column_link_p: Link column in InsolverGeoPointsFrame.
         columns_params: List of columns in InsolverGeoPointsFrame to merge into InsolverDataFrame.

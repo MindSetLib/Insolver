@@ -11,7 +11,7 @@ class InsolverBaseWrapper:
     def __init__(self, backend):
         """Base wrapper serving as a building block for other wrappers.
 
-        Attributes:
+        Parameters:
             backend (str): Name of the backend to built the model.
         """
         self.algo, self.backend, self._backends = None, backend, None
@@ -87,7 +87,7 @@ class InsolverBaseWrapper:
 class InsolverTrivialWrapper(InsolverBaseWrapper):
     """Dummy wrapper for returning trivial "predictions" for metric comparison and statistics.
 
-    Attributes:
+    Parameters:
         col_name (:obj:`str` or :obj:`list`, optional): String or list of strings containing column name(s) to perform
          groupby operation.
         agg (:obj:`callable`, optional): Aggregation function.

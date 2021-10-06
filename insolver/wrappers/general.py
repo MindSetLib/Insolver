@@ -11,7 +11,7 @@ from .extensions import InsolverCVHPExtension, InsolverPDPExtension
 class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPExtension):
     """Insolver wrapper for Random Forest.
 
-    Attributes:
+    Parameters:
         backend (str): Framework for building RF, 'sklearn' is supported.
         task (str): Task that RF should solve: Classification or Regression. Values 'reg' and 'class' are supported.
         n_estimators (:obj:`int`, optional): Number of trees in the forest. Equals 100 by default.

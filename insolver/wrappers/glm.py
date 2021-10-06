@@ -16,17 +16,18 @@ from .extensions import InsolverH2OExtension, InsolverCVHPExtension, InsolverPDP
 class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHPExtension, InsolverPDPExtension):
     """Insolver wrapper for Generalized Linear Models.
 
-    Attributes:
+    Parameters:
         backend (str): Framework for building GLM, currently 'h2o' and 'sklearn' are supported.
         family (:obj:`str`, :obj:`float`, :obj:`int`, optional): Distribution for GLM. Supports any family from h2o as
-        str. For sklearn supported `str` families are ['gaussian', 'normal', 'poisson', 'gamma', 'inverse_gaussian'],
-        also may be defined as `int` or `float` as a power for Tweedie GLM. By default, Gaussian GLM is fitted.
+          str. For sklearn supported `str` families are ['gaussian', 'normal', 'poisson', 'gamma', 'inverse_gaussian'],
+          also may be defined as `int` or `float` as a power for Tweedie GLM. By default, Gaussian GLM is fitted.
         link (:obj:`str`, optional): Link function for GLM. If `None`, sets to default value for both h2o and sklearn.
         standardize (:obj:`bool`, optional): Whether to standardize data before fitting the model. Enabled by default.
         h2o_init_params (:obj:`dict`, optional): Parameters passed to `h2o.init()`, when `backend` == 'h2o'.
         load_path (:obj:`str`, optional): Path to GLM model to load from disk.
         **kwargs: Parameters for GLM estimators (for H2OGeneralizedLinearEstimator or TweedieRegressor) except
-        `family` (`power` for TweedieRegressor) and `link`.
+          `family` (`power` for TweedieRegressor) and `link`.
+
         """
     def __init__(self, backend, family=None, link=None, standardize=True, h2o_init_params=None,
                  load_path=None, **kwargs):

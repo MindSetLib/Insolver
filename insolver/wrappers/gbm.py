@@ -19,13 +19,14 @@ from .extensions import InsolverCVHPExtension, InsolverPDPExtension, AUTO_SPACE_
 class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPExtension):
     """Insolver wrapper for Gradient Boosting Machines.
 
-    Attributes:
+    Parameters:
         backend (str): Framework for building GBM, 'xgboost', 'lightgbm' and 'catboost' are supported.
         task (str): Task that GBM should solve: Classification or Regression. Values 'reg' and 'class' are supported.
         n_estimators (:obj:`int`, optional): Number of boosting rounds. Equals 100 by default.
         objective (:obj:`str` or :obj:`callable`): Objective function for GBM to optimize.
         load_path (:obj:`str`, optional): Path to GBM model to load from disk.
         **kwargs: Parameters for GBM estimators except `n_estimators` and `objective`. Will not be changed in hyperopt.
+
     """
     def __init__(self, backend, task=None, objective=None, n_estimators=100, load_path=None, **kwargs):
         super(InsolverGBMWrapper, self).__init__(backend)

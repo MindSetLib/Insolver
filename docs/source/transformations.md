@@ -215,7 +215,7 @@ import pandas as pd
 class TransformToNumeric:
     """Example of user-defined transformations. Transform values to numeric.
 
-    Attributes:
+    Parameters:
         column_names (list): List of columns for transformations
         downcast (str): parameter from pd.to_numeric, default: 'float'
     """

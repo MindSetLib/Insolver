@@ -11,10 +11,10 @@ from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper, InsolverRF
 class ModelMetricsCompare:
     """Class for model comparison.
 
-    Attributes:
+    Parameters:
         X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for making predictions.
         y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Actual target values for X.
-        source (:obj:`str`, :obj:`list`, :obj:`tuple`, :ibj:`None`): List or tuple of insolver wrappers or path to the
+        source (:obj:`str`, :obj:`list`, :obj:`tuple`, :obj:`None`): List or tuple of insolver wrappers or path to the
         metrics (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Metrics or list of metrics to compute.
         stats (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Statistics or list of statistics to compute.
         folder with models. If `None`, taking current working directory as source.
