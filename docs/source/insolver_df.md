@@ -1,6 +1,6 @@
 # Insolver DataFrame
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.frame.InsolverDataFrame
    :show-inheritance: 
 ```

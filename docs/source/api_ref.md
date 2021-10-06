@@ -2,7 +2,7 @@
 
 ## Insolver DataFrame
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.frame.InsolverDataFrame
    :members:
 ```
@@ -13,49 +13,49 @@
 
 - TransformGenderGetFromName
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformGenderGetFromName
    :members:
 ```
 
 - TransformAgeGetFromBirthday
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformAgeGetFromBirthday
    :members:
 ```
 
 - TransformAge
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformAge
    :members:
 ```
 
 - TransformAgeGender
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformAgeGender
    :members:
 ```
 
 - TransformExp
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformExp
    :members:
 ```
 
 - TransformAgeExpDiff
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformAgeExpDiff
    :members:
 ```
 
 - TransformNameCheck
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformNameCheck
    :members:
 ```
@@ -64,21 +64,21 @@
 ### Vehicle data methods
 - TransformVehPower
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformVehPower
    :members:
 ```
 
 - TransformVehAgeGetFromIssueYear
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformVehAgeGetFromIssueYear
    :members:
 ```
 
 - TransformVehAge
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformVehAge
    :members:
 ```
@@ -86,7 +86,7 @@
 ### Region data methods
 - TransformRegionGetFromKladr
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformRegionGetFromKladr
    :members:
 ```
@@ -94,21 +94,21 @@
 ### Sorting data methods
 - TransformParamUselessGroup
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformParamUselessGroup
    :members:
 ```
 
 - TransformParamSortFreq
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformParamSortFreq
    :members:
 ```
 
 - TransformParamSortAC
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformParamSortAC
    :members:
 ```
@@ -116,35 +116,35 @@
 ### Other data methods
 - TransformToNumeric
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformToNumeric
    :members:
 ```
 
 - TransformMapValues
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformMapValues
    :members:
 ```
 
 - TransformPolynomizer
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformPolynomizer
    :members:
 ```
 
 - TransformGetDummies
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformGetDummies
    :members:
 ```
 
 - TransformCarFleetSize
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.TransformCarFleetSize
    :members:
 ```
@@ -152,21 +152,21 @@
 ### Fill NA and Encode methods
 - AutoFillNATransforms
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.AutoFillNATransforms
    :members:
 ```
 
 - EncoderTransforms
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.EncoderTransforms
    :members:
 ```
 
 - OneHotEncoderTransforms
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.transforms.OneHotEncoderTransforms
    :members:
 ```
@@ -175,7 +175,7 @@
 
 ### Base Wrapper
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.wrappers.base.InsolverBaseWrapper
    :members:
 ```
@@ -183,28 +183,28 @@
 ### Trivial Wrapper
 
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.wrappers.InsolverTrivialWrapper
    :members:
 ```
 
 ### Generalized Linear Model Wrapper
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.wrappers.InsolverGLMWrapper
    :members:
 ```
 
 ### Gradient Boosting Machine Wrapper
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.wrappers.InsolverGBMWrapper
    :members:
 ```
 
 ### Random Forest Wrapper
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.wrappers.InsolverRFWrapper
    :members:
 ```
@@ -213,7 +213,7 @@
 
 ### Model Comparison
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.model_tools.ModelMetricsCompare
    :members:
 ```

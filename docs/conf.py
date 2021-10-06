@@ -13,7 +13,6 @@
 import os
 import sys
 from datetime import datetime
-from recommonmark.transform import AutoStructify
 
 sys.path.insert(0, os.path.abspath('../insolver/'))
 
@@ -46,7 +45,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
-    'recommonmark',
+    'myst_parser'
 ]
 
 # Napoleon settings
@@ -90,10 +89,3 @@ source_suffix = {
     '.md': 'markdown',
     '.rst': 'restructuredtext'
 }
-
-
-def setup(app):
-    app.add_config_value('recommonmark_config', {
-            'enable_eval_rst': True,
-            }, True)
-    app.add_transform(AutoStructify)
