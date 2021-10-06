@@ -205,7 +205,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
                 column = method()
 
                 if isinstance(column, dict):
-                    result = result.join(pd.Series(column, name=name), how='outer')
+                    result = result.join(Series(column, name=name), how='outer')
             except Exception as e:
                 # exception of class Exception usage justified because
                 # method self.coef_norm() can raise exception of that class
