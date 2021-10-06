@@ -18,7 +18,7 @@ class InsolverTransform(InsolverDataFrame):
     transforms which sort values (TransformParamSortFreq, TransformParamSortAC).
     Priority=3: transforms which get functions of values (TransformPolynomizer, TransformGetDummies, ets).
 
-    Attributes:
+    Parameters:
         df: InsolverDataFrame to transform.
         transforms: List of transforms to be done.
     """

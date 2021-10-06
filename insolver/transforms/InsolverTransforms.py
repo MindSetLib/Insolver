@@ -15,7 +15,7 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 class TransformGenderGetFromName:
     """Gets clients' genders from theirs russian second names.
 
-    Attributes:
+    Parameters:
         column_name (str): Column name in InsolverDataFrame containing clients' names, column type is string.
         column_gender (str): Column name in InsolverDataFrame for clients' genders.
         gender_male (str): Return value for male gender in InsolverDataFrame, 'male' by default.
@@ -50,7 +50,7 @@ class TransformGenderGetFromName:
 class TransformAgeGetFromBirthday:
     """Gets clients' ages in years from theirs birth dates and policies' start dates.
 
-    Attributes:
+    Parameters:
         column_date_birth (str): Column name in InsolverDataFrame containing clients' birth dates, column type is date.
         column_date_start (str): Column name in InsolverDataFrame containing policies' start dates, column type is date.
         column_age (str): Column name in InsolverDataFrame for clients' ages in years, column type is int.
@@ -88,7 +88,7 @@ class TransformAge:
     """Transforms values of drivers' minimum ages in years.
     Values under 'age_min' are invalid. Values over 'age_max' will be grouped.
 
-    Attributes:
+    Parameters:
         column_driver_minage (str): Column name in InsolverDataFrame containing drivers' minimum ages in years,
             column type is integer.
         age_min (int): Minimum value of drivers' age in years, lower values are invalid, 18 by default.
@@ -119,7 +119,7 @@ class TransformAge:
 class TransformAgeGender:
     """Gets intersections of drivers' minimum ages and genders.
 
-    Attributes:
+    Parameters:
         column_age (str): Column name in InsolverDataFrame containing clients' ages in years, column type is integer.
         column_gender (str): Column name in InsolverDataFrame containing clients' genders.
         column_age_m (str): Column name in InsolverDataFrame for males' ages, for females default value is applied,
@@ -171,7 +171,7 @@ class TransformAgeGender:
 class TransformExp:
     """Transforms values of drivers' minimum experiences in years with values over 'exp_max' grouped.
 
-    Attributes:
+    Parameters:
         column_driver_minexp (str): Column name in InsolverDataFrame containing drivers' minimum experiences in years,
             column type is integer.
         exp_max (int): Maximum value of drivers' experience in years, bigger values will be grouped, 52 by default.
@@ -200,7 +200,7 @@ class TransformAgeExpDiff:
     """Transforms records with difference between drivers' minimum age and minimum experience less then 'diff_min'
      years, sets drivers' minimum experience equal to drivers' minimum age minus 'diff_min' years.
 
-    Attributes:
+    Parameters:
         column_driver_minage (str): Column name in InsolverDataFrame containing drivers' minimum ages in years,
             column type is integer.
         column_driver_minexp (str): Column name in InsolverDataFrame containing drivers' minimum experiences in years,
@@ -224,7 +224,7 @@ class TransformNameCheck:
     """Checks if clients' first names are in special list.
     Names may concatenate surnames, first names and last names.
 
-    Attributes:
+    Parameters:
         column_name (str): Column name in InsolverDataFrame containing clients' names, column type is string.
         name_full (bool): Sign if name is the concatenation of surname, first name and last name, False by default.
         column_name_check (str): Column name in InsolverDataFrame for bool values if first names are in the list or not.
@@ -264,7 +264,7 @@ class TransformVehPower:
     Values under 'power_min' and over 'power_max' will be grouped.
     Values between 'power_min' and 'power_max' will be grouped with step 'power_step'.
 
-    Attributes:
+    Parameters:
         column_veh_power (str): Column name in InsolverDataFrame containing vehicles' powers,
             column type is float.
         power_min (float): Minimum value of vehicles' power, lower values will be grouped, 10 by default.
@@ -300,7 +300,7 @@ class TransformVehPower:
 class TransformVehAgeGetFromIssueYear:
     """Gets vehicles' ages in years from issue years and policies' start dates.
 
-    Attributes:
+    Parameters:
         column_veh_issue_year (str): Column name in InsolverDataFrame containing vehicles' issue years,
             column type is integer.
         column_date_start (str): Column name in InsolverDataFrame containing policies' start dates, column type is date.
@@ -339,7 +339,7 @@ class TransformVehAgeGetFromIssueYear:
 class TransformVehAge:
     """Transforms values of vehicles' ages in years. Values over 'veh_age_max' will be grouped.
 
-    Attributes:
+    Parameters:
         column_veh_age (str): Column name in InsolverDataFrame containing vehicles' ages in years,
             column type is integer.
         veh_age_max (int): Maximum value of vehicles' age in years, bigger values will be grouped, 25 by default.
@@ -372,7 +372,7 @@ class TransformVehAge:
 class TransformRegionGetFromKladr:
     """Gets regions' numbers from KLADRs.
 
-    Attributes:
+    Parameters:
         column_kladr (str): Column name in InsolverDataFrame containing KLADRs, column type is string.
         column_region_num (str): Column name in InsolverDataFrame for regions' numbers, column type is integer.
     """
@@ -408,7 +408,7 @@ class TransformRegionGetFromKladr:
 class TransformParamUselessGroup:
     """Groups all parameter's values with few data to one group.
 
-    Attributes:
+    Parameters:
         column_param (str): Column name in InsolverDataFrame containing parameter.
         size_min (int): Minimum allowed number of records for each parameter value, 1000 by default.
         group_name: Name of the group for parameter's values with few data.
@@ -454,7 +454,7 @@ class TransformParamUselessGroup:
 class TransformParamSortFreq:
     """Gets sorted by claims' frequency parameter's values.
 
-    Attributes:
+    Parameters:
         column_param (str): Column name in InsolverDataFrame containing parameter.
         column_param_sort_freq (str): Column name in InsolverDataFrame for sorted values of parameter,
             column type is integer.
@@ -500,7 +500,7 @@ class TransformParamSortFreq:
 class TransformParamSortAC:
     """Gets sorted by claims' average sum parameter's values.
 
-    Attributes:
+    Parameters:
         column_param (str): Column name in InsolverDataFrame containing parameter.
         column_param_sort_ac (str): Column name in InsolverDataFrame for sorted values of parameter,
             column type is integer.
@@ -549,7 +549,7 @@ class TransformParamSortAC:
 class TransformToNumeric:
     """Transforms parameter's values to numeric types, uses Pandas' 'to_numeric'.
 
-    Attributes:
+    Parameters:
         column_param (str): Column name in InsolverDataFrame containing parameter to transform.
         downcast: Target numeric dtype, equal to Pandas' 'downcast' in the 'to_numeric' function, 'integer' by default.
     """
@@ -566,7 +566,7 @@ class TransformToNumeric:
 class TransformMapValues:
     """Transforms parameter's values according to the dictionary.
 
-    Attributes:
+    Parameters:
         column_param (str): Column name in InsolverDataFrame containing parameter to map.
         dictionary (dict): The dictionary for mapping.
     """
@@ -583,7 +583,7 @@ class TransformMapValues:
 class TransformPolynomizer:
     """Gets polynomials of parameter's values.
 
-    Attributes:
+    Parameters:
         column_param (str): Column name in InsolverDataFrame containing parameter to polynomize.
         n (int): Polynomial degree.
     """
@@ -604,7 +604,7 @@ class TransformPolynomizer:
 class TransformGetDummies:
     """Gets dummy columns of the parameter, uses Pandas' 'get_dummies'.
 
-    Attributes:
+    Parameters:
         column_param (str): Column name in InsolverDataFrame containing parameter to transform.
         drop_first (bool): Whether to get k-1 dummies out of k categorical levels by removing the first level,
             False by default.
@@ -637,7 +637,7 @@ class TransformGetDummies:
 class TransformCarFleetSize:
     """Calculates fleet sizes for policyholders.
 
-    Attributes:
+    Parameters:
         column_id (str): Column name in InsolverDataFrame containing policyholders' IDs.
         column_date_start (str): Column name in InsolverDataFrame containing policies' start dates, column type is date.
         column_fleet_size (str): Column name in InsolverDataFrame for fleet sizes, column type is int.
@@ -661,7 +661,7 @@ class TransformCarFleetSize:
 class AutoFillNATransforms:
     """Fill NA values
 
-    Attributes:
+    Parameters:
         numerical_columns (list): List of numerical columns
         categorical_columns (list): List of categorical columns
         medians (dict): Dictionary of median for each numerical column
@@ -713,7 +713,7 @@ class AutoFillNATransforms:
 class EncoderTransforms:
     """Label Encoder
 
-     Attributes:
+     Parameters:
          column_names (list): columns for label encoding
          le_classes (dict): dictionary with label encoding classes for each column
 
@@ -741,7 +741,7 @@ class EncoderTransforms:
 class OneHotEncoderTransforms:
     """OneHotEncoder Transformations
 
-    Attributes:
+    Parameters:
         column_names (list): columns for one hot encoding
         encoder_dict (dict): dictionary with encoder_params for each column
     """
