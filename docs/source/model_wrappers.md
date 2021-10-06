@@ -5,7 +5,7 @@ Currently model wrappers implement Generalized Linear Models (`scikit-learn`, `h
 
 ## BaseWrapper
 
-```eval_rst
+```{eval-rst}
 .. autoclass:: insolver.wrappers.base.InsolverBaseWrapper
     :show-inheritance:
 ```
@@ -75,7 +75,7 @@ The functionality of a `InsolverBaseWrapper` is quite limited. However, it allow
 
 ## TrivialWrapper
 
-```eval_rst
+```{eval-rst}
 .. autoclass:: insolver.wrappers.InsolverTrivialWrapper
     :show-inheritance:
 ```
@@ -91,7 +91,7 @@ Resulting "predictions" are obtained as follows:
 
 ## Generalized Linear Models
 
-```eval_rst
+```{eval-rst}
 .. autoclass:: insolver.wrappers.InsolverGLMWrapper
     :show-inheritance:
 ```
@@ -114,7 +114,7 @@ GLM with `h2o` backend also supports hyperparameter optimization using `optimize
 
 ## Gradient Boosting Machines
 
-```eval_rst
+```{eval-rst}
 .. autoclass:: insolver.wrappers.InsolverGBMWrapper
     :show-inheritance:
 ```
@@ -129,7 +129,7 @@ It is also possible to examine metrics and shap values changes on cross-validati
 
 ## Random Forest
 
-```eval_rst
+```{eval-rst}
 .. autoclass:: insolver.wrappers.InsolverRFWrapper
     :show-inheritance:
 ```
