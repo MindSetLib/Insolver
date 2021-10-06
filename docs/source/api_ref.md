@@ -176,7 +176,7 @@
 ### Base Wrapper
 
 ```eval_rst
- .. autoclass:: insolver.wrappers.InsolverBaseWrapper
+ .. autoclass:: insolver.wrappers.base.InsolverBaseWrapper
    :members:
 ```
 

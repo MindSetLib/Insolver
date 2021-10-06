@@ -6,7 +6,7 @@ Currently model wrappers implement Generalized Linear Models (`scikit-learn`, `h
 ## BaseWrapper
 
 ```eval_rst
-.. autoclass:: insolver.wrappers.InsolverBaseWrapper
+.. autoclass:: insolver.wrappers.base.InsolverBaseWrapper
     :show-inheritance:
 ```
 
