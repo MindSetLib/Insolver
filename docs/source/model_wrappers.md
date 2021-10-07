@@ -38,8 +38,8 @@ Apart from that, a new wrapper class should also have the following list of attr
   
   Example: `self._back_load_dict = {'backend1': self._pickle_load, 'backend2': self._pickle_load}`.
   
-``` important:: An extension for H2O framework, `InsolverH2OExtension` class, also implements function `_h2o_load` by default, but it should be used a bit differently.
-``` 
+::::{important} An extension for H2O framework, `InsolverH2OExtension` class, also implements function `_h2o_load` by default, but it should be used a bit differently.
+:::: 
 
 * `self._back_save_dict`: A dictionary containing backend names from `self._backends` as keys and callable functions as values. These functions should implement the process of saving the model from the wrapper to file when using `save_model` method. `InsolverBaseWrapper` implements function `_pickle_save` out of the box. An extension for H2O framework, `InsolverH2OExtension` class, also implements function `_h2o_save` by default.
   
