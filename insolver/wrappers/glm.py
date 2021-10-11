@@ -179,3 +179,41 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
         return coefs
+
+    def coef_to_csv(self, path_or_buf=None, **kwargs):
+        """Write GLM coefficients to a comma-separated values (csv) file.
+
+        Args:
+            path_or_buf : str or file handle, default None
+                File path or object, if None is provided the result is returned as
+                a string.  If a non-binary file object is passed, it should be opened
+                with `newline=''`, disabling universal newlines. If a binary
+                file object is passed, `mode` might need to contain a `'b'`.
+            **kwargs: Other parameters passed to Pandas DataFrame.to_csv method.
+        Returns:
+            None or str
+                If path_or_buf is None, returns the resulting csv format as a
+                string. Otherwise returns None.
+        """
+        result = DataFrame()
+        sources_methods = {
+            'coefficients for standardized data': self.coef_norm,
+            'coefficients for non-standardized data': self.coef,
+        }
+
+        for name, method in sources_methods.items():
+            try:
+                column = method()
+
+                if isinstance(column, dict):
+                    result = result.join(Series(column, name=name), how='outer')
+            except Exception as e:
+                # exception of class Exception usage justified because
+                # method self.coef_norm() can raise exception of that class
+                print(e)
+
+        if result.size > 0:
+            kwargs['path_or_buf'] = path_or_buf
+            return result.to_csv(**kwargs)
+        else:
+            print('csv file was not created, no available data')
