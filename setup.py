@@ -27,6 +27,7 @@ setup(name='insolver',
             ]
       },
       install_requires=required,
+      setup_requires=['wheel'],
       zip_safe=False,
       classifiers=[
             'Programming Language :: Python :: 3',
