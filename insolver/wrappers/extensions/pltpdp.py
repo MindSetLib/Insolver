@@ -2,7 +2,6 @@ from sklearn.inspection import plot_partial_dependence
 from h2o.frame import H2OFrame
 
 from matplotlib.pyplot import show, tight_layout
-from pdpbox.pdp import pdp_isolate, pdp_plot
 
 
 class InsolverPDPExtension:
@@ -17,7 +16,11 @@ class InsolverPDPExtension:
                 tight_layout()
                 show()
             elif plot_backend == 'pdpbox':
-                pdp_plot(pdp_isolate(self.model, X, features, feature_name), feature_name, **kwargs)
-                show()
+                try:
+                    from pdpbox.pdp import pdp_isolate, pdp_plot
+                    pdp_plot(pdp_isolate(self.model, X, features, feature_name), feature_name, **kwargs)
+                    show()
+                except ImportError:
+                    print('Package PDPbox is not installed')
             else:
                 raise NotImplementedError(f'Plot backend {plot_backend} is not implemented.')
