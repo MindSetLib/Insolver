@@ -137,6 +137,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         Returns:
             dict: {:obj:`str`: :obj:`float`} Dictionary containing GLM coefficients for standardized data.
         """
+        if not self.__is_fitted():
+            raise Exception('This instance is not fitted yet. Call \'fit\' before using this estimator.')
         if self.standardize:
             if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
                 if self.model.feature_name_ is None:
@@ -160,6 +162,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         Returns:
             dict: {:obj:`str`: :obj:`float`} Dictionary containing GLM coefficients for non-standardized data.
         """
+        if not self.__is_fitted():
+            raise Exception('This instance is not fitted yet. Call \'fit\' before using this estimator.')
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
             if self.model.feature_name_ is None:
                 self.model.feature_name_ = [f'Variable_{i}' for i
@@ -217,3 +221,27 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
             return result.to_csv(**kwargs)
         else:
             print('csv file was not created, no available data')
+
+    def __is_fitted(self):
+        """Function to check if model is fitted.
+
+        Raises:
+            NotImplementedError: if method to check that model is fitted is not implemented
+                and if model instance type does not match with expected type (for used backend).
+
+        Returns:
+            True if model is fitted, False otherwise.
+
+        """
+        methods = {
+                'sklearn': lambda x: x.__sklearn_is_fitted__(),
+                'h2o': lambda x: x._model_json is not None,
+        }
+
+        if self.backend not in methods.keys():
+            raise NotImplementedError('__is_fitted method does not support choosen backend')
+        if ((self.backend == 'sklearn') & isinstance(self.model, Pipeline) or
+                (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator)):
+            return methods[self.backend](self.model)
+        else:
+            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
