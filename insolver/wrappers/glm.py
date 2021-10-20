@@ -116,6 +116,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         Returns:
             array: Returns predicted values.
         """
+        if not self.__is_fitted():
+            raise Exception("This instance is not fitted yet. Call 'fit' before using this estimator.")
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
             predictions = self.model.predict(X if not hasattr(self.model, 'feature_name_')
                                              else X[self.model.feature_name_])
