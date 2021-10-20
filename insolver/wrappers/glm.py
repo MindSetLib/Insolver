@@ -226,7 +226,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         """Function to check if model is fitted.
 
         Raises:
-            NotImplementedError: if method to check that model is fitted is not implemented
+            NotImplementedError: if method for checking that model is fitted is not implemented
                 and if model instance type does not match with expected type (for used backend).
 
         Returns:
