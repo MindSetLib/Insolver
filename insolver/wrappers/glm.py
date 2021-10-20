@@ -138,7 +138,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
             dict: {:obj:`str`: :obj:`float`} Dictionary containing GLM coefficients for standardized data.
         """
         if not self.__is_fitted():
-            raise Exception('This instance is not fitted yet. Call \'fit\' before using this estimator.')
+            raise Exception("This instance is not fitted yet. Call 'fit' before using this estimator.")
         if self.standardize:
             if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
                 if self.model.feature_name_ is None:
