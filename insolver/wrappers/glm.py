@@ -240,8 +240,4 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
 
         if self.backend not in methods.keys():
             raise NotImplementedError('__is_fitted method does not support choosen backend')
-        if ((self.backend == 'sklearn') & isinstance(self.model, Pipeline) or
-                (self.backend == 'h2o') & isinstance(self.model, H2OGeneralizedLinearEstimator)):
-            return methods[self.backend](self.model)
-        else:
-            raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
+        return methods[self.backend](self.model)
