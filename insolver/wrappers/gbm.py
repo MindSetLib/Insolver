@@ -134,7 +134,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
             data (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for shap values calculation.
             index (:obj:`int`, optional): Index of the observation of interest, if data is pd.DataFrame.
             link (:obj:`callable`, optional): A function for transforming shap values into predictions.
-            Unnecessary if self.objective is present and it takes values in ['binary', 'poisson', 'gamma'].
+              Unnecessary if self.objective is present and it takes values in ['binary', 'poisson', 'gamma'].
             show (:obj:`boolean`, optional): Whether to plot a graph or return a json.
             layout_dict (:obj:`boolean`, optional): Dictionary containing the parameters of plotly figure layout.
 
