@@ -177,7 +177,7 @@ print(df)
 ```
 
 Class `DatetimeTransforms` is used to preprocess date and date time columns. 
-Unlike other transformations, this class does not change the date columns, but creates new ones with the used feature in the name 
+Unlike other transformations, this class does not change the date columns, but creates new ones with the used feature in the name.
 
 ```python
 import numpy as np
@@ -207,7 +207,7 @@ print(df)
 
 ### Label Encoder
 
-EncoderTransforms based on [sklearn's LabelEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html). Encode target labels with value between 0 and n_classes-1.
+EncoderTransforms based on [sklearn's LabelEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html). Encode target labels with value between 0 and `n_classes`-1.
 
 ```python
 import pandas as pd
