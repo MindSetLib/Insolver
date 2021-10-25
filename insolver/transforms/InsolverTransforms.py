@@ -4,7 +4,6 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from insolver.frame import InsolverDataFrame
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 # ---------------------------------------------------
@@ -426,7 +425,7 @@ class TransformParamUselessGroup:
                 raise NotImplementedError("'param_useless' should contain the list of useless values.")
             self.param_useless = param_useless
         else:
-            self.param_useless = {}
+            self.param_useless = []
 
     @staticmethod
     def _param_useless_get(df, column_param, size_min):
@@ -664,12 +663,15 @@ class AutoFillNATransforms:
     Parameters:
         numerical_columns (list): List of numerical columns
         categorical_columns (list): List of categorical columns
-        numerical_method (str): Fill numerical NA values using this specified method: 'median' (by default), 'mean', 'mode' or 'remove'
-        categorical_method (str): Fill categorical NA values using this specified method: 'frequent' (by default), 'new_category', 'imputed_column' or 'remove'
+        numerical_method (str): Fill numerical NA values using this specified method: 'median' (by default), 'mean',
+          'mode' or 'remove'
+        categorical_method (str): Fill categorical NA values using this specified method: 'frequent' (by default),
+          'new_category', 'imputed_column' or 'remove'
         numerical_constants (dict): Dictionary of constants for each numerical column
         categorical_constants (dict): Dictionary of constants for each categorical column
     """
-    def __init__(self, numerical_columns=None, categorical_columns=None, numerical_method='median', categorical_method='frequent', numerical_constants=None, categorical_constants=None):
+    def __init__(self, numerical_columns=None, categorical_columns=None, numerical_method='median',
+                 categorical_method='frequent', numerical_constants=None, categorical_constants=None):
         self.priority = 0
         self.numerical_columns = numerical_columns
         self.categorical_columns = categorical_columns
@@ -690,15 +692,15 @@ class AutoFillNATransforms:
         if not self.numerical_columns:
             return
         
-        if (self.numerical_method == 'remove'):
-            df.dropna(subset=self.numerical_columns, inplace = True)
+        if self.numerical_method == 'remove':
+            df.dropna(subset=self.numerical_columns, inplace=True)
             return
         
-        if (self.numerical_constants):
+        if self.numerical_constants:
             for column in self.numerical_constants.keys():
                 df[column].fillna(self.numerical_constants[column], inplace=True)
         
-        if (self.numerical_method in self._num_methods):
+        if self.numerical_method in self._num_methods:
             self._num_methods_dict = {
                 'median': lambda column: df[column].median(),
                 'mean': lambda column: df[column].mean(),
@@ -722,21 +724,21 @@ class AutoFillNATransforms:
         if not self.categorical_columns:
             return
         
-        if (self.categorical_method == 'remove'):
-            df.dropna(subset=self.categorical_columns, inplace = True)
+        if self.categorical_method == 'remove':
+            df.dropna(subset=self.categorical_columns, inplace=True)
             return
         
-        if (self.categorical_constants):
+        if self.categorical_constants:
             for column in self.categorical_constants.keys():
                 df[column].fillna(self.categorical_constants[column], inplace=True)
         
-        if (self.categorical_method in self._cat_methods):
-            if (self.categorical_method == 'new_category'):
+        if self.categorical_method in self._cat_methods:
+            if self.categorical_method == 'new_category':
                 for column in self.categorical_columns:
                     df[column].fillna('Unknown', inplace=True)
                 return
             
-            if (self.categorical_method == 'imputed_column'):
+            if self.categorical_method == 'imputed_column':
                 for column in self.categorical_columns:
                     df[column+"_Imputed"] = np.where(df[column].isnull(), 1, 0)
                 
@@ -799,7 +801,8 @@ class OneHotEncoderTransforms:
         self.column_names = column_names
         self.encoder_dict = encoder_dict
 
-    def _encode_column(self, df, column_name):
+    @staticmethod
+    def _encode_column(df, column_name):
         encoder = OneHotEncoder(sparse=False)
         encoder.fit(df[[column_name]])
         encoder_params = encoder.categories_
