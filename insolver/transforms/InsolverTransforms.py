@@ -820,6 +820,7 @@ class OneHotEncoderTransforms:
 
 class DatetimeTransforms:
     """Get selected feature from date variable.
+
     Parameters:
         column_names (list): List of columns to convert, columns in column_names can't be duplicated in column_feature.
         column_types (dict): Dictionary of columns and types to return.
