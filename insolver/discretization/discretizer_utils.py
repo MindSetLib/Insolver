@@ -1,5 +1,5 @@
 import numpy as np
-import sklearn.preprocessing
+from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.model_selection import cross_val_score
 from sklearn.tree import DecisionTreeClassifier
 
@@ -7,21 +7,20 @@ from sklearn.tree import DecisionTreeClassifier
 class KBinsDiscretizer:
     @staticmethod
     def _transform(X, n_bins, method):
-        """
-        Apply discretizations from scikit-learn
+        """Apply discretizations from scikit-learn.
 
         Args:
-            X: 1-D array, data to be descretized
-            n_bins: int, number of bins
-            method: string, method used by scikit-learn's KBinsDiscretizer. Either 'uniform', 'quantile' or 'kmeans'
+            X: 1-D array, The data to be descretized.
+            n_bins (int): The number of bins.
+            method (string): The method used by scikit-learn's KBinsDiscretizer. Either 'uniform', 'quantile' or 'kmeans'.
 
         Returns:
-            1-D array, transformed data
+            1-D array, The transformed data.
 
         References:
             [1] https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.KBinsDiscretizer.html
         """
-        return sklearn.preprocessing.KBinsDiscretizer(n_bins=n_bins, encode='ordinal', strategy=method).fit_transform(X)
+        return KBinsDiscretizer(n_bins=n_bins, encode='ordinal', strategy=method).fit_transform(X)
 
 
 class CARTDiscretizer:

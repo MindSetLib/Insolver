@@ -4,11 +4,11 @@ from insolver.discretization.discretizer_utils import *
 
 
 class InsolverDiscretizer:
-    """
-    Trasform continuous variable into discrete form
+    """Trasform continuous variable into discrete form.
 
     Parameters:
-    method: {'uniform', 'quantile', 'kmeans', 'cart'} method used to discretize
+        method (str): The method used to discretize. Should be in {'uniform', 'quantile', 'kmeans', 'cart'}.
+    
     """
 
     _methods = ['uniform', 'quantile', 'kmeans', 'cart']
@@ -24,17 +24,19 @@ class InsolverDiscretizer:
         self.X = None
 
     def transform(self, X, y=None, n_bins=None, min_samples_leaf=None):
-        """
-        Apply discretization to given data
+        """Apply discretization to given data
 
         Args:
-            X: 1-D array, data to be descretized
-            y: 1-D array, target values, ignored for unsupervised transformations
-            n_bins: int or {'square-root', 'sturges', 'rice-rule', 'scotts-rule', 'freedman-diaconis'}
-            min_samples_leaf: int or float, for 'cart' method only, ignored otherwise
+            X: 1-D array, The data to be descretized.
+            y: 1-D array, The target values, ignored for unsupervised transformations.
+            n_bins (:obj:`int ` or :obj:`str`): The number of bins; Either integer number or value in 
+              {'square-root', 'sturges', 'rice-rule', 'scotts-rule', 'freedman-diaconis'}.
+            min_samples_leaf (:obj:`int ` or :obj:`float`):  The minimum number of samples required to be at a leaf node. 
+              Used for 'cart' method only, ignored otherwise.
 
         Returns:
-            1-D array, transformed data
+            1-D array, The transformed data.
+
         """
         self.X = X
 
@@ -103,7 +105,7 @@ class InsolverDiscretizer:
             int, length of X
         """
         if len(self.X.shape) not in (1, 2):
-            raise ValueError(f'Expected 1D or 2D array, '
+            raise ValueError('Expected 1D or 2D array, '
                              f'got shape={self.X.shape} instead.')
 
         if len(self.X.shape) == 1:
