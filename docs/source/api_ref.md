@@ -171,6 +171,13 @@
    :members:
 ```
 
+### Date and Datetime
+
+```{eval-rst}
+.. autoclass:: insolver.transforms.DatetimeTransforms
+   :members:
+```
+
 ## Model Wrappers
 
 ### Base Wrapper
