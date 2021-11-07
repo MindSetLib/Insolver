@@ -193,6 +193,7 @@
 ```eval_rst
  .. autoclass:: insolver.wrappers.InsolverTrivialWrapper
    :members:
+   :inherited-members:
 ```
 
 ### Generalized Linear Model Wrapper
@@ -200,6 +201,7 @@
 ```eval_rst
  .. autoclass:: insolver.wrappers.InsolverGLMWrapper
    :members:
+   :inherited-members:
 ```
 
 ### Gradient Boosting Machine Wrapper
@@ -207,6 +209,7 @@
 ```eval_rst
  .. autoclass:: insolver.wrappers.InsolverGBMWrapper
    :members:
+   :inherited-members:
 ```
 
 ### Random Forest Wrapper
@@ -214,6 +217,7 @@
 ```eval_rst
  .. autoclass:: insolver.wrappers.InsolverRFWrapper
    :members:
+   :inherited-members:
 ```
 
 ## Model Tools
