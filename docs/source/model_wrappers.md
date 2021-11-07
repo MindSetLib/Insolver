@@ -7,7 +7,6 @@ Currently model wrappers implement Generalized Linear Models (`scikit-learn`, `h
 
 ```{eval-rst}
 .. autoclass:: insolver.wrappers.base.InsolverBaseWrapper
-    :members:
 ```
 
 
@@ -78,8 +77,6 @@ The functionality of a `InsolverBaseWrapper` is quite limited. However, it allow
 ```{eval-rst}
 .. autoclass:: insolver.wrappers.InsolverTrivialWrapper
     :show-inheritance:
-    :members:
-    :inherited-members:
 ```
 
 
@@ -96,8 +93,6 @@ Resulting "predictions" are obtained as follows:
 ```{eval-rst}
 .. autoclass:: insolver.wrappers.InsolverGLMWrapper
     :show-inheritance:
-    :members:
-    :inherited-members:
 ```
 
 `InsolverGLMWrapper` implements Generalized Linear Models with support of `h2o` and `scikit-learn` packages.
@@ -121,8 +116,6 @@ GLM with `h2o` backend also supports hyperparameter optimization using `optimize
 ```{eval-rst}
 .. autoclass:: insolver.wrappers.InsolverGBMWrapper
     :show-inheritance:
-    :members:
-    :inherited-members:
 ```
 
 `InsolverGBMWrapper` implements Gradient Boosting Machines with support of `xgboost`, `lightgbm` and `catboost` packages. This object supports only classification and regression problems, that is why objective functions for ranking may not work well.
@@ -138,8 +131,6 @@ It is also possible to examine metrics and shap values changes on cross-validati
 ```{eval-rst}
 .. autoclass:: insolver.wrappers.InsolverRFWrapper
     :show-inheritance:
-    :members:
-    :inherited-members:
 ```
 
 `InsolverRFWrapper` implements Random Forest Models with support of `scikit-learn`. It uses [`RandomForestClassifier`](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html) to create a classification model and [`RandomForestRegressor`](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#sklearn.ensemble.RandomForestRegressor) to create a regression model. You can change model type by setting `task` attribute to `class` or `reg`, respectively. 
