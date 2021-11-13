@@ -20,20 +20,6 @@ from insolver.wrappers import (
 
 class ModelMetricsCompare:
     """Class for model comparison.
-<<<<<<< Updated upstream
-
-    Parameters:
-        X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for making predictions.
-        y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Actual target values for X.
-        source (:obj:`str`, :obj:`list`, :obj:`tuple`, :obj:`None`): List or tuple of insolver wrappers or path to the
-        metrics (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Metrics or list of metrics to compute.
-        stats (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Statistics or list of statistics to compute.
-        folder with models. If `None`, taking current working directory as source.
-        h2o_init_params (:obj:`dict`, optional): Parameters passed to `h2o.init()`, when `backend` == 'h2o'.
-        predict_params (:obj:`list`, optional): List of dictionaries containing parameters passed to predict methods
-         for each model.
-        features (:obj:`list`, optional): List of lists containing features for predict method for each model.
-=======
     It will compute statistics and metrics for the regression task and metrics
     for the classification task.
     You can compare created models with the `source` parameter or if `source` 
@@ -64,7 +50,6 @@ class ModelMetricsCompare:
             containing parameters passed to predict methods for each model.
         features (:obj:`list`, optional): List of lists containing features
             for predict method for each model.
->>>>>>> Stashed changes
         names (:obj:`list`, optional): List of model names.
 
     """
