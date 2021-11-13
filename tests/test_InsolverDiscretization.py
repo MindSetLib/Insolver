@@ -11,7 +11,6 @@ data = InsolverDataFrame(pd.DataFrame({'X': X, 'y': y}))
 def test_method_uniform():
     insolverDisc = InsolverDiscretizer(method='uniform')
     expected = np.array([1., 2., 1., 2., 1., 0., 0., 2.])
-
     assert np.all(expected == insolverDisc.transform(data.X, n_bins=3))
 
 
@@ -30,7 +29,6 @@ def test_method_kmeans():
 def test_method_cart():
     insolverDisc = InsolverDiscretizer(method='cart')
     expected = np.array([0.4, 0.4, 1., 0.4, 0.4, 1., 1., 0.4])
-
     assert np.all(expected == insolverDisc.transform(data.X, data.y, n_bins=3))
 
 
