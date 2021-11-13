@@ -14,34 +14,35 @@ def test_method_uniform():
 
     assert np.all(expected == insolverDisc.transform(data.X, n_bins=3))
 
+
 def test_method_quantile():
     insolverDisc = InsolverDiscretizer(method='quantile')
     expected = np.array([1., 2., 0., 2., 1., 0., 0., 2.])
-
     assert np.all(expected == insolverDisc.transform(data.X, n_bins=3))
+
 
 def test_method_kmeans():
     insolverDisc = InsolverDiscretizer(method='kmeans')
     expected = np.array([1., 2., 1., 2., 1., 0., 0., 2.])
-
     assert np.all(expected == insolverDisc.transform(data.X, n_bins=3))
+
 
 def test_method_cart():
     insolverDisc = InsolverDiscretizer(method='cart')
-    expected = np.array([0.4, 0.4, 1. , 0.4, 0.4, 1. , 1. , 0.4])
+    expected = np.array([0.4, 0.4, 1., 0.4, 0.4, 1., 1., 0.4])
 
     assert np.all(expected == insolverDisc.transform(data.X, data.y, n_bins=3))
+
 
 def test_method_chimerge():
     insolverDisc = InsolverDiscretizer(method='chimerge')
     expected = np.array([1, 1, 0, 2, 1, 0, 0, 1], dtype=np.int64)
-
     assert np.all(expected == insolverDisc.transform(data.X, data.y.values, n_bins=3))
+
 
 def test_data_type():
     insolverDisc = InsolverDiscretizer(method='uniform')
     expected = np.array([1., 2., 1., 2., 1., 0., 0., 2.])
-
     assert np.all(expected == insolverDisc.transform(X, n_bins=3))
     assert np.all(expected == insolverDisc.transform(np.array(X), n_bins=3))
     assert np.all(expected == insolverDisc.transform(data.X, n_bins=3))
@@ -52,24 +53,22 @@ def test_data_type():
 def test_target_type():
     insolverDisc = InsolverDiscretizer(method='chimerge')
     expected = np.array([1, 1, 0, 2, 1, 0, 0, 1], dtype=np.int64)
-
     assert np.all(expected == insolverDisc.transform(data.X, y, n_bins=3))
     assert np.all(expected == insolverDisc.transform(data.X, np.array(y), n_bins=3))
     assert np.all(expected == insolverDisc.transform(data.X, data.y, n_bins=3))
     assert np.all(expected == insolverDisc.transform(data.X, data.y.values, n_bins=3))
     assert np.all(expected == insolverDisc.transform(data.X, data.y.to_frame(), n_bins=3))
 
+
 def test_n_bins_formulas():
     insolverDisc = InsolverDiscretizer(method='uniform')
-
     expected_1 = np.array([1., 2., 1., 2., 1., 0., 0., 2.])
     expected_2 = np.array([2., 3., 1., 3., 1., 0., 0., 3.])
     expected_3 = np.array([3., 4., 2., 4., 2., 0., 0., 4.])
     expected_4 = np.array([1., 1., 0., 1., 0., 0., 0., 1.])
     expected_5 = np.array([30., 37., 19., 46., 22.,  7.,  0., 45.])
-
     assert np.all(expected_1 == insolverDisc.transform(data.X, n_bins='square-root'))
-    assert np.all(expected_2 == insolverDisc.transform(data.X, n_bins='sturge'))
+    assert np.all(expected_2 == insolverDisc.transform(data.X, n_bins='sturges'))
     assert np.all(expected_2 == insolverDisc.transform(data.X, n_bins='huntsberger'))
     assert np.all(expected_3 == insolverDisc.transform(data.X, n_bins='brooks-carrther'))
     assert np.all(expected_4 == insolverDisc.transform(data.X, n_bins='cencov'))
