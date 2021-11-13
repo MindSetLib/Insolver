@@ -1,5 +1,6 @@
+import numpy as np
+from pandas import DataFrame, Series
 from numpy import log10, log2, std, percentile, subtract, sqrt, power, ndarray
-from scipy.stats import kurtosis
 from insolver.discretization.discretizer_utils import *
 
 
@@ -13,7 +14,7 @@ class InsolverDiscretizer:
 
     _methods = ['uniform', 'quantile', 'kmeans', 'cart', 'chimerge']
 
-    _n_bins_formula = ('square-root', 'sturge', 'huntsberger', 'brooks-carrther', 'cencov', 'rice-rule',
+    _n_bins_formula = ('square-root', 'sturges', 'huntsberger', 'brooks-carrther', 'cencov', 'rice-rule',
                        'terrell-scott', 'scott', 'freedman-diaconis')
 
     def __init__(self, method='uniform'):
@@ -66,7 +67,7 @@ class InsolverDiscretizer:
         if self.method in ['uniform', 'quantile', 'kmeans']:
             if not ((isinstance(n_bins, int) and n_bins > 1)
                     or n_bins in self._n_bins_formula):
-                raise ValueError(f'Invalid number of bins. '
+                raise ValueError('Invalid number of bins. '
                                  f'Accepted integer value or one of the following options: {self._n_bins_formula},'
                                  f'got {n_bins} instead.')
 
@@ -87,20 +88,20 @@ class InsolverDiscretizer:
 
     def __check_y(self, y):
         """Check y type."""
-        if isinstance(y, pd.core.frame.DataFrame):
+        if isinstance(y, DataFrame):
             y = y.values.reshape(-1)
-        elif isinstance(y, pd.core.series.Series):
+        elif isinstance(y, Series):
             y = y.values
         elif isinstance(y, list):
             y = np.array(y)
-        elif not (isinstance(y, np.ndarray)):
-            raise ValueError(f'Invalid target type. '
-                             f'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
+        elif not (isinstance(y, ndarray)):
+            raise ValueError('Invalid target type. '
+                             'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
                              f'{type(y)} instead.')
 
         if (not y.shape != (len(y), 1) or len(y.shape) != 1) and len(y) != self.X.shape[0]:
-            raise ValueError(f'Invalid target shape. '
-                             f'Expected 1-D array with shape {(self.X.shape[0],)} or {(self.X.shape[0], 1)}, got {y.shape} instead')
+            raise ValueError('Invalid target shape. Expected 1-D array with shape '
+                             f'{(self.X.shape[0],)} or {(self.X.shape[0], 1)}, got {y.shape} instead')
 
         return y
 
@@ -108,7 +109,6 @@ class InsolverDiscretizer:
         """Calculate number of bins.
 
         Args:
-            X: 1-D array, The data to be descretized.
             n_bins(string): The formula to calculate number of bins.
             len_X(int): length of X.
 
@@ -123,7 +123,7 @@ class InsolverDiscretizer:
         if n_bins == 'square-root':
             return round(sqrt(len_X))
 
-        elif n_bins == 'sturge':
+        elif n_bins == 'sturges':
             return round(1 + log2(len_X))
 
         elif n_bins == 'huntsberger':
@@ -152,8 +152,6 @@ class InsolverDiscretizer:
     def __check_X_shape(self):
         """Check shape of X.
 
-        Args:
-            X: 1-D array, The data to be descretized.
 
         Returns:
             int, length of X.
@@ -174,11 +172,11 @@ class InsolverDiscretizer:
 
     def __check_X_type(self):
         """Check X type."""
-        if isinstance(self.X, pd.core.frame.DataFrame) or isinstance(self.X, pd.core.series.Series):
+        if isinstance(self.X, DataFrame) or isinstance(self.X, Series):
             self.X = self.X.values
         elif isinstance(self.X, list):
             self.X = np.array(self.X)
-        elif not (isinstance(self.X, np.ndarray)):
-            raise ValueError(f'Invalid data type. '
-                             f'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
+        elif not (isinstance(self.X, ndarray)):
+            raise ValueError('Invalid data type. '
+                             'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
                              f'{type(self.X)} instead.')
