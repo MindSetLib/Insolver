@@ -22,3 +22,4 @@ uvicorn[standard]==0.13.3
 pydantic==1.7.4
 gunicorn==20.0.4
 sympy==1.9
+py4j>=0.10.9.2
