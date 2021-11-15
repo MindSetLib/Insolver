@@ -365,7 +365,8 @@ All the methods used in this class are from `scikit-learn`:
 
 ```python
 import pandas as pd
-from insolver import InsolverDataFrame, FeatureSelection
+from insolver.frame import InsolverDataFrame
+from insolver.transforms import FeatureSelection
 
 #create dataset using InsolverDataFrame or pandas.DataFrame
 dataset = InsolverDataFrame(pd.read_csv("..."))
@@ -383,7 +384,7 @@ fs.plot_importance()
 fs.create_permutation_importance()
 
 #create new dataset using create_new_dataset()
-new_dataset = create_new_dataset()
+new_dataset = fs.create_new_dataset()
 
 #you can also create permutation importance by setting parameter permutation_importance=True
 fs_p = FeatureSelection(method='lasso', task='class', permutation_importance=True)
