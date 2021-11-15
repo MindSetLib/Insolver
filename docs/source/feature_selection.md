@@ -25,6 +25,12 @@ All the methods used in this class are from `scikit-learn`:
 
 [`Permutation feature importance`](https://scikit-learn.org/stable/modules/generated/sklearn.inspection.permutation_importance.html) technique is also from `scikit-learn`. It supports only [estimator](https://scikit-learn.org/stable/glossary.html#term-estimator) models: Random Forest, Lasso and ElasticNet.
 
+## Methods diagram
+
+![feature selection methods](feature_selection_methods.png)
+
+## Example
+
 ```python
 import pandas as pd
 from insolver.frame import InsolverDataFrame
