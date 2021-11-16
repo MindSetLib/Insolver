@@ -88,29 +88,22 @@ class FeatureSelection:
         if self.permutation_importance:
             self.create_permutation_importance()
          
-    def create_permutation_importance(self, scoring=None, n_repeats=5, n_jobs=None, sample_weight=None,
-                                      max_samples=1.0):
+    def create_permutation_importance(self, **kwargs):
         """A method for creating permutation importance for the features. This method will be automatically called if
-         'permutation_importance' parameter was set to True. Features importances will be set to importances_mean from
+        'permutation_importance' parameter was set to True. Features importances will be set to importances_mean from
          permutation_importance model.
         
         Note:
             This method can be called only after method 'create_model' has been called.
-        
-        Parameters:
-            figsize (list): Figsize of the plot.
-            importance_threshold (float): The threshold of importance by which the features will be plotted.
-        
+       
         Raises:
             Exception: Model was not created, self.x or self.importances was not initialized.
             Exception: Permutation importance was used with the method that doesn't implement class
-             sklearn.base.BaseEstimator.
+                sklearn.base.BaseEstimator.
         
         """
         try:
-            self.permutation_model = permutation_importance(self.model, self.x, self.y, scoring=scoring,
-                                                            n_repeats=n_repeats, n_jobs=n_jobs,
-                                                            sample_weight=sample_weight)
+            self.permutation_model = permutation_importance(self.model, self.x, self.y, **kwargs)
             self.importances = self.permutation_model.importances_mean
         
         except AttributeError:
