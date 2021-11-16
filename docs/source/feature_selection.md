@@ -1,6 +1,6 @@
 # Feature Selection
 
-```eval_rst
+```{eval-rst}
  .. autoclass:: insolver.selection.FeatureSelection
    :show-inheritance: 
 ```
