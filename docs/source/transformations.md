@@ -103,6 +103,11 @@ Since Insolver was made for the insurance industry, there are also available som
 
 ### AutoFill NA values
 
+```{eval-rst}
+.. autoclass:: insolver.transforms.AutoFillNATransforms
+    :show-inheritance:
+```
+
 Class `AutoFillNATransforms` is used to fill NA values in a dataset. 
 It fills NA values with median values for numerical columns and with most frequently used values for categorical columns.
 
@@ -133,9 +138,76 @@ print(df_transformed)
 # 2   1.5
 ```
 
+#### Numerical AutoFillNA methods
+There are several options for the `numerical_method` parameter available to fill the NA numerical values: 
+- `median` (by default) - the value separating the higher half from the lower half;
+- `mean` - the sum of the values divided by the number of values;
+- `mode` - the value that appears most often in a set of data values, if several values are found, the first one is used;
+- `remove` - removes all columns containing NA values.
+
+#### Categorical AutoFillNA methods
+There are several options for the `categorical_method` parameter available to fill the NA categorical values: 
+- `frequent` (by default) - the category that appears most often in a set of data values, if several values are found, the first one is used;
+- `new_category` - creates a new category "Unknown" for NA values; 
+- `imputed_column` - fills with the frequent category and creates new `bool` column containing whether a value was imputed or not;
+- `remove` - removes all columns containing NA values.
+
+#### Using constants
+You can also use constants to fill NA values using the `numerical_constants` and `categorical_constants` parameters for numerical and categorical columns respectively.
+
+```python
+transform = InsolverTransform(df, [
+    AutoFillNATransforms(numerical_constants={'col1': '111'}), 
+])
+
+transform.ins_transform()
+
+print(df)
+#    col1
+# 0   1.0
+# 1   2.0
+# 2   111
+```
+
+### Date and datetime
+
+```{eval-rst}
+.. autoclass:: insolver.transforms.DatetimeTransforms
+    :show-inheritance:
+```
+
+Class `DatetimeTransforms` is used to preprocess date and date time columns. 
+Unlike other transformations, this class does not change the date columns, but creates new ones with the used feature in the name.
+
+```python
+import numpy as np
+import pandas as pd
+
+from insolver.frame import InsolverDataFrame
+from insolver.transforms import InsolverTransform, AutoFillNATransforms
+
+df = InsolverDataFrame(pd.DataFrame(data={'last_review': ['2018-10-19', '2019-05-21']}))
+
+print(df)
+#    last_review
+# 0   2018-10-19
+# 1   2019-05-21
+
+transform = InsolverTransform(df, [
+        DatetimeTransforms(['last_review']),
+    ])
+    
+transform.ins_transform()
+
+print(df)
+#    last_review last_review_unix
+# 0   2018-10-19   1.539907e+09     
+# 1   2019-05-21   1.558397e+09
+```
+
 ### Label Encoder
 
-EncoderTransforms based on [sklearn's LabelEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html). Encode target labels with value between 0 and n_classes-1.
+EncoderTransforms based on [sklearn's LabelEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html). Encode target labels with value between 0 and `n_classes`-1.
 
 ```python
 import pandas as pd
@@ -263,3 +335,4 @@ print(df_transformed.dtypes)
 # col1    float32
 # dtype: object
 ```
+

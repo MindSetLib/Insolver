@@ -171,6 +171,13 @@
    :members:
 ```
 
+### Date and Datetime
+
+```{eval-rst}
+.. autoclass:: insolver.transforms.DatetimeTransforms
+   :members:
+```
+
 ## Model Wrappers
 
 ### Base Wrapper
@@ -186,6 +193,7 @@
 ```{eval-rst}
  .. autoclass:: insolver.wrappers.InsolverTrivialWrapper
    :members:
+   :inherited-members:
 ```
 
 ### Generalized Linear Model Wrapper
@@ -193,6 +201,7 @@
 ```{eval-rst}
  .. autoclass:: insolver.wrappers.InsolverGLMWrapper
    :members:
+   :inherited-members:
 ```
 
 ### Gradient Boosting Machine Wrapper
@@ -200,6 +209,7 @@
 ```{eval-rst}
  .. autoclass:: insolver.wrappers.InsolverGBMWrapper
    :members:
+   :inherited-members:
 ```
 
 ### Random Forest Wrapper
@@ -207,6 +217,7 @@
 ```{eval-rst}
  .. autoclass:: insolver.wrappers.InsolverRFWrapper
    :members:
+   :inherited-members:
 ```
 
 ## Model Tools

@@ -88,14 +88,14 @@ class FeatureSelection:
         if self.permutation_importance:
             self.create_permutation_importance()
          
-    def create_permutation_importance(self, **kwargs):
+        def create_permutation_importance(self, **kwargs):
         """A method for creating permutation importance for the features. This method will be automatically called if
         'permutation_importance' parameter was set to True. Features importances will be set to importances_mean from
          permutation_importance model.
         
         Note:
             This method can be called only after method 'create_model' has been called.
-        
+       
         Raises:
             Exception: Model was not created, self.x or self.importances was not initialized.
             Exception: Permutation importance was used with the method that doesn't implement class
@@ -110,7 +110,7 @@ class FeatureSelection:
             raise Exception('Model was not created yet.')
         except TypeError:
             raise Exception('Permutation importance can only be used with the estimator.')
-    
+        
     def create_new_dataset(self, threshold='mean'):
         """
         A method for creating new dataset. It uses threshold parameter to select features.
