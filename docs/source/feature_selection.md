@@ -1,8 +1,8 @@
 # Feature Selection
 
 ```{eval-rst}
- .. autoclass:: insolver.selection.FeatureSelection 
-     :show-inheritance: 
+ .. autoclass:: insolver.selection.FeatureSelection
+    :show-inheritance: 
 ```
 Class `FeatureSelection` allows you to compute features importances using selected method. It also can plot it with selected plot size and the importance threshold. Using computed importance you can create a new dataset with the best features. You can also use permutation importance model inspection technique with some models.
 
