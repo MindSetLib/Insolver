@@ -15,7 +15,7 @@ class FeatureSelection:
     Note:
         The following specified methods can be used for each individual task:
         - for the classification problem Mutual information, F statistics, chi-squared test, Random Forest, Lasso or
-         ElasticNet can be used;
+        ElasticNet can be used;
         - for the regression problem Mutual information, F statistics, Random Forest, Lasso or ElasticNet can be used;
         - for the multiclass classification Random Forest, Lasso or ElasticNet can be used;
         - for the multiclass multioutput classification Random Forest can be used.
