@@ -1,1 +1,1 @@
-from .InsolverFeatureSelection import FeatureSelection
+from .InsolverFeatureSelection import FeatureSelection, Sampling
