@@ -1,5 +1,6 @@
 import pandas as pd 
 import numpy as np
+
 class Sampling:
     """ 
     A class for performing sampling with the dataset. 
@@ -12,10 +13,10 @@ class Sampling:
             - for a `systematic` sampling `n` is the number of step size;
             - for a `cluster` sampling `n` is the number of clusters to keep;
             - for a `stratified` sampling `n` is the number of values to keep in each cluster.
-        n_clusters (int): Number of clusters for the `cluster` and `stratified` sampling.
+        n_clusters (int), default = 10: Number of clusters for the `cluster` and `stratified` sampling.
         method (str): Sampling method, supported methods: `simple`, `systematic`, `cluster`, `stratified`. 
     """
-    def __init__(self, n, n_clusters=None, method='simple'):
+    def __init__(self, n, n_clusters=10, method='simple'):
         self.method = method
         self.n = n
         self.n_clusters = n_clusters
