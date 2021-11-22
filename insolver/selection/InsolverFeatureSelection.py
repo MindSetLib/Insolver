@@ -88,7 +88,7 @@ class FeatureSelection:
         if self.permutation_importance:
             self.create_permutation_importance()
          
-        def create_permutation_importance(self, **kwargs):
+    def create_permutation_importance(self, **kwargs):
         """A method for creating permutation importance for the features. This method will be automatically called if
         'permutation_importance' parameter was set to True. Features importances will be set to importances_mean from
          permutation_importance model.

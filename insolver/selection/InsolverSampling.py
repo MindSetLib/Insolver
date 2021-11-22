@@ -1,6 +1,7 @@
 import pandas as pd 
 import numpy as np
 
+
 class Sampling:
     """ 
     A class for performing sampling with the dataset. 
@@ -54,7 +55,7 @@ class Sampling:
         Returns:
             New dataset with selected rows.
         """
-        simple_random_sample = df.sample(n = self.n)
+        simple_random_sample = df.sample(n=self.n)
         return simple_random_sample
     
     def _systematic_sampling(self, df):
@@ -64,7 +65,7 @@ class Sampling:
         Returns:
             New dataset with selected rows.
         """
-        indexes = np.arange(0, len(df), step = self.n)
+        indexes = np.arange(0, len(df), step=self.n)
         systematic_sample = df.iloc[indexes]
         return systematic_sample
     
@@ -79,7 +80,7 @@ class Sampling:
         cluster_sample = pd.DataFrame()
         
         if self.n > self.n_clusters:
-            raise Exception (f'{self.n} cannot be bigger then {self.n_clusters}.')
+            raise Exception(f'{self.n} cannot be bigger then {self.n_clusters}.')
             
         elif self.n == self.n_clusters:
             return df
@@ -87,7 +88,7 @@ class Sampling:
         else:
             clusters_to_keep = np.random.randint(1, self.n_clusters, self.n)
             for cluster in clusters_to_keep:
-                cluster_sample = pd.concat([cluster_sample, cluster_df[cluster_df['cluster_id']==cluster]])
+                cluster_sample = pd.concat([cluster_sample, cluster_df[cluster_df['cluster_id'] == cluster]])
                 
         return cluster_sample
     
@@ -120,7 +121,7 @@ class Sampling:
         try:
             new_df['cluster_id'] = np.repeat([range(1, self.n_clusters + 1)], cluster_size)
             
-        except(ValueError):
+        except ValueError:
             indexes = np.repeat([range(1, self.n_clusters+1)], cluster_size)
             diff = len(indexes) - len(df)
             if diff > 0:
