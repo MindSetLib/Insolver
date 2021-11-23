@@ -1,32 +1,31 @@
-import pandas as pd 
-import numpy as np
-
 class Sampling:
     """ 
-    A class for performing sampling with the dataset. 
-    It includes several different techniques: simple sampling,systematic sampling, cluster sampling, 
+    Sampling class.
+    It includes several different techniques: simple sampling, systematic sampling, cluster sampling, 
     stratified sampling.
     
     Parameters:
-        n (int): This parameter is used in chosen sampling method:
-            - for a `simple` sampling `n` is the number of values to keep;
-            - for a `systematic` sampling `n` is the number of step size;
-            - for a `cluster` sampling `n` is the number of clusters to keep;
-            - for a `stratified` sampling `n` is the number of values to keep in each cluster.
-        n_clusters (int), default = 10: Number of clusters for the `cluster` and `stratified` sampling.
-        method (str): Sampling method, supported methods: `simple`, `systematic`, `cluster`, `stratified`. 
+        n (:obj:int): This parameter is used in chosen sampling method:
+            for a `simple` sampling `n` is the number of values to keep;
+            for a `systematic` sampling `n` is the number of step size;
+            for a `cluster` sampling `n` is the number of clusters to keep;
+            for a `stratified` sampling `n` is the number of values to keep in each cluster.
+        n_clusters (:obj:int), default = 10: Number of clusters for the `cluster` and `stratified` sampling.
+        cluster_column (:obj:str): Column name of the data frame used as clusters.
+        method (:obj:str): Sampling method, supported methods: `simple`, `systematic`, `cluster`, `stratified`. 
     """
-    def __init__(self, n, n_clusters=10, method='simple'):
+    def __init__(self, n, cluster_column=None, n_clusters=10, method='simple'):
         self.method = method
         self.n = n
         self.n_clusters = n_clusters
+        self.cluster_column = cluster_column
         
     def sample_dataset(self, df):
         """
         A method for performing sampling with the dataset using selected method.
         
         Parameters:
-            df (pd.DataFrame): Dataframe to sample.
+            df (:obj:pandas.Dataframe): The dataframe.
         
         Raises:
             NotImplementedError: If self.method is not supported.
@@ -49,8 +48,11 @@ class Sampling:
         
     def _simple_sampling(self, df):
         """
-        A method for simple sampling. 
+        Simple sampling. 
         
+        Parameters:
+            df (:obj:pandas.Dataframe): The dataframe.
+            
         Returns:
             New dataset with selected rows.
         """
@@ -59,7 +61,10 @@ class Sampling:
     
     def _systematic_sampling(self, df):
         """
-        A method for systematic sampling. 
+        Systematic sampling. 
+        
+        Parameters:
+            df (:obj:pandas.Dataframe): The dataframe.
         
         Returns:
             New dataset with selected rows.
@@ -70,22 +75,27 @@ class Sampling:
     
     def _cluster_sampling(self, df):
         """
-        A method for cluster sampling. 
+        Cluster sampling.
+        
+        Parameters:
+            df (:obj:pandas.Dataframe): The dataframe.
         
         Returns:
             New dataset with selected rows.
         """
         cluster_df = self._create_clusters(df)
+        clusters_count = cluster_df['cluster_id'].unique().sum()
+            
         cluster_sample = pd.DataFrame()
         
-        if self.n > self.n_clusters:
-            raise Exception (f'{self.n} cannot be bigger then {self.n_clusters}.')
+        if self.n > clusters_count:
+            raise Exception (f'{self.n} cannot be bigger then number of clusters.')
             
-        elif self.n == self.n_clusters:
+        elif self.n == clusters_count:
             return df
         
         else:
-            clusters_to_keep = np.random.randint(1, self.n_clusters, self.n)
+            clusters_to_keep = np.random.choice(cluster_df['cluster_id'].unique(), self.n)
             for cluster in clusters_to_keep:
                 cluster_sample = pd.concat([cluster_sample, cluster_df[cluster_df['cluster_id']==cluster]])
                 
@@ -93,15 +103,20 @@ class Sampling:
     
     def _stratified_sampling(self, df):
         """
-        A method for stratified sampling. 
+        Stratified sampling. 
+        
+        Parameters:
+            df (:obj:pandas.Dataframe): The dataframe.
         
         Returns:
             New dataset with selected rows.
         """
         cluster_df = self._create_clusters(df)
+        clusters_count = cluster_df['cluster_id'].unique().sum()
+        
         stratified_sample = pd.DataFrame()
         
-        for cluster in range(1, self.n_clusters+1):
+        for cluster in cluster_df['cluster_id'].unique():
             sample_cluster = cluster_df[cluster_df['cluster_id'] == cluster].sample(n=self.n)
             stratified_sample = pd.concat([stratified_sample, sample_cluster])
             
@@ -109,24 +124,40 @@ class Sampling:
     
     def _create_clusters(self, df):
         """
-        A method for creating dataframe with clusters. 
+        Creating dataframe with clusters. 
+        If self.cluster_column is defined, the clusters column is created using the dataframe column.
+        Otherwise the clusters are formed according to the existing order.
         
+        Parameters:
+            df (:obj:pandas.Dataframe): The dataframe.
+        
+        Raises:
+            ValueError: Values in the column must be not null.
+            
         Returns:
             New dataset with cluster column.
         """
         cluster_size = round(len(df)/self.n_clusters)
         new_df = df.copy()
         
-        try:
-            new_df['cluster_id'] = np.repeat([range(1, self.n_clusters + 1)], cluster_size)
+        if self.cluster_column:
+            if (df[self.cluster_column].isnull().sum() > 0):
+                raise ValueError('All values in the column must be not null.')
+
+            new_df = df.copy()
+            new_df['cluster_id'] = df[self.cluster_column]
             
-        except(ValueError):
-            indexes = np.repeat([range(1, self.n_clusters+1)], cluster_size)
-            diff = len(indexes) - len(df)
-            if diff > 0:
-                new_df['cluster_id'] = np.delete(indexes, len(indexes)-1)
-                
-            if diff < 0:
-                new_df['cluster_id'] = np.append(indexes, self.n_clusters)
+        else:
+            try:
+                new_df['cluster_id'] = np.repeat([range(1, self.n_clusters + 1)], cluster_size)
+
+            except(ValueError):
+                indexes = np.repeat([range(1, self.n_clusters+1)], cluster_size)
+                diff = len(indexes) - len(df)
+                if diff > 0:
+                    new_df['cluster_id'] = np.delete(indexes, len(indexes)-1)
+
+                if diff < 0:
+                    new_df['cluster_id'] = np.append(indexes, self.n_clusters)
         
         return new_df
