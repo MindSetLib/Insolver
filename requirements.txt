@@ -16,6 +16,7 @@ seaborn==0.11.2
 shap==0.39.0
 geocoder==1.38.1
 h2o==3.32.0.3
+jinja2>=3.0.1
 flask==1.1.2
 fastapi>=0.65.2
 uvicorn[standard]==0.13.3
