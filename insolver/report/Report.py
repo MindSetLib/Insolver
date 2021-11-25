@@ -8,21 +8,20 @@ from sklearn.utils.multiclass import type_of_target
 
 import shutil
 import jinja2
-from jinja2 import Environment, PackageLoader, select_autoescape
 
 
 class Report:
     def __init__(self,
-            model,
-            task,
-            X_train,
-            y_train,
-            predicted_train,
-            X_test,
-            y_test,
-            predicted_test,
-            directory='.',
-            ):
+                 model,
+                 task,
+                 X_train,
+                 y_train,
+                 predicted_train,
+                 X_test,
+                 y_test,
+                 predicted_test,
+                 directory='.',
+                 ):
         '''
             task        : str   "reg" or "class"
             model       : model-file
@@ -38,8 +37,7 @@ class Report:
                 and isinstance(y_train, pandas.Series)
                 and isinstance(y_test, pandas.Series)
                 and isinstance(predicted_train, pandas.Series)
-                and isinstance(predicted_test, pandas.Series)
-                ):
+                and isinstance(predicted_test, pandas.Series)):
             self.X_train = X_train
             self.y_train = y_train
             self.predicted_train = predicted_train
@@ -48,15 +46,17 @@ class Report:
             self.predicted_test = predicted_test
         else:
             raise TypeError(f"""Wrong types of input data.
-                \rX_train {type(X_train)} should be pandas.DataFrame
-                \ry_train {type(y_train)} should be pandas.Series
-                \rX_test {type(X_test)} should be pandas.DataFrame
-                \ry_test {type(y_test)} should be pandas.Series
-                \rpredicted_train {type(predicted_train)} should be pandas.Series
-                \rpredicted_test {type(predicted_test)} should be pandas.Series
-                \r""")
+              \rX_train {type(X_train)} should be pandas.DataFrame
+              \ry_train {type(y_train)} should be pandas.Series
+              \rX_test {type(X_test)} should be pandas.DataFrame
+              \ry_test {type(y_test)} should be pandas.Series
+              \rpredicted_train {type(predicted_train)} should be pandas.Series
+              \rpredicted_test {type(predicted_test)} should be pandas.Series
+              \r""")
         self.directory = directory
-        self._directory = inspect.getfile(Report)[:inspect.getfile(Report).rfind("/") + 1]
+        _directory = inspect.getfile(Report)
+        self._directory = _directory[:_directory.rfind("/") + 1]
+
         self.profile = None
         self.profile_data()
 
@@ -66,16 +66,24 @@ class Report:
 
         self.sections = [
                 {
-                    'name': 'Dataset',
-                    'articles': [
-                            {
-                                'name': 'Pandas profiling',
-                                'parts': ['<div class="col-12"><button class="btn btn-primary" type="submit" onclick="window.location.href=\'./profiling_report.html\';">Go to report</button></div>'],
-                                'header': '<p>Generated profile report from a pandas <code>DataFrame</code> prepared by <code>Pandas profiling library</code>.</p>',
-                                'footer': '<a href="https://pypi.org/project/pandas-profiling/">library page</a>',
-                            }
-                        ],
-                    },
+                  'name': 'Dataset',
+                  'articles': [
+                      {
+                        'name': 'Pandas profiling',
+                        'parts': [
+                            '<div class="col-12"><button '
+                            'class="btn btn-primary" type="submit" '
+                            'onclick="window.location.href=\''
+                            './profiling_report.html\';">'
+                            'Go to report</button></div>'],
+                        'header': '<p>Generated profile report from a '
+                                  'pandas <code>DataFrame</code> prepared by '
+                                  '<code>Pandas profiling library</code>.</p>',
+                        'footer': '<a href="https://pypi.org/project/'
+                                  'pandas-profiling/">library page</a>',
+                      }
+                   ],
+                },
                 {
                     'name': 'Model',
                     'articles': [
@@ -107,28 +115,31 @@ class Report:
         data_test = self.X_test.copy()
         data_test[self.y_test.name] = self.y_train
         data = data_train.append(data_test)
-        # Profiling 
+        # Profiling
         self.profile = ProfileReport(data, title='Pandas Profiling Report')
 
     def model_features_importance(self):
         if self.model is not None:
             if self.model.backend in ["h2o", "sklearn"]:
-                coefs = self.get_coefs_dict(self.model.coef_norm()) 
+                coefs = self.get_coefs_dict(self.model.coef_norm())
             elif self.model.backend in ['xgboost', 'lightgbm', 'catboost']:
                 coefs = self.get_coefs_dict(
                                 self.model.shap(
                                     self.X_train.append(self.X_test),
-                                    show=False)) 
+                                    show=False))
             else:
-                raise Exception(f"Unsupperted backend type {model.backend}")
+                raise Exception("Unsupperted backend type "
+                                "{}".format(self.model.backend))
 
-            coefs_head = ['relative_importance', 'scaled_importance', 'percentage']
+            coefs_head = ['relative_importance',
+                          'scaled_importance',
+                          'percentage']
             model_coefs = self.create_html_table(coefs_head,
-                coefs,
-                two_columns_table=False,
-                classes='table table-striped',
-                justify='left'
-                )
+                                                 coefs,
+                                                 two_columns_table=False,
+                                                 classes='table table-striped',
+                                                 justify='left'
+                                                 )
         else:
             Exception("Model instance was not provided")
         return model_coefs
@@ -143,13 +154,14 @@ class Report:
                         self.predicted_test,
                         self.task)
 
-        table = {key: [table_train.get(key, ''), table_test.get(key, '')] for key in table_train.keys()}
+        table = {key: [table_train.get(key, ''), table_test.get(key, '')]
+                 for key in table_train.keys()}
         model_metrics = self.create_html_table(["train", "test"],
-                            table,
-                            two_columns_table=False,
-                            classes='table table-striped',
-                            justify='left'
-                            )
+                                               table,
+                                               two_columns_table=False,
+                                               classes='table table-striped',
+                                               justify='left'
+                                               )
         return model_metrics
 
     def model_parameters_to_list(self):
@@ -165,13 +177,16 @@ class Report:
         return model_parameters_list
 
     def to_html(self):
-        shutil.copytree(f'{self._directory}report_template', f'{self.directory}/report')
+        shutil.copytree(f'{self._directory}report_template',
+                        f'{self.directory}/report')
         self.profile.to_file(f"{self.directory}/report/profiling_report.html")
 
         with open(f'{self.directory}/report/report.html', 'w') as f:
-            f.write(self.template.render(sections=self.sections
-                                        ).replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
-                                    )
+            html_ = self.template.render(sections=self.sections)
+            html_ = html_.replace('&#34;', '"'
+                                  ).replace('&lt;', '<'
+                                            ).replace('&gt;', '>')
+            f.write(html_)
 
     def get_objects_as_dicts(self, obj: any, path='') -> list:
         """Method that saves any python object instances as dicts
@@ -194,24 +209,28 @@ class Report:
                 )
         elif type(obj) in [dict]:
             for key, value in obj.items():
-                result.extend(self.get_objects_as_dicts(value, path=f'{path}/{key}'))
+                result.extend(
+                        self.get_objects_as_dicts(value, path=f'{path}/{key}'))
         elif not is_builtin(obj) and '__dict__' in dir(obj):
             if obj.__dict__:
                 result.append(
-                    (
-                        f"{path}/{str(obj.__class__).replace('<', '').replace('>', '')}",
-                        {key: value for key, value in obj.__dict__.items() if key[0] != '_'}
-                    )
+                  (
+                    "{}/{}".format(path,
+                                   str(obj.__class__
+                                       ).replace('<', '').replace('>', '')),
+                    {key: value for key, value in obj.__dict__.items()
+                     if key[0] != '_'}
+                  )
                 )
                 result.extend(self.get_objects_as_dicts(obj.__dict__))
         return result
 
     @staticmethod
     def create_html_table(head: list,
-                            body: dict,
-                            two_columns_table: bool=False,
-                            **kwargs
-                            ) -> str:
+                          body: dict,
+                          two_columns_table: bool = False,
+                          **kwargs
+                          ) -> str:
         """Create html code for table based on python dict instance
 
             arguments:
@@ -221,9 +240,11 @@ class Report:
                 two_columns_table:
                         bool whether to store all data in one column
                         or try to sparse data by columns.
-                        If True body values sholud have len(body['key']) == len(head) 
-                        otherwise raises Exception
-                kwargs: dict arguments passed to DataFrame.to_html(**kwargs) method
+                        If True body values sholud have
+                        len(body['key']) == len(head)
+                        otherwise raised Exception
+                kwargs: dict arguments passed to
+                        DataFrame.to_html(**kwargs) method
 
             return:
                 str html-code for table
@@ -238,7 +259,8 @@ class Report:
                         value_len_prev = len(value)
                     else:
                         return False
-                elif not(isinstance(value, list) and len(value) == value_len_prev):
+                elif not (isinstance(value, list)
+                          and len(value) == value_len_prev):
                     return False
             return True
 
@@ -249,7 +271,8 @@ class Report:
             len_body_value = len(list(body.values())[0])
 
             if len_body_value != len(head):
-                raise Exception(f"column names list length {len(head)} not equal to columns quantity {len_body_value}")
+                raise Exception(f"column names list length {len(head)} not "
+                                "equal to columns quantity {len_body_value}")
 
         if not check_body(body) or two_columns_table:
             body = {key: [value] for key, value in body.items()}
@@ -265,14 +288,15 @@ class Report:
         """Function to calculate metrics
         """
         result = dict()
-        
+
         metrics_regression = {
             'explained_variance_score': metrics.explained_variance_score,
-            'metrics.max_error': metrics.max_error,
+            'max_error': metrics.max_error,
             'mean_absolute_error': metrics.mean_absolute_error,
             'mean_squared_error': metrics.mean_squared_error,
             'median_absolute_error': metrics.median_absolute_error,
-            'mean_absolute_percentage_error': metrics.mean_absolute_percentage_error,
+            'mean_absolute_percentage_error':
+                metrics.mean_absolute_percentage_error,
             'r2_score': metrics.r2_score,
             'mean_poisson_deviance': metrics.mean_poisson_deviance,
             'mean_gamma_deviance': metrics.mean_gamma_deviance,
@@ -297,7 +321,8 @@ class Report:
             "matthews_corrcoef": metrics.matthews_corrcoef,
             "multilabel_confusion_matrix": metrics.multilabel_confusion_matrix,
             "precision_recall_curve": metrics.precision_recall_curve,
-            "precision_recall_fscore_support": metrics.precision_recall_fscore_support,
+            "precision_recall_fscore_support":
+                metrics.precision_recall_fscore_support,
             "precision_score": metrics.precision_score,
             "recall_score": metrics.recall_score,
             "roc_auc_score": metrics.roc_auc_score,
@@ -329,10 +354,12 @@ class Report:
                                     ]
             else:
                 raise Exception(
-                        f"Not supported target type <{type_of_true}> or predicted type <{type_of_pred}>")
+                        f"Not supported target type <{type_of_true}> "
+                        "or predicted type <{type_of_pred}>")
         else:
             raise Exception(
-                    f"Not supported task type <{task}>. Currently supported {['class', 'reg']}")
+                        f"Not supported task type <{task}>. "
+                        "Currently supported {['class', 'reg']}")
 
         for name in functions_names:
             try:
@@ -340,7 +367,6 @@ class Report:
             except Exception as e:
                 print(f'\t-{e}')
         return result
-
 
     @staticmethod
     def get_coefs_dict(model_coefs: dict) -> dict:
@@ -356,6 +382,8 @@ class Report:
         rel_imp_max = max([x[0] for x in coefs.values()])
         rel_imp_sum = sum([x[0] for x in coefs.values()])
         # add scaled_importance and percentage values
-        coefs = {key: value + [value[0] / rel_imp_max, value[0] / rel_imp_sum] for key, value in coefs.items()}
+        coefs = {key: value + [value[0] / rel_imp_max, value[0] / rel_imp_sum]
+                 for key, value in coefs.items()}
 
-        return {key: value for key, value in sorted(coefs.items(), key=lambda x: x[1][0], reverse=True)}
+        return {key: value for key, value
+                in sorted(coefs.items(), key=lambda x: x[1][0], reverse=True)}
