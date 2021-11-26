@@ -153,7 +153,7 @@ class Report:
 
     def _model_features_importance(self):
         """Depend on model backend prepare features importance list
-        
+
         Return:
             str: html table with features sorted by importance
         """
@@ -173,11 +173,12 @@ class Report:
                           'scaled_importance',
                           'percentage']
             model_coefs = self._create_html_table(coefs_head,
-                                                 coefs,
-                                                 two_columns_table=False,
-                                                 classes='table table-striped',
-                                                 justify='left'
-                                                 )
+                                                  coefs,
+                                                  two_columns_table=False,
+                                                  classes='table '
+                                                          'table-striped',
+                                                  justify='left'
+                                                  )
         else:
             Exception("Model instance was not provided")
         return model_coefs
@@ -195,11 +196,11 @@ class Report:
         table = {key: [table_train.get(key, ''), table_test.get(key, '')]
                  for key in table_train.keys()}
         model_metrics = self._create_html_table(["train", "test"],
-                                               table,
-                                               two_columns_table=False,
-                                               classes='table table-striped',
-                                               justify='left'
-                                               )
+                                                table,
+                                                two_columns_table=False,
+                                                classes='table table-striped',
+                                                justify='left'
+                                                )
         return model_metrics
 
     def _model_parameters_to_list(self):
@@ -243,7 +244,8 @@ class Report:
         elif type(obj) in [dict]:
             for key, value in obj.items():
                 result.extend(
-                        self._get_objects_as_dicts(value, path=f'{path}/{key}'))
+                        self._get_objects_as_dicts(value,
+                                                   path=f'{path}/{key}'))
         elif not is_builtin(obj) and '__dict__' in dir(obj):
             if obj.__dict__:
                 result.append(
@@ -260,10 +262,10 @@ class Report:
 
     @staticmethod
     def _create_html_table(head: list,
-                          body: dict,
-                          two_columns_table: bool = False,
-                          **kwargs
-                          ) -> str:
+                           body: dict,
+                           two_columns_table: bool = False,
+                           **kwargs
+                           ) -> str:
         """Create html table based on python dict instance
 
             Args:
@@ -275,7 +277,7 @@ class Report:
                         or try to sparse data by columns.
                         If True body values sholud have
                         len(body['key']) == len(head)
-                        otherwise Exception is raised 
+                        otherwise Exception is raised
                 kwargs (dict): arguments passed to
                         DataFrame.to_html(**kwargs) method
 
