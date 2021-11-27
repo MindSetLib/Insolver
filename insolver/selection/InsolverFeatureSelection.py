@@ -109,7 +109,7 @@ class FeatureSelection:
             raise Exception('Model was not created yet.')
         except TypeError:
             raise Exception('Permutation importance can only be used with the estimator.')
-    
+        
     def create_new_dataset(self, threshold='mean'):
         """
         A method for creating new dataset. It uses threshold parameter to select features.
