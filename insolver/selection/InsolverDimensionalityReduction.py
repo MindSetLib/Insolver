@@ -1,10 +1,10 @@
-import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA, TruncatedSVD, FactorAnalysis, NMF
 from sklearn.manifold import TSNE, Isomap, LocallyLinearEmbedding
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
 
 class DimensionalityReduction:
     """
@@ -24,6 +24,7 @@ class DimensionalityReduction:
     """
     def __init__(self, method='pca'):
         self.method = method
+        self.estimator, self.X_transformed = None, None
         
     def transform(self, X, y=None, **kwargs):
         """
@@ -50,7 +51,7 @@ class DimensionalityReduction:
         
         return self.X_transformed
         
-    def plot_transformed(self, y, figsize=(10,10), **kwargs):
+    def plot_transformed(self, y, figsize=(10, 10), **kwargs):
         """
         Plot transformed X values using y as hue.
         If n_components < 3 it will use seaborn.scatterplot to plot values.
@@ -70,11 +71,11 @@ class DimensionalityReduction:
             Exception: If method is called before transform() method.
         """
         try:
-            if type(y) == pd.DataFrame:
+            if isinstance(y, pd.DataFrame):
                 y = y[y.columns[0]]
                 new_df = pd.concat([self.X_transformed, y], axis=1)
 
-            elif type(y) == pd.Series:
+            elif isinstance(y, pd.Series):
                 new_df = pd.concat([self.X_transformed, y], axis=1)
 
             else:
@@ -87,7 +88,7 @@ class DimensionalityReduction:
             else:
                 sns.pairplot(new_df, hue=y.name, **kwargs)
                 
-        except (AttributeError):
+        except AttributeError:
             raise Exception('Estimator was not created yet. Call transform() method.')
 
     def _init_methods(self):
