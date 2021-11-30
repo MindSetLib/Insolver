@@ -99,3 +99,53 @@ new_dataset = sampling.sample_dataset(df=dataset)
 samling = Sampling(n = 2, cluster_column = 'name', method='stratified')
 new_dataset = sampling.sample_dataset(df=dataset)
 ```
+
+## Dimensionality Reduction
+
+.. autoclass:: insolver.selection.DimensionalityReduction
+    :show-inheritance:
+    
+`DimensionalityReduction` class allows you to reduce the dimensionality of data with a selected method. There are 3 types of techniques implemented: decomposition, manifold and discriminant analysis.
+
+The type of the method can be specified in the `method` parameter. The list of methods that can be assigned is presented below. All methods are implemented from [scikit-learn](https://scikit-learn.org/stable/index.html).
+
+Matrix decomposition is represented by methods such as:
+- `pca` - [Principal Component Analysis, PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html);
+- `svd` - [truncated Singular Value Decomposition, SVD](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html);
+- `fa` - [Factor Analysis, FA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FactorAnalysis.html);
+- `nmf` - [Non-Negative Matrix Factorization, NMF](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html).
+
+Discriminant Analysis is represented by methods such as:
+- `lda` - [Linear Discriminant Analysis, LDA](https://scikit-learn.org/stable/modules/generated/sklearn.discriminant_analysis.LinearDiscriminantAnalysis.html).
+
+Manifold learning is represented by methods such as:
+- `lle` - [Locally Linear Embedding, LLE](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.LocallyLinearEmbedding.html);
+- `isomap` - [Isomap Embedding](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.Isomap.html);
+- `t_sne` - [T-distributed Stochastic Neighbor Embedding, T-SNE](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html).
+
+Use `transform(X, y=None, **kwargs)` method to create a new transformed X. Parameters assigned as `kwargs` can be used to change model(estimator) parameters which can be found in the sklearn pages above.
+
+You can plot the transformed X and y with the `plot_transformed(self, y, figsize=(10,10), **kwargs)` method. It uses [seaborn](https://seaborn.pydata.org/) to create plots. If the number of components is less than 3, [seaborn.scatterplot](https://seaborn.pydata.org/generated/seaborn.scatterplot.html) will be created, else [seaborn.pairplot](https://seaborn.pydata.org/generated/seaborn.pairplot.html) will be created. The `y` parameter is used as the hue. Parameters assigned as `kwargs` can be used to change plot parameters which can be found in the seaborn pages.
+
+You can access created model with the `estimator` attribute.
+
+### Example
+```python
+import pandas as pd
+from insolver.selection import DimensionalityReduction
+
+#create X and y
+from sklearn import datasets
+iris = datasets.load_iris()
+X = iris.data
+y = pd.DataFrame(iris.target, columns=['y']) 
+
+#create DimensionalityReduction
+dm = DimensionalityReduction(method='nmf')
+
+#use transform() to create new X
+new_X = dm.transform(X=X, n_components=3)
+
+#plot result
+dm.plot_transformed(y, figsize=(5,5), palette='Set2')
+```
