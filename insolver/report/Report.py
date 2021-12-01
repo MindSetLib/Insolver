@@ -17,26 +17,18 @@ class Report:
         to_html(): generates html report
     """
 
-    def __init__(self,
-                 model,
-                 task,
-                 X_train,
-                 y_train,
-                 predicted_train,
-                 X_test,
-                 y_test,
-                 predicted_test,
-                 ):
+    def __init__(self, model, task, X_train, y_train, predicted_train, X_test, y_test, predicted_test):
         """
         Args:
-            model (InsolverBaseWrapper): model-file
+            model (InsolverBaseWrapper): model-file.
             task (str): {"reg" or "class"}
-            X_train (pandas.DataFrame), y_train (pandas.Series):
-                data used to train model
-            predicted_train (pandas.Series): model answers on train data
-            X_test (pandas.DataFrame), y_test (pandas.Series):
-                data used to test model
-            predicted_test (pandas.Series): model answers on test data
+            X_train (pandas.DataFrame): Data used to train model.
+            y_train (pandas.Series): Series with targets on train.
+            predicted_train (pandas.Series): Model response on train data.
+            X_test (pandas.DataFrame): Data used to test model.
+            y_test (pandas.Series): Series with targets on test.
+            predicted_test (pandas.Series): Model response on test data.
+
         """
         # check and save attributes
         self.model = model
@@ -129,15 +121,12 @@ class Report:
         Args:
             path: location to save report
         """
-        shutil.copytree(f'{self._directory}/report_template',
-                        f'{path}/report')
+        shutil.copytree(f'{self._directory}/report_template', f'{path}/report')
         self.profile.to_file(f"{path}/report/profiling_report.html")
 
         with open(f'{path}/report/report.html', 'w') as f:
             html_ = self.template.render(sections=self.sections)
-            html_ = html_.replace('&#34;', '"'
-                                  ).replace('&lt;', '<'
-                                            ).replace('&gt;', '>')
+            html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
             f.write(html_)
 
     def _profile_data(self):
@@ -152,7 +141,7 @@ class Report:
         self.profile = ProfileReport(data, title='Pandas Profiling Report')
 
     def _model_features_importance(self):
-        """Depend on model backend prepare features importance list
+        """Depend on model backend prepare features importance list.
 
         Return:
             str: html table with features sorted by importance
@@ -161,59 +150,32 @@ class Report:
             if self.model.backend in ["h2o", "sklearn"]:
                 coefs = self._get_coefs_dict(self.model.coef_norm())
             elif self.model.backend in ['xgboost', 'lightgbm', 'catboost']:
-                coefs = self._get_coefs_dict(
-                                self.model.shap(
-                                    self.X_train.append(self.X_test),
-                                    show=False))
+                coefs = self._get_coefs_dict(self.model.shap(self.X_train.append(self.X_test), show=False))
             else:
-                raise Exception("Unsupperted backend type "
-                                "{}".format(self.model.backend))
+                raise Exception("Unsupperted backend type {}".format(self.model.backend))
 
-            coefs_head = ['relative_importance',
-                          'scaled_importance',
-                          'percentage']
-            model_coefs = self._create_html_table(coefs_head,
-                                                  coefs,
-                                                  two_columns_table=False,
-                                                  classes='table '
-                                                          'table-striped',
-                                                  justify='left'
-                                                  )
+            coefs_head = ['relative_importance', 'scaled_importance', 'percentage']
+            model_coefs = self._create_html_table(coefs_head, coefs, two_columns_table=False,
+                                                  classes='table table-striped', justify='left')
         else:
-            Exception("Model instance was not provided")
+            raise Exception("Model instance was not provided")
         return model_coefs
 
     def _calculate_train_test_metrics(self):
-        table_train = self._calc_metrics(
-                        self.y_train,
-                        self.predicted_train,
-                        self.task)
-        table_test = self._calc_metrics(
-                        self.y_test,
-                        self.predicted_test,
-                        self.task)
+        table_train = self._calc_metrics(self.y_train, self.predicted_train, self.task)
+        table_test = self._calc_metrics(self.y_test, self.predicted_test, self.task)
 
-        table = {key: [table_train.get(key, ''), table_test.get(key, '')]
-                 for key in table_train.keys()}
-        model_metrics = self._create_html_table(["train", "test"],
-                                                table,
-                                                two_columns_table=False,
-                                                classes='table table-striped',
-                                                justify='left'
-                                                )
+        table = {key: [table_train.get(key, ''), table_test.get(key, '')] for key in table_train.keys()}
+        model_metrics = self._create_html_table(["train", "test"], table, two_columns_table=False,
+                                                classes='table table-striped', justify='left')
         return model_metrics
 
     def _model_parameters_to_list(self):
         """Model parameters as html tables in one list"""
         model_parameters_list = list()
         for table_name, table in self._get_objects_as_dicts(self.model):
-            model_parameters_list.append(self._create_html_table(
-                    [table_name],
-                    table,
-                    two_columns_table=True,
-                    classes='table table-striped',
-                    justify='left'
-                ))
+            model_parameters_list.append(self._create_html_table([table_name], table, two_columns_table=True,
+                                                                 classes='table table-striped', justify='left'))
         return model_parameters_list
 
     def _get_objects_as_dicts(self, obj, path='') -> list:
@@ -227,62 +189,38 @@ class Report:
             list: tuples like (<str: path>, <dict: object content>)
         """
         def is_builtin(obj):
-            if obj is None:
-                return True
-            else:
-                return type(obj).__name__ in dir(builtins)
+            return True if obj is None else type(obj).__name__ in dir(builtins)
 
         result = list()
         if obj is None:
             return result
         elif type(obj) in [list, tuple]:
             for item in obj:
-                result.extend(self._get_objects_as_dicts(
-                    item,
-                    path=f"{path}")
-                )
+                result.extend(self._get_objects_as_dicts(item, path=f"{path}"))
         elif type(obj) in [dict]:
             for key, value in obj.items():
-                result.extend(
-                        self._get_objects_as_dicts(value,
-                                                   path=f'{path}/{key}'))
+                result.extend(self._get_objects_as_dicts(value, path=f'{path}/{key}'))
         elif not is_builtin(obj) and '__dict__' in dir(obj):
             if obj.__dict__:
-                result.append(
-                  (
-                    "{}/{}".format(path,
-                                   str(obj.__class__
-                                       ).replace('<', '').replace('>', '')),
-                    {key: value for key, value in obj.__dict__.items()
-                     if key[0] != '_'}
-                  )
-                )
+                result.append(("{}/{}".format(path, str(obj.__class__).replace('<', '').replace('>', '')),
+                               {key: value for key, value in obj.__dict__.items() if key[0] != '_'}))
                 result.extend(self._get_objects_as_dicts(obj.__dict__))
         return result
 
     @staticmethod
-    def _create_html_table(head: list,
-                           body: dict,
-                           two_columns_table: bool = False,
-                           **kwargs
-                           ) -> str:
+    def _create_html_table(head: list, body: dict, two_columns_table: bool = False, **kwargs) -> str:
         """Create html table based on python dict instance
 
-            Args:
-                head (list):   column's names
-                body (dict):   data for table where
-                        dict keys are index names and dict values are data
-                two_columns_table (bool):
-                        whether to store all data in one column
-                        or try to sparse data by columns.
-                        If True body values sholud have
-                        len(body['key']) == len(head)
-                        otherwise Exception is raised
-                kwargs (dict): arguments passed to
-                        DataFrame.to_html(**kwargs) method
+        Args:
+            head (list): Column's names.
+            body (dict): Data for table where dict keys are index names and dict values are data.
+            two_columns_table (bool): whether to store all data in one column  or try to sparse data by columns.
+             If True body values sholud have len(body['key']) == len(head) otherwise Exception is raised.
+            **kwargs: arguments passed to DataFrame.to_html(**kwargs) method.
 
-            return (str):
-                html-code for table
+        Returns:
+            str: html-code for table.
+
         """
 
         def check_body(x: dict):
@@ -294,41 +232,35 @@ class Report:
                         value_len_prev = len(value)
                     else:
                         return False
-                elif not (isinstance(value, list)
-                          and len(value) == value_len_prev):
+                elif not (isinstance(value, list) and len(value) == value_len_prev):
                     return False
             return True
 
         def check_head(head: list, body: dict):
-            """Checks if head list have same length with body values lists
-            """
+            """Checks if head list have same length with body values lists."""
 
             len_body_value = len(list(body.values())[0])
             if len_body_value != len(head):
                 raise Exception(f"column names list length {len(head)} not "
-                                "equal to columns quantity {len_body_value}")
+                                f"equal to columns quantity {len_body_value}")
 
         if not check_body(body) or two_columns_table:
             body = {key: [value] for key, value in body.items()}
         check_head(head, body)
 
-        return pandas.DataFrame(data=body.values(),
-                                columns=head,
-                                index=body.keys()
-                                ).to_html(**kwargs)
+        return pandas.DataFrame(data=body.values(), columns=head, index=body.keys()).to_html(**kwargs)
 
     @staticmethod
     def _calc_metrics(y_true, y_pred, task):
         """Function to calculate metrics
 
         Args:
-            y_true (1d array-like, or label indicator array / sparse matrix):
-                Ground truth (correct) target values.
-            y_pred (1d array-like, or label indicator array / sparse matrix):
-                Estimated targets as returned by a estimator.
+            y_true (1d array-like, or label indicator array / sparse matrix): Ground truth (correct) target values.
+            y_pred (1d array-like, or label indicator array / sparse matrix): Estimated targets as returned by a
+             estimator.
 
         Returns:
-            (dict) where keys are metrics' names and values are scores.
+            dict: Where keys are metrics' names and values are scores.
         """
         result = dict()
 
@@ -338,8 +270,7 @@ class Report:
             'mean_absolute_error': metrics.mean_absolute_error,
             'mean_squared_error': metrics.mean_squared_error,
             'median_absolute_error': metrics.median_absolute_error,
-            'mean_absolute_percentage_error':
-                metrics.mean_absolute_percentage_error,
+            'mean_absolute_percentage_error': metrics.mean_absolute_percentage_error,
             'r2_score': metrics.r2_score,
             'mean_poisson_deviance': metrics.mean_poisson_deviance,
             'mean_gamma_deviance': metrics.mean_gamma_deviance,
@@ -364,8 +295,7 @@ class Report:
             "matthews_corrcoef": metrics.matthews_corrcoef,
             "multilabel_confusion_matrix": metrics.multilabel_confusion_matrix,
             "precision_recall_curve": metrics.precision_recall_curve,
-            "precision_recall_fscore_support":
-                metrics.precision_recall_fscore_support,
+            "precision_recall_fscore_support": metrics.precision_recall_fscore_support,
             "precision_score": metrics.precision_score,
             "recall_score": metrics.recall_score,
             "roc_auc_score": metrics.roc_auc_score,
@@ -398,11 +328,11 @@ class Report:
             else:
                 raise Exception(
                         f"Not supported target type <{type_of_true}> "
-                        "or predicted type <{type_of_pred}>")
+                        f"or predicted type <{type_of_pred}>")
         else:
             raise Exception(
                         f"Not supported task type <{task}>. "
-                        "Currently supported {['class', 'reg']}")
+                        f"Currently supported {['class', 'reg']}")
 
         for name in functions_names:
             try:
@@ -425,7 +355,5 @@ class Report:
         rel_imp_max = max([x[0] for x in coefs.values()])
         rel_imp_sum = sum([x[0] for x in coefs.values()])
         # add scaled_importance and percentage values
-        coefs = {key: value + [value[0] / rel_imp_max, value[0] / rel_imp_sum]
-                 for key, value in coefs.items()}
-        return {key: value for key, value
-                in sorted(coefs.items(), key=lambda x: x[1][0], reverse=True)}
+        coefs = {key: value + [value[0] / rel_imp_max, value[0] / rel_imp_sum] for key, value in coefs.items()}
+        return {key: value for key, value in sorted(coefs.items(), key=lambda x: x[1][0], reverse=True)}
