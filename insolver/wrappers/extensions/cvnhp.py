@@ -60,7 +60,7 @@ class InsolverCVHPExtension:
              hyperopt.random.suggest. Using hyperopt.tpe.suggest by default.
             max_evals (:obj:`int`, optional): Number of function evaluations before returning.
             timeout (:obj:`None`, :obj:`int`, optional): Limits search time by parametrized number of seconds.
-            If None, then the search process has no time constraint. None by default.
+             If None, then the search process has no time constraint. None by default.
             fmin_params (:obj:`dict`, optional): Dictionary of supplementary arguments for hyperopt.fmin function.
             fn_params (:obj:`dict`, optional):  Dictionary of supplementary arguments for custom fn objective function.
             p_last (:obj:`str`, optional): If model object is a sklearn.Pipeline then apply fit parameters to the last

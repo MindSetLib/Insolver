@@ -9,7 +9,8 @@ from sklearn.preprocessing import StandardScaler
 
 
 class FeatureSelection:
-    """Feature selection. Supports the following tasks: classification, regression, multiclass classification and multiclass multioutput classification.
+    """Feature selection. Supports the following tasks: classification, regression, multiclass classification and
+    multiclass multioutput classification.
     
     Note:
         The following specified methods can be used for each individual task:
@@ -90,7 +91,7 @@ class FeatureSelection:
     def create_permutation_importance(self, **kwargs):
         """A method for creating permutation importance for the features. This method will be automatically called if
         'permutation_importance' parameter was set to True. Features importances will be set to importances_mean from
-         permutation_importance model.
+        permutation_importance model.
         
         Note:
             This method can be called only after method 'create_model' has been called.
