@@ -1,5 +1,6 @@
 import builtins
 import inspect
+import glob
 
 import pandas
 from pandas_profiling import ProfileReport
@@ -115,16 +116,39 @@ class Report:
                 },
              ]
 
-    def to_html(self, path: str = '.'):
+    def to_html(self, path: str = '.', report_name: str = 'report'):
         """Saves prepared report to html file
 
         Args:
-            path: location to save report
+            path: existing location to save report
+            report_name: name of report directory
         """
-        shutil.copytree(f'{self._directory}/report_template', f'{path}/report')
-        self.profile.to_file(f"{path}/report/profiling_report.html")
+        def check_name(name_, path_):
+            """Add a number to {name_} if it exists in {path_} directory"""
 
-        with open(f'{path}/report/report.html', 'w') as f:
+            check_names = [x.strip(f'{path_}/') for x in glob.glob(f"{path_}/*")
+                           if x.strip(f'{path_}/').find(name_) == 0
+                           and (x.strip(f'{path_}/')[len(name_):None].isnumeric()
+                                or x.strip(f'{path_}/')[len(name_):None] == ''
+                                )
+                           ]
+
+            name_to_check = name_
+            name_count = len(check_names)
+            while name_to_check in check_names:
+                name_to_check = name_ + str(name_count)
+                name_count += 1
+            return name_to_check
+
+        path = '.' if path == '' else path
+        report_name = check_name(report_name, path)
+
+        # copy template
+        shutil.copytree(f'{self._directory}/report_template',
+                        f'{path}/{report_name}')
+        self.profile.to_file(f"{path}/{report_name}/profiling_report.html")
+
+        with open(f'{path}/{report_name}/report.html', 'w') as f:
             html_ = self.template.render(sections=self.sections)
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
             f.write(html_)
@@ -147,10 +171,16 @@ class Report:
             str: html table with features sorted by importance
         """
         if self.model is not None:
-            if self.model.backend in ["h2o", "sklearn"]:
+            if self.model.algo == "rf":
+                coefs = self._get_coefs_dict({key: value for key, value
+                                              in zip(self.model.model.feature_name_, self.model.model.feature_importances_)})
+            elif self.model.algo == "glm":
                 coefs = self._get_coefs_dict(self.model.coef_norm())
-            elif self.model.backend in ['xgboost', 'lightgbm', 'catboost']:
-                coefs = self._get_coefs_dict(self.model.shap(self.X_train.append(self.X_test), show=False))
+            elif self.model.algo == "gbm":
+                coefs = self._get_coefs_dict(
+                                self.model.shap(
+                                    self.X_train.append(self.X_test),
+                                    show=False))
             else:
                 raise Exception("Unsupperted backend type {}".format(self.model.backend))
 
@@ -174,8 +204,9 @@ class Report:
         """Model parameters as html tables in one list"""
         model_parameters_list = list()
         for table_name, table in self._get_objects_as_dicts(self.model):
-            model_parameters_list.append(self._create_html_table([table_name], table, two_columns_table=True,
-                                                                 classes='table table-striped', justify='left'))
+            if table:
+                model_parameters_list.append(self._create_html_table([str(table_name)], table, two_columns_table=True,
+                                                                     classes='table table-striped', justify='left'))
         return model_parameters_list
 
     def _get_objects_as_dicts(self, obj, path='') -> list:
@@ -192,7 +223,7 @@ class Report:
             return True if obj is None else type(obj).__name__ in dir(builtins)
 
         result = list()
-        if obj is None:
+        if path.count('/') > 10:
             return result
         elif type(obj) in [list, tuple]:
             for item in obj:
@@ -202,9 +233,11 @@ class Report:
                 result.extend(self._get_objects_as_dicts(value, path=f'{path}/{key}'))
         elif not is_builtin(obj) and '__dict__' in dir(obj):
             if obj.__dict__:
-                result.append(("{}/{}".format(path, str(obj.__class__).replace('<', '').replace('>', '')),
-                               {key: value for key, value in obj.__dict__.items() if key[0] != '_'}))
-                result.extend(self._get_objects_as_dicts(obj.__dict__))
+                obj_dict = {key: value for key, value in obj.__dict__.items()
+                            if key[0] != '_'}
+                if obj_dict:
+                    result.append(("{}/{}".format(path, str(obj.__class__).replace('<', '').replace('>', '')), obj_dict))
+            result.extend(self._get_objects_as_dicts(obj.__dict__, path))
         return result
 
     @staticmethod
@@ -220,10 +253,9 @@ class Report:
 
         Returns:
             str: html-code for table.
-
         """
 
-        def check_body(x: dict):
+        def check_body(body: dict):
             """Check if dict values are lists and have same length"""
 
             for index, value in enumerate(body.values()):
@@ -234,6 +266,7 @@ class Report:
                         return False
                 elif not (isinstance(value, list) and len(value) == value_len_prev):
                     return False
+                value_len_prev = len(value)
             return True
 
         def check_head(head: list, body: dict):
