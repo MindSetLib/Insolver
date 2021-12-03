@@ -1,1 +1,3 @@
-from .InsolverFeatureSelection import FeatureSelection, Sampling, DimensionalityReduction
+from .InsolverFeatureSelection import FeatureSelection
+from .InsolverSampling import Sampling
+from .InsolverDimensionalityReduction import DimensionalityReduction
