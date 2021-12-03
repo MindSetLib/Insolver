@@ -101,6 +101,9 @@ Since Insolver was made for the insurance industry, there are also available som
 * class `TransformRegionGetFromKladr`:
     Gets the region number from KLADRs.
 
+* class `TransformCarFleetSize`:
+    Calculates fleet sizes for policyholders.
+
 ### AutoFill NA values
 
 ```{eval-rst}
