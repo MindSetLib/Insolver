@@ -13,10 +13,10 @@ class ModelMetricsCompare:
     """Class for model comparison.
     It will compute statistics and metrics for the regression task and metrics for the classification task.
     You can compare created models with the `source` parameter or if `source` is `None` it use current working directory
-     as a source.
+    as a source.
     If you want to create new models set the `create_models` parameter to True.
     If you already have source parameter and set `create_models` parameter to True new models will be added to the
-     source list.
+    source list.
     
     Parameters:
         X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for making predictions.

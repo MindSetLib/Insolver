@@ -1,4 +1,4 @@
-#Selection
+# Selection
 
 ## Feature Selection
 
@@ -64,6 +64,11 @@ fs_p.create_model(dataset)
 
 ## Sampling
 
+```{eval-rst}
+.. autoclass:: insolver.selection.Sampling
+    :show-inheritance:
+```
+
 [Sampling](https://en.wikipedia.org/wiki/Sampling_(statistics)) is the selection of a subset (a statistical sample) of individuals from within a statistical population to estimate characteristics of the whole population.
 Class `Sampling` implements methods from __probability sampling__. A probability sample is a sample in which every unit in the population has a chance (greater than zero) of being selected in the sample, and this probability can be accurately determined.
 There are four methods you can use by changing `method` parameter:
@@ -102,8 +107,10 @@ new_dataset = sampling.sample_dataset(df=dataset)
 
 ## Dimensionality Reduction
 
+```{eval-rst}
 .. autoclass:: insolver.selection.DimensionalityReduction
     :show-inheritance:
+```
     
 `DimensionalityReduction` class allows you to reduce the dimensionality of data with a selected method. There are 3 types of techniques implemented: decomposition, manifold and discriminant analysis.
 
