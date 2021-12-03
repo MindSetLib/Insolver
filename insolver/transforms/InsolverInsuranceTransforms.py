@@ -1,10 +1,8 @@
-import re
 import datetime
 
 import numpy as np
 import pandas as pd
 
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 class TransformExp:
     """Transforms values of drivers' minimum experiences in years with values over 'exp_max' grouped.
@@ -56,6 +54,7 @@ class TransformAgeExpDiff:
         df[self.column_driver_minexp].loc[(df[self.column_driver_minage] - df[self.column_driver_minexp])
                                           < self.diff_min] = df[self.column_driver_minage] - self.diff_min
         return df
+
 
 class TransformVehPower:
     """Transforms values of vehicles' powers.
@@ -183,7 +182,7 @@ class TransformRegionGetFromKladr:
 
         try:
             region_num = int(region_num)
-        except Exception:
+        except ValueError:
             region_num = None
 
         return region_num
@@ -191,6 +190,7 @@ class TransformRegionGetFromKladr:
     def __call__(self, df):
         df[self.column_region_num] = df[self.column_kladr].apply(self._region_get)
         return df
+
 
 class TransformCarFleetSize:
     """Calculates fleet sizes for policyholders.
@@ -214,5 +214,3 @@ class TransformCarFleetSize:
         cp = cp.groupby(self.column_id).size().to_dict()
         df[self.column_fleet_size] = df[self.column_id].map(cp)
         return df
-
-

@@ -1,10 +1,8 @@
 import re
 import datetime
 
-import numpy as np
 import pandas as pd
 
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 class TransformGenderGetFromName:
     """Gets clients' genders from theirs russian second names.
@@ -160,6 +158,7 @@ class TransformAgeGender:
         df[self.column_age_m], df[self.column_age_f] = zip(*df[[self.column_age, self.column_gender]].apply(
             self._age_gender, axis=1, args=(self.age_default, self.gender_male, self.gender_female)).to_frame()[0])
         return df
+
 
 class TransformNameCheck:
     """Checks if clients' first names are in special list.

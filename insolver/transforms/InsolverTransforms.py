@@ -1,10 +1,7 @@
-import re
-import datetime
-
-import numpy as np
 import pandas as pd
 
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
 
 class TransformToNumeric:
     """Transforms parameter's values to numeric types, uses Pandas' 'to_numeric'.
@@ -93,6 +90,7 @@ class TransformGetDummies:
                 df[column] = 1 * ((self.column_param + '_' + df[self.column_param]) == column)
         return df
 
+
 class EncoderTransforms:
     """Label Encoder
 
@@ -152,6 +150,3 @@ class OneHotEncoderTransforms:
             self.encoder_dict[column] = encoder_params
             df.drop([column], axis=1, inplace=True)
         return df
-
-
-

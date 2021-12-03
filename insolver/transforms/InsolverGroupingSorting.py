@@ -1,10 +1,5 @@
-import re
-import datetime
-
-import numpy as np
 import pandas as pd
 
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 class TransformParamUselessGroup:
     """Groups all parameter's values with few data to one group.
