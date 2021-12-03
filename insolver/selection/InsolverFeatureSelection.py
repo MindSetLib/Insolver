@@ -9,16 +9,15 @@ from sklearn.preprocessing import StandardScaler
 
 
 class FeatureSelection:
-    """Class for feature selection. Supports the following tasks: classification, regression, multiclass classification
-     and multiclass multioutput classification.
+    """Feature selection. Supports the following tasks: classification, regression, multiclass classification and multiclass multioutput classification.
     
     Note:
         The following specified methods can be used for each individual task:
-        - for the classification problem Mutual information, F statistics, chi-squared test, Random Forest, Lasso or
-         ElasticNet can be used;
-        - for the regression problem Mutual information, F statistics, Random Forest, Lasso or ElasticNet can be used;
-        - for the multiclass classification Random Forest, Lasso or ElasticNet can be used;
-        - for the multiclass multioutput classification Random Forest can be used.
+        for the __classification__ problem Mutual information, F statistics, chi-squared test, Random Forest, Lasso or
+        ElasticNet can be used;
+        for the __regression__ problem Mutual information, F statistics, Random Forest, Lasso or ElasticNet can be used;
+        for the __multiclass classification__ Random Forest, Lasso or ElasticNet can be used;
+        for the __multiclass multioutput classification__ Random Forest can be used.
         Random Forest is used by default.
    
     Parameters:

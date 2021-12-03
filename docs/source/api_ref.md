@@ -178,6 +178,14 @@
    :members:
 ```
 
+## Selection
+### Feature selection
+
+```{eval-rst}
+ .. autoclass:: insolver.selection.FeatureSelection
+   :members:
+```
+
 ## Model Wrappers
 
 ### Base Wrapper
