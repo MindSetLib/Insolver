@@ -36,7 +36,7 @@ class Report:
         if task in ['reg', 'class']:
             self.task = task
         else:
-            raise Exception(f"Not supported task class {task}")
+            raise ValueError(f"Not supported task class {task}")
         if (isinstance(X_train, pandas.DataFrame)
                 and isinstance(X_test, pandas.DataFrame)
                 and isinstance(y_train, pandas.Series)
@@ -172,8 +172,8 @@ class Report:
         """
         if self.model is not None:
             if self.model.algo == "rf":
-                coefs = self._get_coefs_dict({key: value for key, value
-                                              in zip(self.model.model.feature_name_, self.model.model.feature_importances_)})
+                coefs = self._get_coefs_dict({key: value for key, value in zip(self.model.model.feature_name_,
+                                                                               self.model.model.feature_importances_)})
             elif self.model.algo == "glm":
                 coefs = self._get_coefs_dict(self.model.coef_norm())
             elif self.model.algo == "gbm":
@@ -236,7 +236,8 @@ class Report:
                 obj_dict = {key: value for key, value in obj.__dict__.items()
                             if key[0] != '_'}
                 if obj_dict:
-                    result.append(("{}/{}".format(path, str(obj.__class__).replace('<', '').replace('>', '')), obj_dict))
+                    result.append(("{}/{}".format(path,
+                                                  str(obj.__class__).replace('<', '').replace('>', '')), obj_dict))
             result.extend(self._get_objects_as_dicts(obj.__dict__, path))
         return result
 
@@ -289,7 +290,7 @@ class Report:
 
         Args:
             y_true (1d array-like, or label indicator array / sparse matrix): Ground truth (correct) target values.
-            y_pred (1d array-like, or label indicator array / sparse matrix): Estimated targets as returned by a
+            y_pred (1d array-like, or label indicator array / sparse matrix): Estimated targets as returned by an
              estimator.
 
         Returns:
@@ -359,13 +360,9 @@ class Report:
                                     "roc_curve",
                                     ]
             else:
-                raise Exception(
-                        f"Not supported target type <{type_of_true}> "
-                        f"or predicted type <{type_of_pred}>")
+                raise TypeError(f"Not supported target type <{type_of_true}> or predicted type <{type_of_pred}>")
         else:
-            raise Exception(
-                        f"Not supported task type <{task}>. "
-                        f"Currently supported {['class', 'reg']}")
+            raise TypeError(f"Not supported task type <{task}>. Currently supported {['class', 'reg']}")
 
         for name in functions_names:
             try:
