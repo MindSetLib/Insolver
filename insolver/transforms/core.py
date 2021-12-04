@@ -90,7 +90,7 @@ def init_transforms(transforms, inference):
         list: List of transformations objects.
     """
     transforms_list = []
-    module_list = [InsolverTransforms]
+    module_list = [basic]
 
     try:
         import user_transforms
