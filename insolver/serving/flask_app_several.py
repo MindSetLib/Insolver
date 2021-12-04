@@ -20,8 +20,6 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from time import strftime, time
 
-
-
 from multiprocessing import Pool
 
 
@@ -38,9 +36,6 @@ handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
-
-
-
 
 
 def load_pickle_model(model_path):

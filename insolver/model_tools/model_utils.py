@@ -50,9 +50,9 @@ def train_val_test_split(*arrays, val_size, test_size, random_state=0, shuffle=T
         *arrays (array_like): Arrays to split into train/validation/test sets containing predictors.
         val_size (float): The proportion of the dataset to include in validation partition.
         test_size (float): The proportion of the dataset to include in test partition.
-        random_state (:obj:`int`, optional): Random state, passed to train_test_split() from scikit-learn. (default=0).
-        shuffle (:obj:`bool`, optional): Passed to train_test_split() from scikit-learn. (default=True).
-        stratify (:obj:`array_like`, optional): Passed to train_test_split() from scikit-learn. (default=None).
+        random_state (int, optional): Random state, passed to train_test_split() from scikit-learn. (default=0).
+        shuffle (bool, optional): Passed to train_test_split() from scikit-learn. (default=True).
+        stratify (array_like, optional): Passed to train_test_split() from scikit-learn. (default=None).
 
     Returns:
         tuple: (x_train, x_valid, x_test, y_train, y_valid, y_test).
@@ -185,10 +185,10 @@ def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
 
     Args:
         data (pd.DataFrame): DataFrame with data to compute IV and WoE.
-        target (:obj:`str` or :obj:`pd.Series`): Target variable to compute IV and WoE.
-        bins (:obj:`int`, optional): Number of bins for WoE calculation for continuous variables.
-        cat_thresh (:obj:`int`, optional): Maximum number of categories for non-binned WoE calculation.
-        detail (:obj:`bool`, optional):  Whether to return detailed results DataFrame or not. Short by default.
+        target (str or pd.Series): Target variable to compute IV and WoE.
+        bins (int, optional): Number of bins for WoE calculation for continuous variables.
+        cat_thresh (int, optional): Maximum number of categories for non-binned WoE calculation.
+        detail (bool, optional):  Whether to return detailed results DataFrame or not. Short by default.
 
     Returns:
         pd.DataFrame, DataFrame containing the data on Information Value (depends on detail argument).
@@ -218,7 +218,7 @@ def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
 
 def gain_curve(y_true, y_pred, exposure, step=1, figsize=(10, 6)):
     """ Plot gains curve and calculate Gini coefficient. Mostly making use of
-            https://scikit-learn.org/stable/auto_examples/linear_model/plot_tweedie_regression_insurance_claims.html
+    https://scikit-learn.org/stable/auto_examples/linear_model/plot_tweedie_regression_insurance_claims.html.
 
     Args:
         y_true: Array with target variable.

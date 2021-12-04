@@ -1,30 +1,24 @@
 import os
-
-from fastapi import FastAPI
-from pydantic import BaseModel
-
-
-#-----
-
-
+import re
+import glob
 import pickle
 
 import pandas as pd
-from fastapi.encoders import jsonable_encoder
 from sympy import sympify
+
+from pydantic import BaseModel
+from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
 
 from insolver import InsolverDataFrame
 from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 from insolver.configs.settings import *
 
-import re
-import glob
-
 # For logging
 import logging
 from logging.handlers import RotatingFileHandler
-from time import strftime, time
+from time import time
 from multiprocessing import Pool
 
 
@@ -42,8 +36,6 @@ handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
-
-
 
 # print(FORMULA_CALCULATION)
 # print(FORMULA)
@@ -119,10 +111,6 @@ for i, model_path in enumerate(models):
     # print(vlist)
 
 
-# --------------------
-
-
-
 def pool_inference(pack):
     i = pack[1]
     df = pack[0]
@@ -134,9 +122,7 @@ def pool_inference(pack):
     return [i, predicted[0]]
 
 
-
 app = FastAPI()
-
 
 
 class Data(BaseModel):
@@ -151,7 +137,6 @@ def index():
 @app.post("/predict")
 def predict(data: Data):
 
-
     start_prediction = time()
 
     data_dict = data.dict()
@@ -161,7 +146,6 @@ def predict(data: Data):
 
     with Pool(N_CORES) as p:
         result_pool = p.map(pool_inference, pack)
-
 
     for i, vari in enumerate(vlist):
         dict_variables[vari] = result_pool[i][1]
@@ -176,8 +160,4 @@ def predict(data: Data):
         'duration': duration
     }
 
-
     return jsonable_encoder(result)
-
-
-

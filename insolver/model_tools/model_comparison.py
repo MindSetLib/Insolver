@@ -11,29 +11,26 @@ from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper, InsolverRF
 
 class ModelMetricsCompare:
     """Class for model comparison.
-
     It will compute statistics and metrics for the regression task and metrics for the classification task.
     You can compare created models with the `source` parameter or if `source` is `None` it use current working directory
-    as a source. If you want to create new models set the `create_models` parameter to True.
-    If you already have source parameter and set `create_models` parameter to True, new models will be added to the
-    source list.
+    as a source. If you want to create new models set the `create_models` parameter to True. If you already have source
+    parameter and set `create_models` parameter to `True`, new models will be added to the source list.
 
     Parameters:
-        X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for making predictions.
-        y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Actual target values for X.
-        task (:obj:`str`, :obj:`None`): A task for models and metrics. If `task` new models will be created
+        X (pd.DataFrame, pd.Series): Data for making predictions.
+        y (pd.DataFrame, pd.Series): Actual target values for X.
+        task (str, None): A task for models and metrics. If `task` new models will be created
          Supports 'reg' and 'class'.
-        create_models (:obj:`bool): If True, new models will be created and added to the comparison list.
-        source (:obj:`str`, :obj:`list`, :obj:`tuple`, :obj:`None`): List or tuple of insolver wrappers or path to the
-         folder with models.
-            If `None`, taking current working directory as source.
-        metrics (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Metrics or list of metrics to compute.
-        stats (:obj:`list`, :obj:`tuple`, :obj:`callable`, optional): Statistics or list of statistics to compute.
-        h2o_init_params (:obj:`dict`, optional): Parameters passed to `h2o.init()`, when `backend` == 'h2o'.
-        predict_params (:obj:`list`, optional): List of dictionaries containing parameters passed to predict methods
+        create_models (bool): If True, new models will be created and added to the comparison list.
+        source (str, list, tuple, None): List or tuple of insolver wrappers or path to the
+         folder with models. If `None`, taking current working directory as source.
+        metrics (list, tuple, callable, optional): Metrics or list of metrics to compute.
+        stats (list, tuple, callable, optional): Statistics or list of statistics to compute.
+        h2o_init_params (dict, optional): Parameters passed to `h2o.init()`, when `backend` == 'h2o'.
+        predict_params (list, optional): List of dictionaries containing parameters passed to predict methods
          for each model.
-        features (:obj:`list`, optional): List of lists containing features for predict method for each model.
-        names (:obj:`list`, optional): List of model names.
+        features (list, optional): List of lists containing features for predict method for each model.
+        names (list, optional): List of model names.
 
     """
 

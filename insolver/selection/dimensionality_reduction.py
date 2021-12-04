@@ -12,14 +12,14 @@ class DimensionalityReduction:
     This class can be used for dimensionality reduction and plotting of the result.
     
     Parameters:
-        method(:obj:str): Dimensionality reduction method supports: `pca`, `svd`, `lda`, `t_sne`, `isomap`, `lle`, `fa`, 
+        method(str): Dimensionality reduction method supports: `pca`, `svd`, `lda`, `t_sne`, `isomap`, `lle`, `fa`,
             `nmf`.
             
     Attributes:
-        method(:obj:str): Dimensionality reduction method. 
+        method(str): Dimensionality reduction method.
         estimator: Created model. 
-        X_transformed(:obj:pandas.DataFrame): Transformed X.
-        methods_dict(:obj:dict): Methods dictionary.
+        X_transformed(pandas.DataFrame): Transformed X.
+        methods_dict(dict): Methods dictionary.
         
     """
     def __init__(self, method='pca'):
@@ -36,7 +36,7 @@ class DimensionalityReduction:
             **kwargs: Arguments for the estimator.
         
         Returns:
-            X_transformed (:obj:pandas.DataFrame): New X dataframe with transformed values.
+            X_transformed (pandas.DataFrame): New X dataframe with transformed values.
             
         Raises:
             NotImplementedError: If method is not supported.
@@ -62,8 +62,8 @@ class DimensionalityReduction:
             been called.
             
         Parameters:
-            y (:obj:pandas.Series, :obj:pandas.DataFrame): y-value.
-            figsize (:obj:list), default=(10,10): Figure size.
+            y (pandas.Series, pandas.DataFrame): y-value.
+            figsize (list), default=(10,10): Figure size.
             **kwargs: Arguments for the plot function.
             
         Raises:

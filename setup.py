@@ -7,9 +7,12 @@ with open("requirements.txt") as f:
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+with open('VERSION', "r", encoding="utf-8") as v:
+    version = v.read()
+
 
 setup(name='insolver',
-      version='0.4.16',
+      version=version,
       description='Insolver is low-code machine learning library, initially created for the insurance industry, '
                   'but can be used in any other. You can find a detailed overview at '
                   'https://insolver.readthedocs.io/en/latest/source/overview.html.',

@@ -1,7 +1,7 @@
-from .InsolverTransformMain import InsolverTransform, init_transforms
-from .InsolverTransforms import *
-from .InsolverAutoFillNATransform import *
-from .InsolverDateTimeTransform import *
-from .InsolverGroupingSorting import *
-from .InsolverInsuranceTransforms import *
-from .InsolverPersonTransforms import *
+from .core import InsolverTransform, init_transforms
+from .basic import *
+from .autofillna import *
+from .date_time import *
+from .grouping_sorting import *
+from .insurance import *
+from .person import *

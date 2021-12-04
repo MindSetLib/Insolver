@@ -14,13 +14,13 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
     Parameters:
         backend (str): Framework for building RF, 'sklearn' is supported.
         task (str): Task that RF should solve: Classification or Regression. Values 'reg' and 'class' are supported.
-        n_estimators (:obj:`int`, optional): Number of trees in the forest. Equals 100 by default.
-        load_path (:obj:`str`, optional): Path to RF model to load from disk.
+        n_estimators (int, optional): Number of trees in the forest. Equals 100 by default.
+        load_path (str, optional): Path to RF model to load from disk.
         **kwargs: Parameters for RF estimators except `n_estimators`. Will not be changed in hyperopt.
     """
     def __init__(self, backend, task=None, n_estimators=100, load_path=None, **kwargs):
         super(InsolverRFWrapper, self).__init__(backend)
-        self.init_args = self.get_init_args(vars())
+        self.init_args = self._get_init_args(vars())
         self.algo, self._backends = 'rf', ['sklearn']
         self._tasks = ['class', 'reg']
         self._back_load_dict = {'sklearn': self._pickle_load}
@@ -55,9 +55,9 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
         """Fit a Random Forest.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
-            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
-            report (:obj:`list`, :obj:`tuple`, optional): A list of metrics to report after model fitting, optional.
+            X (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            report (list, tuple, optional): A list of metrics to report after model fitting, optional.
             **kwargs: Other parameters passed to Scikit-learn API .fit().
         """
         self.model.fit(X, y, **kwargs)
@@ -74,7 +74,7 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
         """Predict using RF with feature matrix X.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Samples.
+            X (pd.DataFrame, pd.Series): Samples.
             **kwargs: Other parameters passed to Scikit-learn API .predict().
 
         Returns:
@@ -87,10 +87,10 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
         """Method for performing cross-validation given the hyperparameters of initialized or fitted model.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
-            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
-            scoring (:obj:`callable`): Metrics passed to sklearn.model_selection.cross_validate calculation.
-            cv (:obj:`int, cross-validation generator or an iterable`, optional): Cross-validation strategy from
+            X (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            scoring (callable): Metrics passed to sklearn.model_selection.cross_validate calculation.
+            cv (int, iterable, cross-validation generator, optional): Cross-validation strategy from
              sklearn. Performs 5-fold cv by default.
             **kwargs: Other parameters passed to sklearn.model_selection.cross_validate.
 

@@ -60,13 +60,13 @@ class InsolverH2OExtension:
 
         Args:
             hyper_params:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
-            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
-            sample_weight (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Training sample weights.
-            X_valid (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Validation data (only h2o supported).
-            y_valid (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Validation target values (only h2o supported).
-            sample_weight_valid (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Validation sample weights.
-            h2o_train_params (:obj:`dict`, optional): Parameters passed to `H2OGridSearch.train()`.
+            X (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            sample_weight (pd.DataFrame, pd.Series, optional): Training sample weights.
+            X_valid (pd.DataFrame, pd.Series, optional): Validation data (only h2o supported).
+            y_valid (pd.DataFrame, pd.Series, optional): Validation target values (only h2o supported).
+            sample_weight_valid (pd.DataFrame, pd.Series, optional): Validation sample weights.
+            h2o_train_params (dict, optional): Parameters passed to `H2OGridSearch.train()`.
             **kwargs: Other parameters passed to H2OGridSearch.
 
         Returns:
