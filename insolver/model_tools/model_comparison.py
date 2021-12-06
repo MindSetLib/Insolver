@@ -11,11 +11,13 @@ from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper, InsolverRF
 
 class ModelMetricsCompare:
     """Class for model comparison.
+
     It will compute statistics and metrics for the regression task and metrics for the classification task.
-    You can compare created models with the `source` parameter or if `source` is `None` it use current working directory as a source.
-    If you want to create new models set the `create_models` parameter to True.
-    If you already have source parameter and set `create_models` parameter to True new models will be added to the source list.
-    
+    You can compare created models with the `source` parameter or if `source` is `None` it use current working directory
+    as a source. If you want to create new models set the `create_models` parameter to True.
+    If you already have source parameter and set `create_models` parameter to True, new models will be added to the
+    source list.
+
     Parameters:
         X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for making predictions.
         y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Actual target values for X.
@@ -92,11 +94,11 @@ class ModelMetricsCompare:
     def _init_new_models(self):
         """Initializes new models using the `task` parameter.
         If `class` then Gradient Boosting model with the catboost backend and Random Forest with the sklearn backend
-         will be created.
+        will be created.
         If `reg` then Gradient Boosting model with the catboost backend, Random Forest with the sklearn backend and
-         Linear Model with the sklearn backend will be created.
+        Linear Model with the sklearn backend will be created.
         This method uses train_test_split from sklearn.model_selection, fits models with train values and changes
-         `self.X`, `self.y` to test values. Thus, when calculating metrics, it will use test values.
+        `self.X`, `self.y` to test values. Thus, when calculating metrics, it will use test values.
             
         """
         
