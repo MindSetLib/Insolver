@@ -62,6 +62,18 @@
  .. automodule:: insolver.selection.feature_selection
    :members:
 ```
+### Dimensionality Reduction
+
+```{eval-rst}
+ .. autoclass:: insolver.selection.DimensionalityReduction
+   :members:
+```
+### Sampling
+
+```{eval-rst}
+ .. autoclass:: insolver.selection.Sampling
+   :members:
+```
 
 ### Dimensionality reduction.py
 

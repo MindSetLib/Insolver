@@ -12,14 +12,14 @@ class DimensionalityReduction:
     This class can be used for dimensionality reduction and plotting of the result.
     
     Parameters:
-        method(str): Dimensionality reduction method supports: `pca`, `svd`, `lda`, `t_sne`, `isomap`, `lle`, `fa`,
+        method (str): Dimensionality reduction method supports: `pca`, `svd`, `lda`, `t_sne`, `isomap`, `lle`, `fa`, 
             `nmf`.
             
     Attributes:
-        method(str): Dimensionality reduction method.
+        method (str): Dimensionality reduction method. 
         estimator: Created model. 
-        X_transformed(pandas.DataFrame): Transformed X.
-        methods_dict(dict): Methods dictionary.
+        X_transformed (pandas.DataFrame): Transformed X.
+        methods_dict (dict): Methods dictionary.
         
     """
     def __init__(self, method='pca'):
