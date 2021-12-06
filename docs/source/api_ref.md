@@ -185,6 +185,18 @@
  .. autoclass:: insolver.selection.FeatureSelection
    :members:
 ```
+### Dimensionality Reduction
+
+```{eval-rst}
+ .. autoclass:: insolver.selection.DimensionalityReduction
+   :members:
+```
+### Sampling
+
+```{eval-rst}
+ .. autoclass:: insolver.selection.Sampling
+   :members:
+```
 
 ## Model Wrappers
 
