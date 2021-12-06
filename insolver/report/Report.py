@@ -129,9 +129,7 @@ class Report:
             check_names = [x.strip(f'{path_}/') for x in glob.glob(f"{path_}/*")
                            if x.strip(f'{path_}/').find(name_) == 0
                            and (x.strip(f'{path_}/')[len(name_):None].isnumeric()
-                                or x.strip(f'{path_}/')[len(name_):None] == ''
-                                )
-                           ]
+                                or x.strip(f'{path_}/')[len(name_):None] == '')]
 
             name_to_check = name_
             name_count = len(check_names)
@@ -146,6 +144,7 @@ class Report:
         # copy template
         shutil.copytree(f'{self._directory}/report_template',
                         f'{path}/{report_name}')
+        # save profile report
         self.profile.to_file(f"{path}/{report_name}/profiling_report.html")
 
         with open(f'{path}/{report_name}/report.html', 'w') as f:
@@ -156,6 +155,7 @@ class Report:
     def _profile_data(self):
         """Combine all data passed in __init__ method and prepares report"""
 
+        # train and test datasets into full dataset
         data_train = self.X_train.copy()
         data_train[self.y_train.name] = self.y_train
         data_test = self.X_test.copy()
