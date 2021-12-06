@@ -4,12 +4,6 @@ Model wrappers allow you to perform some model fitting routines using a unified 
 Currently model wrappers implement Generalized Linear Models (`scikit-learn`, `h2o`) and Gradient Boosting Machines (`xgboost`, `lightgbm`, `catboost`).
 
 ## BaseWrapper
-
-```{eval-rst}
-.. autoclass:: insolver.wrappers.base.InsolverBaseWrapper
-```
-
-
 `InsolverBaseWrapper` is an abstract class that unifies basic functionality of the wrapper which is not dependent on the model type and backend choice. This class represents a building block for creating wrappers for specific models with their backend packages.
 
 By itself, `InsolverBaseWrapper` provides basic `__call__`, `load_model`, `save_model` methods. By default, `__call__` method returns the model object itself which is stored in `self.model` attribute.

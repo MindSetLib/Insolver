@@ -5,7 +5,7 @@ import geocoder
 import requests
 
 from insolver import InsolverDataFrame
-from insolver.transforms import InsolverTransformMain
+from insolver.transforms import InsolverTransform
 
 
 # ---------------------------------------------------
@@ -119,7 +119,7 @@ class InsolverGeoPointsToPointsFrame(InsolverDataFrame):
 # ---------------------------------------------------
 
 
-class TransformGeoDistGet(InsolverTransformMain):
+class TransformGeoDistGet(InsolverTransform):
     """Gets geographical distance between two points in kilometers.
 
     Parameters:
@@ -160,7 +160,7 @@ class TransformGeoDistGet(InsolverTransformMain):
                                    self.column_dst_lon]].apply(self._get_geo_dist, axis=1)
 
 
-class TransformParamsSumAround(InsolverTransformMain):
+class TransformParamsSumAround(InsolverTransform):
     """Gets sum of numeric parameter's values in surround of each point.
 
     Parameters:
@@ -193,7 +193,7 @@ class TransformParamsSumAround(InsolverTransformMain):
         return df_points
 
 
-class TransformAddParams(InsolverTransformMain):
+class TransformAddParams(InsolverTransform):
     """Adds parameters' values from InsolverGeoPointsFrame to InsolverDataFrame.
 
     Parameters:

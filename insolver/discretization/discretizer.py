@@ -1,4 +1,3 @@
-import numpy as np
 from pandas import DataFrame, Series
 from numpy import log10, log2, std, percentile, subtract, sqrt, power, ndarray
 from insolver.discretization.discretizer_utils import *
@@ -30,9 +29,9 @@ class InsolverDiscretizer:
         Args:
             X: 1-D array, The data to be descretized.
             y: 1-D array, The target values, ignored for unsupervised transformations.
-            n_bins (:obj:`int ` or :obj:`str`): The number of bins; Either integer number or value in
+            n_bins (int, str): The number of bins; Either integer number or value in
               {'square-root', 'sturges', 'rice-rule', 'scotts-rule', 'freedman-diaconis'}.
-            min_samples_leaf (:obj:`int ` or :obj:`float`):  The minimum number of samples required to be at a leaf
+            min_samples_leaf (int, float):  The minimum number of samples required to be at a leaf
             node. Used for 'cart' method only, ignored otherwise.
 
         Returns:

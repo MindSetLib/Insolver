@@ -10,14 +10,14 @@ from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 from insolver.serving import utils
 
-model_path = os.environ['model_path']
-transforms_path = os.environ['transforms_path']
-
 # For logging
 import logging
 import traceback
 from logging.handlers import RotatingFileHandler
 from time import strftime, time
+
+model_path = os.environ['model_path']
+transforms_path = os.environ['transforms_path']
 
 # Logging
 handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)

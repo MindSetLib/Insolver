@@ -16,7 +16,7 @@ class Sampling:
             for a `stratified` sampling `n` is the number of values to keep in each cluster.
         n_clusters (int), default = 10: Number of clusters for the `cluster` and `stratified` sampling.
         cluster_column (str): Column name of the data frame used as clusters.
-        method (str): Sampling method, supported methods: `simple`, `systematic`, `cluster`, `stratified`. 
+        method (str): Sampling method, supported methods: `simple`, `systematic`, `cluster`, `stratified`.
     """
     def __init__(self, n, cluster_column=None, n_clusters=10, method='simple'):
         self.method = method

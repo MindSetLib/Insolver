@@ -20,6 +20,7 @@ Insolver is insurance scoring ML package
    source/selection
    source/model_wrappers
    source/model_comparison
+   source/report
    source/serving
    source/several_models_serving
    source/load_tests

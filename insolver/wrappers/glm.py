@@ -18,13 +18,13 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
 
     Parameters:
         backend (str): Framework for building GLM, currently 'h2o' and 'sklearn' are supported.
-        family (:obj:`str`, :obj:`float`, :obj:`int`, optional): Distribution for GLM. Supports any family from h2o as
+        family (str, float, int, optional): Distribution for GLM. Supports any family from h2o as
           str. For sklearn supported `str` families are ['gaussian', 'normal', 'poisson', 'gamma', 'inverse_gaussian'],
           also may be defined as `int` or `float` as a power for Tweedie GLM. By default, Gaussian GLM is fitted.
-        link (:obj:`str`, optional): Link function for GLM. If `None`, sets to default value for both h2o and sklearn.
-        standardize (:obj:`bool`, optional): Whether to standardize data before fitting the model. Enabled by default.
-        h2o_init_params (:obj:`dict`, optional): Parameters passed to `h2o.init()`, when `backend` == 'h2o'.
-        load_path (:obj:`str`, optional): Path to GLM model to load from disk.
+        link (str, optional): Link function for GLM. If `None`, sets to default value for both h2o and sklearn.
+        standardize (bool, optional): Whether to standardize data before fitting the model. Enabled by default.
+        h2o_init_params (dict, optional): Parameters passed to `h2o.init()`, when `backend` == 'h2o'.
+        load_path (str, optional): Path to GLM model to load from disk.
         **kwargs: Parameters for GLM estimators (for H2OGeneralizedLinearEstimator or TweedieRegressor) except
           `family` (`power` for TweedieRegressor) and `link`.
 
@@ -32,7 +32,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
     def __init__(self, backend, family=None, link=None, standardize=True, h2o_init_params=None,
                  load_path=None, **kwargs):
         super(InsolverGLMWrapper, self).__init__(backend)
-        self.init_args = self.get_init_args(vars())
+        self.init_args = self._get_init_args(vars())
         self.algo, self._backends = 'glm', ['h2o', 'sklearn']
         self._back_load_dict = {'sklearn': self._pickle_load, 'h2o': partial(self._h2o_load,
                                                                              h2o_init_params=h2o_init_params)}
@@ -76,13 +76,13 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         """Fit a Generalized Linear Model.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
-            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
-            sample_weight (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Training sample weights.
-            X_valid (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Validation data (only h2o supported).
-            y_valid (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Validation target values (only h2o supported).
-            sample_weight_valid (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Validation sample weights.
-            report (:obj:`list`, :obj:`tuple`, optional): A list of metrics to report after model fitting, optional.
+            X (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            sample_weight (pd.DataFrame, pd.Series, optional): Training sample weights.
+            X_valid (pd.DataFrame, pd.Series, optional): Validation data (only h2o supported).
+            y_valid (pd.DataFrame, pd.Series, optional): Validation target values (only h2o supported).
+            sample_weight_valid (pd.DataFrame, pd.Series, optional): Validation sample weights.
+            report (list, tuple, optional): A list of metrics to report after model fitting, optional.
             **kwargs: Other parameters passed to H2OGeneralizedLinearEstimator.
         """
         if (self.backend == 'sklearn') & isinstance(self.model, Pipeline):
@@ -109,8 +109,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         """Predict using GLM with feature matrix X.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Samples.
-            sample_weight (:obj:`pd.DataFrame`, :obj:`pd.Series`, optional): Test sample weights.
+            X (pd.DataFrame, pd.Series): Samples.
+            sample_weight (pd.DataFrame, pd.Series, optional): Test sample weights.
             **kwargs: Other parameters passed to H2OGeneralizedLinearEstimator.predict().
 
         Returns:
@@ -137,7 +137,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         """Output GLM coefficients for standardized data.
 
         Returns:
-            dict: {:obj:`str`: :obj:`float`} Dictionary containing GLM coefficients for standardized data.
+            dict: {`str`: `float`} Dictionary containing GLM coefficients for standardized data.
         """
         if not self.__is_fitted():
             raise Exception("This instance is not fitted yet. Call 'fit' before using this estimator.")
@@ -162,7 +162,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         """Output GLM coefficients for non-standardized data. Also calculated when GLM fitted on standardized data.
 
         Returns:
-            dict: {:obj:`str`: :obj:`float`} Dictionary containing GLM coefficients for non-standardized data.
+            dict: {`str`: `float`} Dictionary containing GLM coefficients for non-standardized data.
         """
         if not self.__is_fitted():
             raise Exception("This instance is not fitted yet. Call 'fit' before using this estimator.")

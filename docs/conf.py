@@ -24,8 +24,10 @@ copyright = f'2020-{datetime.now().year}, MindSet Team'
 author = 'MindSet Team'
 
 # The full version, including alpha/beta/rc tags
-release = '0.4.15a2'
-version = '0.4.15a2'
+with open('../VERSION', "r", encoding="utf-8") as v:
+    v = v.read()
+
+release = version = v
 
 
 # -- General configuration ---------------------------------------------------
@@ -68,7 +70,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'README.md']
 
 
 # -- Options for HTML output -------------------------------------------------

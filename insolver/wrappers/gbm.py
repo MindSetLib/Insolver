@@ -22,15 +22,15 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
     Parameters:
         backend (str): Framework for building GBM, 'xgboost', 'lightgbm' and 'catboost' are supported.
         task (str): Task that GBM should solve: Classification or Regression. Values 'reg' and 'class' are supported.
-        n_estimators (:obj:`int`, optional): Number of boosting rounds. Equals 100 by default.
-        objective (:obj:`str` or :obj:`callable`): Objective function for GBM to optimize.
-        load_path (:obj:`str`, optional): Path to GBM model to load from disk.
+        n_estimators (int, optional): Number of boosting rounds. Equals 100 by default.
+        objective (str, callable): Objective function for GBM to optimize.
+        load_path (str, optional): Path to GBM model to load from disk.
         **kwargs: Parameters for GBM estimators except `n_estimators` and `objective`. Will not be changed in hyperopt.
 
     """
     def __init__(self, backend, task=None, objective=None, n_estimators=100, load_path=None, **kwargs):
         super(InsolverGBMWrapper, self).__init__(backend)
-        self.init_args = self.get_init_args(vars())
+        self.init_args = self._get_init_args(vars())
         self.algo, self._backends = 'gbm', ['xgboost', 'lightgbm', 'catboost']
         self._tasks = ['class', 'reg']
         self._back_load_dict = {'xgboost': self._pickle_load, 'lightgbm': self._pickle_load,
@@ -77,9 +77,9 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         """Fit a Gradient Boosting Machine.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
-            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
-            report (:obj:`list`, :obj:`tuple`, optional): A list of metrics to report after model fitting, optional.
+            X (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            report (list, tuple, optional): A list of metrics to report after model fitting, optional.
             **kwargs: Other parameters passed to Scikit-learn API .fit().
         """
         self.model.fit(X, y, **kwargs)
@@ -96,7 +96,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         """Predict using GBM with feature matrix X.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Samples.
+            X (pd.DataFrame, pd.Series): Samples.
             **kwargs: Other parameters passed to Scikit-learn API .predict().
 
         Returns:
@@ -109,9 +109,9 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         """Method for shap values calculation and corresponding plot of feature importances.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for shap values calculation.
-            show (:obj:`boolean`, optional): Whether to plot a graph.
-            plot_type (:obj:`str`, optional): Type of feature importance graph, takes value in ['dot', 'bar'].
+            X (pd.DataFrame, pd.Series): Data for shap values calculation.
+            show (boolean, optional): Whether to plot a graph.
+            plot_type (str, optional): Type of feature importance graph, takes value in ['dot', 'bar'].
 
         Returns:
             JSON containing shap values.
@@ -131,12 +131,12 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         """Method for plotting a waterfall graph or return corresponding JSON if show=False.
 
         Args:
-            data (:obj:`pd.DataFrame`, :obj:`pd.Series`): Data for shap values calculation.
-            index (:obj:`int`, optional): Index of the observation of interest, if data is pd.DataFrame.
-            link (:obj:`callable`, optional): A function for transforming shap values into predictions.
+            data (pd.DataFrame, pd.Series): Data for shap values calculation.
+            index (int, optional): Index of the observation of interest, if data is pd.DataFrame.
+            link (callable, optional): A function for transforming shap values into predictions.
               Unnecessary if self.objective is present and it takes values in ['binary', 'poisson', 'gamma'].
-            show (:obj:`boolean`, optional): Whether to plot a graph or return a json.
-            layout_dict (:obj:`boolean`, optional): Dictionary containing the parameters of plotly figure layout.
+            show (boolean, optional): Whether to plot a graph or return a json.
+            layout_dict (boolean, optional): Dictionary containing the parameters of plotly figure layout.
 
         Returns:
             None or dict: Waterfall graph or corresponding JSON.
@@ -198,10 +198,10 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         """Method for performing cross-validation given the hyperparameters of initialized or fitted model.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
-            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
-            scoring (:obj:`callable`): Metrics passed to sklearn.model_selection.cross_validate calculation.
-            cv (:obj:`int, cross-validation generator or an iterable`, optional): Cross-validation strategy from
+            X (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            scoring (callable): Metrics passed to sklearn.model_selection.cross_validate calculation.
+            cv (int, cross-validation generator or an iterable`, optional): Cross-validation strategy from
              sklearn. Performs 5-fold cv by default.
             **kwargs: Other parameters passed to sklearn.model_selection.cross_validate.
 

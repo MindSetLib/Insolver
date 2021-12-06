@@ -3,20 +3,16 @@ import pickle
 import warnings
 
 from insolver.frame import InsolverDataFrame
-from insolver.transforms import InsolverTransforms
-
-
-class PriorityWarning(UserWarning):
-    pass
+from insolver.transforms import basic
 
 
 class InsolverTransform(InsolverDataFrame):
     """Class to compose transforms to be done on InsolverDataFrame. Transforms may have the priority param.
     Priority=0: transforms which get values from other (TransformAgeGetFromBirthday, TransformRegionGetFromKladr, etc).
-    Priority=1: main transforms of values (TransformAge, TransformVehPower, ets).
-    Priority=2: transforms which get intersections of features (TransformAgeGender, ets);
+    Priority=1: main transforms of values (TransformAge, TransformVehPower, etc).
+    Priority=2: transforms which get intersections of features (TransformAgeGender, etc);
     transforms which sort values (TransformParamSortFreq, TransformParamSortAC).
-    Priority=3: transforms which get functions of values (TransformPolynomizer, TransformGetDummies, ets).
+    Priority=3: transforms which get functions of values (TransformPolynomizer, TransformGetDummies, etc).
 
     Parameters:
         df: InsolverDataFrame to transform.
@@ -94,7 +90,7 @@ def init_transforms(transforms, inference):
         list: List of transformations objects.
     """
     transforms_list = []
-    module_list = [InsolverTransforms]
+    module_list = [basic]
 
     try:
         import user_transforms

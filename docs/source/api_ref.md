@@ -3,178 +3,55 @@
 ## Insolver DataFrame
 
 ```{eval-rst}
- .. autoclass:: insolver.frame.InsolverDataFrame
+ .. automodule:: insolver.frame.frame
    :members:
 ```
 
 ## Build-in transformations
 
+### Core utils for transformations
+```{eval-rst}
+ .. automodule:: insolver.transforms.core
+   :members:
+```
+
+### Basic data transformations
+```{eval-rst}
+ .. automodule:: insolver.transforms.basic
+   :members:
+```
+
 ### Person data methods
 
-- TransformGenderGetFromName
-
 ```{eval-rst}
- .. autoclass:: insolver.transforms.TransformGenderGetFromName
+ .. automodule:: insolver.transforms.person
    :members:
 ```
 
-- TransformAgeGetFromBirthday
-
+### Insurance data methods
 ```{eval-rst}
- .. autoclass:: insolver.transforms.TransformAgeGetFromBirthday
+.. automodule:: insolver.transforms.insurance
    :members:
 ```
 
-- TransformAge
+### Grouping and sorting data methods
 
 ```{eval-rst}
- .. autoclass:: insolver.transforms.TransformAge
+.. automodule:: insolver.transforms.grouping_sorting
    :members:
 ```
 
-- TransformAgeGender
+### Missing values imputation methods
 
 ```{eval-rst}
- .. autoclass:: insolver.transforms.TransformAgeGender
+ .. automodule:: insolver.transforms.autofillna
    :members:
 ```
 
-- TransformExp
+### Date and Datetime methods
 
 ```{eval-rst}
- .. autoclass:: insolver.transforms.TransformExp
-   :members:
-```
-
-- TransformAgeExpDiff
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformAgeExpDiff
-   :members:
-```
-
-- TransformNameCheck
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformNameCheck
-   :members:
-```
-
-
-### Vehicle data methods
-- TransformVehPower
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformVehPower
-   :members:
-```
-
-- TransformVehAgeGetFromIssueYear
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformVehAgeGetFromIssueYear
-   :members:
-```
-
-- TransformVehAge
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformVehAge
-   :members:
-```
-
-### Region data methods
-- TransformRegionGetFromKladr
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformRegionGetFromKladr
-   :members:
-```
-
-### Sorting data methods
-- TransformParamUselessGroup
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformParamUselessGroup
-   :members:
-```
-
-- TransformParamSortFreq
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformParamSortFreq
-   :members:
-```
-
-- TransformParamSortAC
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformParamSortAC
-   :members:
-```
-
-### Other data methods
-- TransformToNumeric
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformToNumeric
-   :members:
-```
-
-- TransformMapValues
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformMapValues
-   :members:
-```
-
-- TransformPolynomizer
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformPolynomizer
-   :members:
-```
-
-- TransformGetDummies
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformGetDummies
-   :members:
-```
-
-- TransformCarFleetSize
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.TransformCarFleetSize
-   :members:
-```
-
-### Fill NA and Encode methods
-- AutoFillNATransforms
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.AutoFillNATransforms
-   :members:
-```
-
-- EncoderTransforms
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.EncoderTransforms
-   :members:
-```
-
-- OneHotEncoderTransforms
-
-```{eval-rst}
- .. autoclass:: insolver.transforms.OneHotEncoderTransforms
-   :members:
-```
-
-### Date and Datetime
-
-```{eval-rst}
-.. autoclass:: insolver.transforms.DatetimeTransforms
+.. automodule:: insolver.transforms.date_time
    :members:
 ```
 
@@ -182,20 +59,35 @@
 ### Feature selection
 
 ```{eval-rst}
- .. autoclass:: insolver.selection.FeatureSelection
+ .. automodule:: insolver.selection.feature_selection
    :members:
 ```
-### Dimensionality Reduction
+
+### Dimensionality reduction.py
 
 ```{eval-rst}
- .. autoclass:: insolver.selection.DimensionalityReduction
+ .. automodule:: insolver.selection.dimensionality_reduction
    :members:
 ```
+
 ### Sampling
 
 ```{eval-rst}
- .. autoclass:: insolver.selection.Sampling
+ .. automodule:: insolver.selection.sampling
    :members:
+```
+
+## Discretization
+
+```{eval-rst}
+ .. automodule:: insolver.discretization.discretizer
+   :members:
+```
+
+```{eval-rst}
+ .. automodule:: insolver.discretization.discretizer_utils
+   :members:
+   :undoc-members:
 ```
 
 ## Model Wrappers
@@ -203,15 +95,13 @@
 ### Base Wrapper
 
 ```{eval-rst}
- .. autoclass:: insolver.wrappers.base.InsolverBaseWrapper
+ .. automodule:: insolver.wrappers.base
    :members:
 ```
-
 ### Trivial Wrapper
 
-
 ```{eval-rst}
- .. autoclass:: insolver.wrappers.InsolverTrivialWrapper
+ .. automodule:: insolver.wrappers.trivial
    :members:
    :inherited-members:
 ```
@@ -219,7 +109,7 @@
 ### Generalized Linear Model Wrapper
 
 ```{eval-rst}
- .. autoclass:: insolver.wrappers.InsolverGLMWrapper
+ .. automodule:: insolver.wrappers.glm
    :members:
    :inherited-members:
 ```
@@ -227,7 +117,7 @@
 ### Gradient Boosting Machine Wrapper
 
 ```{eval-rst}
- .. autoclass:: insolver.wrappers.InsolverGBMWrapper
+ .. automodule:: insolver.wrappers.gbm
    :members:
    :inherited-members:
 ```
@@ -235,7 +125,7 @@
 ### Random Forest Wrapper
 
 ```{eval-rst}
- .. autoclass:: insolver.wrappers.InsolverRFWrapper
+ .. automodule:: insolver.wrappers.general
    :members:
    :inherited-members:
 ```
@@ -245,6 +135,13 @@
 ### Model Comparison
 
 ```{eval-rst}
- .. autoclass:: insolver.model_tools.ModelMetricsCompare
+ .. automodule:: insolver.model_tools.model_comparison
+   :members:
+```
+
+### Model utils
+
+```{eval-rst}
+ .. automodule:: insolver.model_tools.model_utils
    :members:
 ```

@@ -18,13 +18,13 @@ class InsolverCVHPExtension:
 
         Args:
             params (dict): Dictionary of hyperopt parameters.
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
-            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
-            scoring (:obj:`callable`): Metrics passed to cross_val_score calculation.
-            cv (:obj:`int, cross-validation generator or an iterable`, optional): Cross-validation strategy from
+            X (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            scoring (callable): Metrics passed to cross_val_score calculation.
+            cv (int, iterable, cross-validation generator, optional): Cross-validation strategy from
              sklearn. Performs 5-fold cv by default.
-            agg (:obj:`callable`, optional): Function computing the final score out of test cv scores.
-            maximize (:obj:`bool`, optional): Indicator whether to maximize or minimize objective.
+            agg (callable, optional): Function computing the final score out of test cv scores.
+            maximize (bool, optional): Indicator whether to maximize or minimize objective.
              Minimizing by default.
             **kwargs: Other parameters passed to sklearn.model_selection.cross_val_score().
 
@@ -52,18 +52,18 @@ class InsolverCVHPExtension:
         """Hyperparameter optimization using hyperopt. Using cross-validation to evaluate hyperparameters by default.
 
         Args:
-            X (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training data.
-            y (:obj:`pd.DataFrame`, :obj:`pd.Series`): Training target values.
+            X (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
             params (dict): Dictionary of hyperparameters passed to hyperopt.
-            fn (:obj:`callable`, optional): Objective function to optimize with hyperopt.
-            algo (:obj:`callable`, optional): Algorithm for hyperopt. Available choices are: hyperopt.tpe.suggest and
+            fn (callable, optional): Objective function to optimize with hyperopt.
+            algo (callable, optional): Algorithm for hyperopt. Available choices are: hyperopt.tpe.suggest and
              hyperopt.random.suggest. Using hyperopt.tpe.suggest by default.
-            max_evals (:obj:`int`, optional): Number of function evaluations before returning.
-            timeout (:obj:`None`, :obj:`int`, optional): Limits search time by parametrized number of seconds.
+            max_evals (int, optional): Number of function evaluations before returning.
+            timeout (None, int, optional): Limits search time by parametrized number of seconds.
              If None, then the search process has no time constraint. None by default.
-            fmin_params (:obj:`dict`, optional): Dictionary of supplementary arguments for hyperopt.fmin function.
-            fn_params (:obj:`dict`, optional):  Dictionary of supplementary arguments for custom fn objective function.
-            p_last (:obj:`str`, optional): If model object is a sklearn.Pipeline then apply fit parameters to the last
+            fmin_params (dict, optional): Dictionary of supplementary arguments for hyperopt.fmin function.
+            fn_params (dict, optional):  Dictionary of supplementary arguments for custom fn objective function.
+            p_last (str, optional): If model object is a sklearn.Pipeline then apply fit parameters to the last
              step. True by default.
 
         Returns:
