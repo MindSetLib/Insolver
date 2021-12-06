@@ -9,14 +9,14 @@ class Sampling:
     stratified sampling.
     
     Parameters:
-        n (:obj:int): This parameter is used in chosen sampling method:
+        n (int): This parameter is used in chosen sampling method:
             for a `simple` sampling `n` is the number of values to keep;
             for a `systematic` sampling `n` is the number of step size;
             for a `cluster` sampling `n` is the number of clusters to keep;
             for a `stratified` sampling `n` is the number of values to keep in each cluster.
-        n_clusters (:obj:int), default = 10: Number of clusters for the `cluster` and `stratified` sampling.
-        cluster_column (:obj:str): Column name of the data frame used as clusters.
-        method (:obj:str): Sampling method, supported methods: `simple`, `systematic`, `cluster`, `stratified`. 
+        n_clusters (int), default = 10: Number of clusters for the `cluster` and `stratified` sampling.
+        cluster_column (str): Column name of the data frame used as clusters.
+        method (str): Sampling method, supported methods: `simple`, `systematic`, `cluster`, `stratified`. 
     """
     def __init__(self, n, cluster_column=None, n_clusters=10, method='simple'):
         self.method = method
@@ -29,7 +29,7 @@ class Sampling:
         A method for performing sampling with the dataset using selected method.
         
         Parameters:
-            df (:obj:pandas.Dataframe): The dataframe.
+            df (pandas.Dataframe): The dataframe.
         
         Raises:
             NotImplementedError: If self.method is not supported.
@@ -55,7 +55,7 @@ class Sampling:
         Simple sampling. 
         
         Parameters:
-            df (:obj:pandas.Dataframe): The dataframe.
+            df (pandas.Dataframe): The dataframe.
             
         Returns:
             New dataset with selected rows.
@@ -68,7 +68,7 @@ class Sampling:
         Systematic sampling. 
         
         Parameters:
-            df (:obj:pandas.Dataframe): The dataframe.
+            df (pandas.Dataframe): The dataframe.
         
         Returns:
             New dataset with selected rows.
@@ -82,7 +82,7 @@ class Sampling:
         Cluster sampling.
         
         Parameters:
-            df (:obj:pandas.Dataframe): The dataframe.
+            df (pandas.Dataframe): The dataframe.
         
         Returns:
             New dataset with selected rows.
@@ -110,7 +110,7 @@ class Sampling:
         Stratified sampling. 
         
         Parameters:
-            df (:obj:pandas.Dataframe): The dataframe.
+            df (pandas.Dataframe): The dataframe.
         
         Returns:
             New dataset with selected rows.
@@ -131,7 +131,7 @@ class Sampling:
         Otherwise the clusters are formed according to the existing order.
         
         Parameters:
-            df (:obj:pandas.Dataframe): The dataframe.
+            df (pandas.Dataframe): The dataframe.
         
         Raises:
             ValueError: Values in the column must be not null.

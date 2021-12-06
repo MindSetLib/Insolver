@@ -14,32 +14,26 @@ class FeatureSelection:
     
     Note:
         The following specified methods can be used for each individual task:
-        for the __classification__ problem Mutual information, F statistics, chi-squared test, Random Forest, Lasso or
+        for the `classification` problem Mutual information, F statistics, chi-squared test, Random Forest, Lasso or
         ElasticNet can be used;
-        for the __regression__ problem Mutual information, F statistics, Random Forest, Lasso or ElasticNet can be used;
-        for the __multiclass classification__ Random Forest, Lasso or ElasticNet can be used;
-        for the __multiclass multioutput classification__ Random Forest can be used.
+        for the `regression` problem Mutual information, F statistics, Random Forest, Lasso or ElasticNet can be used;
+        for the `multiclass classification` Random Forest, Lasso or ElasticNet can be used;
+        for the `multiclass multioutput classification` Random Forest can be used.
         Random Forest is used by default.
    
     Parameters:
         y_column (str): The name of the column to predict.
-        task (str): A task for the model. Values 'reg', 'class', 'multiclass' and 'multiclass_multioutput' are
+        task (str): A task for the model. Values `reg`, `class`, `multiclass` and `multiclass_multioutput` are
          supported.
-        method (str): A technique to compute features importance. Values 'random_forest'(default), 'mutual_inf', 'chi2',
-         'f_statistic', 'lasso' and 'elasticnet' are supported.
+        method (str): A technique to compute features importance. Values `random_forest`(default), `mutual_inf`, `chi2`,
+         `f_statistic`, 'lasso' and 'elasticnet' are supported.
         permutation_importance (bool): Uses permutation feature importance, false is default.
         
     Attributes:
-        y_column (str): The name of the column to predict.
-        task (str): A task that RF should solve: Classification or Regression. Values 'reg' and 'class' are supported.
-        method (str): A method to compute features importance: Random Forest(default), lasso
-        permutation_importance (bool): Uses permutation feature importance, false is default.
         new_dataframe (pandas.DataFrame): New dataframe with the selected features only.
-        self.x : X value.
-        self.y : Y value.
         importances (list): A list of the importances created using selected method.
         model : A model for feature selection.
-        permutation_model : A permutation model  for feature selection.
+        permutation_model : Permutation model for feature selection.
         
     """
     
