@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
+from seaborn import scatterplot
+from pandas import DataFrame
 import statsmodels.api as sm
 from scipy.signal import savgol_filter
 from scipy.fft import rfft, rfftfreq, irfft
@@ -29,7 +29,7 @@ class Smoothing:
         self.threshold = threshold
         self.x_column = x_column
         self.y_column = y_column
-        self.new_df = pd.DataFrame()
+        self.new_df = DataFrame()
         
     def transform(self, data, **kwargs):
         """
@@ -47,10 +47,10 @@ class Smoothing:
         if self.method not in self.methods_dict.keys():
             raise NotImplementedError(f'Method {self.method} is not supported.')
         
-        if isinstance(data, pd.DataFrame):
+        if isinstance(data, DataFrame):
             self.new_df = data.copy()
         else:
-            self.new_df = pd.DataFrame(data, columns=['data'])
+            self.new_df = DataFrame(data, columns=['data'])
             self.x_column = 'data'   
         
         func = self.methods_dict[self.method]
@@ -118,8 +118,8 @@ class Smoothing:
         columns = self.new_df.columns
         if self.method == 'lowess':
             plt.figure(figsize=figsize)
-            sns.scatterplot(self.new_df[self.x_column], 
-                            self.new_df[self.y_column], label='Raw')
+            scatterplot(self.new_df[self.x_column],
+                        self.new_df[self.y_column], label='Raw')
             plt.plot(self.new_df[columns[-2]], 
                      self.new_df[columns[-1]], label=self.method)
             plt.legend()
