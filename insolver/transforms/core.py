@@ -1,9 +1,12 @@
+import sys
+import ntpath
 import json
 import pickle
+import importlib
 import warnings
 
 from insolver.frame import InsolverDataFrame
-from insolver.transforms import basic
+from insolver.transforms import basic, person, insurance, autofillna, date_time, grouping_sorting
 
 
 class InsolverTransform(InsolverDataFrame):
@@ -77,11 +80,12 @@ def load_class(module_list, transform_name):
             pass
 
 
-def init_transforms(transforms, inference):
+def init_transforms(transforms, module_path=None, inference=False):
     """Function for creation transformations objects from the dictionary.
 
     Args:
         transforms (list): Dictionary with classes and their init parameters.
+        module_path (str, None): Path to the user transformations saved in .py file. E.g., user_transforms.py.
         inference (bool): Should be 'False' if transforms are applied while preparing data for modeling.
             Should be 'True' if transforms are applied on inference.
 
@@ -89,14 +93,24 @@ def init_transforms(transforms, inference):
         list: List of transformations objects.
     """
     transforms_list = []
-    module_list = [basic]
+    module_list = [basic, person, insurance, autofillna, date_time, grouping_sorting]
 
-    try:
-        import user_transforms
-        module_list.append(user_transforms)
+    if module_path is not None:
+        _directory = ntpath.dirname(module_path)
+        _script = ntpath.basename(module_path)
+        if not _script.endswith('.py'):
+            raise ValueError('Argument module_path should contain path to the .py file.')
+        else:
+            user_transforms = _script.strip('.py')
+        sys.path.insert(1, _directory)
 
-    except ModuleNotFoundError:
-        pass
+        try:
+            user_transforms = importlib.import_module(user_transforms)
+            importlib.reload(user_transforms)
+            module_list.append(user_transforms)
+
+        except ModuleNotFoundError:
+            pass
 
     for n in transforms:
         try:
