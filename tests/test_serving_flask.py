@@ -1,5 +1,5 @@
-from flask import json
 import os
+import json
 
 os.environ['model_path'] = 'examples/serving_example/insolver_glm_h2o_1610467176142'
 os.environ['transforms_path'] = 'examples/serving_example/transforms.pkl'

@@ -112,7 +112,7 @@ def pool_inference(pack):
     # print('index', i)
     a_json = json.loads(pack[0])
     df = pd.DataFrame.from_dict(a_json, orient='index').T
-    #df = pd.read_json(pack[0])
+    # df = pd.read_json(pack[0])
     InsDataFrame = InsolverDataFrame(df)
     InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
     InsTransforms.ins_transform()
@@ -122,6 +122,7 @@ def pool_inference(pack):
 
 app = Flask(__name__)
 app.debug = True
+
 
 @app.route("/")
 def index():
@@ -146,7 +147,6 @@ def predict():
 
     # print(json_input)
 
-
     pack = list(zip([json_str for i in range(0, len(mlist))],
                     [i for i in range(0, len(mlist))]
                     )
@@ -160,12 +160,10 @@ def predict():
 
     # Response logging
 
-
     formula_sympy = sympify(FORMULA)
     result = float(formula_sympy.subs(dict_variables).evalf())
 
     # print(result)
-
 
     end_prediction = time()
     duration = round(end_prediction - start_prediction, 6)
@@ -195,4 +193,4 @@ def exceptions(e):
 
 
 if __name__ == '__main__':
-    app.run() #threaded=True, port = 5000
+    app.run()  # threaded=True, port = 5000
