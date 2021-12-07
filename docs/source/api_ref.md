@@ -59,21 +59,21 @@
 ### Feature selection
 
 ```{eval-rst}
- .. automodule:: insolver.selection.feature_selection
+ .. automodule:: insolver.feature_engineering.feature_selection
    :members:
 ```
 
 ### Dimensionality reduction.py
 
 ```{eval-rst}
- .. automodule:: insolver.selection.dimensionality_reduction
+ .. automodule:: insolver.feature_engineering.dimensionality_reduction
    :members:
 ```
 
 ### Sampling
 
 ```{eval-rst}
- .. automodule:: insolver.selection.sampling
+ .. automodule:: insolver.feature_engineering.sampling
    :members:
 ```
 

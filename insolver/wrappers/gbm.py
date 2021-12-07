@@ -143,7 +143,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         """
 
         def logit(x):
-            return true_divide(1, add(1, exp(-x)))
+            return true_divide(1, add(1, exp(x)))
 
         explainer = TreeExplainer(self.model)
         if isinstance(self.model, (XGBClassifier, XGBRegressor)):

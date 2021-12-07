@@ -14,7 +14,7 @@ An example of creating `InsolverDataFrame` from pandas `DataFrame`:
 import pandas as pd
 from insolver import InsolverDataFrame
 
-df = pd.read_csv(file_path)
+df = pd.read_csv('file_path')
 
 InsDataFrame = InsolverDataFrame(df)
 InsDataFrame.get_meta_info()

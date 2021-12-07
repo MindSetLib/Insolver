@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 
 
 class FeatureSelection:
-    """Feature selection. Supports the following tasks: classification, regression, multiclass classification and
+    """Feature feature_engineering. Supports the following tasks: classification, regression, multiclass classification and
     multiclass multioutput classification.
     
     Note:
@@ -35,8 +35,8 @@ class FeatureSelection:
     Attributes:
         new_dataframe (pandas.DataFrame): New dataframe with the selected features only.
         importances (list): A list of the importances created using selected method.
-        model : A model for feature selection.
-        permutation_model : Permutation model for feature selection.
+        model : A model for feature feature_engineering.
+        permutation_model : Permutation model for feature feature_engineering.
         
     """
     
@@ -51,7 +51,7 @@ class FeatureSelection:
        
     def create_model(self, df):
         """
-        A method to create a model for feature selection using specified method. Random Forest is used by default.
+        A method to create a model for feature feature_engineering using specified method. Random Forest is used by default.
         
         Parameters:
             df (pandas.Dataframe): The dataframe.

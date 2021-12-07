@@ -3,7 +3,7 @@
 ## Feature Selection
 
 ```{eval-rst}
- .. autoclass:: insolver.selection.FeatureSelection
+ .. autoclass:: insolver.feature_engineering.FeatureSelection
     :show-inheritance: 
 ```
 Class `FeatureSelection` allows you to compute features importances using selected method. It also can plot it with selected plot size and the importance threshold. Using computed importance you can create a new dataset with the best features. You can also use permutation importance model inspection technique with some models.
@@ -37,27 +37,27 @@ All the methods used in this class are from `scikit-learn`:
 ```python
 import pandas as pd
 from insolver.frame import InsolverDataFrame
-from insolver.selection import FeatureSelection
+from insolver.feature_engineering import FeatureSelection
 
-#create dataset using InsolverDataFrame or pandas.DataFrame
+# create dataset using InsolverDataFrame or pandas.DataFrame
 dataset = InsolverDataFrame(pd.read_csv("..."))
 
-#init class FeatureSelection with default method
+# init class FeatureSelection with default method
 fs = FeatureSelection(y_column='y_column', task='class')
 
-#create model using create_model()
+# create model using create_model()
 fs.create_model(dataset)
 
-#plot created model importances using plot_importance()
+# plot created model importances using plot_importance()
 fs.plot_importance()
 
-#create permutation importance using create_permutation_importance()
+# create permutation importance using create_permutation_importance()
 fs.create_permutation_importance()
 
-#create new dataset using create_new_dataset()
+# create new dataset using create_new_dataset()
 new_dataset = fs.create_new_dataset()
 
-#you can also create permutation importance by setting parameter permutation_importance=True
+# you can also create permutation importance by setting parameter permutation_importance=True
 fs_p = FeatureSelection(method='lasso', task='class', permutation_importance=True)
 fs_p.create_model(dataset)
 ```
@@ -65,7 +65,7 @@ fs_p.create_model(dataset)
 ## Sampling
 
 ```{eval-rst}
-.. autoclass:: insolver.selection.Sampling
+.. autoclass:: insolver.feature_engineering.Sampling
     :show-inheritance:
 ```
 
@@ -89,7 +89,8 @@ You can use dataframe column as clusters by defining `cluster_column`. It will u
 
 ```python
 import pandas as pd
-from insolver import InsolverDataFrame, FeatureSelection
+from insolver import InsolverDataFrame
+from insolver.feature_engineering import Sampling
 
 #create dataset using InsolverDataFrame or pandas.DataFrame
 dataset = InsolverDataFrame(pd.read_csv("..."))
@@ -108,7 +109,7 @@ new_dataset = sampling.sample_dataset(df=dataset)
 ## Dimensionality Reduction
 
 ```{eval-rst}
-.. autoclass:: insolver.selection.DimensionalityReduction
+.. autoclass:: insolver.feature_engineering.DimensionalityReduction
     :show-inheritance:
 ```
     
@@ -137,15 +138,17 @@ You can plot the transformed X and y with the `plot_transformed(self, y, figsize
 You can access created model with the `estimator` attribute.
 
 ### Example
+
 ```python
 import pandas as pd
-from insolver.selection import DimensionalityReduction
+from insolver.feature_engineering import DimensionalityReduction
 
 #create X and y
 from sklearn import datasets
+
 iris = datasets.load_iris()
 X = iris.data
-y = pd.DataFrame(iris.target, columns=['y']) 
+y = pd.DataFrame(iris.target, columns=['y'])
 
 #create DimensionalityReduction
 dm = DimensionalityReduction(method='nmf')
@@ -154,5 +157,5 @@ dm = DimensionalityReduction(method='nmf')
 new_X = dm.transform(X=X, n_components=3)
 
 #plot result
-dm.plot_transformed(y, figsize=(5,5), palette='Set2')
+dm.plot_transformed(y, figsize=(5, 5), palette='Set2')
 ```
