@@ -184,7 +184,7 @@ You can also plot original and transformed data with the `plot_transformed(figsi
 ```python
 import pandas as pd
 from insolver.frame import InsolverDataFrame
-from insolver.\\\ import Smoothing
+from insolver.feature_engineering import Smoothing
 
 #create dataset using InsolverDataFrame or pandas.DataFrame
 df = InsolverDataFrame(pd.read_csv("..."))
