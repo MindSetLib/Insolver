@@ -1,4 +1,4 @@
-import os
+import ntpath
 import builtins
 import inspect
 import glob
@@ -59,7 +59,7 @@ class Report:
               \rpredicted_train {type(predicted_train)} should be pandas.Series
               \rpredicted_test {type(predicted_test)} should be pandas.Series
               \r""")
-        self._directory = os.path.dirname(inspect.getfile(Report))
+        self._directory = ntpath.dirname(inspect.getfile(Report))
 
         # prepare profile report
         self.profile = None

@@ -318,7 +318,7 @@ import pandas as pd
 
 from insolver.frame import InsolverDataFrame
 from insolver.transforms import InsolverTransform
-from user_transforms import TransformToNumeric
+from examples.user_transforms import TransformToNumeric
 
 df = InsolverDataFrame(pd.DataFrame(data={'col1': ['1.0', '2', -3]}))
 

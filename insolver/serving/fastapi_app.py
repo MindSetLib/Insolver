@@ -12,6 +12,7 @@ from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
+module_path = os.environ['module_path']
 
 # Load model
 model = utils.load_pickle_model(model_path)
@@ -25,7 +26,7 @@ else:
 # load and init transformations
 with open(transforms_path, 'rb') as file:
     tranforms = pickle.load(file)
-tranforms = init_transforms(tranforms, inference=True)
+tranforms = init_transforms(tranforms, module_path=module_path, inference=True)
 
 
 app = FastAPI()

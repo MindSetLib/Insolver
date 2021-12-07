@@ -12,9 +12,10 @@ def run():
     parser = argparse.ArgumentParser(description='ML API service')
     parser.add_argument('-model', action='store', required=False)
     parser.add_argument('-transforms', action='store', required=False)
+    parser.add_argument('-transforms_module', action='store', required=False)
     parser.add_argument('-service', action='store', required=False)
     
-    #add new parameter config file and models and transforms
+    # add new parameter config file and models and transforms
     parser.add_argument('-configfile', action='store', required=False)
     parser.add_argument('-transforms_folder', action='store', required=False)
     parser.add_argument('-models_folder', action='store', required=False)
@@ -24,7 +25,6 @@ def run():
     parser.add_argument('-port', action='store', default=8000, type=int, required=True)
 
     args = parser.parse_args()
-
 
     if args.model is not None:
         print(args.model)
@@ -37,6 +37,12 @@ def run():
         os.environ['transforms_path'] = args.transforms
     else:
         os.environ['transforms_path'] = ''
+
+    if args.transforms_module is not None:
+        print(args.transforms_module)
+        os.environ['module_path'] = args.transforms_module
+    else:
+        os.environ['module_path'] = ''
 
     # add new config file and models
     if args.configfile is not None:
@@ -67,7 +73,8 @@ def run():
         cmd = f'gunicorn --worker-class gthread -b {args.ip}:{args.port} insolver.serving.flask_app_several:app'
         exec_cmd(cmd)
     elif args.service == 'sfastapi':
-        cmd = f'gunicorn -b {args.ip}:{args.port} insolver.serving.fastapi_app_several:app -k uvicorn.workers.UvicornWorker'
+        cmd = (f'gunicorn -b {args.ip}:{args.port}'
+               'insolver.serving.fastapi_app_several:app -k uvicorn.workers.UvicornWorker')
         exec_cmd(cmd)
     else:
         print('wrong service, try "-service flask" or "-service fastapi"')

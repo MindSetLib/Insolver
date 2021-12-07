@@ -29,7 +29,8 @@ if os.environ['transforms_folder'] is not None:
     transforms_folder = os.environ['transforms_folder']
 if os.environ['config_file'] is not None:
     config_file = os.environ['config_file']
-
+if os.environ['module_path'] is not None:
+    module_path = os.environ['module_path']
 
 # Logging
 handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)
@@ -97,7 +98,7 @@ for i, model_path in enumerate(models):
     # load and init transformations
     with open(transforms[i], 'rb') as file:
         transformations = pickle.load(file)
-    transformations = init_transforms(transformations, inference=True)
+    transformations = init_transforms(transformations, module_path=module_path, inference=True)
 
     tlist.append(transformations)
 
