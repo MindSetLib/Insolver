@@ -9,6 +9,21 @@ from insolver.transforms import (InsolverTransform, TransformExp, TransformAge, 
                                  TransformPolynomizer, TransformAgeGender)
 from insolver.serving.flask_app import app
 
+
+class TransformExp(TransformExp):
+    @staticmethod
+    def new_exp(exp, exp_max):
+        if pd.isnull(exp):
+            exp = None
+        elif exp < 0:
+            exp = None
+        else:
+            exp = exp * 7 // 365
+        if exp > exp_max:
+            exp = exp_max
+        return exp
+
+
 features = ['LicAge', 'Gender', 'MariStat', 'DrivAge', 'HasKmLimit', 'BonusMalus', 'RiskArea',
             'Age_m', 'Age_f', 'Age_m_2', 'Age_f_2']
 target = 'ClaimAmount'
@@ -27,21 +42,6 @@ test_df = ('LicAge,Gender,MariStat,DrivAge,HasKmLimit,BonusMalus,RiskArea,ClaimA
 train_df = InsolverDataFrame(pd.read_csv(StringIO(train_df)))
 test_df = pd.read_csv(StringIO(test_df))
 
-
-@staticmethod
-def new_exp(exp, exp_max):
-    if pd.isnull(exp):
-        exp = None
-    elif exp < 0:
-        exp = None
-    else:
-        exp = exp * 7 // 365
-    if exp > exp_max:
-        exp = exp_max
-    return exp
-
-
-TransformExp._exp = new_exp
 
 InsTransforms = InsolverTransform(train_df, [
     TransformAge('DrivAge', 18, 75),
