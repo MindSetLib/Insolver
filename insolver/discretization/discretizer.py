@@ -1,6 +1,6 @@
 from pandas import DataFrame, Series
-from numpy import log10, log2, std, percentile, subtract, sqrt, power, ndarray
-from insolver.discretization.discretizer_utils import *
+from numpy import log10, log2, std, percentile, subtract, sqrt, power, ndarray, array, min as npmin, max as npmax
+from insolver.discretization.discretizer_utils import SklearnDiscretizer, CARTDiscretizer, ChiMergeDiscretizer
 
 
 class InsolverDiscretizer:
@@ -92,7 +92,7 @@ class InsolverDiscretizer:
         elif isinstance(y, Series):
             y = y.values
         elif isinstance(y, list):
-            y = np.array(y)
+            y = array(y)
         elif not (isinstance(y, ndarray)):
             raise ValueError('Invalid target type. '
                              'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
@@ -141,12 +141,12 @@ class InsolverDiscretizer:
             return round(power(2*len_X, 1/3))
 
         elif n_bins == 'scott':
-            return round((np.max(self.X) - np.min(self.X)) / 3.5 * std(self.X) * power(len_X, -1/3))
+            return round((npmax(self.X) - npmin(self.X)) / 3.5 * std(self.X) * power(len_X, -1/3))
 
         elif n_bins == 'freedman-diaconis':
             iqr = subtract(*percentile(self.X, [75, 25]))
             h = 2 * iqr / power(len_X, 1/3)
-            return round((np.max(self.X) - np.min(self.X)) / h)
+            return round((npmax(self.X) - npmin(self.X)) / h)
 
     def __check_X_shape(self):
         """Check shape of X.
@@ -174,7 +174,7 @@ class InsolverDiscretizer:
         if isinstance(self.X, DataFrame) or isinstance(self.X, Series):
             self.X = self.X.values
         elif isinstance(self.X, list):
-            self.X = np.array(self.X)
+            self.X = array(self.X)
         elif not (isinstance(self.X, ndarray)):
             raise ValueError('Invalid data type. '
                              'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
