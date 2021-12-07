@@ -95,7 +95,7 @@ def init_transforms(transforms, module_path=None, inference=False):
     transforms_list = []
     module_list = [basic, person, insurance, autofillna, date_time, grouping_sorting]
 
-    if module_path is not None:
+    if not ((module_path is None) or (module_path == '')):
         _directory = ntpath.dirname(module_path)
         _script = ntpath.basename(module_path)
         if not _script.endswith('.py'):

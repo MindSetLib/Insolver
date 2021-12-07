@@ -18,6 +18,7 @@ from time import strftime, time
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
+module_path = os.environ['module_path']
 
 # Logging
 handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)
@@ -39,7 +40,7 @@ else:
 # load and init transformations
 with open(transforms_path, 'rb') as file:
     tranforms = pickle.load(file)
-tranforms = init_transforms(tranforms, inference=True)
+tranforms = init_transforms(tranforms, module_path=module_path, inference=True)
 
 
 @app.route("/")
