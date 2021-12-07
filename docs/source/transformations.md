@@ -19,8 +19,10 @@ from insolver.transforms import (
     TransformPolynomizer,
     TransformAgeGender
 )
+from insolver.model_tools import download_dataset
 
-InsDataFrame = InsolverDataFrame(pd.read_csv('freMPL-R.csv', low_memory=False))
+download_dataset('freMPL-R')
+InsDataFrame = InsolverDataFrame(pd.read_csv('./datasets/freMPL-R.csv', low_memory=False))
 
 InsTransforms = InsolverTransform(InsDataFrame, [
     TransformAge('DrivAge', 18, 75),
@@ -33,7 +35,7 @@ InsTransforms = InsolverTransform(InsDataFrame, [
 ])
 
 InsTransforms.ins_transform()
-InsTransforms.save('transforms.pkl')
+InsTransforms.save('transforms.pickle')
 ```
 
 ### General preprocessing
@@ -159,10 +161,16 @@ There are several options for the `categorical_method` parameter available to fi
 You can also use constants to fill NA values using the `numerical_constants` and `categorical_constants` parameters for numerical and categorical columns respectively.
 
 ```python
+import pandas as pd
+from insolver import InsolverDataFrame
+from insolver.transforms import InsolverTransform, AutoFillNATransforms
+from insolver.model_tools import download_dataset
+
+download_dataset('freMPL-R')
+df = InsolverDataFrame(pd.read_csv('./datasets/freMPL-R.csv', low_memory=False))
 transform = InsolverTransform(df, [
     AutoFillNATransforms(numerical_constants={'col1': '111'}), 
 ])
-
 transform.ins_transform()
 
 print(df)
@@ -183,11 +191,10 @@ Class `DatetimeTransforms` is used to preprocess date and date time columns.
 Unlike other transformations, this class does not change the date columns, but creates new ones with the used feature in the name.
 
 ```python
-import numpy as np
 import pandas as pd
 
 from insolver.frame import InsolverDataFrame
-from insolver.transforms import InsolverTransform, AutoFillNATransforms
+from insolver.transforms import InsolverTransform, DatetimeTransforms
 
 df = InsolverDataFrame(pd.DataFrame(data={'last_review': ['2018-10-19', '2019-05-21']}))
 

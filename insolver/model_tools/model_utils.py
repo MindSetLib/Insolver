@@ -16,7 +16,8 @@ def download_dataset(name, folder='datasets'):
     """Function for downloading and unzipping example datasets
 
     Args:
-        name (str): Dataset name. Available datasets are freMPL-R, US_Accidents and Lending_Club
+        name (str): Dataset name. Available datasets are freMPL-R, US_Accidents, Lending_Club, weatherAus and
+         AB_NYC_2019.
         folder (str): Path to the folder to dataset saving
 
     Returns:
@@ -27,7 +28,9 @@ def download_dataset(name, folder='datasets'):
         'freMPL-R': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/freMPL-R.zip',
         'US_Accidents': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/US_Accidents_June20.zip',
         'US_Accidents_small': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.5/US_Accidents_small.zip',
-        'Lending_Club': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/LendingClub.zip'
+        'Lending_Club': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/LendingClub.zip',
+        'weatherAUS': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.15/weatherAUS.zip',
+        'AB_NYC_2019': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.15/AB_NYC_2019.zip'
     }
     if name not in datasets.keys():
         return f'Dataset {name} is not found. Available datasets are {", ".join(datasets.keys())}'
@@ -178,6 +181,34 @@ def deviance_explained(y, y_pred, weight=None, power=0):
     dev = deviance_score(y, y_pred, weight=weight, power=power)
     dev0 = deviance_score(y, np.repeat(np.mean(y), len(y)), weight=weight, power=power)
     return 1 - dev/dev0
+
+
+def deviance_explained_poisson(y, y_pred, weight=None):
+    """Function for Pseudo R^2 (Deviance explained) evaluation for Poisson model.
+
+        Args:
+            y: Array with target variable.
+            y_pred: Array with predictions.
+            weight: Weights for weighted metric.
+
+        Returns:
+            float, value of the Pseudo R^2.
+        """
+    return deviance_explained(y, y_pred, weight=weight, power=1)
+
+
+def deviance_explained_gamma(y, y_pred, weight=None):
+    """Function for Pseudo R^2 (Deviance explained) evaluation for Gamma model.
+
+        Args:
+            y: Array with target variable.
+            y_pred: Array with predictions.
+            weight: Weights for weighted metric.
+
+        Returns:
+            float, value of the Pseudo R^2.
+        """
+    return deviance_explained(y, y_pred, weight=weight, power=2)
 
 
 def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):

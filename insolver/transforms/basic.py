@@ -138,7 +138,7 @@ class OneHotEncoderTransforms:
         encoder_params = encoder.categories_
         encoder_params = [x.tolist() for x in encoder_params]
         column_encoded = pd.DataFrame(encoder.transform(df[[column_name]]))
-        column_encoded.columns = encoder.get_feature_names([column_name])
+        column_encoded.columns = encoder.get_feature_names_out([column_name])
         for column in column_encoded.columns:
             df[column] = column_encoded[column]
         return encoder_params
