@@ -1,4 +1,4 @@
-# Selection
+# Feature Engineering
 
 ## Feature Selection
 
@@ -28,11 +28,11 @@ All the methods used in this class are from `scikit-learn`:
 
 [`Permutation feature importance`](https://scikit-learn.org/stable/modules/generated/sklearn.inspection.permutation_importance.html) technique is also from `scikit-learn`. It supports only [estimator](https://scikit-learn.org/stable/glossary.html#term-estimator) models: Random Forest, Lasso and ElasticNet.
 
-## Methods diagram
+### Methods diagram
 
 ![feature selection methods](feature_selection_methods.png)
 
-## Example
+### Example
 
 ```python
 import pandas as pd
@@ -158,4 +158,43 @@ new_X = dm.transform(X=X, n_components=3)
 
 #plot result
 dm.plot_transformed(y, figsize=(5, 5), palette='Set2')
+```
+
+## Smoothing
+Data smoothing can be defined as a statistical approach of eliminating outliers from datasets to make the patterns more noticeable. Class `Smoothing` implements four methods for data smoothing. 
+
+You can select the method by changing the `method` parameter:
+- `moving_average` is a calculation to analyze data points by creating a series of averages of different subsets of the full data set, uses [pandas.DataFrame.rolling()](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rolling.html).mean() method;
+- `lowess` - Locally Weighted Scatterplot Smoothing is a generalization of moving average and polynomial regression, uses [statsmodels.api.nonparametric.lowess](statsmodels.api.nonparametric.lowess);
+- `s_g_filter` - Savitzky–Golay filter is  achieved by fitting successive sub-sets of adjacent data points with a low-degree polynomial by the method of linear least squares, uses [scipy.signal.savgol_filter](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html);
+- `fft` - Fast Fourier transform  is an algorithm that computes the discrete Fourier transform (DFT) of a sequence, or its inverse (IDFT), uses [scipy.fft.rfft](https://docs.scipy.org/doc/scipy/reference/generated/scipy.fft.rfft.html) and [scipy.fft.irfft](https://docs.scipy.org/doc/scipy/reference/generated/scipy.fft.irfft.html).
+
+`transform(data, **kwargs)` is the main smoothing method. It creates new `pandas.DataFrame` as a copy of original data and adds a new transformed column.
+
+This class has parameters that are used for different methods:
+- `window` - Window size for the `moving_average` and `s_g_filter` methods.
+- `polyorder` - Polyorder for the `s_g_filter` method.
+- `threshold` - Threshold for the `fft` method.
+
+Other parameters that are used for each method (besides `fft`) can be passed as `kwargs` to the `transform(data, **kwargs)` method.
+
+You can also plot original and transformed data with the `plot_transformed(figsize=(7, 7))` method.
+### Example
+
+```python
+import pandas as pd
+from insolver.frame import InsolverDataFrame
+from insolver.feature_engineering import Smoothing
+
+#create dataset using InsolverDataFrame or pandas.DataFrame
+df = InsolverDataFrame(pd.read_csv("..."))
+
+#create class instance with the selected sampling method
+smoothing = Smoothing(method='fft', x_column='x')
+
+#use transform() to create new dataframe
+new_data = smoothing.transform(data=df)
+
+#plot result
+smoothing.plot_transformed(figsize=(10,10))
 ```
