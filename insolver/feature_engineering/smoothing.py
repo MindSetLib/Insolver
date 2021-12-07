@@ -5,6 +5,7 @@ import statsmodels.api as sm
 from scipy.signal import savgol_filter
 from scipy.fft import rfft, rfftfreq, irfft
 
+
 class Smoothing: 
     """
     Smoothing algorithms.
@@ -65,7 +66,7 @@ class Smoothing:
             df (pandas.Dataframe): New dataframe.
             **kwargs: Arguments for the `pandas.DataFrame.rolling` function.
         """
-        df[f'{self.x_column}_Moving_Average'] = df[self.x_column].rolling(window = self.window, **kwargs).mean()
+        df[f'{self.x_column}_Moving_Average'] = df[self.x_column].rolling(window=self.window, **kwargs).mean()
         
     def _lowess(self, df, **kwargs):
         """
@@ -76,9 +77,9 @@ class Smoothing:
             **kwargs: Arguments for the `statsmodels.api.nonparametric.lowess` function.
         """
         lowess = sm.nonparametric.lowess(df[self.y_column], df[self.x_column], **kwargs)
-        if (lowess.shape[1] == 2):
-            df[f'{self.x_column}_Lowess'] = lowess[:,0]
-            df[f'{self.y_column}_Lowess'] = lowess[:,1]
+        if lowess.shape[1] == 2:
+            df[f'{self.x_column}_Lowess'] = lowess[:, 0]
+            df[f'{self.y_column}_Lowess'] = lowess[:, 1]
         else:
             df[f'{self.x_column}_Lowess'] = lowess
         
@@ -90,9 +91,9 @@ class Smoothing:
             df (pandas.Dataframe): New dataframe.
             **kwargs: Arguments for the `scipy.signal.savgol_filter` function.
         """
-        df[f'{self.x_column}_Savitzky_Golaay'] = savgol_filter(df[self.x_column], 
-                                                               window_length = self.window, 
-                                                               polyorder = self.polyorder, **kwargs)
+        df[f'{self.x_column}_Savitzky_Golaay'] = savgol_filter(df[self.x_column],
+                                                               window_length=self.window,
+                                                               polyorder=self.polyorder, **kwargs)
         
     def _fft(self, df, **kwargs):
         """
@@ -112,11 +113,10 @@ class Smoothing:
         Plot of the data before and after smoothing. 
         
         Parameters:
-            df (pandas.Dataframe): New dataframe.
             figsize (list), default=(7,7): Figure size.
         """
         columns = self.new_df.columns
-        if self.method=='lowess':
+        if self.method == 'lowess':
             plt.figure(figsize=figsize)
             sns.scatterplot(self.new_df[self.x_column], 
                             self.new_df[self.y_column], label='Raw')
@@ -130,7 +130,7 @@ class Smoothing:
             plt.plot(self.new_df[columns[-1]], label=self.method)
             plt.legend()
             plt.show()
-        
+
     def _init_methods_dict(self):
         """
         Methods dictionary initialization.
