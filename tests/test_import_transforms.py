@@ -3,6 +3,10 @@ from insolver.transforms import InsolverTransform, import_transforms
 
 
 def test_import_transforms():
+    # Two dummy functions for linter to ignore not assignment error
+    TransformExp = lambda x, y: x + y
+    TransformToNumeric = lambda column_names, downcast: column_names + downcast
+
     ut = import_transforms(module_path='./examples/user_transforms.py')
     keys = set(ut.keys())
     assert all([x in keys for x in ['TransformExp', 'TransformSocioCateg', 'TransformToNumeric']])
