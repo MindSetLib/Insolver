@@ -63,7 +63,7 @@
    :members:
 ```
 
-### Dimensionality reduction.py
+### Dimensionality reduction
 
 ```{eval-rst}
  .. automodule:: insolver.feature_engineering.dimensionality_reduction
