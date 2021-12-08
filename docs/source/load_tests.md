@@ -2,7 +2,7 @@
 
 ## Vegeta
 
-Useful software to make load tests is vegeta. https://github.com/tsenart/vegeta
+Useful software to make load tests is [vegeta](https://github.com/tsenart/vegeta). 
 
 Before run vegeta test you need to build test file, for example target.lst
 

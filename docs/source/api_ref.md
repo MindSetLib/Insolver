@@ -55,7 +55,7 @@
    :members:
 ```
 
-## Selection
+## Feature engineering
 ### Feature selection
 
 ```{eval-rst}
@@ -74,6 +74,12 @@
 
 ```{eval-rst}
  .. automodule:: insolver.feature_engineering.sampling
+   :members:
+```
+
+### Smoothing
+```{eval-rst}
+ .. automodule:: insolver.feature_engineering.smoothing
    :members:
 ```
 

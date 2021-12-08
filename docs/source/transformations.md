@@ -1,9 +1,9 @@
 # Transformations
 
-Transformations allow you to preprocess data, save your preprocessing steps to pickle file and using it in the model inference.
+Transformations allow you to preprocess data, save your preprocessing steps to a pickle file, and use it in the model inference.
 
 ## Build-in transformations
-There are several build-in transformations that can help you to preprocess some sorts of specific data.
+Several built-in transformations can help you to preprocess some specific data.
 
 An example of using build-in transformations:
 
@@ -29,7 +29,8 @@ InsTransforms = InsolverTransform(InsDataFrame, [
     TransformExp('LicAge', 57),
     TransformMapValues('Gender', {'Male': 0, 'Female': 1}),
     TransformMapValues('MariStat', {'Other': 0, 'Alone': 1}),
-    TransformAgeGender('DrivAge', 'Gender', 'Age_m', 'Age_f', age_default=18, gender_male=0, gender_female=1),
+    TransformAgeGender('DrivAge', 'Gender', 'Age_m', 'Age_f', age_default=18,
+                       gender_male=0, gender_female=1),
     TransformPolynomizer('Age_m'),
     TransformPolynomizer('Age_f')
 ])
@@ -67,26 +68,26 @@ You can also generate the polynomial features.
     Sorts by the average sum values of the chosen column.
 
 ### Preprocessing data about a person
-These classes are used to preprocess data about a person such as gender, age or name.
+These classes are used to preprocess data about a person, such as gender, age, or name.
 * class `TransformGenderGetFromName`:
-    For russian names only. Gets the gender of a person from russian second names.
+    For Russian names only. Gets the gender of a person from Russian second names.
 
 * class `TransformAgeGetFromBirthday`:
     Gets the age of a person in years from birth dates.
 
 * class `TransformAge`:
-    Transforms the age of a person to age for a specified `age_min` (lower values are invalid) and `age_max` (bigger values will be grouped) age. 
+    Transform a person's age to age for a specified `age_min` (lower values are invalid) and `age_max` (exceeding values will be grouped) age. 
 
 * class `TransformAgeGender`:
     Gets the intersection of a person's minimum age and gender.
 
 * class `TransformNameCheck`:
-    Checks if the person's first name is on the special list. Names may concatenate surnames, first names and last names.
+    Checks if the person's first name is on the particular list. Names may concatenate surnames, first names, and last names.
 
 ### Preprocessing of insurance data 
-Since Insolver was made for the insurance industry, there are also available some classes to handle driving experience, vehicle and region data.
+Since Insolver was made for the insurance industry, some classes are also available to handle the driving experience, vehicle, and region data.
 * class `TransformExp`:
-    Transforms the values of the minimum driving experience in years with a grouping of values greater than `exp_max`. 
+    Transforms the minimum driving experience values in years with a grouping of values greater than `exp_max`. 
 
 * class `TransformAgeExpDiff`:
     Transforms records with the difference between the minimum driver age and the minimum experience less than `diff_min` years, sets the minimum driver experience equal to the minimum driver age minus `diff_min` years. 
@@ -95,10 +96,10 @@ Since Insolver was made for the insurance industry, there are also available som
     Transforms vehicle power values. Values under `power_min` and over `power_max` will be grouped. Values between `power_min` and `power_max` will be grouped with step `power_step`.
 
 * class `TransformVehAgeGetFromIssueYear`:
-    Gets the age of the vehicles in years by year of issue and policy start dates. 
+    Get the vehicles' age (in years) by year of issue and policy start dates. 
 
 * class `TransformVehAge`:
-    Transforms vehicle age values in years. Values over `veh_age_max` will be grouped.
+    Transforms vehicle age values (in years). Values over `veh_age_max` will be grouped.
 
 * class `TransformRegionGetFromKladr`:
     Gets the region number from KLADRs.
@@ -114,7 +115,7 @@ Since Insolver was made for the insurance industry, there are also available som
 ```
 
 Class `AutoFillNATransforms` is used to fill NA values in a dataset. 
-It fills NA values with median values for numerical columns and with most frequently used values for categorical columns.
+It fills NA values with median values for numerical columns and the most frequently used categorical columns.
 
 ```python
 import numpy as np
@@ -154,11 +155,11 @@ There are several options for the `numerical_method` parameter available to fill
 There are several options for the `categorical_method` parameter available to fill the NA categorical values: 
 - `frequent` (by default) - the category that appears most often in a set of data values, if several values are found, the first one is used;
 - `new_category` - creates a new category "Unknown" for NA values; 
-- `imputed_column` - fills with the frequent category and creates new `bool` column containing whether a value was imputed or not;
+- `imputed_column` - fills with the frequent category and creates a new `bool` column containing whether a value was imputed or not;
 - `remove` - removes all columns containing NA values.
 
 #### Using constants
-You can also use constants to fill NA values using the `numerical_constants` and `categorical_constants` parameters for numerical and categorical columns respectively.
+You can also use constants to fill NA values using the `numerical_constants` and `categorical_constants` parameters for numerical and categorical columns.
 
 ```python
 import pandas as pd
@@ -187,8 +188,8 @@ print(df)
     :show-inheritance:
 ```
 
-Class `DatetimeTransforms` is used to preprocess date and date time columns. 
-Unlike other transformations, this class does not change the date columns, but creates new ones with the used feature in the name.
+Class `DatetimeTransforms` is used to preprocess date and date-time columns. 
+Unlike other transformations, this class does not change the date columns but creates new ones with the used feature in the name.
 
 ```python
 import pandas as pd
@@ -283,11 +284,12 @@ print(df_transformed)
 
 ## Custom transformations
 
-Custom transformations can be created in a special module `user_transforms.py`, which must be created in your project directory (exact name also required).
+Custom transformations can be created in a particular module. It must be a python file, e.g., `user_transforms.py`.
+To use it in your workflow, you should pass the path to this module into `import_transforms` or `init_transforms`functions.
 
-In this module you can create you own transformation classes.
+In this module, you can create your transformation classes.
 
-The custom class must have `__call__` method, which gets the initial dataframe and returns transformed one:
+The custom class must have the `__call__` method, which gets the initial dataframe and returns transformed one:
 
 ```python
 # user_transforms.py
@@ -311,15 +313,15 @@ class TransformToNumeric:
         return df
 ```
 
-After that you can use user-defined transformations the same way as the build-in transformations:
+After that, you can import user-defined transformations (updating globals) and then use them in the same way as the build-in transformations:
 
 ```python
 import pandas as pd
 
 from insolver.frame import InsolverDataFrame
-from insolver.transforms import InsolverTransform
-from examples.user_transforms import TransformToNumeric
+from insolver.transforms import InsolverTransform, import_transforms
 
+globals().update(import_transforms("./user_transforms.py"))
 df = InsolverDataFrame(pd.DataFrame(data={'col1': ['1.0', '2', -3]}))
 
 print(df)
@@ -346,3 +348,25 @@ print(df_transformed.dtypes)
 # dtype: object
 ```
 
+When using saved user-defined transforms, they should be initialized with `init_transforms`.   
+
+```python
+import pickle
+import pandas as pd
+
+from insolver import InsolverDataFrame
+from insolver.transforms import InsolverTransform, init_transforms
+
+# load data
+df = pd.read_json('request_example.json')
+InsDataFrame = InsolverDataFrame(df)
+
+# load and init transformations
+with open('transforms.pickle', 'rb') as file:
+    transforms = pickle.load(file)
+
+transforms = init_transforms(transforms, module_path='./user_transforms.py', inference=True)
+InsTransforms = InsolverTransform(InsDataFrame, transforms)
+InsTransforms.ins_transform()
+...
+```

@@ -1,5 +1,5 @@
+import os
 import sys
-import ntpath
 import json
 import pickle
 import importlib
@@ -96,8 +96,8 @@ def init_transforms(transforms, module_path=None, inference=False):
     module_list = [basic, person, insurance, autofillna, date_time, grouping_sorting]
 
     if not ((module_path is None) or (module_path == '')):
-        _directory = ntpath.dirname(module_path)
-        _script = ntpath.basename(module_path)
+        _directory = os.path.dirname(os.path.abspath(module_path))
+        _script = os.path.basename(os.path.abspath(module_path))
         if not _script.endswith('.py'):
             raise ValueError('Argument module_path should contain path to the .py file.')
         else:
@@ -126,3 +126,31 @@ def init_transforms(transforms, module_path=None, inference=False):
             transforms_list.append(transform_class(**transforms[n]['attributes']))
 
     return transforms_list
+
+
+def import_transforms(module_path):
+    """Function for importing custom transformations into dictionary.
+
+        Args:
+            module_path (str): Path to the user transformations saved in .py file. E.g., user_transforms.py.
+
+        Returns:
+            dict: Dictionary containing user-defined transformations.
+        """
+    if not module_path == '':
+        _directory = os.path.dirname(os.path.abspath(module_path))
+        _script = os.path.basename(os.path.abspath(module_path))
+        if not _script.endswith('.py'):
+            raise ValueError('Argument module_path should contain path to the .py file.')
+        else:
+            user_transforms = _script.strip('.py')
+        sys.path.insert(1, _directory)
+
+        user_transforms = importlib.import_module(user_transforms)
+        importlib.reload(user_transforms)
+
+        if "__all__" in user_transforms.__dict__:
+            names = user_transforms.__dict__["__all__"]
+        else:
+            names = [x for x in user_transforms.__dict__ if not x.startswith("_")]
+        return {k: getattr(user_transforms, k) for k in names}
