@@ -6,14 +6,14 @@
  .. autoclass:: insolver.feature_engineering.FeatureSelection
     :show-inheritance: 
 ```
-Class `FeatureSelection` allows you to compute features importances using selected method. It also can plot it with selected plot size and the importance threshold. Using computed importance you can create a new dataset with the best features. You can also use permutation importance model inspection technique with some models.
+Class `FeatureSelection` allows you to compute features importances using the selected method. It also can plot it with the plot size chosen and the importance threshold. You can create a new dataset with the best features using computed importance. The permutation importance model inspection with some models also can be used.
 
-Class `FeatureSelection` supports such tasks as classification, regression, multiclass classification and multiclass multioutput classification.
+Class `FeatureSelection` supports such tasks as classification, regression, multiclass classification, and multiclass multioutput classification.
 
-The following  methods can be used for each individual task:
-- for the `class` task Mutual information, F statistics, chi-squared test, Random Forest, Lasso or ElasticNet can be used;
-- for the `reg` task Mutual information, F statistics, Random Forest, Lasso or ElasticNet can be used;
-- for the `multiclass` task Random Forest, Lasso or ElasticNet can be used;
+The following  methods can be used for each task:
+- for the `class` task, Mutual information, F statistics, chi-squared test, Random Forest, Lasso, or ElasticNet can be used;
+- for the `reg` task, Mutual information, F statistics, Random Forest, Lasso, or ElasticNet can be used;
+- for the `multiclass` task, Random Forest, Lasso or ElasticNet can be used;
 - for the `multiclass_multioutput` classification Random Forest can be used.
 
 Random Forest is used by default.
@@ -26,7 +26,7 @@ All the methods used in this class are from `scikit-learn`:
 -  `f_statistic` [classification statistic](https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.f_classif.html) / [regression statistic](https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.f_regression.html),
 -  `chi2` [classification statistic](https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.chi2.html).
 
-[`Permutation feature importance`](https://scikit-learn.org/stable/modules/generated/sklearn.inspection.permutation_importance.html) technique is also from `scikit-learn`. It supports only [estimator](https://scikit-learn.org/stable/glossary.html#term-estimator) models: Random Forest, Lasso and ElasticNet.
+[`Permutation feature importance`](https://scikit-learn.org/stable/modules/generated/sklearn.inspection.permutation_importance.html) technique is also from `scikit-learn`. It supports only [estimator](https://scikit-learn.org/stable/glossary.html#term-estimator) models: Random Forest, Lasso, and ElasticNet.
 
 ### Methods diagram
 
@@ -71,19 +71,19 @@ fs_p.create_model(dataset)
 
 [Sampling](https://en.wikipedia.org/wiki/Sampling_(statistics)) is the selection of a subset (a statistical sample) of individuals from within a statistical population to estimate characteristics of the whole population.
 Class `Sampling` implements methods from __probability sampling__. A probability sample is a sample in which every unit in the population has a chance (greater than zero) of being selected in the sample, and this probability can be accurately determined.
-There are four methods you can use by changing `method` parameter:
+There are four methods you can use by changing the `method` parameter:
 - `simple` (default) sampling is a technique in which a subset is randomly selected number from a set;
 - `systematic` sampling is a technique in which a subset is selected from a set using a defined step;
 - `cluster` sampling is a technique in which a set is divided into clusters, then the set is determined by a randomly selected number of clusters; 
 - `stratified` sampling is a technique in which a set is divided into clusters, then the set is determined by a randomly selected number of units from each cluster.
 
 The `n` parameter is used differently in each sampling method:
-- for a `simple` sampling `n` is the number of values to keep;
-- for a `systematic` sampling `n` is the number of step size;
-- for a `cluster` sampling `n` is the number of clusters to keep;
-- for a `stratified` sampling `n` is the number of values to keep in each cluster.
+- for a `simple` sampling, `n` is the number of values to keep;
+- for a `systematic` sampling, `n` is the number of step size;
+- for a `cluster` sampling, `n` is the number of clusters to keep;
+- for a `stratified` sampling, `n` is the number of values to keep in each cluster.
 
-You can use dataframe column as clusters by defining `cluster_column`. It will use values from this column in `cluster` and `stratified` methods.
+You can use the dataframe column as clusters by defining `cluster_column`. It will use values from this column in `cluster` and `stratified` methods.
 
 ### Example
 
@@ -113,7 +113,7 @@ new_dataset = sampling.sample_dataset(df=dataset)
     :show-inheritance:
 ```
     
-`DimensionalityReduction` class allows you to reduce the dimensionality of data with a selected method. There are 3 types of techniques implemented: decomposition, manifold and discriminant analysis.
+`DimensionalityReduction` class allows you to reduce data dimensionality with a selected method. There are three types of techniques implemented: decomposition, manifold, and discriminant analysis.
 
 The type of the method can be specified in the `method` parameter. The list of methods that can be assigned is presented below. All methods are implemented from [scikit-learn](https://scikit-learn.org/stable/index.html).
 
@@ -131,9 +131,9 @@ Manifold learning is represented by methods such as:
 - `isomap` - [Isomap Embedding](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.Isomap.html);
 - `t_sne` - [T-distributed Stochastic Neighbor Embedding, T-SNE](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html).
 
-Use `transform(X, y=None, **kwargs)` method to create a new transformed X. Parameters assigned as `kwargs` can be used to change model(estimator) parameters which can be found in the sklearn pages above.
+Use the `transform(X, y=None, **kwargs)` method to create a new transformed X. Parameters assigned as `kwargs` can be used to change model(estimator) parameters which can be found in the sklearn pages above.
 
-You can plot the transformed X and y with the `plot_transformed(self, y, figsize=(10,10), **kwargs)` method. It uses [seaborn](https://seaborn.pydata.org/) to create plots. If the number of components is less than 3, [seaborn.scatterplot](https://seaborn.pydata.org/generated/seaborn.scatterplot.html) will be created, else [seaborn.pairplot](https://seaborn.pydata.org/generated/seaborn.pairplot.html) will be created. The `y` parameter is used as the hue. Parameters assigned as `kwargs` can be used to change plot parameters which can be found in the seaborn pages.
+You can plot the transformed X and y with the `plot_transformed(self, y, figsize=(10,10), **kwargs)` method. It uses [seaborn](https://seaborn.pydata.org/) to create plots. If the number of components is less than 3, [seaborn.scatterplot](https://seaborn.pydata.org/generated/seaborn.scatterplot.html) will be created, else [seaborn.pairplot](https://seaborn.pydata.org/generated/seaborn.pairplot.html) will be created. The `y` parameter is used as the hue. Parameters assigned as `kwargs` can be used to change plot parameters found in the seaborn pages.
 
 You can access created model with the `estimator` attribute.
 

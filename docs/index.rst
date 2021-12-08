@@ -1,12 +1,8 @@
-.. Insolver - Insurance Scoring documentation master file, created by
-   sphinx-quickstart on Wed Sep  2 16:40:53 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Insolver Documentation
 ========================================================
 
-Insolver is insurance scoring ML package
+Insolver is a low-code machine learning package specified for insurance tasks: prepare data, build model, and implement
+into production.
 
 .. toctree::
    :maxdepth: 1
