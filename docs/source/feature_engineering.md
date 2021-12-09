@@ -69,7 +69,7 @@ fs_p.create_model(dataset)
     :show-inheritance:
 ```
 
-[Sampling](https://en.wikipedia.org/wiki/Sampling_(statistics)) is the selection of a subset (a statistical sample) of individuals from within a statistical population to estimate characteristics of the whole population.
+Sampling is the selection of a subset (a statistical sample) of individuals from within a statistical population to estimate characteristics of the whole population.
 Class `Sampling` implements methods from __probability sampling__. A probability sample is a sample in which every unit in the population has a chance (greater than zero) of being selected in the sample, and this probability can be accurately determined.
 There are four methods you can use by changing the `method` parameter:
 - `simple` (default) sampling is a technique in which a subset is randomly selected number from a set;
@@ -161,11 +161,17 @@ dm.plot_transformed(y, figsize=(5, 5), palette='Set2')
 ```
 
 ## Smoothing
+
+```{eval-rst}
+.. autoclass:: insolver.feature_engineering.Smoothing
+    :show-inheritance:
+```
+
 Data smoothing can be defined as a statistical approach of eliminating outliers from datasets to make the patterns more noticeable. Class `Smoothing` implements four methods for data smoothing. 
 
 You can select the method by changing the `method` parameter:
 - `moving_average` is a calculation to analyze data points by creating a series of averages of different subsets of the full data set, uses [pandas.DataFrame.rolling()](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rolling.html).mean() method;
-- `lowess` - Locally Weighted Scatterplot Smoothing is a generalization of moving average and polynomial regression, uses [statsmodels.api.nonparametric.lowess](statsmodels.api.nonparametric.lowess);
+- `lowess` - Locally Weighted Scatterplot Smoothing is a generalization of moving average and polynomial regression, uses [statsmodels.api.nonparametric.lowess](https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html);
 - `s_g_filter` - Savitzky–Golay filter is  achieved by fitting successive sub-sets of adjacent data points with a low-degree polynomial by the method of linear least squares, uses [scipy.signal.savgol_filter](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html);
 - `fft` - Fast Fourier transform  is an algorithm that computes the discrete Fourier transform (DFT) of a sequence, or its inverse (IDFT), uses [scipy.fft.rfft](https://docs.scipy.org/doc/scipy/reference/generated/scipy.fft.rfft.html) and [scipy.fft.irfft](https://docs.scipy.org/doc/scipy/reference/generated/scipy.fft.irfft.html).
 
@@ -179,6 +185,7 @@ This class has parameters that are used for different methods:
 Other parameters that are used for each method (besides `fft`) can be passed as `kwargs` to the `transform(data, **kwargs)` method.
 
 You can also plot original and transformed data with the `plot_transformed(figsize=(7, 7))` method.
+
 ### Example
 
 ```python
@@ -189,7 +196,7 @@ from insolver.feature_engineering import Smoothing
 #create dataset using InsolverDataFrame or pandas.DataFrame
 df = InsolverDataFrame(pd.read_csv("..."))
 
-#create class instance with the selected sampling method
+#create class instance with the selected method
 smoothing = Smoothing(method='fft', x_column='x')
 
 #use transform() to create new dataframe
