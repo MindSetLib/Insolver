@@ -92,7 +92,7 @@ You can also plot original and transformed data with the `plot_transformed(colum
 ```python
 import pandas as pd
 from insolver.frame import InsolverDataFrame
-from insolver.feature_engineering.Normalization import Normalization
+from insolver.feature_engineering.normalization import Normalization
 
 #create dataset using InsolverDataFrame or pandas.DataFrame
 df = InsolverDataFrame(pd.read_csv("..."))
