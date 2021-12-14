@@ -116,10 +116,10 @@ def pool_inference(pack):
     i = pack[1]
     df = pack[0]
     # print('index', i)
-    InsDataFrame = InsolverDataFrame(df)
-    InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
-    InsTransforms.ins_transform()
-    predicted = mlist[i].predict(InsTransforms)
+    insdataframe = InsolverDataFrame(df)
+    instransforms = InsolverTransform(insdataframe, tlist[i])
+    instransforms.ins_transform()
+    predicted = mlist[i].predict(instransforms)
     return [i, predicted[0]]
 
 
@@ -143,7 +143,7 @@ def predict(data: Data):
     data_dict = data.dict()
     df = pd.DataFrame(data_dict['df'])
 
-    pack = list(zip([df for i in range(0, len(mlist))], [i for i in range(0, len(mlist))]))
+    pack = list([(df, i) for i in range(0, len(mlist))])
 
     with Pool(N_CORES) as p:
         result_pool = p.map(pool_inference, pack)

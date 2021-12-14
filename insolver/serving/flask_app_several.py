@@ -115,10 +115,10 @@ def pool_inference(pack):
     a_json = json.loads(pack[0])
     df = pd.DataFrame.from_dict(a_json, orient='index').T
     # df = pd.read_json(pack[0])
-    InsDataFrame = InsolverDataFrame(df)
-    InsTransforms = InsolverTransform(InsDataFrame, tlist[i])
-    InsTransforms.ins_transform()
-    predicted = mlist[i].predict(InsTransforms)
+    insdataframe = InsolverDataFrame(df)
+    instransforms = InsolverTransform(insdataframe, tlist[i])
+    instransforms.ins_transform()
+    predicted = mlist[i].predict(instransforms)
     return [i, predicted[0]]
 
 
@@ -149,10 +149,7 @@ def predict():
 
     # print(json_input)
 
-    pack = list(zip([json_str for i in range(0, len(mlist))],
-                    [i for i in range(0, len(mlist))]
-                    )
-                )
+    pack = list([(json_str, i) for i in range(0, len(mlist))])
 
     with Pool(N_CORES) as p:
         result_pool = p.map(pool_inference, pack)
