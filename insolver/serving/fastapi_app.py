@@ -47,13 +47,13 @@ async def predict(data: Data):
     data_dict = data.dict()
     df = pd.DataFrame(data_dict['df'])
 
-    InsDataFrame = InsolverDataFrame(df)
+    insdataframe = InsolverDataFrame(df)
     # Apply transformations
-    InsTransforms = InsolverTransform(InsDataFrame, tranforms)
-    InsTransforms.ins_transform()
+    instransforms = InsolverTransform(insdataframe, tranforms)
+    instransforms.ins_transform()
 
     # Prediction
-    predicted = model.predict(InsTransforms)
+    predicted = model.predict(instransforms)
 
     result = {
         'predicted': predicted.tolist()
