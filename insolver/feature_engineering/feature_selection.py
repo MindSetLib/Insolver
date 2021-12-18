@@ -124,8 +124,12 @@ class FeatureSelection:
         
         """
 
-        try: 
-            df_scores = pd.DataFrame({'feature_name': self.x.columns, 'feature_score': self.importances})
+        try:
+            scores = self.importances
+            if (self.task=='multiclass') and (not self.method=='random_forest'):
+                scores = np.mean(np.abs(self.importances), axis=0)
+                
+            df_scores = pd.DataFrame({'feature_name': self.x.columns, 'feature_score': scores})
                     
             if threshold == 'mean':
                 self.threshold = df_scores['feature_score'].abs().mean()
@@ -262,8 +266,8 @@ class FeatureSelection:
             'mutual_inf': lambda model: model,
             'chi2': lambda model: model[1],
             'f_statistic': lambda model: -np.log10(model[1])/(-np.log10(model[1])).max(),
-            'lasso': lambda model: model.coef_[0] if self.task == 'class' else model.coef_,
-            'elasticnet': lambda model: model.coef_[0] if self.task == 'class' else model.coef_
+            'lasso': lambda model: model.coef_,
+            'elasticnet': lambda model: model.coef_
         }
     
     def __call__(self, df):
