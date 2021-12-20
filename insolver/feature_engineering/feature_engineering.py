@@ -67,9 +67,9 @@ class NoNameFS:
         
     """
     def __init__(self, numerical_columns=None, categorical_columns=None,
-                 transform_categorical=True, transform_categorical_drop=[],
+                 transform_categorical=True, transform_categorical_drop=None,
                  fillna=True, fillna_numerical='median', fillna_categorical='frequent',
-                 normalization=True, normalization_drop=[],
+                 normalization=True, normalization_drop=None,
                  feature_selection=None, feat_select_task=None, feat_select_threshold='mean',
                  dim_red=None, dim_red_n_components=None, dim_red_n_neighbors=None,
                  sampling=None, sampling_n=None, sampling_n_clusters=10,
@@ -79,7 +79,8 @@ class NoNameFS:
         self.numerical_columns = numerical_columns
         self.categorical_columns = categorical_columns
         self.transform_categorical = transform_categorical
-        self.transform_categorical_drop = transform_categorical_drop.copy()
+        self.transform_categorical_drop = ([] if transform_categorical_drop is None
+                                           else transform_categorical_drop.copy())
         
         # auto fill NA values attributes
         self.fillna = fillna
@@ -88,7 +89,7 @@ class NoNameFS:
         
         # normalization attributes
         self.normalization = normalization
-        self.normalization_drop = normalization_drop.copy()
+        self.normalization_drop = [] if normalization_drop is None else normalization_drop.copy()
         
         # feature selection attributes
         self.feature_selection = feature_selection
