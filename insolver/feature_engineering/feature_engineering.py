@@ -80,7 +80,7 @@ class NoNameFS:
         self.categorical_columns = categorical_columns
         self.transform_categorical = transform_categorical
         self.transform_categorical_drop = ([] if transform_categorical_drop is None
-                                           else transform_categorical_drop.copy())
+                                           else transform_categorical_drop)
         
         # auto fill NA values attributes
         self.fillna = fillna
@@ -89,7 +89,7 @@ class NoNameFS:
         
         # normalization attributes
         self.normalization = normalization
-        self.normalization_drop = [] if normalization_drop is None else normalization_drop.copy()
+        self.normalization_drop = [] if normalization_drop is None else normalization_drop
         
         # feature selection attributes
         self.feature_selection = feature_selection
