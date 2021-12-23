@@ -123,13 +123,28 @@ class NoNameFS:
             df (pandas.Dataframe): The dataframe.
             target (str): Target column name.
             drop_target (bool), default=True: If True, target column won't be transformed.
+
+        Raises:
+            NotImplementedError: If target parameter must be str or list.
         """
         # create a copy of the DataFrame if inplace=False
         df = df.copy()
         
         if drop_target:
-            self.normalization_drop.append(target)
-            self.transform_categorical_drop.append(target)
+            #if target is str add to lists
+            if isinstance(target, str):
+                self.normalization_drop.append(target)
+                self.transform_categorical_drop.append(target)
+
+            #if target is list iterate and add to lists
+            elif isinstance(target, list):
+                for t in target:
+                    self.normalization_drop.append(t)
+                    self.transform_categorical_drop.append(t)
+
+            #else if not str and not list raise error
+            else:
+                raise NotImplementedError('Target parameter must be str or list.')
 
         self._init_features(df, target)
         if self.transform_categorical:
@@ -266,15 +281,22 @@ class NoNameFS:
         Parameters:
             df (pandas.Dataframe): The dataframe.
             target (str): Target column name.
+            
+        Raises:
+            NotImplementedError: If Y is Multi target and dim_red == 'lda'.
         """
         # set default value if parameter is initialized as True
         if self.dim_red is True:
             self.dim_red = 'pca'
             
-        # set X as the given DataFrame if the target is None else set X as the given DataFrame without target
-        X = df if target is None else df.drop([target], axis=1)
-        # set y as the target if it's initialized else set y None
-        y = df[target] if target else None
+        if isinstance(target, str):
+            #set X as the given DataFrame if the target is None else set X as the given DataFrame without target
+            X = df if target is None else df.drop([target], axis=1)
+            #set y as the target if it's initialized else set y None
+            y = df[target] if target else None
+        else:
+            X = df if target is None else df.drop(target, axis=1)
+            y = df[target] if target else None
         
         # if the selected method is decomposition, then set X and n_components in the transform method
         if self.dim_red in ['pca', 'svd', 'fa', 'nmf']:
@@ -282,6 +304,10 @@ class NoNameFS:
         
         # if the selected method is LDA, then set X, y and n_components in the transform method
         elif self.dim_red == 'lda':
+            #raise error if y is list
+            if isinstance(target, list):
+                raise NotImplementedError('Multi target is not supported for LDA.')
+            
             X = DimensionalityReduction(method=self.dim_red).transform(X=X, y=y,
                                                                        n_components=self.dim_red_n_components)
             
@@ -335,7 +361,7 @@ class NoNameFS:
             target (str): Target column name.
             
         Raises:
-            NotImplementedError: If parameter `smoothing_column` is not initialized.
+            AttributeError: If parameter `smoothing_column` is not initialized.
         """
         # set default value if parameter is initialized as True
         if self.smoothing is True:
@@ -343,7 +369,7 @@ class NoNameFS:
         
         # check if parameter `smoothing_column` is not initialized
         if not self.smoothing_column:
-            raise NotImplementedError('Parameter `smoothing_column` must be initialized for the smoothing.')
+            raise AttributeError('Parameter `smoothing_column` must be initialized for the smoothing.')
             
         # smooth and return transformed values
         return Smoothing(method=self.smoothing, x_column=self.smoothing_column, y_column=target).transform(df)
@@ -357,8 +383,12 @@ class NoNameFS:
             target (str): Target column name.
             
         Raises:
-            NotImplementedError: If parameter `feat_select_task` is not initialized.
+            NotImplementedError: If Y is Multi target.
+            AttributeError: If parameter `feat_select_task` is not initialized.
         """
+        #raise error if target is list
+        if isinstance(target, list):
+            raise NotImplementedError('Multi target is not supported in feature selection.')
         
         # set default value if parameter is initialized as True
         if self.feature_selection is True:
@@ -366,7 +396,7 @@ class NoNameFS:
         
         # check if parameter `task` is not initialized
         if not self.feat_select_task:
-            raise NotImplementedError('Parameter `feat_select_task` must be initialized for the feature selection.')
+            raise AttributeError('Parameter `feat_select_task` must be initialized for feature selection.')
             
         _fs = FeatureSelection(y_column=target, task=self.feat_select_task, method=self.feature_selection)
         _fs.create_model(df)
