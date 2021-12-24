@@ -42,17 +42,23 @@ class Smoothing:
         Raises:
             NotImplementedError: If method is not supported.
         """
+        # initialize all methods 
         self._init_methods_dict()
-        
+
+        # raise error if the method is not supported
         if self.method not in self.methods_dict.keys():
             raise NotImplementedError(f'Method {self.method} is not supported.')
-        
+
+        # if the data is a DataFrame create a copy
         if isinstance(data, DataFrame):
             self.new_df = data.copy()
+
+        # else create a DataFrame from data with the column 'data'
         else:
             self.new_df = DataFrame(data, columns=['data'])
             self.x_column = 'data'   
-        
+
+        # get a function and call it
         func = self.methods_dict[self.method]
         func(self.new_df, **kwargs)
         
@@ -66,6 +72,7 @@ class Smoothing:
             df (pandas.Dataframe): New dataframe.
             **kwargs: Arguments for the `pandas.DataFrame.rolling` function.
         """
+        # create a new column using the DataFrame.rolling().mean() methods
         df[f'{self.x_column}_Moving_Average'] = df[self.x_column].rolling(window=self.window, **kwargs).mean()
         
     def _lowess(self, df, **kwargs):
@@ -76,10 +83,19 @@ class Smoothing:
             df (pandas.Dataframe): New dataframe.
             **kwargs: Arguments for the `statsmodels.api.nonparametric.lowess` function.
         """
+        # create lowess from data
         lowess = sm.nonparametric.lowess(df[self.y_column], df[self.x_column], **kwargs)
-        if lowess.shape[1] == 2:
+        
+        # save lowess shape for use in the plot_transformed() method
+        self._lowess_shape = lowess.shape[1]
+        
+        # the returned from lowess array is two-dimensional if return_sorted is True
+        if self._lowess_shape == 2:
+            #add both of them to the DataFrame as new columns
             df[f'{self.x_column}_Lowess'] = lowess[:, 0]
             df[f'{self.y_column}_Lowess'] = lowess[:, 1]
+            
+        # the returned from lowess array is one dimensional if return_sorted is False
         else:
             df[f'{self.x_column}_Lowess'] = lowess
         
@@ -91,6 +107,7 @@ class Smoothing:
             df (pandas.Dataframe): New dataframe.
             **kwargs: Arguments for the `scipy.signal.savgol_filter` function.
         """
+        # create a new column with the savgol_filter method
         df[f'{self.x_column}_Savitzky_Golaay'] = savgol_filter(df[self.x_column],
                                                                window_length=self.window,
                                                                polyorder=self.polyorder, **kwargs)
@@ -102,10 +119,15 @@ class Smoothing:
         Parameters:
             df (pandas.Dataframe): New dataframe.
         """
+        # get signal from data
         signal = df[self.x_column]
+        # compute the one-dimensional discrete Fourier Transform 
         fourier = rfft(signal)
+        # get the Discrete Fourier Transform sample frequencies
         frequencies = rfftfreq(signal.size, d=20e-3/signal.size)
+        # remove values outside the threshold 
         fourier[frequencies > self.threshold] = 0
+        # compute the inverse of rfftn and create a new column
         df[f'{self.x_column}_FFT'] = irfft(fourier)
         
     def plot_transformed(self, figsize=(7, 7)):
@@ -115,18 +137,29 @@ class Smoothing:
         Parameters:
             figsize (list), default=(7,7): Figure size.
         """
+        # get columns
         columns = self.new_df.columns
+
+        # if the method is lowess plot x and y columns
         if self.method == 'lowess':
             plt.figure(figsize=figsize)
+            # plot old values as scatterplot
             scatterplot(self.new_df[self.x_column],
                         self.new_df[self.y_column], label='Raw')
-            plt.plot(self.new_df[columns[-2]], 
-                     self.new_df[columns[-1]], label=self.method)
+            # plot new values
+            if self._lowess_shape == 2:
+                plt.plot(self.new_df[columns[-2]], 
+                         self.new_df[columns[-1]], label=self.method)
+            else:
+                plt.plot(self.new_df[columns[-1]], 
+                         self.new_df[self.y_column], label=self.method)
             plt.legend()
             
         else:
             plt.figure(figsize=(15, 10))
+            # plot old x
             plt.plot(self.new_df[self.x_column], label='Raw')
+            # plot new x
             plt.plot(self.new_df[columns[-1]], label=self.method)
             plt.legend()
             plt.show()
