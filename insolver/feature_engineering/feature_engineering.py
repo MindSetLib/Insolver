@@ -1,18 +1,7 @@
 import warnings
 import pandas as pd
-from insolver.transforms import (
-    TransformGetDummies,
-    EncoderTransforms,
-    OneHotEncoderTransforms,
-    AutoFillNATransforms
-)
-from insolver.feature_engineering import (
-    DimensionalityReduction,
-    Sampling,
-    Smoothing,
-    Normalization,
-    FeatureSelection
-)
+from insolver.transforms import EncoderTransforms, OneHotEncoderTransforms, AutoFillNATransforms
+from insolver.feature_engineering import DimensionalityReduction, Sampling, Smoothing, Normalization, FeatureSelection
 
 
 class NoNameFS:
@@ -131,18 +120,18 @@ class NoNameFS:
         df = df.copy()
         
         if drop_target:
-            #if target is str add to lists
+            # if target is str add to lists
             if isinstance(target, str):
                 self.normalization_drop.append(target)
                 self.transform_categorical_drop.append(target)
 
-            #if target is list iterate and add to lists
+            # if target is list iterate and add to lists
             elif isinstance(target, list):
                 for t in target:
                     self.normalization_drop.append(t)
                     self.transform_categorical_drop.append(t)
 
-            #else if not str and not list raise error
+            # else if not str and not list raise error
             else:
                 raise NotImplementedError('Target parameter must be str or list.')
 
@@ -290,9 +279,9 @@ class NoNameFS:
             self.dim_red = 'pca'
             
         if isinstance(target, str):
-            #set X as the given DataFrame if the target is None else set X as the given DataFrame without target
+            # set X as the given DataFrame if the target is None else set X as the given DataFrame without target
             X = df if target is None else df.drop([target], axis=1)
-            #set y as the target if it's initialized else set y None
+            # set y as the target if it's initialized else set y None
             y = df[target] if target else None
         else:
             X = df if target is None else df.drop(target, axis=1)
@@ -304,7 +293,7 @@ class NoNameFS:
         
         # if the selected method is LDA, then set X, y and n_components in the transform method
         elif self.dim_red == 'lda':
-            #raise error if y is list
+            # raise error if y is list
             if isinstance(target, list):
                 raise NotImplementedError('Multi target is not supported for LDA.')
             
@@ -386,7 +375,7 @@ class NoNameFS:
             NotImplementedError: If Y is Multi target.
             AttributeError: If parameter `feat_select_task` is not initialized.
         """
-        #raise error if target is list
+        # raise error if target is list
         if isinstance(target, list):
             raise NotImplementedError('Multi target is not supported in feature selection.')
         
