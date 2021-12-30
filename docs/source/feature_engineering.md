@@ -1,52 +1,73 @@
 # Feature Engineering
 
 ```{eval-rst}
- .. autoclass:: insolver.feature_engineering.NONAME
+ .. autoclass:: insolver.feature_engineering.DataPreprocessing
     :show-inheritance: 
 ```
-Class NONAME allows you to automatically preprocess your data. It supports such feature engineering functionality to transform data as Categorical data transform, AutoFill NA, Normalization, Feature Selection, Dimensionality Reduction, Smoothing, Sampling.
+Class `DataPreprocessing` allows you to automatically preprocess your data. It supports such feature engineering functionality to transform data as Categorical data transform, AutoFill NA, Normalization, Feature Selection, Dimensionality Reduction, Smoothing, Sampling.
 
-You can just call the method NONAMEMEThHOD and it will normalize, fill in NA values and transform your data.
+You can just call the method preprocess and it will normalize, fill in NA values and transform your data.
+
 ```python
-new_df = NoNameFS().no_name_func(df = df, target='target')
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+new_df = DataPreprocessing().preprocess(df=df, target='target')
 ```
 Data must be [pandas.DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) or insolver.InsolverDataFrame type.
 
 You can also set selected columns as numerical or categorical:
 ```python
-new_df = NoNameFS(numerical_columns=['1', '2', '3'],
-                  categorical_columns=['5']).no_name_func(df = df, target='target')
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+new_df = DataPreprocessing(numerical_columns=['1', '2', '3'],
+                  categorical_columns=['5']).preprocess(df = df, target='target')
 ```
 If you want to use some of the functionality available in this class, but don't want to select a specific method, set the parameters to True and it will use the default values: 
 ```python
-noName = NoNameFS(normalization=True,
-                  fillna=True,
-                  sampling=True, 
-                  transform_categorical=True)
-new_df = noName.no_name_func(df = df, target='target')
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+preprocess = DataPreprocessing(normalization=True, fillna=True, sampling=True, transform_categorical=True)
+new_df = preprocess.preprocess(df = df, target='target')
 ```
 However, some functions need to have initialized parameters: 
 ```python
-noName = NoNameFS(feature_selection=True, feat_select_task='class',
-                  smoothing=True, smoothing_column='smoothing_column')
-new_df = noName.no_name_func(df = df, target='target')
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+preprocess = DataPreprocessing(feature_selection=True, feat_select_task='class', smoothing=True,
+                           smoothing_column='smoothing_column')
+new_df = preprocess.preprocess(df = df, target='target')
 ```
 The NONE class also supports the initialization of multiple targets, for this set the `target` parameter in the `no_name_func` method as a list: 
 ```python
-new_df = NoNameFS().no_name_func(df = df, target=['target', 'target_2'])
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+new_df = DataPreprocessing().preprocess(df = df, target=['target', 'target_2'])
 ```
 You can also modify all functions by changing their parameters or by setting some of the default functions that are True to None/False:
 ```python
-noName = NoNameFS(transform_categorical=None, 
-                  normalization='minmax',
-                  fillna=True, , fillna_categorical='imputed_column', fillna_numerical='mode',
-                  sampling='cluster', sampling_n=2, sampling_n_clusters=5,
-                  smoothing='moving_average', smoothing_column='smoothing_column',
-                  feature_selection='lasso', feat_select_task='class', feat_select_threshold='mean')
-new_df = noName.no_name_func(df = df, target='target')
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
 
-dim_red_NoName = NoNameFS(dim_red='isomap', dim_red_n_components=1, dim_red_n_neighbors=10)
-dim_red_new_df = dim_red_NoName.no_name_func(df = df, target='target')
+df = pd.DataFrame(...)
+preprocess = DataPreprocessing(transform_categorical=None,  normalization='minmax', fillna=True,
+                           fillna_categorical='imputed_column', fillna_numerical='mode', sampling='cluster',
+                           sampling_n=2, sampling_n_clusters=5, smoothing='moving_average',
+                           smoothing_column='smoothing_column', feature_selection='lasso', feat_select_task='class',
+                           feat_select_threshold='mean')
+new_df = preprocess.preprocess(df = df, target='target')
+
+dim_red_preprocess = DataPreprocessing(dim_red='isomap', dim_red_n_components=1, dim_red_n_neighbors=10)
+dim_red_new_df = dim_red_preprocess.preprocess(df = df, target='target')
 ```
 
 ## Feature Selection

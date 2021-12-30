@@ -137,8 +137,8 @@ class FeatureSelection:
             scores = self.importances
             
             # check if multiclass and lasso or elasticnet because it returns (n_targets, n_features)
-            if (self.task=='multiclass') and (not self.method=='random_forest'):
-                #calculate mean value for each feature
+            if (self.task == 'multiclass') and (not self.method == 'random_forest'):
+                # calculate mean value for each feature
                 scores = np.mean(np.abs(self.importances), axis=0)
                 
             df_scores = pd.DataFrame({'feature_name': self.x.columns, 'feature_score': scores})

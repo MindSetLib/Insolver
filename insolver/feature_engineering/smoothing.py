@@ -91,7 +91,7 @@ class Smoothing:
         
         # the returned from lowess array is two-dimensional if return_sorted is True
         if self._lowess_shape == 2:
-            #add both of them to the DataFrame as new columns
+            # add both of them to the DataFrame as new columns
             df[f'{self.x_column}_Lowess'] = lowess[:, 0]
             df[f'{self.y_column}_Lowess'] = lowess[:, 1]
             

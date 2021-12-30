@@ -4,7 +4,7 @@ from insolver.transforms import EncoderTransforms, OneHotEncoderTransforms, Auto
 from insolver.feature_engineering import DimensionalityReduction, Sampling, Smoothing, Normalization, FeatureSelection
 
 
-class NoNameFS:
+class DataPreprocessing:
     """
     Feature Engineering.
     This class allows you to automatically preprocess data. 
@@ -99,10 +99,9 @@ class NoNameFS:
         self.smoothing = smoothing
         self.smoothing_column = smoothing_column
         
-    def no_name_func(self, df, target=None, drop_target=True):
+    def preprocess(self, df, target=None, drop_target=True):
         """
-        NO NAME FUNC.
-        When you call the NO NAME FUNC method, it finds numerical and categorical columns, 
+        When you call the `preprocess` method, it finds numerical and categorical columns,
         transformes categorical columns using the `one_hot_encoder` method, fills in the NA values using the'median'
         method.
         for numerical columns and the 'frequent' method for categorical columns, normalizes data using the `standard`
