@@ -41,11 +41,14 @@ class DimensionalityReduction:
         Raises:
             NotImplementedError: If method is not supported.
         """
+        # initialize all methods 
         self._init_methods()
-        
+
+        # raise error if the method is not supported
         if self.method not in self.methods_dict.keys():
             raise NotImplementedError(f'Method {self.method} is not supported.')
-        
+
+        # get estimator and create transformed DataFrame
         self.estimator = self.methods_dict[self.method]
         self.X_transformed = pd.DataFrame(self.estimator(**kwargs).fit_transform(X=X, y=y))
         
@@ -70,21 +73,28 @@ class DimensionalityReduction:
             TypeError: If y is not pandas.DataFrame or pandas.Series.
             Exception: If method is called before transform() method.
         """
+        # try in case plot_transformed() is called before transform()
         try:
+            
+            # if y is DataFrame use the first column to concat X_transformed and y
             if isinstance(y, pd.DataFrame):
                 y = y[y.columns[0]]
                 new_df = pd.concat([self.X_transformed, y], axis=1)
 
+            # elif y is Series just concat X_transformed and y
             elif isinstance(y, pd.Series):
                 new_df = pd.concat([self.X_transformed, y], axis=1)
 
+            # else raise error because only DataFrame or Series can be used in pd.concat
             else:
                 raise TypeError('Only pandas.DataFrame and pandas.Series object can be used as y.')
 
+            # if n_conponents < 2 create sns.scatterplot
             if self.X_transformed.shape[1] < 3:
                 plt.figure(figsize=figsize)
                 sns.scatterplot(data=new_df, x=0, y=1, hue=y.name, **kwargs)
 
+            # else create sns.pairplot to display all components
             else:
                 sns.pairplot(new_df, hue=y.name, **kwargs)
                 

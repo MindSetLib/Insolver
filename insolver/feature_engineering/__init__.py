@@ -1,3 +1,4 @@
+from .feature_engineering import DataPreprocessing
 from .dimensionality_reduction import DimensionalityReduction
 from .feature_selection import FeatureSelection
 from .sampling import Sampling
