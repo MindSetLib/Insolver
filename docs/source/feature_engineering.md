@@ -1,5 +1,75 @@
 # Feature Engineering
 
+```{eval-rst}
+ .. autoclass:: insolver.feature_engineering.DataPreprocessing
+    :show-inheritance: 
+```
+Class `DataPreprocessing` allows you to automatically preprocess your data. It supports such feature engineering functionality to transform data as Categorical data transform, AutoFill NA, Normalization, Feature Selection, Dimensionality Reduction, Smoothing, Sampling.
+
+You can just call the method preprocess and it will normalize, fill in NA values and transform your data.
+
+```python
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+new_df = DataPreprocessing().preprocess(df=df, target='target')
+```
+Data must be [pandas.DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) or insolver.InsolverDataFrame type.
+
+You can also set selected columns as numerical or categorical:
+```python
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+new_df = DataPreprocessing(numerical_columns=['1', '2', '3'],
+                  categorical_columns=['5']).preprocess(df = df, target='target')
+```
+If you want to use some of the functionality available in this class, but don't want to select a specific method, set the parameters to True and it will use the default values: 
+```python
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+preprocess = DataPreprocessing(normalization=True, fillna=True, sampling=True, transform_categorical=True)
+new_df = preprocess.preprocess(df = df, target='target')
+```
+However, some functions need to have initialized parameters: 
+```python
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+preprocess = DataPreprocessing(feature_selection=True, feat_select_task='class', smoothing=True,
+                           smoothing_column='smoothing_column')
+new_df = preprocess.preprocess(df = df, target='target')
+```
+The NONE class also supports the initialization of multiple targets, for this set the `target` parameter in the `no_name_func` method as a list: 
+```python
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+new_df = DataPreprocessing().preprocess(df = df, target=['target', 'target_2'])
+```
+You can also modify all functions by changing their parameters or by setting some of the default functions that are True to None/False:
+```python
+import pandas as pd
+from insolver.feature_engineering import DataPreprocessing
+
+df = pd.DataFrame(...)
+preprocess = DataPreprocessing(transform_categorical=None,  normalization='minmax', fillna=True,
+                           fillna_categorical='imputed_column', fillna_numerical='mode', sampling='cluster',
+                           sampling_n=2, sampling_n_clusters=5, smoothing='moving_average',
+                           smoothing_column='smoothing_column', feature_selection='lasso', feat_select_task='class',
+                           feat_select_threshold='mean')
+new_df = preprocess.preprocess(df = df, target='target')
+
+dim_red_preprocess = DataPreprocessing(dim_red='isomap', dim_red_n_components=1, dim_red_n_neighbors=10)
+dim_red_new_df = dim_red_preprocess.preprocess(df = df, target='target')
+```
+
 ## Feature Selection
 
 ```{eval-rst}
@@ -61,49 +131,56 @@ new_dataset = fs.create_new_dataset()
 fs_p = FeatureSelection(method='lasso', task='class', permutation_importance=True)
 fs_p.create_model(dataset)
 ```
-
-## Sampling
+## Normalization
 
 ```{eval-rst}
-.. autoclass:: insolver.feature_engineering.Sampling
+.. autoclass:: insolver.feature_engineering.Normalization
     :show-inheritance:
 ```
 
-Sampling is the selection of a subset (a statistical sample) of individuals from within a statistical population to estimate characteristics of the whole population.
-Class `Sampling` implements methods from __probability sampling__. A probability sample is a sample in which every unit in the population has a chance (greater than zero) of being selected in the sample, and this probability can be accurately determined.
-There are four methods you can use by changing the `method` parameter:
-- `simple` (default) sampling is a technique in which a subset is randomly selected number from a set;
-- `systematic` sampling is a technique in which a subset is selected from a set using a defined step;
-- `cluster` sampling is a technique in which a set is divided into clusters, then the set is determined by a randomly selected number of clusters; 
-- `stratified` sampling is a technique in which a set is divided into clusters, then the set is determined by a randomly selected number of units from each cluster.
+Normalization can be defined as adjusting values measured on different scales to a notionally common scale, often prior to averaging. In more complicated cases, normalization can be defined as more sophisticated adjustments where the intention is to bring the entire probability distributions of adjusted values into alignment. Class `Normalization` implements seven methods for data normalization. 
 
-The `n` parameter is used differently in each sampling method:
-- for a `simple` sampling, `n` is the number of values to keep;
-- for a `systematic` sampling, `n` is the number of step size;
-- for a `cluster` sampling, `n` is the number of clusters to keep;
-- for a `stratified` sampling, `n` is the number of values to keep in each cluster.
+You can select the method by changing the `method` parameter:
+- `standard` - [StandardScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html) standardizes features by removing the mean and scaling to unit variance;
+- `minmax` - [MinMaxScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MinMaxScaler.html) transforms features by scaling each feature to a given range;
+- `robust` - [RobustScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.RobustScaler.html) scales features using statistics that are robust to outliers;
+- `normalizer` - [Normalizer](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Normalizer.html) normalizes samples individually to unit norm;
+- `yeo-johnson` - [PowerTransformer(method='yeo-johnson')](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PowerTransformer.html) applies a power transform featurewise to make data more Gaussian-like, supports both positive or negative data;
+- `box-cox` - [PowerTransformer(method='box-cox')](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PowerTransformer.html) applies a power transform featurewise to make data more Gaussian-like, requires input data to be strictly positive;
+- `log` - logarithm of the values.
 
-You can use the dataframe column as clusters by defining `cluster_column`. It will use values from this column in `cluster` and `stratified` methods.
+Only selected columns can be transformed using the `method` with the `column_names` parameter set to `str` or `list`.
+You can also transform particular columns using the specified method for each column with the `column_method` parameter set to `dict` *{'column name': 'method'}*. If `column_method` is set and `method` is None, only columns from `column_method` will be transformed. Columns in `column_method` and `column_names` cannot be dublicated.
+If `column_names` is None and `column_method` is also None, all columns will be transformed using the specified method.
+
+`transform(data)` is the main normalization method. It creates new `pandas.DataFrame` as a copy of the original data and transformes either the selected or all columns.
+
+You can also plot original and transformed data with the `plot_transformed(column, **kwargs)` method. It will plot old and new transformed selected `column`. You can set parameters for the [seaborn.displot](https://seaborn.pydata.org/generated/seaborn.displot.html) as **kwargs.
 
 ### Example
 
 ```python
 import pandas as pd
-from insolver import InsolverDataFrame
-from insolver.feature_engineering import Sampling
+from insolver.frame import InsolverDataFrame
+from insolver.feature_engineering.normalization import Normalization
 
 #create dataset using InsolverDataFrame or pandas.DataFrame
-dataset = InsolverDataFrame(pd.read_csv("..."))
+df = InsolverDataFrame(pd.read_csv("..."))
 
-#create class instance with the selected sampling method
-sampling = Sampling(n=10, n_clusters=5, method='stratified')
+#create class instance with the selected method
+norm = Normalization(method='standard', 
+                     column_method={'column3':'minmax', 'Y_column': 'log'}, 
+                     column_names=['column1', 'column2'])
 
-#use method sample_dataset() to create new dataframe
-new_dataset = sampling.sample_dataset(df=dataset)
+#use transform() to create new dataframe
+new_data = norm.transform(data = df)
 
-#using dataframe column as clusters
-samling = Sampling(n = 2, cluster_column = 'name', method='stratified')
-new_dataset = sampling.sample_dataset(df=dataset)
+#plot result
+norm.plot_transformed(column = 'Y_column', kind="kde")
+
+#set method=None to transform only columns from `column_method`
+new_data = Normalization(method=None, 
+                         column_method={'column3':'minmax', 'Y_column': 'log'}).transform(data = df)
 ```
 
 ## Dimensionality Reduction
@@ -204,4 +281,48 @@ new_data = smoothing.transform(data=df)
 
 #plot result
 smoothing.plot_transformed(figsize=(10,10))
+```
+
+## Sampling
+
+```{eval-rst}
+.. autoclass:: insolver.feature_engineering.Sampling
+    :show-inheritance:
+```
+
+Sampling is the selection of a subset (a statistical sample) of individuals from within a statistical population to estimate characteristics of the whole population.
+Class `Sampling` implements methods from __probability sampling__. A probability sample is a sample in which every unit in the population has a chance (greater than zero) of being selected in the sample, and this probability can be accurately determined.
+There are four methods you can use by changing the `method` parameter:
+- `simple` (default) sampling is a technique in which a subset is randomly selected number from a set;
+- `systematic` sampling is a technique in which a subset is selected from a set using a defined step;
+- `cluster` sampling is a technique in which a set is divided into clusters, then the set is determined by a randomly selected number of clusters; 
+- `stratified` sampling is a technique in which a set is divided into clusters, then the set is determined by a randomly selected number of units from each cluster.
+
+The `n` parameter is used differently in each sampling method:
+- for a `simple` sampling, `n` is the number of values to keep;
+- for a `systematic` sampling, `n` is the number of step size;
+- for a `cluster` sampling, `n` is the number of clusters to keep;
+- for a `stratified` sampling, `n` is the number of values to keep in each cluster.
+
+You can use the dataframe column as clusters by defining `cluster_column`. It will use values from this column in `cluster` and `stratified` methods.
+
+### Example
+
+```python
+import pandas as pd
+from insolver import InsolverDataFrame
+from insolver.feature_engineering import Sampling
+
+#create dataset using InsolverDataFrame or pandas.DataFrame
+dataset = InsolverDataFrame(pd.read_csv("..."))
+
+#create class instance with the selected sampling method
+sampling = Sampling(n=10, n_clusters=5, method='stratified')
+
+#use method sample_dataset() to create new dataframe
+new_dataset = sampling.sample_dataset(df=dataset)
+
+#using dataframe column as clusters
+samling = Sampling(n = 2, cluster_column = 'name', method='stratified')
+new_dataset = sampling.sample_dataset(df=dataset)
 ```

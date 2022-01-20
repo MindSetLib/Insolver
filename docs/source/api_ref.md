@@ -83,6 +83,12 @@
    :members:
 ```
 
+### Normalization
+```{eval-rst}
+ .. automodule:: insolver.feature_engineering.normalization
+   :members:
+```
+
 ## Discretization
 
 ```{eval-rst}

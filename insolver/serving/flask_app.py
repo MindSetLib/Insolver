@@ -65,13 +65,13 @@ def predict():
     json_input = request.json
     json_str = json.dumps(json_input['df'])
     df = pd.read_json(json_str)
-    InsDataFrame = InsolverDataFrame(df)
+    insdataframe = InsolverDataFrame(df)
     # Apply transformations
-    InsTransforms = InsolverTransform(InsDataFrame, tranforms)
-    InsTransforms.ins_transform()
+    instransforms = InsolverTransform(insdataframe, tranforms)
+    instransforms.ins_transform()
 
     # Prediction
-    predicted = model.predict(InsTransforms)
+    predicted = model.predict(instransforms)
 
     result = {
         'predicted': predicted.tolist()

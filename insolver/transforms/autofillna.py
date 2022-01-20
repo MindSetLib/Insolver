@@ -27,8 +27,10 @@ class AutoFillNATransforms:
         self.categorical_method = categorical_method
 
     def _find_num_cat_features(self, df):
-        self.categorical_columns = [c for c in df.columns if df[c].dtype.name == 'object']
-        self.numerical_columns = [c for c in df.columns if df[c].dtype.name != 'object']
+        if not self.categorical_columns:
+            self.categorical_columns = [c for c in df.columns if df[c].dtype.name == 'object']
+        if not self.numerical_columns:
+            self.numerical_columns = [c for c in df.columns if df[c].dtype.name != 'object']
 
     def _fillna_numerical(self, df):
         """Replace numerical NaN values using specified method"""

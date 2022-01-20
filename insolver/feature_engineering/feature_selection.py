@@ -62,26 +62,32 @@ class FeatureSelection:
             NotImplementedError: If self.method isn't supported with the task.
             
         """
-        
+        # check for null values
         if not df.isnull().sum().sum() == 0:
             raise ValueError('All values in the dataframe must be not null.')
-            
+
+        # check for categorical columns    
         if len([var for var in df.columns if df[var].dtype == 'object']) > 0:
             raise ValueError('All values in the dataframe must not be object.')
-            
-        self._init_methods_dict()
-        self._init_importance_dict()
-            
-        if self.method not in self.methods_dict.keys():
-            raise NotImplementedError(
-                f'Task {self.task} does not support method "{self.method}".')
 
+        # initialize all methods 
+        self._init_methods_dict()
+        # initialize importance dictionary
+        self._init_importance_dict()
+
+        # raise error if the method is not supported
+        if self.method not in self.methods_dict.keys():
+            raise NotImplementedError(f'Task {self.task} does not support method "{self.method}".')
+
+        # get x and y
         self.x = df.drop([self.y_column], axis=1)
         self.y = df[self.y_column]
-        
-        self.model = self.methods_dict[self.method](self.x, self.y) 
+
+        # get estimator, calculate importance and get importance
+        self.model = self.methods_dict[self.method](self.x, self.y)
         self.importances = self.importance_dict[self.method](self.model)
-        
+
+        # if permutation_importance, create it
         if self.permutation_importance:
             self.create_permutation_importance()
          
@@ -100,11 +106,13 @@ class FeatureSelection:
         
         """
         try:
+            # calculate permutation_importance and get importance
             self.permutation_model = permutation_importance(self.model, self.x, self.y, **kwargs)
             self.importances = self.permutation_model.importances_mean
         
         except AttributeError:
             raise Exception('Model was not created yet.')
+        
         except TypeError:
             raise Exception('Permutation importance can only be used with the estimator.')
         
@@ -124,23 +132,34 @@ class FeatureSelection:
         
         """
 
-        try: 
-            df_scores = pd.DataFrame({'feature_name': self.x.columns, 'feature_score': self.importances})
-                    
+        try:
+            # get importance
+            scores = self.importances
+            
+            # check if multiclass and lasso or elasticnet because it returns (n_targets, n_features)
+            if (self.task == 'multiclass') and (not self.method == 'random_forest'):
+                # calculate mean value for each feature
+                scores = np.mean(np.abs(self.importances), axis=0)
+                
+            df_scores = pd.DataFrame({'feature_name': self.x.columns, 'feature_score': scores})
+
+            # calculate mean as threshold and select columns        
             if threshold == 'mean':
                 self.threshold = df_scores['feature_score'].abs().mean()
                 cols = df_scores[df_scores['feature_score'] > self.threshold]['feature_name']
                 self.new_dataframe = pd.concat([self.x[cols], self.y], axis=1)
                 
                 return self.new_dataframe
-                
+            
+            # calculate median as threshold and select columns     
             elif threshold == 'median':
                 self.threshold = df_scores['feature_score'].abs().median()
                 cols = df_scores[df_scores['feature_score'] > self.threshold]['feature_name']
                 self.new_dataframe = pd.concat([self.x[cols], self.y], axis=1)
                 
                 return self.new_dataframe
-            
+
+            # select columns with threshold
             else:
                 self.threshold = threshold
                 cols = df_scores[df_scores['feature_score'].abs() > self.threshold]['feature_name']
@@ -170,33 +189,40 @@ class FeatureSelection:
         
         """
         try:
+            # check if importances is (n_targets, n_features)
             if len(self.importances.shape) > 1:
                 n = 0
+                # plot each class importances
                 for n_class in self.importances:
                     df_to_plot = pd.DataFrame({
                         'feature_name': self.x.columns,
                         'feature_score': n_class})
                     
+                    # if importance_threshold plot only selected features
                     if importance_threshold:
                         df_to_plot[df_to_plot['feature_score'] > importance_threshold].plot.barh(
                             x='feature_name', y='feature_score', figsize=figsize)
 
+                    # else plot all features
                     else:
                         df_to_plot.plot.barh(x='feature_name', y='feature_score', figsize=figsize)
 
                     plt.title(f'Model {self.method} class {self.model.classes_[n]} scores')
                     n += 1
-
+                    
+            # else importances is (, n_features)
             else:
                 df_to_plot = pd.DataFrame({
                     'feature name': self.x.columns,
                     'feature score': self.importances
                 })
-                
+
+                # if importance_threshold plot only selected features
                 if importance_threshold:
                     df_to_plot[df_to_plot['feature score'] > importance_threshold].plot.barh(
                         x='feature name', y='feature score', figsize=figsize)
-
+                    
+                # else plot all features
                 else:
                     df_to_plot.plot.barh(x='feature name', y='feature score', figsize=figsize)
                 
@@ -213,6 +239,7 @@ class FeatureSelection:
             NotImplementedError: If self.task is not supported.
         
         """
+        # methods_dict initialization for classification task 
         if self.task == 'class':
             self.methods_dict = {
                 'mutual_inf': lambda x, y: mutual_info_classif(x, y),
@@ -225,6 +252,7 @@ class FeatureSelection:
                                                               solver='saga').fit(StandardScaler().fit_transform(x), y),
             }
             
+        # methods_dict initialization for regression task    
         elif self.task == 'reg':
             self.methods_dict = {
                 'mutual_inf': lambda x, y: mutual_info_regression(x, y),
@@ -233,7 +261,8 @@ class FeatureSelection:
                 'lasso': lambda x, y: Lasso().fit(StandardScaler().fit_transform(x), y),
                 'elasticnet': lambda x, y: ElasticNet().fit(StandardScaler().fit_transform(x), y),
             } 
-       
+
+        # methods_dict initialization for multiclass classification task
         elif self.task == 'multiclass':
             self.methods_dict = {
                 'random_forest': lambda x, y: RandomForestRegressor(n_estimators=10).fit(x, y),
@@ -244,7 +273,8 @@ class FeatureSelection:
                 LogisticRegression(penalty='elasticnet', l1_ratio=0.5, solver='saga', multi_class='multinomial')
                 .fit(StandardScaler().fit_transform(x), y),
             }
-        
+
+        # methods_dict initialization for multiclass multioutput classification task
         elif self.task == 'multiclass_multioutput':
             self.methods_dict = {
                 'random_forest': lambda x, y: RandomForestRegressor(n_estimators=10).fit(x, y),
@@ -262,8 +292,8 @@ class FeatureSelection:
             'mutual_inf': lambda model: model,
             'chi2': lambda model: model[1],
             'f_statistic': lambda model: -np.log10(model[1])/(-np.log10(model[1])).max(),
-            'lasso': lambda model: model.coef_[0] if self.task == 'class' else model.coef_,
-            'elasticnet': lambda model: model.coef_[0] if self.task == 'class' else model.coef_
+            'lasso': lambda model: model.coef_,
+            'elasticnet': lambda model: model.coef_
         }
     
     def __call__(self, df):
