@@ -183,10 +183,12 @@ class Sampling:
                 
                 # if the difference is greater than 0 delete one row
                 if diff > 0:
-                    new_df['cluster_id'] = np.delete(indexes, len(indexes)-1)
+                    for i in range(diff):
+                        new_df['cluster_id'] = np.delete(indexes, len(indexes)-1)
                     
                 # if the difference is less than 0 add one row
                 if diff < 0:
-                    new_df['cluster_id'] = np.append(indexes, self.n_clusters)
+                    for i in range(abs(diff)):
+                        new_df['cluster_id'] = np.append(indexes, self.n_clusters)
         
         return new_df

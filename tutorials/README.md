@@ -1,5 +1,8 @@
-# Examples
+# Tutorials
+In this module different main features and functionalities of the `Insolver` library are introduced in the tutorials. 
+These tutorials contain a demonstration of the use of various classes and methods. All datasets presented in the examples can be downloaded using the `download_dataset` function presented [here](https://github.com/MindSetLib/Insolver/blob/master/insolver/model_tools/model_utils.py).
 
+## Сontents
 - [Binary Classification Example - Rain in Australia Prediction](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Binary%20Classification%20Example%20-%20Rain%20in%20Australia%20Prediction.ipynb)
 This tutorial demonstrates how to create **classification models** for the [`weatherAUS`](https://www.kaggle.com/jsphyg/weather-dataset-rattle-package) dataset: getting and preprocessing data, transformations, creating models, plotting SHAP values and comparing models.
 

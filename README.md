@@ -5,7 +5,7 @@
 
 # Insolver
 
-Insolver is low-code machine learning library, initially created for the insurance industry, but can be used in any other. A more detailed overview you can find [here](https://insolver.readthedocs.io/en/latest/source/overview.html).
+Insolver is a low-code machine learning library, originally created for the insurance industry, but can be used in any other. You can find a more detailed overview [here](https://insolver.readthedocs.io/en/latest/source/overview.html).
 
 ## Installation:
 
@@ -15,12 +15,12 @@ pip install insolver
 
 ### Post-install:
 
-To fix displaying plotly figs in jyputerlab install:
+To fix the display of plotly figs in jyputerlab, install:
 ```shell
 jupyter labextension install jupyterlab-plotly
 ```
 
-### Insolver is already installed in the easy access cloud via GitHub login. Try https://mset.space with a familiar notebook-style environment.
+### Insolver is already installed in the easy access cloud via the GitHub login. Try https://mset.space with a familiar notebook-style environment.
 
 ## Examples:
 
@@ -67,13 +67,13 @@ python -m pytest --cov=insolver; coverage html; xdg-open htmlcov/index.html
 Please, feel free to open an issue or/and suggest PR, if you find any bugs or any enhancements.
 
 ## Demo
-### Example of models creation using insolver
+### Example of creating models using the Insolver
 ![](InsolverDemo.gif)
 
-### Example of model production service
+### Example of a model production service
 ![](InsolverImplementation.gif)
 
-### Example of elyra pipeline built with insolver inside
+### Example of an elyra pipeline built with the Insolver inside
 ![](InsolverElyraPipeline.gif)
 
 ### Contacts
