@@ -73,7 +73,7 @@ def train_val_test_split(*arrays, val_size, test_size, random_state=0, shuffle=T
             train, valid = split2[0::2], split2[1::2]
             return (*train, *valid, *test)
         else:
-            return train, test
+            return (*train, *test)
     else:
         train, test = split1[0], split1[1]
         if val_size != 0:
