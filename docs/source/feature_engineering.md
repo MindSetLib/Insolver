@@ -45,7 +45,7 @@ preprocess = DataPreprocessing(feature_selection=True, feat_select_task='class',
                            smoothing_column='smoothing_column')
 new_df = preprocess.preprocess(df = df, target='target')
 ```
-The NONE class also supports the initialization of multiple targets, for this set the `target` parameter in the `no_name_func` method as a list: 
+The `DataPreprocessing` class also supports the initialization of multiple targets, for this set the `target` parameter in the `no_name_func` method as a list: 
 ```python
 import pandas as pd
 from insolver.feature_engineering import DataPreprocessing

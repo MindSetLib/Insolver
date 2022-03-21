@@ -14,6 +14,7 @@ into production.
    source/insolver_df
    source/transformations
    source/feature_engineering
+   source/interpretation
    source/model_wrappers
    source/model_comparison
    source/report
