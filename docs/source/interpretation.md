@@ -19,8 +19,9 @@ You need x, a fitted model and a list of features (features to interpret) to cre
 ```python
 import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor
+from insolver.interpretation import ExplanationPlot, DiCEExplanation, LimeExplanation
 
-dataset = pd.read_csv(....)
+dataset = pd.read_csv(...)
 x, y = dataset.drop(['y'], axis=1), dataset['y']
 clr = GradientBoostingRegressor().fit(x, y)
 features = x.columns
@@ -28,7 +29,7 @@ features = x.columns
 
 When all the data and model are set up, you just need to create a class instance and call the `plot()` method.
 ```python
-ep = ExplanationPlot(method = 'pdp', x = x, estimator = clr, features = features)
+ep = ExplanationPlot(method='pdp', x=x, estimator=clr, features=features)
 ep.plot()
 ```
 You can change plot by setting different parameters in the `plot()` method.
@@ -39,7 +40,7 @@ ep.plot(ice_lines_kw={"color": "tab:blue", "alpha": 0.2, "linewidth": 0.2},
 ```
 Note that [`ale`](https://docs.seldon.io/projects/alibi/en/latest/methods/ALE.html) can create plots for any number of features, but [`ale_aleplot`](https://github.com/blent-ai/ALEPython) can only get one or two features.
 ```python
-ep = ExplanationPlot(method = 'ale_aleplot', x = x, estimator = clr, features = ['X5', 'X6'])
+ep = ExplanationPlot(method='ale_aleplot', x=x, estimator=clr, features = ['X5', 'X6'])
 ep.plot(figsize = (10,10))
 ```
 
@@ -51,7 +52,7 @@ You need x and y OR dataset and outcome name, a fitted model to create an explan
 import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor
 
-dataset = pd.read_csv(....)
+dataset = pd.read_csv(...)
 x, y = dataset.drop(['y'], axis=1), dataset['y']
 clr = GradientBoostingRegressor().fit(x, y)
 features = x.columns
@@ -81,7 +82,7 @@ You need x and a fitted model to create an interpretation.
 import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor
 
-dataset = pd.read_csv(....)
+dataset = pd.read_csv(...)
 x, y = dataset.drop(['y'], axis=1), dataset['y']
 clr = GradientBoostingRegressor().fit(x, y)
 features = x.columns

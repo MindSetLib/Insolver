@@ -1,5 +1,7 @@
 import pandas as pd
 from dice_ml import Dice, Data, Model
+from .base import InterpretBase
+
 
 class DiCEExplanation(InterpretBase):
     """
@@ -12,12 +14,11 @@ class DiCEExplanation(InterpretBase):
         y: Y value.
         continuous_features (list): Continuous features list.
         outcome_name (str): Outcome feature name.
-        method (str): Name of the method to use for generating counterfactuals. Values `genetic`, `random` and `kdtree` are
-            supported.
+        method (str): Name of the method to use for generating counterfactuals. Values `genetic`, `random` and `kdtree`
+         are supported.
         
     """
-    def  __init__(self, estimator, model_type, x, y = None, 
-                  continuous_features = None, outcome_name = None, method = 'genetic'):
+    def __init__(self, estimator, model_type, x, y=None, continuous_features=None, outcome_name=None, method='genetic'):
         self.estimator = estimator
         self.model_type = model_type
         self.x = x
@@ -30,10 +31,8 @@ class DiCEExplanation(InterpretBase):
         if self.y is None and self.outcome_name is None:
             raise AttributeError('Either y or outcome_name must be initialized.')
     
-    def show_explanation(self, instance, total_CFs = 2, 
-                         desired_range = None, desired_class = 'opposite', 
-                         features_to_vary = 'all', permitted_range = None,
-                         result_type = 'dataframe', return_json = False):
+    def show_explanation(self, instance, total_CFs=2, desired_range=None, desired_class='opposite',
+                         features_to_vary='all', permitted_range=None, result_type='dataframe', return_json = False):
         """
         Show explanation. Creates dice_ml.Data, dice_ml.Model, dice_ml.Dice using Data and Model, then generates 
         counterfactuals using dice_ml.Dice.generate_counterfactuals() method.
@@ -56,27 +55,27 @@ class DiCEExplanation(InterpretBase):
         
         # create dice_ml.Data class containing all required information about the data
         data = Data(
-            dataframe = dataframe,
-            continuous_features = list(self.continuous_features),
-            outcome_name = _outcome_name
+            dataframe=dataframe,
+            continuous_features=list(self.continuous_features),
+            outcome_name=_outcome_name
         )
 
         # create dice_ml.Model class that returns class selected with the backend parameter
         dice_model = Model(
-            model = self.estimator, 
-            backend = 'sklearn', 
-            model_type = self.model_type
+            model=self.estimator,
+            backend='sklearn',
+            model_type=self.model_type
         )
         
         # create dice_ml.Dice class that returns class selected with the method parameter
-        self.model = Dice(data, dice_model, method = self.method)
+        self.model = Dice(data, dice_model, method=self.method)
         
         # generate counterfactuals
         counterfactuals = self.model.generate_counterfactuals(
-            query_instances = instance, 
-            total_CFs = total_CFs, 
-            desired_range = desired_range, desired_class = desired_class,
-            features_to_vary = features_to_vary, permitted_range = permitted_range
+            query_instances=instance,
+            total_CFs=total_CFs,
+            desired_range=desired_range, desired_class = desired_class,
+            features_to_vary=features_to_vary, permitted_range = permitted_range
         )
               
         # visualize as dataframe
