@@ -13,7 +13,8 @@ from plotly.graph_objects import Figure, Waterfall
 from plotly.io import to_image
 
 from .base import InsolverBaseWrapper
-from .extensions import InsolverCVHPExtension, InsolverPDPExtension, AUTO_SPACE_CONFIG
+from .extensions import InsolverCVHPExtension, InsolverPDPExtension
+from .extensions.cvnhp import AUTO_SPACE_CONFIG
 
 
 class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPExtension):

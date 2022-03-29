@@ -11,6 +11,7 @@ from sklearn.pipeline import Pipeline
 
 from .base import InsolverBaseWrapper
 from .extensions import InsolverH2OExtension, InsolverCVHPExtension, InsolverPDPExtension
+from .extensions.h2oext import to_h2oframe
 
 
 class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHPExtension, InsolverPDPExtension):
@@ -127,7 +128,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
                 sample_weight = Series(repeat(0, len(X)), name=offset_name, index=X.index)
             if sample_weight is not None:
                 X = concat([X, sample_weight], axis=1)
-            h2o_predict = X if isinstance(X, H2OFrame) else H2OFrame(X)
+            h2o_predict = X if isinstance(X, H2OFrame) else to_h2oframe(X)
             predictions = self.model.predict(h2o_predict, **kwargs).as_data_frame().values.reshape(-1)
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')
