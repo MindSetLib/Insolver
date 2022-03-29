@@ -1,0 +1,6 @@
+kaleido>=0.1.0
+geocoder==1.38.1
+dice-ml
+lime
+alibi
+alepython @ git+https://github.com/MaximeJumelle/ALEPython.git@dev#egg=alepython
