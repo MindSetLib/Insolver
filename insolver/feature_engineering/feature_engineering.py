@@ -51,7 +51,7 @@ class DataPreprocessing:
         sampling_n_clusters (int), default=10: Sampling n_clusters value.
         smoothing (str, bool, None), default=None: Smoothing method name, values `moving_average`, `lowess`,
          `s_g_filter`, `fft` are supported. If True `moving_average` will be used. If False/None smoothing won't be
-          applied.
+         applied.
         smoothing_column (str): Name of the column to smooth.
         
     """

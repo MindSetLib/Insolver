@@ -56,6 +56,12 @@
 ```
 
 ## Feature engineering
+### Data preprocessing
+```{eval-rst}
+ .. automodule:: insolver.feature_engineering.feature_engineering
+   :members:
+```
+
 ### Feature selection
 
 ```{eval-rst}
@@ -100,6 +106,25 @@
  .. automodule:: insolver.discretization.discretizer_utils
    :members:
    :undoc-members:
+```
+
+## Interpretation
+### DiCE
+```{eval-rst}
+ .. automodule:: insolver.interpretation.dice
+   :members:
+```
+
+### LIME
+```{eval-rst}
+ .. automodule:: insolver.interpretation.lime
+   :members:
+```
+
+### Plots
+```{eval-rst}
+ .. automodule:: insolver.interpretation.plots
+   :members:
 ```
 
 ## Model Wrappers

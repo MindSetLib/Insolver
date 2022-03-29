@@ -25,3 +25,7 @@ gunicorn>=20.0.4
 sympy==1.9
 pandas-profiling==3.1.0
 statsmodels==0.13.1
+dice-ml
+lime
+alibi
+alepython @ git+https://github.com/MaximeJumelle/ALEPython.git@dev#egg=alepython
