@@ -24,9 +24,14 @@ jupyter labextension install jupyterlab-plotly
 
 ## Examples:
 
-- [Private motor French insurer dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_FreMPL.ipynb)
-- [US  traffic accident dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_US_Accidents.ipynb)
-- [Landing club dataset](https://github.com/MindSetLib/Insolver/blob/master/examples/Insolver_LendingClub.ipynb)
+- [Regression Example - FreeMLP](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Regression%20Example%20-%20FreeMLP.ipynb)
+This tutorial demonstrates how to create **regression models** for the `freMPL-R` dataset: getting and preprocessing data, transformations, creating models, plotting SHAP values and comparing models.
+- [Regression Example - US Accidents](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Regression%20Example%20-%20FreeMLP.ipynb)
+This tutorial demonstrates how to create **regression models** for the [`US Traffic Accident`](https://smoosavi.org/datasets/us_accidents) dataset: getting and preprocessing data, transformations, creating models, plotting SHAP values and comparing models.
+- [Gradient Boosting Example - Lending Club](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Gradient%20Boosting%20Example%20-%20Lending%20Club.ipynb)
+This tutorial demonstrates how to create **classification models** for the [`Lending Club`](https://www.kaggle.com/wordsforthewise/lending-club) dataset using the **Gradient Boosting libraries** and the `InsolverGBMWrapper` class.
+- [Binary Classification Example - Rain in Australia Prediction](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Binary%20Classification%20Example%20-%20Rain%20in%20Australia%20Prediction.ipynb)
+This tutorial demonstrates how to create **classification models** for the [`weatherAUS`](https://www.kaggle.com/jsphyg/weather-dataset-rattle-package) dataset: getting and preprocessing data, transformations, creating models, plotting SHAP values and comparing models.
 
 ## Documentation:
 
