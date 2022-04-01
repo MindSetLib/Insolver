@@ -135,10 +135,10 @@ class DataPreprocessing:
                 raise NotImplementedError('Target parameter must be str or list.')
 
         self._init_features(df, target)
-        if self.transform_categorical:
-            df = self._transform_categorical(df)
         if self.fillna:
             self._fillna(df)
+        if self.transform_categorical:
+            df = self._transform_categorical(df)
         if self.smoothing:
             df = self._smoothing(df, target)
         if self.normalization:
