@@ -41,5 +41,5 @@ setup(name='insolver',
             'License :: OSI Approved :: MIT License',
       ],
       python_requires='>=3.7',
-A      include_package_data=True
+      include_package_data=True
       )
