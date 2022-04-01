@@ -13,7 +13,7 @@ The interpretation module consists of three classes: `ExplanationPlot`, `DiCEExp
 
 ## PDP, ICE and ALE
 `ExplanationPlot` is a class for creating a plot for interpretation. Partial Dependence Plot (PDP), Individual Condition Expectation (ICE), Accumulated Local Effects (ALE) are supported.
-You can select the method by changing the `method` parameter: [`pdp`](https://scikit-learn.org/stable/modules/generated/sklearn.inspection.PartialDependenceDisplay), [`ice`](https://scikit-learn.org/stable/modules/generated/sklearn.inspection.PartialDependenceDisplay), [`ale`](https://docs.seldon.io/projects/alibi/en/latest/methods/ALE.html) or [`ale_aleplot`](https://github.com/blent-ai/ALEPython).
+You can select the method by changing the `method` parameter: [`pdp`](https://scikit-learn.org/stable/modules/generated/sklearn.inspection.PartialDependenceDisplay), [`ice`](https://scikit-learn.org/stable/modules/generated/sklearn.inspection.PartialDependenceDisplay) or [`ale`](https://docs.seldon.io/projects/alibi/en/latest/methods/ALE.html).
 
 You need x, a fitted model and a list of features (features to interpret) to create a plot for interpretation.
 ```python
@@ -34,14 +34,9 @@ ep.plot()
 ```
 You can change plot by setting different parameters in the `plot()` method.
 ```python
-ep = ExplanationPlot(method = 'ice', x = x, estimator = clr, features = features)
+ep = ExplanationPlot(method = 'ice', x=x, estimator=clr, features=features)
 ep.plot(ice_lines_kw={"color": "tab:blue", "alpha": 0.2, "linewidth": 0.2},
         pd_line_kw={"color": "tab:orange", "linestyle": "--"})
-```
-Note that [`ale`](https://docs.seldon.io/projects/alibi/en/latest/methods/ALE.html) can create plots for any number of features, but [`ale_aleplot`](https://github.com/blent-ai/ALEPython) can only get one or two features.
-```python
-ep = ExplanationPlot(method='ale_aleplot', x=x, estimator=clr, features = ['X5', 'X6'])
-ep.plot(figsize = (10,10))
 ```
 
 ## DiCE

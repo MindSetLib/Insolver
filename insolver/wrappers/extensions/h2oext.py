@@ -1,5 +1,6 @@
 import os
 
+from numpy import arange
 from pandas import DataFrame, Series, concat
 from h2o import no_progress, cluster, init, load_model, save_model
 from h2o.frame import H2OFrame
@@ -13,6 +14,23 @@ def is_number(x):
         return True
     except ValueError:
         return False
+
+
+def to_h2oframe(df):
+    """Function converts pandas.DataFrame to h2o.H2OFrame ensuring there is no bug duplicating rows in results.
+
+    Args:
+        df (pandas.DataFrame):  Dataset to convert to h2o.H2OFrame
+
+    Returns:
+        DataFrame converted to h2o.H2OFrame.
+    """
+    df_h2o = df.copy()
+    df_h2o['__insolver_temp_row_id'] = arange(len(df_h2o))
+    df_h2o = H2OFrame(df_h2o)
+    df_h2o = df_h2o.drop_duplicates(columns=['__insolver_temp_row_id'], keep='first')
+    df_h2o = df_h2o.drop('__insolver_temp_row_id', axis=1)
+    return df_h2o
 
 
 class InsolverH2OExtension:
@@ -39,7 +57,7 @@ class InsolverH2OExtension:
                 params['offset_column'] = (sample_weight.columns.tolist() if isinstance(sample_weight, DataFrame)
                                            else sample_weight.name)
                 X = concat([X, sample_weight], axis=1)
-            train_set = H2OFrame(concat([X, y], axis=1))
+            train_set = to_h2oframe(concat([X, y], axis=1))
         else:
             raise TypeError('X, y are supposed to be pandas DataFrame or Series')
 
@@ -48,7 +66,7 @@ class InsolverH2OExtension:
                 if ((sample_weight_valid is not None) & isinstance(sample_weight_valid, (DataFrame, Series)) &
                         (sample_weight is not None)):
                     X_valid = concat([X_valid, sample_weight_valid], axis=1)
-                valid_set = H2OFrame(concat([X_valid, y_valid], axis=1))
+                valid_set = to_h2oframe(concat([X_valid, y_valid], axis=1))
                 params['validation_frame'] = valid_set
             else:
                 raise TypeError('X_valid, y_valid are supposed to be pandas DataFrame or Series')

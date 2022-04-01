@@ -4,6 +4,9 @@ from setuptools import setup, find_packages
 with open("requirements.txt") as f:
     required = f.read().splitlines()
 
+with open("requirements-extra.txt") as f:
+    extras = f.read().splitlines()
+
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
@@ -31,6 +34,7 @@ setup(name='insolver',
       },
       install_requires=required,
       setup_requires=['wheel'],
+      extras_require={'full': extras},
       zip_safe=False,
       classifiers=[
             'Programming Language :: Python :: 3',

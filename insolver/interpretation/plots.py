@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.inspection import PartialDependenceDisplay
 from alibi.explainers import ALE, plot_ale
-from alepython import ale_plot
 from .base import InterpretBase
 warnings.filterwarnings('ignore')
 
@@ -105,28 +104,10 @@ class ExplanationPlot(InterpretBase):
         
         explanation = self.model.explain(X=X)
         plot_ale(exp=explanation, ax=ax, **kwargs)
-    
-    def _plot_aleplot(self, figsize, **kwargs):
-        
-        if len(self.features) > 2:
-            raise NotImplementedError('aleplot only supports one or two features.')
-            
-        # convert x to pandas.DataFrame if x is not a dataframe
-        X = pd.DataFrame(self.x) if not isinstance(self.x, pd.DataFrame) else self.x
-        
-        plt.rcParams['figure.figsize'] = figsize
-        ale_plot(
-            model=self.estimator,
-            train_set=X,
-            features=self.features,
-            monte_carlo=True, 
-            **kwargs
-        )
         
     def _init_methods_dict(self):
         self.methods_dict = {
             'pdp': self._plot_pdp,
             'ice': self._plot_ice,
             'ale': self._plot_ale,
-            'ale_aleplot': self._plot_aleplot  
         }
