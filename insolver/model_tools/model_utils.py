@@ -247,6 +247,28 @@ def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
     return short_result if detail else detailed_result
 
 
+def lorenz_curve(y_true, y_pred, exposure):
+    """Calculating lornz curve and Gini coefficient.
+
+    Args:
+        y_true: Array with target variable.
+        y_pred: Array with predictions.
+        exposure: Array with corresponding exposure
+
+    Returns: cumulated_samples, cumulated_claim_amount, -minus_gini_coef
+
+    """
+    true, pred = np.asarray(y_true), np.asarray(y_pred)
+    exp = np.asarray(exposure)
+    ranking = np.argsort(-pred)
+    ranked_exposure, ranked_pure_premium = exp[ranking], true[ranking]
+    cumulated_claim_amount = np.cumsum(ranked_pure_premium * ranked_exposure)
+    cumulated_claim_amount /= cumulated_claim_amount[-1]
+    cumulated_samples = np.linspace(0, 1, len(cumulated_claim_amount))
+    minus_gini_coef = 1 - 2 * auc(cumulated_samples, cumulated_claim_amount)
+    return cumulated_samples, cumulated_claim_amount, -minus_gini_coef
+
+
 def gain_curve(y_true, y_pred, exposure, step=1, figsize=(10, 6)):
     """ Plot gains curve and calculate Gini coefficient. Mostly making use of
     https://scikit-learn.org/stable/auto_examples/linear_model/plot_tweedie_regression_insurance_claims.html.
@@ -259,16 +281,6 @@ def gain_curve(y_true, y_pred, exposure, step=1, figsize=(10, 6)):
          evaluated.
         figsize: Tuple corresponding to matplotlib figsize.
     """
-    def lorenz_curve(true, pred, exp):
-        true, pred = np.asarray(true), np.asarray(pred)
-        exp = np.asarray(exp)
-        ranking = np.argsort(-pred)
-        ranked_exposure, ranked_pure_premium = exp[ranking], true[ranking]
-        cumulated_claim_amount = np.cumsum(ranked_pure_premium * ranked_exposure)
-        cumulated_claim_amount /= cumulated_claim_amount[-1]
-        cumulated_samples = np.linspace(0, 1, len(cumulated_claim_amount))
-        minus_gini_coef = 1 - 2 * auc(cumulated_samples, cumulated_claim_amount)
-        return cumulated_samples, cumulated_claim_amount, -minus_gini_coef
 
     plt.figure(figsize=figsize)
     plt.title('Gains curve')
