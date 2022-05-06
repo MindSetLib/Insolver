@@ -2,12 +2,12 @@ from sklearn import metrics
 from sklearn.utils.multiclass import type_of_target
 import numpy as np
 import pandas as pd
-from insolver.model_tools import  (
-    deviance_poisson, deviance_gamma, deviance_score, deviance_explained,
-    deviance_explained_poisson, deviance_explained_gamma, lift_score)
+from insolver.model_tools import (deviance_poisson, deviance_gamma, deviance_score, deviance_explained,
+                                  deviance_explained_poisson, deviance_explained_gamma, lift_score)
 
 gain_descr = 'gain curve description'
 lift_descr = 'lift curve description'
+
 
 def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, predicted_test, exposure=None):
     # calculate lift score
@@ -18,7 +18,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
     test_lift.index = np.arange(5, 105, 5)
     footer = {
         'train_lift': [list(train_lift.dropna().index), list(train_lift.dropna()['Predict'])],
-        'test_lift': [list(test_lift.dropna().index),list(test_lift.dropna()['Predict'])],
+        'test_lift': [list(test_lift.dropna().index), list(test_lift.dropna()['Predict'])],
         'y_name': y_train.name,
         'gain': 'false'
     }
@@ -38,7 +38,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
         t1, t2, t3 = gini_coef(y_test, predicted_test, X_test[exposure])
         footer['test_gain'] = [list(t1), list(t2), t3]
 
-        gain_curve+=f'''
+        gain_curve += f'''
         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
             <h4 class="text-center fw-light">Gain Curve:</h4>
                 <div id="gini_score"></div>
@@ -67,6 +67,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
     </div>{gain_curve}
     '''
 
+
 def _calc_psi(x_train, x_test, dataset):
     features = x_train.columns
     nav_items = ''
@@ -82,7 +83,7 @@ def _calc_psi(x_train, x_test, dataset):
             nav_class = "nav-link active" if feature == features[0] else "nav-link"
             # replace ' ' so that href could work correctly
             feature_replaced = feature.replace(' ', '_')
-            nav_items +=f'''
+            nav_items += f'''
             <li class="nav-item">
                 <a class="{nav_class}" aria-current="true" href="#psi_{feature_replaced}" data-bs-toggle="tab">
                 {feature}</a>
@@ -107,6 +108,7 @@ def _calc_psi(x_train, x_test, dataset):
             {tab_pane_items}
         </form>
     </div>'''
+
 
 def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
     """Function to calculate metrics
@@ -160,11 +162,12 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
                 result[name] = functions[name](y_true, y_pred)
             
         except Exception as e:
-                print(f'\t-{e}')
+            print(f'\t-{e}')
 
     return result
 
-functions_names_dict =   {
+
+functions_names_dict = {
     'binary_cont': [
                         "average_precision_score",
                         "brier_score_loss",
@@ -196,6 +199,7 @@ functions_names_dict =   {
     ],
 }
 
+
 def gini_coef(true, pred, exp):
     true, pred = np.asarray(true), np.asarray(pred)
     exp = np.asarray(exp)
@@ -204,8 +208,9 @@ def gini_coef(true, pred, exp):
     cumulated_claim_amount = np.cumsum(ranked_pure_premium * ranked_exposure)
     cumulated_claim_amount /= cumulated_claim_amount[-1]
     cumulated_samples = np.linspace(0, 1, len(cumulated_claim_amount))
-    gini_coef = 2 * metrics.auc(cumulated_samples, cumulated_claim_amount) - 1
-    return cumulated_samples, cumulated_claim_amount, gini_coef
+    gini = 2 * metrics.auc(cumulated_samples, cumulated_claim_amount) - 1
+    return cumulated_samples, cumulated_claim_amount, gini
+
 
 def stability_index(scoring_variable, dev, oot, kind='psi', bins=10):
     assert kind in ['psi', 'csi'], '"kind" argument must be in ["psi", "csi"]'
@@ -216,7 +221,7 @@ def stability_index(scoring_variable, dev, oot, kind='psi', bins=10):
         dev_bins = pd.cut(dev[scoring_variable], bins=bins)
         oot_bins = pd.cut(oot[scoring_variable], bins=dev_bins.cat.categories)
     psi = pd.concat([(oot_bins.value_counts().sort_index(ascending=False)/oot_bins.shape[0]*100).rename('OOT'),
-                  (dev_bins.value_counts().sort_index(ascending=False)/dev_bins.shape[0]*100).rename('DEV')], axis=1)
+                     (dev_bins.value_counts().sort_index(ascending=False)/dev_bins.shape[0]*100).rename('DEV')], axis=1)
     psi['Diff'] = psi['OOT'] - psi['DEV']
     psi['ln_OOT_DEV'] = np.log(psi['OOT']/psi['DEV'])
     psi['ln_OOT_DEV'].replace([np.inf, -np.inf], 0, inplace=True)
@@ -273,4 +278,3 @@ metrics_classification = {
             "roc_curve": metrics.roc_curve,
             "zero_one_loss": metrics.zero_one_loss,
         }
-
