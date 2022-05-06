@@ -107,8 +107,8 @@ class Report:
         self.model = model
         self.models_to_compare = models_to_compare
         self.comparison_metrics = [] if not comparison_metrics else comparison_metrics
-        self.predicted_train = pandas.Series(model.predict(X_train), index=X_train.index) if not isinstance(predicted_test, pandas.Series) else predicted_train
-        self.predicted_test = pandas.Series(model.predict(X_test), index=X_test.index) if not isinstance(predicted_train, pandas.Series) else predicted_test
+        self.predicted_train = pandas.Series(model.predict(X_train), index=X_train.index) if not predicted_test else predicted_train
+        self.predicted_test = pandas.Series(model.predict(X_test), index=X_test.index) if not predicted_train else predicted_test
         if task in ['reg', 'class']:
             self.task = task
         else:
@@ -117,8 +117,8 @@ class Report:
                 and isinstance(X_test, pandas.DataFrame)
                 and isinstance(y_train, pandas.Series)
                 and isinstance(y_test, pandas.Series)
-                and isinstance(predicted_train, pandas.Series)
-                and isinstance(predicted_test, pandas.Series)):
+                and isinstance(self.predicted_train, pandas.Series)
+                and isinstance(self.predicted_test, pandas.Series)):
             self.X_train = X_train
             self.y_train = y_train
             self.X_test = X_test
@@ -129,8 +129,8 @@ class Report:
               \ry_train {type(y_train)} must be pandas.Series
               \rX_test {type(X_test)} must be pandas.DataFrame
               \ry_test {type(y_test)} should be pandas.Series
-              \rpredicted_train {type(predicted_train)} must be pandas.Series
-              \rpredicted_test {type(predicted_test)} must be pandas.Series
+              \rpredicted_train {type(self.predicted_train)} must be pandas.Series
+              \rpredicted_test {type(self.predicted_test)} must be pandas.Series
               \r""")
         self._directory = Path().absolute()
 
