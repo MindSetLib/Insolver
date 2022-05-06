@@ -380,6 +380,7 @@ class Report:
                 if index == 0:
                     if not isinstance(value, list):
                         return False
+                    value_len_prev = len(value)
                 elif not (isinstance(value, list) and len(value) == value_len_prev):
                     return False
                 value_len_prev = len(value)
