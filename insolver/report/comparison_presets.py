@@ -340,10 +340,10 @@ def _create_comparison_matrix(x, y, pairs_for_matrix, bins, freq):
                 col0 = pair_df[models_names[0]]
                 col1 = pair_df[models_names[1]]
                 df_compare.loc[gr, gr_2] = pair_df.loc[
-                    col0.between(gr.left, gr.right) & col1.between(gr_2.left, gr_2.right), 'Profit'].sum() / pair_df.loc[
-                    col0.between(gr.left, gr.right) & col1.between(gr_2.left, gr_2.right), 'Profit'].count()
+                    col0.between(gr.left, gr.right) & col1.between(gr_2.left, gr_2.right), y.name].sum() / pair_df.loc[
+                    col0.between(gr.left, gr.right) & col1.between(gr_2.left, gr_2.right), y.name].count()
                 df_count.loc[gr, gr_2] = pair_df.loc[
-                    col0.between(gr.left, gr.right) & col1.between(gr_2.left, gr_2.right), 'Profit'].count()
+                    col0.between(gr.left, gr.right) & col1.between(gr_2.left, gr_2.right), y.name].count()
         
         style_df = df_compare.style.background_gradient(axis=None, gmap=df_count, cmap=cm).format('{:.3f}')
         if len(pairs_for_matrix) == 1:
