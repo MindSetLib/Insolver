@@ -573,6 +573,7 @@ for (let data_type of ['train', 'test']){
     var trace1 = {
       x: feature_bins,
       y: feature_count,
+      yaxis: 'y2',
       name: 'feature',
       type: 'bar',
       marker: {
@@ -591,8 +592,7 @@ for (let data_type of ['train', 'test']){
         x: feature_bins,
         y: footer[feature][model],
         mode: 'lines+markers',
-        name: model,
-        yaxis: 'y2'
+        name: model
       }
       trace.push(trace_model)
     }
@@ -603,9 +603,9 @@ for (let data_type of ['train', 'test']){
       width: 1100,
       height: 500,
       xaxis: {title: "Group"}, 
-      yaxis: {title: "Count"},
+      yaxis: {title: "Prediction"},
       yaxis2: {
-        title: 'Prediction',
+        title: 'Count',
         overlaying: 'y',
         side: 'right'}
     };

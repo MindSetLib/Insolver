@@ -47,7 +47,7 @@ class Report:
             set, min(column)-1 is used. If float, all features are cut using `f_start`. If dict, must be 
             {'feature': start, 'all': 'groups_type'} where 'all' will be used for all features not listed in the dict.
         f_end (float, dict): End for the `Features comparison chart`. End value for `freq` groups_type. If not
-            set, max(column)+1 is used. If float, all features are cut using `f_end`. If dict, must be 
+            set, max(column) is used. If float, all features are cut using `f_end`. If dict, must be 
             {'feature': end, 'all': 'groups_type'} where 'all' will be used for all features not listed in the dict.
         f_freq (float, dict): Freq for the `Features comparison chart`. The length of each interval for `freq` 
             groups_type. Default value is 1.5. If float, all features are cut using `f_freq`. If dict, must be 
@@ -60,7 +60,7 @@ class Report:
         p_start (float): Start for the `Predict groups chart`. Start value for `freq` groups_type. If not
             set, min(column)-1 is used.
         p_end (float): End for the `Predict groups chart`. End value for `freq` groups_type. If not
-            set, max(column)+1 is used. 
+            set, max(column) is used. 
         p_freq (float): Freq for the `Predict groups chart`. The length of each interval for `freq` 
             groups_type. Default value is 1.5. 
         d_groups_type (str): Groups type for the `Difference chart`, supported values are: `cut` - bin 
@@ -70,7 +70,7 @@ class Report:
             value is 10.
         d_start (float): Start for the `Difference chart`. Start value for `freq` groups_type. If not set, 
             min(column)-1 is used.
-        d_end (float): End for the `Difference chart`. End value for `freq` groups_type. If not set, max(column)+1 
+        d_end (float): End for the `Difference chart`. End value for `freq` groups_type. If not set, max(column) 
             is used. 
         d_freq (float): Freq for the `Difference chart`. The length of each interval for `freq` groups_type. 
             Default value is 1.5. 
