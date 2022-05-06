@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-def _create_models_comparison(x_train, y_train, x_test, y_test, dataset, task, models_to_compare, comparison_metrics, 
+
+def _create_models_comparison(x_train, y_train, x_test, y_test, dataset, task, models_to_compare, comparison_metrics,
                               f_groups_type, f_bins, f_start, f_end, f_freq,
                               p_groups_type, p_bins, p_start, p_end, p_freq,
                               d_groups_type, d_bins, d_start, d_end, d_freq, 
@@ -12,7 +13,7 @@ def _create_models_comparison(x_train, y_train, x_test, y_test, dataset, task, m
     articles = []
     
     icons = {'train': '<i class="bi bi-clipboard"></i>', 'test': '<i class="bi bi-clipboard-check"></i>'}
-    for key, value in {'train':[x_train, y_train], 'test': [x_test, y_test]}.items():
+    for key, value in {'train': [x_train, y_train], 'test': [x_test, y_test]}.items():
         # footer values are used by js in the report_template
         footer = {}
         # compare using ModelMetricsCompare and footer values
@@ -20,22 +21,23 @@ def _create_models_comparison(x_train, y_train, x_test, y_test, dataset, task, m
                                                                            comparison_metrics)
         # get features comparison and footer values
         footer[f'features_{key}'], feat_html_grid = _create_features_comparison(key, value[0], value[1], dataset,
-                                                                                models_to_compare,
-                                                                                f_groups_type, f_bins, f_start, f_end, f_freq)
+                                                                                models_to_compare, f_groups_type,
+                                                                                f_bins, f_start, f_end, f_freq)
         # get predict groups and footer values
         footer[f'predict_gp_{key}'], pr_gr_grid = _create_predict_groups(key, value[0], value[1], models_to_compare,
                                                                          p_groups_type, p_bins, p_start, p_end, p_freq)
         # get difference comparison and footer values
-        footer[f'diff_{key}'], diff_grid = _create_difference_comparison(key, value[0], value[1], model, models_to_compare,
-                                                                         main_diff_model, compare_diff_models,
-                                                                         d_groups_type, d_bins, d_start, d_end, d_freq)
+        footer[f'diff_{key}'], diff_grid = _create_difference_comparison(key, value[0], value[1], model,
+                                                                         models_to_compare, main_diff_model,
+                                                                         compare_diff_models, d_groups_type, d_bins,
+                                                                         d_start, d_end, d_freq)
 
         articles.append({
             'name': f'Compare on {key} data',
             'parts': [
                 '<div class="p-3 m-3 bg-light border rounded-3 fw-light">'
                     '<h4 class="text-center fw-light">Metrics comparison chart:</h4>'
-                       f'<canvas id="comparison_{key}"></canvas>'
+                f'<canvas id="comparison_{key}"></canvas>'
                 '</div>'
                 '<div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">'
                     '<h4 class="text-center fw-light">Metrics comparison table:</h4>'
@@ -65,13 +67,14 @@ def _create_models_comparison(x_train, y_train, x_test, y_test, dataset, task, m
 
     return {
         'name': 'Compare models',
-                  'articles': articles,
-                  'icon': '<i class="bi bi-binoculars"></i>',
+        'articles': articles,
+        'icon': '<i class="bi bi-binoculars"></i>',
     }
+
 
 def _get_ModelMetricsCompare(x, y, task, source, comparison_metrics):
     # use ModelMetricsCompare to create comparison dataframes
-    mc = ModelMetricsCompare(x, y, task, source = source, metrics = comparison_metrics)
+    mc = ModelMetricsCompare(x, y, task, source=source, metrics=comparison_metrics)
     mc.compare()
     metrics = mc.metrics_results
     metrics_columns = metrics.columns[2:]
@@ -85,6 +88,7 @@ def _get_ModelMetricsCompare(x, y, task, source, comparison_metrics):
         result[row['Algo']] = list(row[metrics_columns])
 
     return result, metrics
+
 
 def _create_features_comparison(data_type, x, y, dataset, models_to_compare, groups_type, bins, start, end, freq):
     features = x.columns
@@ -104,7 +108,7 @@ def _create_features_comparison(data_type, x, y, dataset, models_to_compare, gro
             y_pred = model.predict(x)
             try:
                 model_name = model.algo
-            except (AttributeError):
+            except AttributeError:
                 model_name = model.__class__.__name__
 
             model_name = f'{model_name}_1' if model_name in x_y.columns else model_name
@@ -137,9 +141,10 @@ def _create_features_comparison(data_type, x, y, dataset, models_to_compare, gro
         nav_class = "nav-link active" if feature == features[0] else "nav-link"
         # replace ' ' so that href could work correctly
         feature_replaced = feature.replace(' ', '_')
-        nav_items +=f'''
+        nav_items += f'''
         <li class="nav-item">
-            <a class="{nav_class}" aria-current="true" href="#comparison_{feature_replaced}_{data_type}" data-bs-toggle="tab">
+            <a class="{nav_class}" aria-current="true" href="#comparison_{feature_replaced}_{data_type}" 
+            data-bs-toggle="tab">
             {feature}</a>
         </li>'''
         tab_pane_class = "tab-pane active" if feature == features[0] else "tab-pane"
@@ -152,7 +157,8 @@ def _create_features_comparison(data_type, x, y, dataset, models_to_compare, gro
     return result, f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs" style="overflow-x: auto;">
+            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            style="overflow-x: auto;">
                 {nav_items}
             </ul>
             
@@ -161,6 +167,7 @@ def _create_features_comparison(data_type, x, y, dataset, models_to_compare, gro
             {tab_pane_items}
         </form>
     </div>'''
+
 
 def _create_predict_groups(data_type, x, y, models_to_compare, groups_type, bins, start, end, freq):
     nav_items = ''
@@ -174,7 +181,7 @@ def _create_predict_groups(data_type, x, y, models_to_compare, groups_type, bins
     for model in models_to_compare:
         try:
             model_name = model.algo
-        except (AttributeError):
+        except AttributeError:
             model_name = model.__class__.__name__
         y_pred = model.predict(x)
         # create Dataframe to save and group values 
@@ -198,7 +205,7 @@ def _create_predict_groups(data_type, x, y, models_to_compare, groups_type, bins
                                    list(round(model_groups_mean[y.name].dropna(), 3))]
 
         nav_class = "nav-link active" if model_name == models[0] else "nav-link"
-        nav_items +=f'''
+        nav_items += f'''
         <li class="nav-item">
             <a class="{nav_class}" aria-current="true" href="#comparison_{model_name}_{data_type}" data-bs-toggle="tab">
             {model_name}</a>
@@ -213,7 +220,8 @@ def _create_predict_groups(data_type, x, y, models_to_compare, groups_type, bins
     return result, f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs" style="overflow-x: auto;">
+            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+             style="overflow-x: auto;">
                 {nav_items}
             </ul>
             
@@ -222,6 +230,7 @@ def _create_predict_groups(data_type, x, y, models_to_compare, groups_type, bins
             {tab_pane_items}
         </form>
     </div>'''
+
 
 def _create_difference_comparison(data_type, x, y, main_model, models_to_compare,
                                   main_diff_model, compare_diff_models,
@@ -235,13 +244,13 @@ def _create_difference_comparison(data_type, x, y, main_model, models_to_compare
     main_pred = main_model.predict(x)
     try:
         result['main_model'] = main_model.algo
-    except (AttributeError):
+    except AttributeError:
         result['main_model'] = main_model.__class__.__name__
 
     for model in models_to_compare:
         try:
             model_name = model.algo
-        except (AttributeError):
+        except AttributeError:
             model_name = model.__class__.__name__
         # create Dataframe to save and group values 
         y_preds = pd.DataFrame(y.copy())
@@ -260,22 +269,23 @@ def _create_difference_comparison(data_type, x, y, main_model, models_to_compare
 
         # count in groups
         main_model_count = y_preds[['diff_model_model', 'diff_groups']].groupby('diff_groups', as_index=False).count()
-        result[f'count_{model_name}'] = list(main_model_count[main_model_count['diff_model_model'] != 0]['diff_model_model'])
+        result[f'count_{model_name}'] = list(
+            main_model_count[main_model_count['diff_model_model'] != 0]['diff_model_model'])
 
         # mean predict and fact values
         
-        model_groups_mean = y_preds[['diff_model_model', 'diff_fact_model', 'diff_groups']].groupby('diff_groups', 
-                                                                                            as_index=False).mean()
+        model_groups_mean = y_preds[['diff_model_model', 'diff_fact_model',
+                                     'diff_groups']].groupby('diff_groups', as_index=False).mean()
 
-        
         result[f'diff_model_{model_name}'] = list(round(model_groups_mean['diff_model_model'].dropna(), 3))
         result[f'diff_fact_{model_name}'] = list(round(model_groups_mean['diff_fact_model'].dropna(), 3))
         result[f'{model_name}_bins'] = list(model_groups_mean['diff_groups'].astype(str).dropna())
 
         nav_class = "nav-link active" if model_name == models[0] else "nav-link"
-        nav_items +=f'''
+        nav_items += f'''
         <li class="nav-item">
-            <a class="{nav_class}" aria-current="true" href="#diff_comparison_{model_name}_{data_type}" data-bs-toggle="tab">
+            <a class="{nav_class}" aria-current="true" href="#diff_comparison_{model_name}_{data_type}"
+            data-bs-toggle="tab">
             {model_name}</a>
         </li>'''
         tab_pane_class = "tab-pane active" if model_name == models[0] else "tab-pane"
@@ -289,7 +299,8 @@ def _create_difference_comparison(data_type, x, y, main_model, models_to_compare
     return result,  f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs" style="overflow-x: auto;">
+            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+             style="overflow-x: auto;">
                 {nav_items}
             </ul>
             
@@ -299,24 +310,27 @@ def _create_difference_comparison(data_type, x, y, main_model, models_to_compare
         </form>
     </div>''' 
 
+
 def _create_comparison_matrix(x, y, pairs_for_matrix, bins, freq):
-    if not pairs_for_matrix: return ''
+    if not pairs_for_matrix:
+        return ''
     # check if pairs is [] and then make it [[]]
     pairs_for_matrix = [pairs_for_matrix] if len(np.array(pairs_for_matrix).shape) == 1 else pairs_for_matrix
     nav_items = ''
     tab_pane_items = ''
     cm = sns.light_palette("Blue", as_cmap=True)
-    i=0
+    i = 0
     for pair in pairs_for_matrix:
         # check if pair is a pair
         if len(pair) != 2:
-            raise NotImplementedError(f'Only two values is supported as a pair, now {pair} pair has {len(pair)} values.')
+            raise NotImplementedError('Only two values is supported as a pair,'
+                                      f' now {pair} pair has {len(pair)} values.')
         pair_df = pd.DataFrame(y)
         models_names = []
         for model in pair:
             try:
                 model_name = model.algo
-            except (AttributeError):
+            except AttributeError:
                 model_name = model.__class__.__name__
             # predict values
             pair_df[model_name] = model.predict(x)
@@ -327,13 +341,12 @@ def _create_comparison_matrix(x, y, pairs_for_matrix, bins, freq):
         _bins = pd.interval_range(start=_start, end=_end, 
                                   freq=freq) if freq else pd.interval_range(start=_start, end=_end, periods=bins)
 
-        _bins = pd.IntervalIndex([pd.Interval( round(i.left, 2), round(i.right, 2), i.closed ) 
-                                    for i in _bins])
+        _bins = pd.IntervalIndex([pd.Interval(round(i.left, 2), round(i.right, 2), i.closed) for i in _bins])
         pair_df['groups'] = _cut_column(pair_df[y.name], groups_type='cut', bins=_bins) 
         unique_gr = pair_df['groups'].unique()
         # create empty dataframes
-        df_compare = pd.DataFrame(index=sorted(unique_gr), columns = sorted(unique_gr))
-        df_count = pd.DataFrame(index=sorted(unique_gr), columns = sorted(unique_gr))
+        df_compare = pd.DataFrame(index=sorted(unique_gr), columns=sorted(unique_gr))
+        df_count = pd.DataFrame(index=sorted(unique_gr), columns=sorted(unique_gr))
         # get rows where both predict values are in the interval
         for gr in unique_gr:
             for gr_2 in unique_gr:
@@ -350,13 +363,13 @@ def _create_comparison_matrix(x, y, pairs_for_matrix, bins, freq):
             return f'''<h5 class="text-center fw-light">{models_names[0]} and {models_names[1]} comparison matrix:</h5>
             {style_df.to_html(table_attributes='classes="table"')}'''
         else:
-            nav_class = "nav-link active" if i==0 else "nav-link"
-            nav_items +=f'''
+            nav_class = "nav-link active" if i == 0 else "nav-link"
+            nav_items += f'''
             <li class="nav-item">
                 <a class="{nav_class}" aria-current="true" href="#comparison_matrix_{i}" data-bs-toggle="tab">
                 {models_names[0]} and {models_names[1]}</a>
             </li>'''
-            tab_pane_class = "tab-pane active" if i==0 else "tab-pane"
+            tab_pane_class = "tab-pane active" if i == 0 else "tab-pane"
             
             tab_pane_items += (f'''
             <div class="{tab_pane_class}" id="comparison_matrix_{i}">
@@ -364,11 +377,12 @@ def _create_comparison_matrix(x, y, pairs_for_matrix, bins, freq):
                 {style_df.to_html(table_attributes='classes="table"')}
             </div>
             ''')
-        i+=1
+        i += 1
     return f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs" style="overflow-x: auto;">
+            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            style="overflow-x: auto;">
                 {nav_items}
             </ul>
             
@@ -378,7 +392,6 @@ def _create_comparison_matrix(x, y, pairs_for_matrix, bins, freq):
         </form>
     </div>''' 
 
-        
 
 def _cut_column(column, groups_type, bins=None, start=None, end=None, freq=None):
     p = 0 if column.dtype == 'int64' else 2
@@ -390,21 +403,22 @@ def _cut_column(column, groups_type, bins=None, start=None, end=None, freq=None)
         elif groups_type == 'qcut':
             return pd.qcut(column, bins)
         elif groups_type == 'freq':
-            _start = min(column)-1 if start == None else start
-            _end = max(column) if end == None else end
+            _start = min(column)-1 if start is None else start
+            _end = max(column) if end is None else end
             _bins = pd.interval_range(start=_start, end=_end, freq=freq)
             # count digits after the decimal point
             s = str(freq)
             p = 0 if s.isdecimal() else len(s.split('.')[1])
-            _bins = pd.IntervalIndex([pd.Interval( round(i.left, p), round(i.right, p), i.closed ) 
-                                    for i in _bins])
+            _bins = pd.IntervalIndex([pd.Interval(round(i.left, p), round(i.right, p), i.closed) for i in _bins])
             # pd.interval_range creates big numbers, it rounds them
             return pd.cut(column, bins=_bins)
             
         else:
-            raise NotImplementedError(f'`groups_type` = {groups_type} is not supported, must be `cut`, `qcut` or `freq`.')
-    except(TypeError):
+            raise NotImplementedError(f'`groups_type` = {groups_type} is not supported, '
+                                      'must be `cut`, `qcut` or `freq`.')
+    except TypeError:
         return column
+
 
 def _get_columns_params(column, groups_type, bins, start, end, freq):
     result = []

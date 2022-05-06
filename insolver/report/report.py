@@ -5,7 +5,6 @@ from pathlib import Path
 import pandas
 from pandas_profiling import ProfileReport
 from sklearn import metrics
-from sklearn.utils.multiclass import type_of_target
 
 import presets
 import metrics
@@ -379,9 +378,7 @@ class Report:
 
             for index, value in enumerate(body.values()):
                 if index == 0:
-                    if isinstance(value, list):
-                        value_len_prev = len(value)
-                    else:
+                    if not isinstance(value, list):
                         return False
                 elif not (isinstance(value, list) and len(value) == value_len_prev):
                     return False
