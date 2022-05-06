@@ -390,7 +390,7 @@ def _cut_column(column, groups_type, bins=None, start=None, end=None, freq=None)
         elif groups_type == 'qcut':
             return pd.qcut(column, bins)
         elif groups_type == 'freq':
-            _start = min(column) if start == None else start
+            _start = min(column)-1 if start == None else start
             _end = max(column) if end == None else end
             _bins = pd.interval_range(start=_start, end=_end, freq=freq)
             # count digits after the decimal point
@@ -420,7 +420,3 @@ def _get_columns_params(column, groups_type, bins, start, end, freq):
             result.append(param)
 
     return tuple(result)
-
-
-        
-        
