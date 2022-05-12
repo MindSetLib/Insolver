@@ -27,10 +27,10 @@ jupyter labextension install jupyterlab-plotly
 - [Binary Classification Example - Rain in Australia Prediction](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Binary%20Classification%20Example%20-%20Rain%20in%20Australia%20Prediction.ipynb)
 This tutorial demonstrates how to create **classification models** for the [`weatherAUS`](https://www.kaggle.com/jsphyg/weather-dataset-rattle-package) dataset: getting and preprocessing data, transformations, creating models, plotting SHAP values and comparing models.
 
-- [Data Preprocessing Example I - New York City Airbnb]()
+- [Data Preprocessing Example I - New York City Airbnb](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Data%20Preprocessing%20Example%20I%20-%20New%20York%20City%20Airbnb.ipynb)
 This tutorial demonstrates how to use the [`feature_engineering`](https://github.com/MindSetLib/Insolver/tree/fixed_docs/insolver/feature_engineering) module and all the **main features of each class**. For this, the [`AB_NYC_2019`](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data) dataset is used. 
 
-- [Data Preprocessing Example II - New York City Airbnb]()
+- [Data Preprocessing Example II - New York City Airbnb](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Data%20Preprocessing%20Example%20II%20-%20New%20York%20City%20Airbnb.ipynb)
 This tutorial also demonstrates how to use the [`feature_engineering`](https://github.com/MindSetLib/Insolver/tree/fixed_docs/insolver/feature_engineering) module, but it covers the **automated data preprossesing** class and all of its features. For this, the [`AB_NYC_2019`](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data) dataset is used. 
 
 - [Gradient Boosting Example - Lending Club](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Gradient%20Boosting%20Example%20-%20Lending%20Club.ipynb)
