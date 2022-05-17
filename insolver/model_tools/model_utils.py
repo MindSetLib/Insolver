@@ -248,7 +248,7 @@ def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
 
 
 def lorenz_curve(y_true, y_pred, exposure):
-    """Calculating lornz curve and Gini coefficient.
+    """Calculating lorenz curve and Gini coefficient.
 
     Args:
         y_true: Array with target variable.
@@ -270,7 +270,7 @@ def lorenz_curve(y_true, y_pred, exposure):
 
 
 def gain_curve(y_true, y_pred, exposure, step=1, figsize=(10, 6)):
-    """ Plot gains curve and calculate Gini coefficient. Mostly making use of
+    """Plot gains curve and calculate Gini coefficient. Mostly making use of
     https://scikit-learn.org/stable/auto_examples/linear_model/plot_tweedie_regression_insurance_claims.html.
 
     Args:
@@ -319,6 +319,21 @@ def gain_curve(y_true, y_pred, exposure, step=1, figsize=(10, 6)):
 
 
 def lift_score(predict, column, lift_type='groupby', q=10, output=False, reference='mean', kind='line', show=True):
+    """
+
+    Args:
+        predict:
+        column:
+        lift_type:
+        q:
+        output:
+        reference:
+        kind:
+        show:
+
+    Returns:
+
+    """
     df = concat([column.reset_index(drop=True), Series(predict, name='Predict').reset_index(drop=True)], axis=1)
     if lift_type == 'groupby':
         pass
@@ -348,14 +363,46 @@ def lift_score(predict, column, lift_type='groupby', q=10, output=False, referen
         return df
 
 
-def stability_index(scoring_variable, dev, oot, kind='psi', bins=10, detail=True):
-    assert kind in ['psi', 'csi'], '"kind" argument must be in ["psi", "csi"]'
-    if kind == 'psi':
-        oot_bins = cut(oot[scoring_variable], bins=bins)
-        dev_bins = cut(dev[scoring_variable], bins=oot_bins.cat.categories)
+def stability_index(scoring_variable, dev, oot, index='psi', binning_method='quantile', bins=10, detail=True):
+    """Calculation of Population Stability Index or Characteristic Stability Index.
+    Based on https://www.lexjansen.com/wuss/2017/47_Final_Paper_PDF.pdf,
+    https://www.listendata.com/2015/05/population-stability-index.html and
+    https://towardsdatascience.com/psi-and-csi-top-2-model-monitoring-metrics-924a2540bed8.
+
+    Args:
+        scoring_variable (str): The name of the variable with respect to which the index will be calculated.
+        dev (pandas.DataFrame): The dataset containing `scoring_variable` on which the model was developed.
+        oot (pandas.DataFrame): The out-of-time dataset containing `scoring_variable`.
+        index (str): The type of stability index: Polulation (psi) or Characteristic (csi). Default 'psi'.
+        binning_method (str): Method for splitting variable into bins, 'quantile' or 'equal_width'. Default 'quantile'.
+         If scoring_variable is object or category column, then initial values are used, without any binning.
+        bins (int): The number of bins the population will be divided into. Default 10.
+        detail (bool): Whether to return detail info on index calculation or only index value.
+
+    Returns:
+
+    """
+    assert index in ['psi', 'csi'], '"index" argument must be in ["psi", "csi"]'
+    assert binning_method in ['quantile', 'equal_width'], ('"binning_method" argument must'
+                                                           'be in ["quantile", "equal_width"]')
+    assert ((scoring_variable in dev.columns) and
+            (scoring_variable in oot.columns)), '"scoring_variable" must be in both `dev` and `out` datasets.'
+    sc_var_dev, sc_var_oot = dev[scoring_variable], oot[scoring_variable]
+    assert sc_var_dev.dtype == sc_var_oot.dtype, '"scoring_variable" type must be the same in both `dev` and `oot`'
+
+    # if sc_var_dev.dtype in ['object', 'category']:
+    #
+    # else:
+    #     if binning_method == 'quantile':
+    #
+    #     else:
+
+    if index == 'psi':
+        oot_bins = cut(sc_var_oot, bins=bins)
+        dev_bins = cut(sc_var_dev, bins=oot_bins.cat.categories)
     else:
-        dev_bins = cut(dev[scoring_variable], bins=bins)
-        oot_bins = cut(oot[scoring_variable], bins=dev_bins.cat.categories)
+        dev_bins = cut(sc_var_dev, bins=bins)
+        oot_bins = cut(sc_var_oot, bins=dev_bins.cat.categories)
     psi = concat([(oot_bins.value_counts().sort_index(ascending=False)/oot_bins.shape[0]*100).rename('OOT'),
                   (dev_bins.value_counts().sort_index(ascending=False)/dev_bins.shape[0]*100).rename('DEV')], axis=1)
     psi['Diff'] = psi['OOT'] - psi['DEV']
