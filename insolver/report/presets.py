@@ -6,6 +6,7 @@ import numpy as np
 from shap import TreeExplainer
 import lime.lime_tabular as lt
 
+
 def _create_pandas_profiling():
     pandas_profiling = '''Generated profile report from a 
         pandas <code>DataFrame</code> prepared by 
@@ -14,23 +15,24 @@ def _create_pandas_profiling():
     return {
         'name': 'Pandas profiling',
         'parts': ['<div class="col-12"><button '
-            'class="btn btn-primary" type="submit" '
-            'onclick="window.location.href=\''
-            './profiling_report.html\';">'
-            'Go to report</button></div>'],
+                  'class="btn btn-primary" type="submit" '
+                  'onclick="window.location.href=\''
+                  './profiling_report.html\';">'
+                  'Go to report</button></div>'],
         'header': f'<p class="fs-5 fw-light">{pandas_profiling}</p>',
         'footer': '<a href="https://pypi.org/project/'
-            'pandas-profiling/">library page</a>',
+                  'pandas-profiling/">library page</a>',
         'icon': '<i class="bi bi-briefcase"></i>',
     }
 
+
 def _create_dataset_description(x_train, x_test, y_train, y_test, task,
                                 description, y_description,
-                                dataset = None):
+                                dataset=None):
     # calculate values for train/test split
     x_sum = len(x_train) + len(x_test)
-    train_pct = round(len(x_train)/x_sum * 100)
-    test_pct = round(len(x_test)/x_sum * 100)
+    train_pct = round(len(x_train) / x_sum * 100)
+    test_pct = round(len(x_test) / x_sum * 100)
 
     train_test_column = f'''
     <div class="col-3.ms-auto my-3">
@@ -45,18 +47,18 @@ def _create_dataset_description(x_train, x_test, y_train, y_test, task,
     '''
     # create y description, contains specification, chart and values description
     described_y, footer = _describe_y(y_train, y_test, task, y_description, dataset,
-                              classes = "table table-striped table-responsive-sm ", justify="center")
+                                      classes="table table-striped table-responsive-sm ", justify="center")
 
     return {
         'name': 'Dataset description',
-        'parts': [ 
+        'parts': [
             '<div class="p-3 my-3 bg-light border rounded-3 fs-5 fw-light">'
-                f'{description}</div>'
+            f'{description}</div>'
             '<div class="p-3 my-3 bg-light border rounded-3 text-center fw-light">'
-                '<div class="row row-cols-2 my-3 fs-6">'
-                    f'{train_test_column}'
-                    f'{described_y}'
-                '</div>'
+            '<div class="row row-cols-2 my-3 fs-6">'
+            f'{train_test_column}'
+            f'{described_y}'
+            '</div>'
             '</div>'
 
         ],
@@ -65,13 +67,14 @@ def _create_dataset_description(x_train, x_test, y_train, y_test, task,
         'icon': '<i class="bi bi-book"></i>',
     }
 
+
 def _create_importance_charts():
     # create html for js 
     nav_items = ''
     tab_pane_items = ''
     for coef_name in ['relative_importance', 'scaled_importance', 'percentage']:
         nav_class = "nav-link active" if coef_name == 'relative_importance' else "nav-link"
-        nav_items +=f'''
+        nav_items += f'''
         <li class="nav-item">
             <a class="{nav_class}" aria-current="true" href="#{coef_name}" data-bs-toggle="tab">
             {coef_name}</a>
@@ -83,13 +86,15 @@ def _create_importance_charts():
         </div>
         ''')
     return f'''
-    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_metrics" aria-expanded="False" aria-controls="collapseWidthExample">
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_metrics"
+     aria-expanded="False" aria-controls="collapseWidthExample">
         Show charts
     </button>
     <div class="collapse" id="collapse_metrics">
         <div class="card text-center">
             <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs" style="overflow-x: auto;">
+                <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+                 style="overflow-x: auto;">
                     {nav_items}
                 </ul>
                 
@@ -101,9 +106,10 @@ def _create_importance_charts():
     </div>    
     '''
 
+
 def _create_shap(x_train, x_test, model):
     # footer values are used by js in the report_template
-    footer = {}
+    footer = dict()
     # save features names
     footer['features'] = list(x_train.columns)
     # create explainer
@@ -126,23 +132,22 @@ def _create_shap(x_train, x_test, model):
         for i in range(len(variables)):
             feat = variables[i]
             shap_feat = shap_values.T[i]
-            footer[f'{feat}_{key}'] = [[round(num, 4) for num in list(value[feat])], 
+            footer[f'{feat}_{key}'] = [[round(num, 4) for num in list(value[feat])],
                                        [round(num, 4) for num in list(shap_feat)]]
             # replace ' ' so that href could work correctly
             feature_replaced = feat.replace(' ', '_')
-            nav_class = "nav-link active" if feat==footer['features'][0] else "nav-link"
-            nav_items +=f'''
+            nav_class = "nav-link active" if feat == footer['features'][0] else "nav-link"
+            nav_items += f'''
             <li class="nav-item">
                 <a class="{nav_class}" aria-current="true" href="#div_shap_{feature_replaced}" data-bs-toggle="tab">
                 {feat}</a>
             </li>'''
-            tab_pane_class = "tab-pane active" if feat==footer['features'][0] else "tab-pane"
+            tab_pane_class = "tab-pane active" if feat == footer['features'][0] else "tab-pane"
             tab_pane_items += (f'''
             <div class="{tab_pane_class}" id="div_shap_{feature_replaced}">
                 <div id="shap_{feat}"></div>
             </div>
             ''')
-
 
     return footer, f'''
     <div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">
@@ -151,7 +156,8 @@ def _create_shap(x_train, x_test, model):
     <div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">
         <div class="card text-center">
             <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs" style="overflow-x: auto;">
+                <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+                 style="overflow-x: auto;">
                     {nav_items}
                 </ul>
                 
@@ -163,14 +169,15 @@ def _create_shap(x_train, x_test, model):
     </div>
     '''
 
+
 def _create_partial_dependence(x_train, x_test, model):
     # footer values are used by js in the report_template
     footer = {}
     model = model.model if isinstance(model, InsolverBaseWrapper) else model
     # get Partial Dependence
-    pdp_train = PartialDependenceDisplay.from_estimator(estimator = model, X = x_train, features = x_train.columns, 
+    pdp_train = PartialDependenceDisplay.from_estimator(estimator=model, X=x_train, features=x_train.columns,
                                                         kind='average').pd_results
-    pdp_test = PartialDependenceDisplay.from_estimator(estimator = model, X = x_test, features = x_test.columns, 
+    pdp_test = PartialDependenceDisplay.from_estimator(estimator=model, X=x_test, features=x_test.columns,
                                                        kind='average').pd_results
     # convert results to list
     for feat in pdp_train:
@@ -190,13 +197,13 @@ def _create_partial_dependence(x_train, x_test, model):
     for feat in footer['features']:
         # replace ' ' so that href could work correctly
         feature_replaced = feat.replace(' ', '_')
-        nav_class = "nav-link active" if feat==footer['features'][0] else "nav-link"
-        nav_items +=f'''
+        nav_class = "nav-link active" if feat == footer['features'][0] else "nav-link"
+        nav_items += f'''
         <li class="nav-item">
             <a class="{nav_class}" aria-current="true" href="#div_pdp_{feature_replaced}" data-bs-toggle="tab">
             {feat}</a>
         </li>'''
-        tab_pane_class = "tab-pane active" if feat==footer['features'][0] else "tab-pane"
+        tab_pane_class = "tab-pane active" if feat == footer['features'][0] else "tab-pane"
         tab_pane_items += (f'''
         <div class="{tab_pane_class}" id="div_pdp_{feature_replaced}">
             <div id="pdp_{feat}"></div>
@@ -205,7 +212,8 @@ def _create_partial_dependence(x_train, x_test, model):
     return footer, f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs" style="overflow-x: auto;">
+            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            style="overflow-x: auto;">
                 {nav_items}
             </ul>
         </div>
@@ -214,28 +222,30 @@ def _create_partial_dependence(x_train, x_test, model):
         </form>
     </div>'''
 
+
 def _explain_instance(explain_instance, model, x, task, original_dataset):
-    footer = {}
+    footer = dict()
     footer['shap_waterfall'] = shap_explain(explain_instance, model)
     footer['lime'] = lime_explain(explain_instance, x, model, task, original_dataset)
     return {
         'name': 'Explain instance',
         'parts': [
             '<div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">'
-                '<h4 class="text-center fw-light">SHAP Waterfall chart:</h4>'
-                    '<div id="shap_waterfall"></div>'
+            '<h4 class="text-center fw-light">SHAP Waterfall chart:</h4>'
+            '<div id="shap_waterfall"></div>'
             '</div>'
             '<div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">'
-                '<h4 class="text-center fw-light">Lime chart:</h4>'
-                    '<div id="lime"></div>'
+            '<h4 class="text-center fw-light">Lime chart:</h4>'
+            '<div id="lime"></div>'
             '</div>'],
         'header': '',
         'footer': footer,
         'icon': '<i class="bi bi-123"></i>',
     }
 
-def _describe_y(y_train, y_test, task, y_description, dataset = None, **kwargs):
-    descr_dict = {'Y specification:' : y_description}
+
+def _describe_y(y_train, y_test, task, y_description, dataset=None, **kwargs):
+    descr_dict = {'Y specification:': y_description}
     # footer values are used by js in the report_template
     footer = {'task': task}
     # if dataset, create one y description
@@ -247,24 +257,24 @@ def _describe_y(y_train, y_test, task, y_description, dataset = None, **kwargs):
                 descr = pd.DataFrame(round(y_column.describe(), 2))
                 footer['data_y'] = list(y_column)
                 descr_dict[f'Y chart:'] = f'<div id="chart_y"></div>'
-                
+
             else:
                 descr = pd.DataFrame(y_column.value_counts())
                 footer['index_y'] = list(pd.Series(list(descr.index)).apply(str))
                 footer['data_y'] = list(descr[y_column.name])
                 descr_dict[f'Y chart:'] = f'<canvas id="chart_y"></canvas>'
 
-            descr = descr.append(pd.Series({y_column.name: y_column.isnull().sum()}, name = 'null'))
+            descr = descr.append(pd.Series({y_column.name: y_column.isnull().sum()}, name='null'))
             descr_dict['Y values description:'] = f'{descr.to_html(**kwargs)}'
 
-        except(KeyError):
+        except KeyError:
             dataset = None
 
     # if not dataset, create train and test y descriptions
-    elif dataset == None:
+    elif dataset is None:
         footer['type'] = 'train_test'
         for key, value in {'train': y_train, 'test': y_test}.items():
-                
+
             if task == 'reg':
                 descr = pd.DataFrame(round(value.describe(), 2))
                 footer[f'data_{key}'] = list(value)
@@ -275,11 +285,10 @@ def _describe_y(y_train, y_test, task, y_description, dataset = None, **kwargs):
                 footer[f'index_{key}'] = list(pd.Series(list(descr.index)).apply(str))
                 footer[f'data_{key}'] = list(descr[value.name])
                 descr_dict[f'Y {key} chart:'] = f'<canvas id="chart_y_{key}"></canvas>'
-            
+
             descr['null'] = value.isnull().sum()
             descr_dict[f'Y {key} values description:'] = f'{descr.to_html(**kwargs)}'
-            
-        
+
     descr_html = ''
 
     for key in descr_dict:
@@ -294,41 +303,42 @@ def _describe_y(y_train, y_test, task, y_description, dataset = None, **kwargs):
             </div>
         '''
 
-    
     return descr_html, footer
+
 
 def _describe_dataset(x_train, x_test, dataset):
     # describe dataset for the 'Features values description'
     if isinstance(dataset, pd.DataFrame):
-        description_table = pd.concat([dataset.dtypes, dataset.isnull().sum(),  
-                                      round(dataset.describe().transpose(), 2)], 
-                                      axis=1).rename(columns = {0: 'type', 1: 'null'}).sort_values(by=['type'])
+        description_table = pd.concat([dataset.dtypes, dataset.isnull().sum(),
+                                       round(dataset.describe().transpose(), 2)],
+                                      axis=1).rename(columns={0: 'type', 1: 'null'}).sort_values(by=['type'])
 
         # Dataframe.describe() method is not working for object columns          
         if description_table['count'].isnull().sum() > 0:
             description_table['count'] = dataset.count()
-        description_table.fillna("-", inplace = True)
-        
+        description_table.fillna("-", inplace=True)
+
     # if dataset is none, description will be created for train and test values
-    elif dataset == None:
-        train_descr = pd.concat([round(x_train.describe().transpose(), 2), 
-                                x_train.isnull().sum()], axis=1).rename(columns = {0: 'null'})
-        test_descr = pd.concat([round(x_test.describe().transpose(), 2), 
-                                x_test.isnull().sum()], axis=1).rename(columns = {0: 'null'})
-        description_table = pd.concat([train_descr, test_descr], axis = 1, keys=['Train', 'Test'])
+    elif dataset is None:
+        train_descr = pd.concat([round(x_train.describe().transpose(), 2),
+                                 x_train.isnull().sum()], axis=1).rename(columns={0: 'null'})
+        test_descr = pd.concat([round(x_test.describe().transpose(), 2),
+                                x_test.isnull().sum()], axis=1).rename(columns={0: 'null'})
+        description_table = pd.concat([train_descr, test_descr], axis=1, keys=['Train', 'Test'])
 
     else:
         TypeError(f'Parameter `dataset` {type(dataset)} must be pandas.DataFrame.')
 
     return description_table
 
+
 def _create_features_description(x_train, x_test, dataset, description=None):
     # create html with features description
     html_grid = ''
-    if (description):
+    if description:
         if not (description, dict):
             raise NotImplementedError('Features description must be dict.')
-        
+
         for key in description.keys():
             html_grid += f'''
             <div class="row">
@@ -341,24 +351,25 @@ def _create_features_description(x_train, x_test, dataset, description=None):
 
     return {
         'name': 'Features description',
-        'parts': [ 
+        'parts': [
             '<div class="p-3 my-3 bg-light border rounded-3 fw-light">'
-                '<h4 class="text-center fw-light">Features specification:</h4>'
-                f'{html_grid}'
+            '<h4 class="text-center fw-light">Features specification:</h4>'
+            f'{html_grid}'
             '</div>'
             '<div class="p-3 my-3 bg-light border rounded-3 text-center fw-light">'
-                '<h4 class="text-center fw-light">Features values description:</h4>'
-                f'{description_table.to_html(classes = "table table-striped", justify="center")}'
+            '<h4 class="text-center fw-light">Features values description:</h4>'
+            f'{description_table.to_html(classes="table table-striped", justify="center")}'
             '</div>'
             '<div class="p-3 my-3 bg-light border rounded-3 text-center fw-light">'
-                '<h4 class="text-center fw-light">Population Stability Index:</h4>'
-                f'{metrics._calc_psi(x_train, x_test, dataset)}'
+            '<h4 class="text-center fw-light">Population Stability Index:</h4>'
+            f'{metrics._calc_psi(x_train, x_test, dataset)}'
             '</div>'
         ],
-        'header':'',
+        'header': '',
         'footer': '',
         'icon': '<i class="bi bi-box-seam"></i>',
     }
+
 
 def shap_explain(instance, model):
     def logit(x):
@@ -366,19 +377,19 @@ def shap_explain(instance, model):
 
     model = model.model if isinstance(model, InsolverBaseWrapper) else model
     explainer = TreeExplainer(model)
-        
+
     feature_names = list(instance.index)
     shap_values = explainer.shap_values(instance)
     cond_bool = isinstance(shap_values, list) and (len(shap_values) == 2)
     shap_values = shap_values[0] if cond_bool else shap_values
     expected_value = explainer.expected_value[0] if cond_bool else explainer.expected_value
 
-    prediction = pd.DataFrame([expected_value[0]] + shap_values.reshape(-1).tolist(), index=['E[f(x)]']+feature_names,
-                               columns=['SHAP Value'])
-        
+    prediction = pd.DataFrame([expected_value[0]] + shap_values.reshape(-1).tolist(), index=['E[f(x)]'] + feature_names,
+                              columns=['SHAP Value'])
+
     prediction['CumSum'] = np.cumsum(prediction['SHAP Value'])
     prediction['Value'] = np.append(np.nan, instance.values.reshape(-1))
-        
+
     objective = model.objective if isinstance(model, InsolverGBMWrapper) else None
     link = None
     if objective is not None:
@@ -388,40 +399,41 @@ def shap_explain(instance, model):
         prediction['Contribution'] = [link(expected_value[0])] + list(np.diff(prediction['Link']))
     else:
         prediction['Contribution'] = list(prediction['SHAP Value'])
-        
+
     # return x, y and measure
-    return [[round(i,4) for i in list(prediction['Contribution'])], 
-            [prediction.index[i] if i == 0                 
-            else f'{prediction.index[i]}={instance.values.reshape(-1)[i-1]:.3f}' for i
-            in range(len(prediction.index))],
+    return [[round(i, 4) for i in list(prediction['Contribution'])],
+            [prediction.index[i] if i == 0
+             else f'{prediction.index[i]}={instance.values.reshape(-1)[i - 1]:.3f}' for i
+             in range(len(prediction.index))],
             list(['relative'] * len(prediction))]
+
 
 def lime_explain(instance, x, model, task, df):
     model = model.model if isinstance(model, InsolverBaseWrapper) else model
     # set lime parameters
-    if task=='reg':
+    if task == 'reg':
         task = 'regression'
         predict_fn = model.predict
     else:
         task = 'classification'
         predict_fn = model.predict_proba
     categorical_features = []
-    #find categorical columns
+    # find categorical columns
     for col in x.columns:
-        if x[col].dtype in ['int8','int16','int32','int64'] and df[col].dtype==object:
+        if x[col].dtype in ['int8', 'int16', 'int32', 'int64'] and df[col].dtype == 'object':
             categorical_features.append(col)
     categorical_features = categorical_features if len(categorical_features) > 0 else None
     # create lime
     lime = lt.LimeTabularExplainer(
-            training_data = x.to_numpy(), 
-            mode = task,
-            feature_names = x.columns,
-            categorical_features = categorical_features)
-    #calculate explanation
+        training_data=x.to_numpy(),
+        mode=task,
+        feature_names=x.columns,
+        categorical_features=categorical_features)
+    # calculate explanation
     explanation = lime.explain_instance(
-            data_row = instance, 
-            predict_fn = predict_fn
-        )
+        data_row=instance,
+        predict_fn=predict_fn
+    )
     # as_list returns new names and scores
     list_expl = explanation.as_list()
     # as_map returns indexes and scores
@@ -437,6 +449,3 @@ def lime_explain(instance, x, model, task, df):
     # add predicted value
     result.append(round(explanation.predicted_value, 3))
     return result
-
-    
-
