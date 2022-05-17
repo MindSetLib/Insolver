@@ -26,6 +26,7 @@ class Report:
         X_test (pandas.DataFrame): Test data.
         y_test (pandas.Series): Test target.
         predicted_test (pandas.Series): Test values predicted by the model.
+        explain_instance (pandas.Series): Instance to be explained using shap, lime and dice.
         exposure_column (pandas.Series, str): Exposure column name for the gini coef and gain curve.
         dataset_description (str): Description of the dataset set to display.
         y_description (str): Description of the y value set to display.
@@ -69,7 +70,7 @@ class Report:
             value is 10.
         d_start (float): Start for the `Difference chart`. Start value for `freq` groups_type. If not set, 
             min(column)-1 is used.
-        d_end (float): End for the `Difference chart`. End value for `freq` groups_type. If not set, max(column) 
+        d_end (float): End for the `Difference chart`. End value for `freq` groups_type. If not set, max(column)
             is used. 
         d_freq (float): Freq for the `Difference chart`. The length of each interval for `freq` groups_type. 
             Default value is 1.5. 
@@ -88,28 +89,26 @@ class Report:
     def __init__(self, model, task,
                  X_train, y_train,  
                  X_test, y_test, original_dataset,
-                 predicted_train=None, predicted_test=None,
-                 exposure_column=None,
+                 predicted_train = None, predicted_test = None,
+                 explain_instance = None, exposure_column = None,
                  dataset_description: str = 'Add a model description to the `dataset_description` parameter.',
                  y_description: str = 'Add a y description to the `y_description` parameter.',
-                 features_description=None,
-                 metrics_to_calc='main', models_to_compare=None, comparison_metrics=None,
-                 f_groups_type='cut', f_bins=10, f_start=None, f_end=None, f_freq=1.5,
-                 p_groups_type='cut', p_bins=10, p_start=None, p_end=None, p_freq=1.5,
-                 d_groups_type='cut', d_bins=10, d_start=None, d_end=None, d_freq=1.5,
-                 main_diff_model=None, compare_diff_models=None,
-                 pairs_for_matrix=None, m_bins=20, m_freq=None,
-                 show_parameters=False):
+                 features_description = None,
+                 metrics_to_calc = 'main', models_to_compare = None, comparison_metrics = None,
+                 f_groups_type = 'cut', f_bins = 10, f_start = None, f_end = None, f_freq = 1.5,
+                 p_groups_type = 'cut', p_bins = 10, p_start = None, p_end = None, p_freq = 1.5,
+                 d_groups_type = 'cut', d_bins = 10, d_start = None, d_end = None, d_freq = 1.5,
+                 main_diff_model = None, compare_diff_models = None,
+                 pairs_for_matrix=None, m_bins = 20, m_freq = None,  
+                 show_parameters = False):
         # check and save attributes
         self.metrics_to_calc = metrics_to_calc
         self.exposure_column = exposure_column.name if isinstance(exposure_column, pandas.Series) else exposure_column
         self.model = model
         self.models_to_compare = models_to_compare
         self.comparison_metrics = [] if not comparison_metrics else comparison_metrics
-        self.predicted_train = pandas.Series(model.predict(X_train),
-                                             index=X_train.index) if not predicted_test else predicted_train
-        self.predicted_test = pandas.Series(model.predict(X_test),
-                                            index=X_test.index) if not predicted_train else predicted_test
+        self.predicted_train = pandas.Series(model.predict(X_train), index=X_train.index) if not predicted_test else predicted_train
+        self.predicted_test = pandas.Series(model.predict(X_test), index=X_test.index) if not predicted_train else predicted_test
         if task in ['reg', 'class']:
             self.task = task
         else:
@@ -153,6 +152,8 @@ class Report:
                                                                       y_train, y_test, 
                                                                       self.predicted_train, self.predicted_test,
                                                                       exposure_column)
+        # create shap
+        shap_footer, shap_part = presets._create_shap(X_train, X_test, model)
         # create partial dependence 
         pdp_footer, pdp_part = presets._create_partial_dependence(X_train, X_test, model)
         
@@ -189,6 +190,13 @@ class Report:
                         'icon': '<i class="bi bi-calculator"></i>',
                       },
                       {
+                        'name': 'SHAP',
+                        'parts': [shap_part],
+                        'header': '',
+                        'footer': shap_footer,
+                        'icon': '<i class="bi bi-filter-left"></i>',
+                      },
+                      {
                         'name': 'Partial Dependence',
                         'parts': [f'''
                         <div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">
@@ -207,17 +215,21 @@ class Report:
         self.sections[0]['articles'].append(presets._create_features_description(X_train, X_test, 
                                                                                  original_dataset,
                                                                                  features_description))
+        if isinstance(explain_instance, pandas.Series):
+            self.sections[1]['articles'].append(presets._explain_instance(explain_instance, model, X_train,
+                                                                          task, original_dataset))
         # create models comparison if model is regression
-        if models_to_compare and task == 'reg':
-            self.sections.append(
-                comparison_presets._create_models_comparison(X_train, y_train, X_test, y_test, original_dataset, task,
-                                                             models_to_compare, comparison_metrics, f_groups_type,
-                                                             f_bins, f_start, f_end, f_freq, p_groups_type, p_bins,
-                                                             p_start, p_end, p_freq, d_groups_type, d_bins, d_start,
-                                                             d_end, d_freq, model, main_diff_model, compare_diff_models,
-                                                             m_bins, m_freq, pairs_for_matrix,
-                                                             classes="table table-striped",
-                                                             justify="center"))
+        if models_to_compare and task=='reg':
+            self.sections.append(comparison_presets._create_models_comparison(X_train, y_train, X_test, y_test,
+                                                                              original_dataset, task,
+                                                                              models_to_compare, comparison_metrics,
+                                                                              f_groups_type, f_bins, f_start, f_end, f_freq,
+                                                                              p_groups_type, p_bins, p_start, p_end, p_freq,
+                                                                              d_groups_type, d_bins, d_start, d_end, d_freq,
+                                                                              model, main_diff_model, compare_diff_models,
+                                                                              m_bins, m_freq, pairs_for_matrix,
+                                                                              classes = "table table-striped", 
+                                                                              justify="center"))
         # show all model parameters, some models have a lot of parameters, so they are not shown by default
         if show_parameters:
             self.sections[1]['articles'].append({
@@ -307,10 +319,10 @@ class Report:
         return model_coefs
 
     def _calculate_train_test_metrics(self):
-        table_train = metrics._calc_metrics(self.y_train, self.predicted_train, self.task, self.metrics_to_calc,
-                                            self.X_train, self.exposure_column)
-        table_test = metrics._calc_metrics(self.y_test, self.predicted_test, self.task, self.metrics_to_calc,
-                                           self.X_test, self.exposure_column)
+        table_train = metrics._calc_metrics(self.y_train, self.predicted_train, self.task, self.metrics_to_calc, 
+                                    self.X_train, self.exposure_column)
+        table_test = metrics._calc_metrics(self.y_test, self.predicted_test, self.task, self.metrics_to_calc, 
+                                    self.X_test, self.exposure_column)
 
         table = {key: [table_train.get(key, ''), table_test.get(key, '')] for key in table_train.keys()}
         model_metrics = self._create_html_table(["train", "test"], table, two_columns_table=False,
@@ -378,9 +390,10 @@ class Report:
 
             for index, value in enumerate(body.values()):
                 if index == 0:
-                    if not isinstance(value, list):
+                    if isinstance(value, list):
+                        value_len_prev = len(value)
+                    else:
                         return False
-                    value_len_prev = len(value)
                 elif not (isinstance(value, list) and len(value) == value_len_prev):
                     return False
                 value_len_prev = len(value)
@@ -401,7 +414,7 @@ class Report:
         result_df = pandas.DataFrame(data=body.values(), columns=head, index=body.keys())
         
         return [result_df.to_html(**kwargs),
-                {'columns': head, 'data': [result_df[column].to_list() for column in result_df.columns],
+               {'columns': head, 'data': [result_df[column].to_list() for column in result_df.columns],
                 'index': list(result_df.axes[0])}]
 
     @staticmethod
