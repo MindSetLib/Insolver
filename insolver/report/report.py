@@ -87,28 +87,30 @@ class Report:
     """
 
     def __init__(self, model, task,
-                 X_train, y_train,  
+                 X_train, y_train,
                  X_test, y_test, original_dataset,
-                 predicted_train = None, predicted_test = None,
-                 explain_instance = None, exposure_column = None,
+                 predicted_train=None, predicted_test=None,
+                 explain_instance=None, exposure_column=None,
                  dataset_description: str = 'Add a model description to the `dataset_description` parameter.',
                  y_description: str = 'Add a y description to the `y_description` parameter.',
-                 features_description = None,
-                 metrics_to_calc = 'main', models_to_compare = None, comparison_metrics = None,
-                 f_groups_type = 'cut', f_bins = 10, f_start = None, f_end = None, f_freq = 1.5,
-                 p_groups_type = 'cut', p_bins = 10, p_start = None, p_end = None, p_freq = 1.5,
-                 d_groups_type = 'cut', d_bins = 10, d_start = None, d_end = None, d_freq = 1.5,
-                 main_diff_model = None, compare_diff_models = None,
-                 pairs_for_matrix=None, m_bins = 20, m_freq = None,  
-                 show_parameters = False):
+                 features_description=None,
+                 metrics_to_calc='main', models_to_compare=None, comparison_metrics=None,
+                 f_groups_type='cut', f_bins=10, f_start=None, f_end=None, f_freq=1.5,
+                 p_groups_type='cut', p_bins=10, p_start=None, p_end=None, p_freq=1.5,
+                 d_groups_type='cut', d_bins=10, d_start=None, d_end=None, d_freq=1.5,
+                 main_diff_model=None, compare_diff_models=None,
+                 pairs_for_matrix=None, m_bins=20, m_freq=None,
+                 show_parameters=False):
         # check and save attributes
         self.metrics_to_calc = metrics_to_calc
         self.exposure_column = exposure_column.name if isinstance(exposure_column, pandas.Series) else exposure_column
         self.model = model
         self.models_to_compare = models_to_compare
         self.comparison_metrics = [] if not comparison_metrics else comparison_metrics
-        self.predicted_train = pandas.Series(model.predict(X_train), index=X_train.index) if not predicted_test else predicted_train
-        self.predicted_test = pandas.Series(model.predict(X_test), index=X_test.index) if not predicted_train else predicted_test
+        self.predicted_train = pandas.Series(model.predict(X_train),
+                                             index=X_train.index) if not predicted_test else predicted_train
+        self.predicted_test = pandas.Series(model.predict(X_test),
+                                            index=X_test.index) if not predicted_train else predicted_test
         if task in ['reg', 'class']:
             self.task = task
         else:
@@ -142,37 +144,37 @@ class Report:
         templateLoader = jinja2.FileSystemLoader(searchpath=self._directory)
         self.env = jinja2.Environment(loader=templateLoader)
         self.template = self.env.get_template("report_template.html")
-        
+
         # get features importance
         model_features_importance = self._model_features_importance()
         # calculate train test metrics
         calculate_train_test_metrics = self._calculate_train_test_metrics()
         # create lift chart and gain curve
         metrics_footer, metrics_part = metrics._create_metrics_charts(X_train, X_test,
-                                                                      y_train, y_test, 
+                                                                      y_train, y_test,
                                                                       self.predicted_train, self.predicted_test,
                                                                       exposure_column)
         # create shap
         shap_footer, shap_part = presets._create_shap(X_train, X_test, model)
         # create partial dependence 
         pdp_footer, pdp_part = presets._create_partial_dependence(X_train, X_test, model)
-        
+
         # content to fill jinja template
         self.sections = [
-                {
-                  'name': 'Dataset',
-                  'articles': [
-                      presets._create_dataset_description(X_train, X_test, y_train, y_test, task,
-                                                          dataset_description, y_description,
-                                                          original_dataset),
-                      presets._create_pandas_profiling(),
-                   ],
-                  'icon': '<i class="bi bi-bricks" width="24" height="24" role="img"></i>',
-                },
-                {
-                  'name': 'Model',
-                  'articles': [
-                      {
+            {
+                'name': 'Dataset',
+                'articles': [
+                    presets._create_dataset_description(X_train, X_test, y_train, y_test, task,
+                                                        dataset_description, y_description,
+                                                        original_dataset),
+                    presets._create_pandas_profiling(),
+                ],
+                'icon': '<i class="bi bi-bricks" width="24" height="24" role="img"></i>',
+            },
+            {
+                'name': 'Model',
+                'articles': [
+                    {
                         'name': 'Coefficients',
                         'parts': [f'''
                         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
@@ -180,23 +182,23 @@ class Report:
                         'header': '',
                         'footer': model_features_importance[1],
                         'icon': '<i class="bi bi-bar-chart-line"></i>',
-                          
-                      },
-                      {
+
+                    },
+                    {
                         'name': 'Metrics',
                         'parts': [f'{calculate_train_test_metrics[0]}{metrics_part}'],
                         'header': '',
                         'footer': metrics_footer,
                         'icon': '<i class="bi bi-calculator"></i>',
-                      },
-                      {
+                    },
+                    {
                         'name': 'SHAP',
                         'parts': [shap_part],
                         'header': '',
                         'footer': shap_footer,
                         'icon': '<i class="bi bi-filter-left"></i>',
-                      },
-                      {
+                    },
+                    {
                         'name': 'Partial Dependence',
                         'parts': [f'''
                         <div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">
@@ -204,45 +206,49 @@ class Report:
                         'header': '',
                         'footer': pdp_footer,
                         'icon': '<i class="bi bi-graph-up"></i>',
-                          
-                      },
-                   ],
-                  'icon': '<i class="bi bi-tools"></i>',
-                },
-             ]
-        
+
+                    },
+                ],
+                'icon': '<i class="bi bi-tools"></i>',
+            },
+        ]
+
         # create features description article, contains specification, description and psi
-        self.sections[0]['articles'].append(presets._create_features_description(X_train, X_test, 
+        self.sections[0]['articles'].append(presets._create_features_description(X_train, X_test,
                                                                                  original_dataset,
                                                                                  features_description))
         if isinstance(explain_instance, pandas.Series):
             self.sections[1]['articles'].append(presets._explain_instance(explain_instance, model, X_train,
                                                                           task, original_dataset))
         # create models comparison if model is regression
-        if models_to_compare and task=='reg':
+        if models_to_compare and task == 'reg':
             self.sections.append(comparison_presets._create_models_comparison(X_train, y_train, X_test, y_test,
                                                                               original_dataset, task,
                                                                               models_to_compare, comparison_metrics,
-                                                                              f_groups_type, f_bins, f_start, f_end, f_freq,
-                                                                              p_groups_type, p_bins, p_start, p_end, p_freq,
-                                                                              d_groups_type, d_bins, d_start, d_end, d_freq,
-                                                                              model, main_diff_model, compare_diff_models,
+                                                                              f_groups_type, f_bins, f_start, f_end,
+                                                                              f_freq,
+                                                                              p_groups_type, p_bins, p_start, p_end,
+                                                                              p_freq,
+                                                                              d_groups_type, d_bins, d_start, d_end,
+                                                                              d_freq,
+                                                                              model, main_diff_model,
+                                                                              compare_diff_models,
                                                                               m_bins, m_freq, pairs_for_matrix,
-                                                                              classes = "table table-striped", 
+                                                                              classes="table table-striped",
                                                                               justify="center"))
         # show all model parameters, some models have a lot of parameters, so they are not shown by default
         if show_parameters:
             self.sections[1]['articles'].append({
-                        'name': 'Parameters',
-                        'parts': self._model_parameters_to_list(),
-                        'header': '',
-                        'footer': '',
-                        'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>',
+                'name': 'Parameters',
+                'parts': self._model_parameters_to_list(),
+                'header': '',
+                'footer': '',
+                'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>',
             })
 
     def get_sections(self):
         return self.sections
-    
+
     def to_html(self, path: str = '.', report_name: str = 'report'):
         """Saves prepared report to html file
 
@@ -250,6 +256,7 @@ class Report:
             path: existing location to save report
             report_name: name of report directory
         """
+
         def check_name(name_, path_):
             """Add a number to {name_} if it exists in {path_} directory"""
 
@@ -305,9 +312,9 @@ class Report:
                 coefs = self._get_coefs_dict(self.model.coef_norm())
             elif self.model.algo == "gbm":
                 coefs = self._get_coefs_dict(
-                                self.model.shap(
-                                    self.X_train.append(self.X_test),
-                                    show=False))
+                    self.model.shap(
+                        self.X_train.append(self.X_test),
+                        show=False))
             else:
                 raise Exception("Unsupperted backend type {}".format(self.model.backend))
 
@@ -319,10 +326,10 @@ class Report:
         return model_coefs
 
     def _calculate_train_test_metrics(self):
-        table_train = metrics._calc_metrics(self.y_train, self.predicted_train, self.task, self.metrics_to_calc, 
-                                    self.X_train, self.exposure_column)
-        table_test = metrics._calc_metrics(self.y_test, self.predicted_test, self.task, self.metrics_to_calc, 
-                                    self.X_test, self.exposure_column)
+        table_train = metrics._calc_metrics(self.y_train, self.predicted_train, self.task, self.metrics_to_calc,
+                                            self.X_train, self.exposure_column)
+        table_test = metrics._calc_metrics(self.y_test, self.predicted_test, self.task, self.metrics_to_calc,
+                                           self.X_test, self.exposure_column)
 
         table = {key: [table_train.get(key, ''), table_test.get(key, '')] for key in table_train.keys()}
         model_metrics = self._create_html_table(["train", "test"], table, two_columns_table=False,
@@ -348,6 +355,7 @@ class Report:
         Returns:
             list: tuples like (<str: path>, <dict: object content>)
         """
+
         def is_builtin(obj):
             return True if obj is None else type(obj).__name__ in dir(builtins)
 
@@ -410,12 +418,12 @@ class Report:
         if not check_body(body) or two_columns_table:
             body = {key: [value] for key, value in body.items()}
         check_head(head, body)
-        
+
         result_df = pandas.DataFrame(data=body.values(), columns=head, index=body.keys())
-        
+
         return [result_df.to_html(**kwargs),
-               {'columns': head, 'data': [result_df[column].to_list() for column in result_df.columns],
-                'index': list(result_df.axes[0])}]
+                {'columns': head, 'data': [result_df[column].to_list() for column in result_df.columns],
+                 'index': list(result_df.axes[0])}]
 
     @staticmethod
     def _get_coefs_dict(model_coefs: dict) -> dict:
