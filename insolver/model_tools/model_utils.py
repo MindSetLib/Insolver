@@ -1,49 +1,9 @@
-import os
-from io import BytesIO
-from urllib.request import urlopen
-from zipfile import ZipFile
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scipy.special import xlogy
 from pandas import DataFrame, Series, concat, qcut, cut
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import auc
-
-
-def download_dataset(name, folder='datasets'):
-    """Function for downloading and unzipping example datasets
-
-    Args:
-        name (str): Dataset name. Available datasets are freMPL-R, US_Accidents, Lending_Club, weatherAus and
-         AB_NYC_2019.
-        folder (str): Path to the folder to dataset saving
-
-    Returns:
-        str: Information about saved dataset
-
-    """
-    datasets = {
-        'freMPL-R': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/freMPL-R.zip',
-        'US_Accidents': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/US_Accidents_June20.zip',
-        'US_Accidents_small': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.5/US_Accidents_small.zip',
-        'Lending_Club': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/LendingClub.zip',
-        'weatherAUS': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.15/weatherAUS.zip',
-        'AB_NYC_2019': 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.15/AB_NYC_2019.zip'
-    }
-    if name not in datasets.keys():
-        return f'Dataset {name} is not found. Available datasets are {", ".join(datasets.keys())}'
-
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-
-    url = datasets[name]
-    with urlopen(url) as file:
-        with ZipFile(BytesIO(file.read())) as zfile:
-            zfile.extractall(folder)
-
-    return f'Dataset {name} saved to "{folder}" folder'
 
 
 def train_val_test_split(*arrays, val_size, test_size, random_state=0, shuffle=True, stratify=None):
@@ -102,113 +62,6 @@ def train_test_column_split(x, y, df_column):
     y1[col_name] = df_column
     return (x1[x1[col_name] == 'train'].drop(col_name, axis=1), x1[x1[col_name] == 'test'].drop(col_name, axis=1),
             y1[y1[col_name] == 'train'].drop(col_name, axis=1), y1[y1[col_name] == 'test'].drop(col_name, axis=1))
-
-
-def deviance_score(y, y_pred, weight=None, power=0, agg='sum'):
-    """Function for Deviance evaluation.
-
-    Args:
-        y: Array with target variable.
-        y_pred: Array with predictions.
-        weight: Weights for weighted metric.
-        power:
-        agg: Function to calculate deviance ['sum', 'mean'] or callable are supported.
-
-    Returns:
-        float, value of the Poisson deviance.
-    """
-    dict_func = {'sum': np.sum, 'mean': np.mean}
-    func = dict_func[agg] if agg in ['sum', 'mean'] else agg if isinstance(agg, callable) else None
-    if func is None:
-        raise ValueError
-    weight = 1 if weight is None else weight
-    if str(power).lower() in ["normal", "gaussian", "0"]:
-        return func(weight * np.power(y - y_pred, 2))
-    elif str(power).lower() in ["poisson", "1"]:
-        return func(2 * weight * (xlogy(y, y / y_pred) - (y - y_pred)))
-    elif str(power).lower() in ["gamma", "2"]:
-        return func(2 * weight * (np.log(y_pred / y) + y / y_pred - 1))
-    elif isinstance(power, str) or (0 < power < 1):
-        raise Exception(f"power={power} is not supported.")
-    else:
-        return func(2 * weight * (np.power(np.max(y, 0), 2 - power) / ((1 - power) * (2 - power)) -
-                                  (y * np.power(y_pred, 1 - power)) / (1 - power) +
-                                  (np.power(y_pred, 2 - power)) / (2 - power)))
-
-
-def deviance_poisson(y, y_pred, weight=None, agg='sum'):
-    """Function for Poisson Deviance evaluation.
-
-    Args:
-        y: Array with target variable.
-        y_pred: Array with predictions.
-        weight: Weights for weighted metric.
-        agg: Function to calculate deviance ['sum', 'mean'] or callable are supported.
-
-    Returns:
-        float, value of the Poisson deviance.
-    """
-    return deviance_score(y, y_pred, weight=weight, power=1, agg=agg)
-
-
-def deviance_gamma(y, y_pred, weight=None, agg='sum'):
-    """Function for Gamma Deviance evaluation.
-
-    Args:
-        y: Array with target variable.
-        y_pred: Array with predictions.
-        weight: Weights for weighted metric.
-        agg: Function to calculate deviance ['sum', 'mean'] or callable are supported.
-
-    Returns:
-        float, value of the Gamma deviance.
-    """
-    return deviance_score(y, y_pred, weight=weight, power=2, agg=agg)
-
-
-def deviance_explained(y, y_pred, weight=None, power=0):
-    """Function for Pseudo R^2 (Deviance explained) evaluation.
-
-        Args:
-            y: Array with target variable.
-            y_pred: Array with predictions.
-            weight: Weights for weighted metric.
-            power: Power for deviance calculation.
-
-        Returns:
-            float, value of the Pseudo R^2.
-        """
-    dev = deviance_score(y, y_pred, weight=weight, power=power)
-    dev0 = deviance_score(y, np.repeat(np.mean(y), len(y)), weight=weight, power=power)
-    return 1 - dev/dev0
-
-
-def deviance_explained_poisson(y, y_pred, weight=None):
-    """Function for Pseudo R^2 (Deviance explained) evaluation for Poisson model.
-
-        Args:
-            y: Array with target variable.
-            y_pred: Array with predictions.
-            weight: Weights for weighted metric.
-
-        Returns:
-            float, value of the Pseudo R^2.
-        """
-    return deviance_explained(y, y_pred, weight=weight, power=1)
-
-
-def deviance_explained_gamma(y, y_pred, weight=None):
-    """Function for Pseudo R^2 (Deviance explained) evaluation for Gamma model.
-
-        Args:
-            y: Array with target variable.
-            y_pred: Array with predictions.
-            weight: Weights for weighted metric.
-
-        Returns:
-            float, value of the Pseudo R^2.
-        """
-    return deviance_explained(y, y_pred, weight=weight, power=2)
 
 
 def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
