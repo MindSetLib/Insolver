@@ -48,9 +48,9 @@ class AutoFillNATransforms:
         
         if self.numerical_method in self._num_methods:
             self._num_methods_dict = {
-                'median': lambda column: df[column].median(),
-                'mean': lambda column: df[column].mean(),
-                'mode': lambda column: df[column].mode()[0]
+                'median': lambda col: df[col].median(),
+                'mean': lambda col: df[col].mean(),
+                'mode': lambda col: df[col].mode()[0]
             }
 
             self.values = {}
