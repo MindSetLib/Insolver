@@ -169,21 +169,24 @@ class TransformNameCheck:
         name_full (bool): Sign if name is the concatenation of surname, first name and last name, False by default.
         column_name_check (str): Column name in InsolverDataFrame for bool values if first names are in the list or not.
         names_list (list): The list of clients' first names.
+        name_position (int): The position of the name in full name. For example, argument should be 0 for notation such
+        as 'John Doe', but 1 for notation like 'Ivanov Ivan'.
     """
-    def __init__(self, column_name, column_name_check, names_list, name_full=False):
+    def __init__(self, column_name, column_name_check, names_list, name_full=False, name_position=1):
         self.priority = 1
         self.column_name = column_name
         self.name_full = name_full
         self.column_name_check = column_name_check
+        self.name_position = name_position
         self.names_list = [n.upper() for n in names_list]
 
     @staticmethod
-    def _name_get(client_name):
+    def _name_get(client_name, name_position):
         tokenize_re = re.compile(r'[\w\-]+', re.I)
         try:
-            name = tokenize_re.findall(str(client_name))[1].upper()
+            name = tokenize_re.findall(str(client_name))[name_position].upper()
             return name
-        except Exception:
+        except IndexError:
             return 'ERROR'
 
     def __call__(self, df):

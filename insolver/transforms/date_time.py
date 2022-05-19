@@ -30,15 +30,15 @@ class DatetimeTransforms:
         
     def _get_date_feature(self, df):
         self.feature_dict = {
-            'unix': lambda column: (column - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s'),
-            'date': lambda column: column.dt.date,
-            'time': lambda column: column.dt.time,
-            'month': lambda column: column.dt.month,
-            'quarter': lambda column: column.dt.quarter,
-            'year': lambda column: column.dt.year,
-            'day': lambda column: column.dt.day,
-            'day_of_the_week': lambda column: column.dt.dayofweek,
-            'weekend': lambda column: np.where(column.dt.day_name().isin(['Sunday', 'Saturday']), 1, 0)
+            'unix': lambda col: (col - pd.to_datetime("1970-01-01")) // pd.Timedelta('1s'),
+            'date': lambda col: col.dt.date,
+            'time': lambda col: col.dt.time,
+            'month': lambda col: col.dt.month,
+            'quarter': lambda col: col.dt.quarter,
+            'year': lambda col: col.dt.year,
+            'day': lambda col: col.dt.day,
+            'day_of_the_week': lambda col: col.dt.dayofweek,
+            'weekend': lambda col: np.where(col.dt.day_name().isin(['Sunday', 'Saturday']), 1, 0)
         }
         
         if self.column_feature:
