@@ -9,10 +9,9 @@ class InsolverBaseWrapper:
     """Base wrapper serving as a building block for other wrappers.
 
     Parameters:
-        backend (str): Name of the backend to built the model.
+        backend (str): Name of the backend to build the model.
     """
     def __init__(self, backend):
-
         self.algo, self.backend, self._backends = None, backend, None
         self._back_load_dict, self._back_save_dict = None, None
         self.meta, self.object, self.model = None, None, None

@@ -316,7 +316,7 @@ class DataPreprocessing:
                                                                        n_neighbors=n_neighbors)
         
         return pd.concat([X, y], axis=1)
-    
+
     def _sampling(self, df):
         """
         Sampling. 

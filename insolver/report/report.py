@@ -155,7 +155,7 @@ class Report:
                                                                       exposure_column)
         # create partial dependence 
         pdp_footer, pdp_part = presets._create_partial_dependence(X_train, X_test, model)
-        
+
         # content to fill jinja template
         self.sections = [
                 {
@@ -204,7 +204,7 @@ class Report:
              ]
         
         # create features description article, contains specification, description and psi
-        self.sections[0]['articles'].append(presets._create_features_description(X_train, X_test, 
+        self.sections[0]['articles'].append(presets._create_features_description(X_train, X_test,
                                                                                  original_dataset,
                                                                                  features_description))
         # create models comparison if model is regression
