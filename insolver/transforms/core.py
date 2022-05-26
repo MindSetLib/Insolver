@@ -4,6 +4,7 @@ import json
 import pickle
 import importlib
 import warnings
+import dill
 
 from insolver.frame import InsolverDataFrame
 from insolver.transforms import basic, person, insurance, autofillna, date_time, grouping_sorting
@@ -27,7 +28,7 @@ class InsolverTransform(InsolverDataFrame):
         super().__init__(df)
         if isinstance(transforms, list):
             self.transforms = transforms
-        self.transforms_done = {}
+        self.transforms_done = dict()
 
     def ins_transform(self):
         """Transforms data in InsolverDataFrame.
@@ -46,25 +47,25 @@ class InsolverTransform(InsolverDataFrame):
                         break
                     else:
                         priority = transform.priority
-                else:
-                    pass
 
-            n = 0
-            for transform in self.transforms:
+            for n, transform in enumerate(self.transforms):
                 obj = transform(self)
                 self._update_inplace(obj)
-                attributes = {}
+                attributes = dict()
                 for attribute in dir(transform):
                     if attribute[0] != '_':
                         exec("attributes.update({attribute: transform.%s})" % attribute)
                 self.transforms_done.update({n: {'name': type(transform).__name__, 'attributes': attributes}})
-                n += 1
 
         return self.transforms_done
 
     def save(self, filename):
         with open(filename, 'wb') as file:
             pickle.dump(self.transforms_done, file)
+
+    def save2(self, filename):
+        with open(filename, 'wb') as file:
+            dill.dump(self.transforms, file)
 
     def save_json(self, filename):
         with open(filename, 'w') as file:
@@ -78,6 +79,11 @@ def load_class(module_list, transform_name):
             return transform_class
         except AttributeError:
             pass
+
+
+def load_transforms(path):
+    with open(path, 'rb') as file:
+        return dill.load(file)
 
 
 def init_transforms(transforms, module_path=None, inference=False):
