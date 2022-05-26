@@ -1,5 +1,5 @@
 """
-Insolver settings for project. 
+Insolver settings for project.
 """
 
 # Will ot work with formula from settings file?

@@ -242,5 +242,5 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
         }
 
         if self.backend not in methods.keys():
-            raise NotImplementedError('__is_fitted method does not support choosen backend')
+            raise NotImplementedError('__is_fitted method does not support chosen backend')
         return methods[self.backend](self.model)
