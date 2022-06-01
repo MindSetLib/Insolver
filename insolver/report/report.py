@@ -26,6 +26,7 @@ class Report:
         X_test (pandas.DataFrame): Test data.
         y_test (pandas.Series): Test target.
         predicted_test (pandas.Series): Test values predicted by the model.
+        shap_type (str): Type of the explainer, supported values are `tree` and `linear`.
         explain_instance (pandas.Series): Instance to be explained using shap, lime and dice.
         exposure_column (pandas.Series, str): Exposure column name for the gini coef and gain curve.
         dataset_description (str): Description of the dataset set to display.
@@ -89,6 +90,7 @@ class Report:
     def __init__(self, model, task,
                  X_train, y_train,
                  X_test, y_test, original_dataset,
+                 shap_type,
                  predicted_train=None, predicted_test=None,
                  explain_instance=None, exposure_column=None,
                  dataset_description: str = 'Add a model description to the `dataset_description` parameter.',
@@ -136,6 +138,10 @@ class Report:
               \r""")
         self._directory = Path().absolute()
 
+        # check shap_type
+        if not shap_type in ['tree', 'linear']:
+            raise NotImplementedError(f'shap type {shap_type} must be "tree" or "linear".')
+
         # prepare profile report
         self.profile = None
         self._profile_data()
@@ -155,7 +161,7 @@ class Report:
                                                                       self.predicted_train, self.predicted_test,
                                                                       exposure_column)
         # create shap
-        shap_footer, shap_part = presets._create_shap(X_train, X_test, model)
+        shap_footer, shap_part = presets._create_shap(X_train, X_test, model, shap_type)
         # create partial dependence 
         pdp_footer, pdp_part = presets._create_partial_dependence(X_train, X_test, model)
 
@@ -219,7 +225,7 @@ class Report:
                                                                                  features_description))
         if isinstance(explain_instance, pandas.Series):
             self.sections[1]['articles'].append(presets._explain_instance(explain_instance, model, X_train,
-                                                                          task, original_dataset))
+                                                                          task, original_dataset, shap_type))
         # create models comparison if model is regression
         if models_to_compare and task == 'reg':
             self.sections.append(comparison_presets._create_models_comparison(X_train, y_train, X_test, y_test,
