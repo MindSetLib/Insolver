@@ -1,5 +1,5 @@
 import pandas as pd
-from insolver.wrappers import InsolverBaseWrapper, InsolverGBMWrapper
+from insolver.wrappers import InsolverBaseWrapper, InsolverGBMWrapper, InsolverGLMWrapper
 from sklearn.inspection import PartialDependenceDisplay
 import metrics
 import numpy as np
