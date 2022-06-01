@@ -65,7 +65,7 @@ class SHAPExplanation(InterpretBase):
         """
         # transformation function
         def logit(x):
-            return true_divide(1, add(1, exp(x)))
+            return np.true_divide(1, np.add(1, np.exp(x)))
         # check type of instance
         if not isinstance(instance, np.ndarray) and not isinstance(instance, pd.Series):
             raise TypeError(f'''
