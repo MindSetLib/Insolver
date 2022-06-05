@@ -5,6 +5,7 @@ from shap import TreeExplainer, LinearExplainer, summary_plot
 from insolver.wrappers import InsolverGBMWrapper, InsolverBaseWrapper, InsolverGLMWrapper
 from .base import InterpretBase
 
+
 class SHAPExplanation(InterpretBase):
     """
     SHapley Additive exPlanations (SHAP). Uses shap package.
@@ -14,7 +15,7 @@ class SHAPExplanation(InterpretBase):
         estimator_type (str): Type of the estimator, supported values are `tree` and `linear`. 
         data (pandas.Dataframe): Data for creating LinearExplainer.
     """
-    def __init__(self, estimator, estimator_type='tree', data = None):
+    def __init__(self, estimator, estimator_type='tree', data=None):
         self.estimator = estimator.model if isinstance(estimator, InsolverBaseWrapper) else estimator
         self.estimator = estimator.model['glm'] if isinstance(estimator, InsolverGLMWrapper) else self.estimator
         self.estimator_type = estimator_type
@@ -23,9 +24,10 @@ class SHAPExplanation(InterpretBase):
             raise NotImplementedError(f'''
             estimator_type {estimator_type} is not supported. Supported values are "tree" and "linear".''')
             
-        self.explainer = TreeExplainer(self.estimator) if self.estimator_type=='tree' else LinearExplainer(self.estimator, masker=data)
+        self.explainer = (TreeExplainer(self.estimator) if self.estimator_type == 'tree'
+                          else LinearExplainer(self.estimator, masker=data))
         
-    def get_features_shap(self, X, show = False, plot_type = 'bar'):
+    def get_features_shap(self, X, show=False, plot_type='bar'):
         """Method for shap values calculation and corresponding plot of feature importances.
         
         Parameters:
@@ -58,7 +60,6 @@ class SHAPExplanation(InterpretBase):
             instance (pd.Series, np.ndarray): Data for shap values calculation.
             link (callable, optional): A function for transforming shap values into predictions.
             show (boolean, optional): Whether to plot a graph or return a json.
-            layout_dict (boolean, optional): Dictionary containing the parameters of plotly figure layout.
             
         Raises:
             TypeError: If the instance type is not supported.
@@ -74,7 +75,7 @@ class SHAPExplanation(InterpretBase):
         if isinstance(instance, pd.Series):
             feature_names = list(instance.index)
         else:
-            if len(instance.shape)>1:
+            if len(instance.shape) > 1:
                 raise NotImplementedError(f'Only (*,) shape is supported.')
             feature_names = []
             for f in range(instance.shape[0]):
@@ -83,11 +84,12 @@ class SHAPExplanation(InterpretBase):
         shap_values = self.explainer.shap_values(instance)
         cond_bool = isinstance(shap_values, list) and (len(shap_values) == 2)
         shap_values = shap_values[0] if cond_bool else shap_values
-        expected_value = self.explainer.expected_value[0] if isinstance(self.explainer.expected_value, np.ndarray) else self.explainer.expected_value
+        expected_value = (self.explainer.expected_value[0] if isinstance(self.explainer.expected_value, np.ndarray)
+                          else self.explainer.expected_value)
         print(self.explainer.expected_value)
         # create predictions Dataframe
-        prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(), 
-                                       index=['E[f(x)]'] + feature_names, columns=['SHAP Value'])
+        prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(),
+                                  index=['E[f(x)]'] + feature_names, columns=['SHAP Value'])
         prediction['CumSum'] = np.cumsum(prediction['SHAP Value'])
         prediction['Value'] = np.append(np.nan, instance)
         # transform result if objective or link
@@ -113,17 +115,17 @@ class SHAPExplanation(InterpretBase):
             Exception: If plot() is called before show_explanation().
         """
         try:
-            fig = Figure(Waterfall(name = f'Prediction',
-                                   orientation = 'h',
-                                   measure = ['relative'] * len(self.prediction),
-                                   y = [self.prediction.index[i] if i == 0
+            fig = Figure(Waterfall(name=f'Prediction',
+                                   orientation='h',
+                                   measure=['relative'] * len(self.prediction),
+                                   y=[self.prediction.index[i] if i == 0
                                         else f'{self.prediction.index[i]} = {round(self.instance[i-1], 4)}' for i 
                                         in range(len(self.prediction.index))],
-                                   x = self.prediction['Contribution']))
+                                   x=self.prediction['Contribution']))
             fig.update_layout(kwargs)
             fig.show()
-        except(AttributeError):
-            raise Exception('First call the "show_explanation()" method to create the prediction!')
+        except AttributeError:
+            raise AttributeError('First call the "show_explanation()" method to create the prediction!')
         
     def get_model(self):
         return self.explainer

@@ -139,7 +139,7 @@ class Report:
         self._directory = Path().absolute()
 
         # check shap_type
-        if not shap_type in ['tree', 'linear']:
+        if shap_type not in ['tree', 'linear']:
             raise NotImplementedError(f'shap type {shap_type} must be "tree" or "linear".')
 
         # prepare profile report

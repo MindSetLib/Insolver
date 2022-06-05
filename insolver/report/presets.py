@@ -384,10 +384,11 @@ def shap_explain(instance, model, shap_type, x):
     shap_values = explainer.shap_values(instance)
     cond_bool = isinstance(shap_values, list) and (len(shap_values) == 2)
     shap_values = shap_values[0] if cond_bool else shap_values
-    expected_value = explainer.expected_value[0] if isinstance(explainer.expected_value, np.ndarray) else explainer.expected_value
+    expected_value = (explainer.expected_value[0] if isinstance(explainer.expected_value, np.ndarray)
+                      else explainer.expected_value)
 
     prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(), index=['E[f(x)]']+feature_names,
-                               columns=['SHAP Value'])
+                              columns=['SHAP Value'])
         
     prediction['CumSum'] = np.cumsum(prediction['SHAP Value'])
     prediction['Value'] = np.append(np.nan, instance.values.reshape(-1))
