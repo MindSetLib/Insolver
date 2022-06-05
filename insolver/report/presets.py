@@ -1,9 +1,9 @@
 import pandas as pd
-from insolver.wrappers import InsolverBaseWrapper, InsolverGBMWrapper
+from insolver.wrappers import InsolverBaseWrapper, InsolverGBMWrapper, InsolverGLMWrapper
 from sklearn.inspection import PartialDependenceDisplay
 import metrics
 import numpy as np
-from shap import TreeExplainer
+from shap import TreeExplainer, LinearExplainer
 import lime.lime_tabular as lt
 
 
@@ -107,16 +107,17 @@ def _create_importance_charts():
     '''
 
 
-def _create_shap(x_train, x_test, model):
+def _create_shap(x_train, x_test, model, shap_type):
     # footer values are used by js in the report_template
     footer = dict()
     # save features names
     footer['features'] = list(x_train.columns)
-    # create explainer
-    model = model.model if isinstance(model, InsolverBaseWrapper) else model
-    explainer = TreeExplainer(model)
+    # check model type
+    base_model = model.model if isinstance(model, InsolverBaseWrapper) else model
+    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) else base_model
     for key, value in {'train': x_train, 'test': x_test}.items():
         # get shap values
+        explainer = TreeExplainer(base_model) if shap_type == 'tree' else LinearExplainer(linear_model, value)
         shap_values = explainer.shap_values(value)
         shap_values = shap_values[0] if isinstance(shap_values, list) and (len(shap_values) == 2) else shap_values
         variables = list(value.columns)
@@ -223,9 +224,9 @@ def _create_partial_dependence(x_train, x_test, model):
     </div>'''
 
 
-def _explain_instance(explain_instance, model, x, task, original_dataset):
+def _explain_instance(explain_instance, model, x, task, original_dataset, shap_type):
     footer = dict()
-    footer['shap_waterfall'] = shap_explain(explain_instance, model)
+    footer['shap_waterfall'] = shap_explain(explain_instance, model, shap_type, x)
     footer['lime'] = lime_explain(explain_instance, x, model, task, original_dataset)
     return {
         'name': 'Explain instance',
@@ -371,26 +372,28 @@ def _create_features_description(x_train, x_test, dataset, description=None):
     }
 
 
-def shap_explain(instance, model):
+def shap_explain(instance, model, shap_type, x):
     def logit(x):
         return np.true_divide(1, np.add(1, np.exp(x)))
 
-    model = model.model if isinstance(model, InsolverBaseWrapper) else model
-    explainer = TreeExplainer(model)
-
+    base_model = model.model if isinstance(model, InsolverBaseWrapper) else model
+    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) else base_model
+    explainer = TreeExplainer(base_model) if shap_type == 'tree' else LinearExplainer(linear_model, x)
+        
     feature_names = list(instance.index)
     shap_values = explainer.shap_values(instance)
     cond_bool = isinstance(shap_values, list) and (len(shap_values) == 2)
     shap_values = shap_values[0] if cond_bool else shap_values
-    expected_value = explainer.expected_value[0] if cond_bool else explainer.expected_value
+    expected_value = (explainer.expected_value[0] if isinstance(explainer.expected_value, np.ndarray)
+                      else explainer.expected_value)
 
-    prediction = pd.DataFrame([expected_value[0]] + shap_values.reshape(-1).tolist(), index=['E[f(x)]'] + feature_names,
+    prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(), index=['E[f(x)]']+feature_names,
                               columns=['SHAP Value'])
-
+        
     prediction['CumSum'] = np.cumsum(prediction['SHAP Value'])
     prediction['Value'] = np.append(np.nan, instance.values.reshape(-1))
-
-    objective = model.objective if isinstance(model, InsolverGBMWrapper) else None
+        
+    objective = base_model.objective if isinstance(base_model, InsolverGBMWrapper) else None
     link = None
     if objective is not None:
         link = np.exp if objective in ['poisson', 'gamma'] else logit if objective == 'binary' else None
