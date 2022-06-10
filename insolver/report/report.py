@@ -1,4 +1,6 @@
+import ntpath
 import builtins
+import inspect
 import glob
 from pathlib import Path
 
@@ -136,7 +138,7 @@ class Report:
               \rpredicted_train {type(self.predicted_train)} must be pandas.Series
               \rpredicted_test {type(self.predicted_test)} must be pandas.Series
               \r""")
-        self._directory = Path().absolute()
+        self._directory = ntpath.dirname(inspect.getfile(Report))
 
         # check shap_type
         if shap_type not in ['tree', 'linear']:
