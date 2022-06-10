@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pandas
 from pandas_profiling import ProfileReport
-from sklearn import metrics
 
-import presets
-import metrics
-import comparison_presets
+from .presets import (_create_shap, _create_partial_dependence, _create_dataset_description, _create_pandas_profiling,
+                      _create_importance_charts, _create_features_description, _explain_instance)
+from .metrics import _create_metrics_charts, _calc_metrics
+from .comparison_presets import _create_models_comparison
 
 import shutil
 import jinja2
@@ -156,24 +156,24 @@ class Report:
         # calculate train test metrics
         calculate_train_test_metrics = self._calculate_train_test_metrics()
         # create lift chart and gain curve
-        metrics_footer, metrics_part = metrics._create_metrics_charts(X_train, X_test,
+        metrics_footer, metrics_part = _create_metrics_charts(X_train, X_test,
                                                                       y_train, y_test,
                                                                       self.predicted_train, self.predicted_test,
                                                                       exposure_column)
         # create shap
-        shap_footer, shap_part = presets._create_shap(X_train, X_test, model, shap_type)
+        shap_footer, shap_part = _create_shap(X_train, X_test, model, shap_type)
         # create partial dependence 
-        pdp_footer, pdp_part = presets._create_partial_dependence(X_train, X_test, model)
+        pdp_footer, pdp_part = _create_partial_dependence(X_train, X_test, model)
 
         # content to fill jinja template
         self.sections = [
             {
                 'name': 'Dataset',
                 'articles': [
-                    presets._create_dataset_description(X_train, X_test, y_train, y_test, task,
+                    _create_dataset_description(X_train, X_test, y_train, y_test, task,
                                                         dataset_description, y_description,
                                                         original_dataset),
-                    presets._create_pandas_profiling(),
+                    _create_pandas_profiling(),
                 ],
                 'icon': '<i class="bi bi-bricks" width="24" height="24" role="img"></i>',
             },
@@ -184,7 +184,7 @@ class Report:
                         'name': 'Coefficients',
                         'parts': [f'''
                         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
-                            {model_features_importance[0]}{presets._create_importance_charts()}</div>'''],
+                            {model_features_importance[0]}{_create_importance_charts()}</div>'''],
                         'header': '',
                         'footer': model_features_importance[1],
                         'icon': '<i class="bi bi-bar-chart-line"></i>',
@@ -220,28 +220,23 @@ class Report:
         ]
 
         # create features description article, contains specification, description and psi
-        self.sections[0]['articles'].append(presets._create_features_description(X_train, X_test,
+        self.sections[0]['articles'].append(_create_features_description(X_train, X_test,
                                                                                  original_dataset,
                                                                                  features_description))
         if isinstance(explain_instance, pandas.Series):
-            self.sections[1]['articles'].append(presets._explain_instance(explain_instance, model, X_train,
+            self.sections[1]['articles'].append(_explain_instance(explain_instance, model, X_train,
                                                                           task, original_dataset, shap_type))
         # create models comparison if model is regression
         if models_to_compare and task == 'reg':
-            self.sections.append(comparison_presets._create_models_comparison(X_train, y_train, X_test, y_test,
-                                                                              original_dataset, task,
-                                                                              models_to_compare, comparison_metrics,
-                                                                              f_groups_type, f_bins, f_start, f_end,
-                                                                              f_freq,
-                                                                              p_groups_type, p_bins, p_start, p_end,
-                                                                              p_freq,
-                                                                              d_groups_type, d_bins, d_start, d_end,
-                                                                              d_freq,
-                                                                              model, main_diff_model,
-                                                                              compare_diff_models,
-                                                                              m_bins, m_freq, pairs_for_matrix,
-                                                                              classes="table table-striped",
-                                                                              justify="center"))
+            self.sections.append(_create_models_comparison(X_train, y_train, X_test, y_test,
+                                                            original_dataset, task,
+                                                            models_to_compare, comparison_metrics,
+                                                            f_groups_type, f_bins, f_start, f_end, f_freq,
+                                                            p_groups_type, p_bins, p_start, p_end, p_freq,
+                                                            d_groups_type, d_bins, d_start, d_end, d_freq,
+                                                            model, main_diff_model, compare_diff_models,
+                                                            m_bins, m_freq, pairs_for_matrix,
+                                                            classes="table table-striped", justify="center"))
         # show all model parameters, some models have a lot of parameters, so they are not shown by default
         if show_parameters:
             self.sections[1]['articles'].append({
@@ -332,9 +327,9 @@ class Report:
         return model_coefs
 
     def _calculate_train_test_metrics(self):
-        table_train = metrics._calc_metrics(self.y_train, self.predicted_train, self.task, self.metrics_to_calc,
+        table_train = _calc_metrics(self.y_train, self.predicted_train, self.task, self.metrics_to_calc,
                                             self.X_train, self.exposure_column)
-        table_test = metrics._calc_metrics(self.y_test, self.predicted_test, self.task, self.metrics_to_calc,
+        table_test = _calc_metrics(self.y_test, self.predicted_test, self.task, self.metrics_to_calc,
                                            self.X_test, self.exposure_column)
 
         table = {key: [table_train.get(key, ''), table_test.get(key, '')] for key in table_train.keys()}
