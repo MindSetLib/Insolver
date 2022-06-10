@@ -157,7 +157,8 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
                                 Must be "all", "main" or list.''')
 
         elif type_of_true == 'binary' and type_of_pred == 'continuous':
-            functions_names = functions_names_dict['binary_cont'] if not isinstance(metrics_to_calc, list) else metrics_to_calc
+            functions_names = (functions_names_dict['binary_cont'] if not isinstance(metrics_to_calc, list)
+                               else metrics_to_calc)
 
         else:
             raise TypeError(f"Not supported target type <{type_of_true}> or predicted type <{type_of_pred}>")
