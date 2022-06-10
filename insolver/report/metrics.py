@@ -131,6 +131,11 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
             functions_names = metrics_regression.keys()
         elif metrics_to_calc == 'main':
             functions_names = functions_names_dict['reg_main']
+        elif isinstance(metrics_to_calc, list):
+            functions_names = metrics_to_calc
+        else:
+            raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported. 
+                            Must be "all", "main" or list.''')
 
         result['root_mean_square_error'] = np.sqrt(functions['mean_squared_error'](y_true, y_pred))
 
@@ -145,16 +150,22 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
                 functions_names = metrics_classification.keys()
             elif metrics_to_calc == 'main':
                 functions_names = functions_names_dict['class_main']
+            elif isinstance(metrics_to_calc, list):
+                functions_names = metrics_to_calc
+            else:
+                raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported. 
+                                Must be "all", "main" or list.''')
 
         elif type_of_true == 'binary' and type_of_pred == 'continuous':
-            functions_names = functions_names_dict['binary_cont']
+            functions_names = functions_names_dict['binary_cont'] if not isinstance(metrics_to_calc, list) else metrics_to_calc
 
         else:
             raise TypeError(f"Not supported target type <{type_of_true}> or predicted type <{type_of_pred}>")
-    else:
-        raise TypeError(f"Not supported task type <{task}>. Currently supported types are 'class' and 'reg'")
 
     for name in functions_names:
+        if name not in functions.keys():
+            raise NotImplementedError(f'''{name} metric name is not supported. Supported names for {task} task:
+                                      {functions.keys()}.''')
         try:
             if name == 'gini_coef' and exposure:
                 result[name] = functions[name](y_true, y_pred, x[exposure])[2]
