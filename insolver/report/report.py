@@ -113,9 +113,9 @@ class Report:
         self.models_to_compare = models_to_compare
         self.comparison_metrics = [] if not comparison_metrics else comparison_metrics
         self.predicted_train = pandas.Series(model.predict(X_train),
-                                             index=X_train.index) if not predicted_test else predicted_train
+                                             index=X_train.index) if not isinstance(predicted_train, pandas.Series) else predicted_train
         self.predicted_test = pandas.Series(model.predict(X_test),
-                                            index=X_test.index) if not predicted_train else predicted_test
+                                            index=X_test.index) if not isinstance(predicted_test, pandas.Series) else predicted_test
         if task in ['reg', 'class']:
             self.task = task
         else:
