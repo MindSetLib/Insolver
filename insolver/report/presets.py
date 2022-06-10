@@ -1,7 +1,7 @@
 import pandas as pd
 from insolver.wrappers import InsolverBaseWrapper, InsolverGBMWrapper, InsolverGLMWrapper
 from sklearn.inspection import PartialDependenceDisplay
-import metrics
+from .metrics import _calc_psi
 import numpy as np
 from shap import TreeExplainer, LinearExplainer
 import lime.lime_tabular as lt
@@ -363,7 +363,7 @@ def _create_features_description(x_train, x_test, dataset, description=None):
             '</div>'
             '<div class="p-3 my-3 bg-light border rounded-3 text-center fw-light">'
             '<h4 class="text-center fw-light">Population Stability Index:</h4>'
-            f'{metrics._calc_psi(x_train, x_test, dataset)}'
+            f'{_calc_psi(x_train, x_test, dataset)}'
             '</div>'
         ],
         'header': '',

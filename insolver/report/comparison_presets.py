@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-
 def _create_models_comparison(x_train, y_train, x_test, y_test, dataset, task, models_to_compare, comparison_metrics,
                               f_groups_type, f_bins, f_start, f_end, f_freq,
                               p_groups_type, p_bins, p_start, p_end, p_freq,
