@@ -28,6 +28,7 @@ class Report:
         X_test (pandas.DataFrame): Test data.
         y_test (pandas.Series): Test target.
         predicted_test (pandas.Series): Test values predicted by the model.
+        original_dataset (pandas.Dataframe): Original dataset for creating features information.
         shap_type (str): Type of the explainer, supported values are `tree` and `linear`.
         explain_instance (pandas.Series): Instance to be explained using shap, lime and dice.
         exposure_column (pandas.Series, str): Exposure column name for the gini coef and gain curve.
