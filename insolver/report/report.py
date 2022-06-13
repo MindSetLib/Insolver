@@ -143,6 +143,14 @@ class Report:
               \r""")
         self._directory = ntpath.dirname(inspect.getfile(Report))
 
+        # check columns
+        if not sorted(X_train.columns.to_list()) == sorted(X_test.columns.to_list()):
+            raise KeyError(f'''Columns in X_train {sorted(X_train.columns.to_list())} 
+            and X_test {sorted(X_test.columns.to_list())} are not the same.''')
+        elif len(set(X_train.columns.to_list()).difference(original_dataset.columns.to_list())) > 0:
+            s = set(X_train.columns.to_list()).difference(original_dataset.columns.to_list())
+            raise KeyError(f'''Columns from X_train {s} are missing from original_dataset.''')
+
         # check shap_type
         if shap_type not in ['tree', 'linear']:
             raise NotImplementedError(f'shap type {shap_type} must be "tree" or "linear".')
