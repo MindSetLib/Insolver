@@ -114,7 +114,7 @@ def _create_shap(x_train, x_test, model, shap_type):
     footer['features'] = list(x_train.columns)
     # check model type
     base_model = model.model if isinstance(model, InsolverBaseWrapper) else model
-    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) else base_model
+    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) and model.backend=='sklearn' else base_model
     for key, value in {'train': x_train, 'test': x_test}.items():
         # get shap values
         explainer = TreeExplainer(base_model) if shap_type == 'tree' else LinearExplainer(linear_model, value)
@@ -377,7 +377,7 @@ def shap_explain(instance, model, shap_type, x):
         return np.true_divide(1, np.add(1, np.exp(x)))
 
     base_model = model.model if isinstance(model, InsolverBaseWrapper) else model
-    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) else base_model
+    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) and model.backend=='sklearn' else base_model
     explainer = TreeExplainer(base_model) if shap_type == 'tree' else LinearExplainer(linear_model, x)
         
     feature_names = list(instance.index)
