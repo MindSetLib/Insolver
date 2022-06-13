@@ -15,6 +15,8 @@ from .comparison_presets import _create_models_comparison
 import shutil
 import jinja2
 
+from tqdm.auto import tqdm
+
 
 class Report:
     """Combine data and model summary in one html report
@@ -145,7 +147,10 @@ class Report:
         if shap_type not in ['tree', 'linear']:
             raise NotImplementedError(f'shap type {shap_type} must be "tree" or "linear".')
 
+        pbar = tqdm(total=10)
         # prepare profile report
+        pbar.update(1)
+        pbar.set_description('Creating Pandas Profiling')
         self.profile = None
         self._profile_data()
 
@@ -155,17 +160,27 @@ class Report:
         self.template = self.env.get_template("report_template.html")
 
         # get features importance
+        pbar.update(1)
+        pbar.set_description('Creating features importance')
         model_features_importance = self._model_features_importance()
         # calculate train test metrics
+        pbar.update(1)
+        pbar.set_description('Creating train test metrics')
         calculate_train_test_metrics = self._calculate_train_test_metrics()
         # create lift chart and gain curve
+        pbar.update(1)
+        pbar.set_description('Creating lift chart and gain curve')
         metrics_footer, metrics_part = _create_metrics_charts(X_train, X_test,
                                                                       y_train, y_test,
                                                                       self.predicted_train, self.predicted_test,
                                                                       exposure_column)
         # create shap
+        pbar.update(1)
+        pbar.set_description('Creating shap')
         shap_footer, shap_part = _create_shap(X_train, X_test, model, shap_type)
         # create partial dependence 
+        pbar.update(1)
+        pbar.set_description('Creating partial dependence')
         pdp_footer, pdp_part = _create_partial_dependence(X_train, X_test, model)
 
         # content to fill jinja template
@@ -223,14 +238,22 @@ class Report:
         ]
 
         # create features description article, contains specification, description and psi
+        pbar.update(1)
+        pbar.set_description('Creating features description article')
         self.sections[0]['articles'].append(_create_features_description(X_train, X_test,
                                                                                  original_dataset,
                                                                                  features_description))
         if isinstance(explain_instance, pandas.Series):
+            pbar.update(1)
+            pbar.set_description('Explaining instance')
             self.sections[1]['articles'].append(_explain_instance(explain_instance, model, X_train,
                                                                           task, original_dataset, shap_type))
+        else:
+            pbar.update(1)
         # create models comparison if model is regression
         if models_to_compare and task == 'reg':
+            pbar.update(1)
+            pbar.set_description('Comparing models')
             self.sections.append(_create_models_comparison(X_train, y_train, X_test, y_test,
                                                             original_dataset, task,
                                                             models_to_compare, comparison_metrics,
@@ -240,8 +263,12 @@ class Report:
                                                             model, main_diff_model, compare_diff_models,
                                                             m_bins, m_freq, pairs_for_matrix,
                                                             classes="table table-striped", justify="center"))
+        else:
+            pbar.update(1)
         # show all model parameters, some models have a lot of parameters, so they are not shown by default
         if show_parameters:
+            pbar.update(1)
+            pbar.set_description('Creating parameters')
             self.sections[1]['articles'].append({
                 'name': 'Parameters',
                 'parts': self._model_parameters_to_list(),
@@ -249,6 +276,9 @@ class Report:
                 'footer': '',
                 'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>',
             })
+        else:
+            pbar.update(1)
+            pbar.set_description('All done')
 
     def get_sections(self):
         return self.sections
