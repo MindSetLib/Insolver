@@ -1,6 +1,10 @@
 import argparse
 import os
 from subprocess import Popen, PIPE
+from pathlib import Path
+
+
+SERVING_DIR = Path(__file__).resolve().parent
 
 
 def exec_cmd(cmd):
@@ -75,6 +79,10 @@ def run():
     elif args.service == 'sfastapi':
         cmd = (f'gunicorn -b {args.ip}:{args.port}'
                'insolver.serving.fastapi_app_several:app -k uvicorn.workers.UvicornWorker')
+        exec_cmd(cmd)
+    if args.service == 'django':
+        django_dir = os.path.join(SERVING_DIR, 'django_insolver')
+        cmd = f'gunicorn -b {args.ip}:{args.port} --chdir {django_dir} django_insolver.wsgi:application'
         exec_cmd(cmd)
     else:
         print('wrong service, try "-service flask" or "-service fastapi"')
