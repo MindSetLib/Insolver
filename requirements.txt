@@ -15,7 +15,7 @@ seaborn==0.11.2
 shap>=0.39.0
 h2o>=3.32.0.3
 jinja2>=3.0.1
-flask>=2.0.2
+flask==2.0.2
 fastapi>=0.65.2
 uvicorn[standard]>=0.13.3
 pydantic==1.8.2
@@ -23,3 +23,6 @@ gunicorn>=20.0.4
 sympy==1.9
 pandas-profiling==3.1.0
 statsmodels==0.13.1
+django==4.0.5
+djangorestframework==3.13.1
+psycopg2-binary==2.9.3
