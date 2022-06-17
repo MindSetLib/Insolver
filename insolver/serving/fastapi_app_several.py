@@ -13,6 +13,7 @@ from fastapi.encoders import jsonable_encoder
 from insolver import InsolverDataFrame
 from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
+from insolver.serving import utils
 from insolver.configs.settings import *
 
 # For logging
@@ -42,15 +43,6 @@ logger.addHandler(handler)
 # print(FORMULA)
 # print(VARIABLES_LIST)
 # print(N_CORES)
-
-
-def load_pickle_model(model_path):
-    try:
-        with open(model_path, 'rb') as file:
-            model = pickle.load(file)
-    except pickle.UnpicklingError:
-        return
-    return model
 
 
 path_models = models_folder
@@ -85,7 +77,7 @@ for i, model_path in enumerate(models):
     # Load model
     # print(i, model_path, models[i], transforms[i])
 
-    model = load_pickle_model(models[i])
+    model = utils.load_pickle_model(models[i])
     if model and model.algo == 'gbm':
         model = InsolverGBMWrapper(backend=model.backend, load_path=models[i])
     elif model and model.algo == 'glm':
