@@ -11,7 +11,7 @@ from .presets import (_create_shap, _create_partial_dependence, _create_dataset_
                       _create_importance_charts, _create_features_description, _explain_instance)
 from .metrics import _create_metrics_charts, _calc_metrics
 from .comparison_presets import _create_models_comparison
-
+from .error_handler import error_handler
 import shutil
 import jinja2
 
@@ -107,8 +107,9 @@ class Report:
                  d_groups_type='cut', d_bins=10, d_start=None, d_end=None, d_freq=1.5,
                  main_diff_model=None, compare_diff_models=None,
                  pairs_for_matrix=None, m_bins=20, m_freq=None,
-                 show_parameters=False):
+                 show_parameters=False, pandas_profiling = True):
         # check and save attributes
+        self.pandas_profiling = pandas_profiling
         self.metrics_to_calc = metrics_to_calc
         self.exposure_column = exposure_column.name if isinstance(exposure_column, pandas.Series) else exposure_column
         self.model = model
@@ -160,7 +161,12 @@ class Report:
         pbar.update(1)
         pbar.set_description('Creating Pandas Profiling')
         self.profile = None
-        self._profile_data()
+        if self.pandas_profiling:
+            self._profile_data()
+            pandas_profiling_html = _create_pandas_profiling()
+        else: 
+            pandas_profiling_html = {'name': 'Pandas profiling','parts': [],'header': '','footer': '',
+                                    'icon': '<i class="bi bi-briefcase"></i>',}
 
         # prepare jinja environment and template
         templateLoader = jinja2.FileSystemLoader(searchpath=self._directory)
@@ -170,11 +176,11 @@ class Report:
         # get features importance
         pbar.update(1)
         pbar.set_description('Creating features importance')
-        model_features_importance = self._model_features_importance()
+        features_importance_footer, features_importance = self._model_features_importance()
         # calculate train test metrics
         pbar.update(1)
         pbar.set_description('Creating train test metrics')
-        calculate_train_test_metrics = self._calculate_train_test_metrics()
+        calculate_train_test_metrics = self._calculate_train_test_metrics()[1]
         # create lift chart and gain curve
         pbar.update(1)
         pbar.set_description('Creating lift chart and gain curve')
@@ -199,7 +205,7 @@ class Report:
                     _create_dataset_description(X_train, X_test, y_train, y_test, task,
                                                         dataset_description, y_description,
                                                         original_dataset),
-                    _create_pandas_profiling(),
+                    pandas_profiling_html,
                 ],
                 'icon': '<i class="bi bi-bricks" width="24" height="24" role="img"></i>',
             },
@@ -210,15 +216,15 @@ class Report:
                         'name': 'Coefficients',
                         'parts': [f'''
                         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
-                            {model_features_importance[0]}{_create_importance_charts()}</div>'''],
+                            {features_importance}{_create_importance_charts()}</div>'''],
                         'header': '',
-                        'footer': model_features_importance[1],
+                        'footer': features_importance_footer,
                         'icon': '<i class="bi bi-bar-chart-line"></i>',
 
                     },
                     {
                         'name': 'Metrics',
-                        'parts': [f'{calculate_train_test_metrics[0]}{metrics_part}'],
+                        'parts': [f'{calculate_train_test_metrics}{metrics_part}'],
                         'header': '',
                         'footer': metrics_footer,
                         'icon': '<i class="bi bi-calculator"></i>',
@@ -321,13 +327,15 @@ class Report:
         shutil.copytree(f'{self._directory}/report_template',
                         f'{path}/{report_name}')
         # save profile report
-        self.profile.to_file(f"{path}/{report_name}/profiling_report.html")
+        if self.pandas_profiling:
+            self.profile.to_file(f"{path}/{report_name}/profiling_report.html")
 
         with open(f'{path}/{report_name}/report.html', 'w') as f:
             html_ = self.template.render(sections=self.sections)
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
             f.write(html_)
 
+    @error_handler(False)
     def _profile_data(self):
         """Combine all data passed in __init__ method and prepares report"""
 
@@ -340,6 +348,7 @@ class Report:
         # Profiling
         self.profile = ProfileReport(data, title='Pandas Profiling Report')
 
+    @error_handler(True)
     def _model_features_importance(self):
         """Depend on model backend prepare features importance list.
 
@@ -367,6 +376,7 @@ class Report:
             raise Exception("Model instance was not provided")
         return model_coefs
 
+    @error_handler(False)
     def _calculate_train_test_metrics(self):
         table_train = _calc_metrics(self.y_train, self.predicted_train, self.task, self.metrics_to_calc,
                                             self.X_train, self.exposure_column)
@@ -377,14 +387,15 @@ class Report:
         model_metrics = self._create_html_table(["train", "test"], table, two_columns_table=False,
                                                 classes='table table-striped', justify='left')
         return model_metrics
-
+    
+    @error_handler(False)
     def _model_parameters_to_list(self):
         """Model parameters as html tables in one list"""
         model_parameters_list = list()
         for table_name, table in self._get_objects_as_dicts(self.model):
             if table:
                 model_parameters_list.append(self._create_html_table([str(table_name)], table, two_columns_table=True,
-                                                                     classes='table table-striped', justify='left')[0])
+                                                                     classes='table table-striped', justify='left')[1])
         return model_parameters_list
 
     def _get_objects_as_dicts(self, obj, path='') -> list:
@@ -421,7 +432,7 @@ class Report:
         return result
 
     @staticmethod
-    def _create_html_table(head: list, body: dict, two_columns_table: bool = False, **kwargs) -> str:
+    def _create_html_table(head: list, body: dict, two_columns_table: bool = False, **kwargs):
         """Create html table based on python dict instance
 
         Args:
@@ -462,10 +473,9 @@ class Report:
         check_head(head, body)
 
         result_df = pandas.DataFrame(data=body.values(), columns=head, index=body.keys())
-
-        return [result_df.to_html(**kwargs),
-                {'columns': head, 'data': [result_df[column].to_list() for column in result_df.columns],
-                 'index': list(result_df.axes[0])}]
+        footer = {'columns': head, 'data': [result_df[column].to_list() for column in result_df.columns],
+                 'index': list(result_df.axes[0])}
+        return [footer, result_df.to_html(**kwargs)]
 
     @staticmethod
     def _get_coefs_dict(model_coefs: dict) -> dict:

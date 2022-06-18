@@ -88,7 +88,9 @@
     {% for article in section.articles %}
       <article class="p-4 my-3 bg-light border rounded-3" id="{{ article.name }}">
            <!-- Save data for creating charts -->
-          <meta id="index_{{ article.name }}" data-column ="{{ article.footer['index'] }}">
+          {% if article.name=='Coefficients' %}
+          <meta id="index_Coefficients" data-column ="{{ article.footer['index'] }}">
+          {% endif %}
           {% if article.name=='Metrics' %}
           <meta id="meta_lift" data-description="{{ article.footer }}">
           {% endif %}

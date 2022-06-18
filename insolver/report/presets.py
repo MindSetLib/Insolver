@@ -5,12 +5,12 @@ from .metrics import _calc_psi
 import numpy as np
 from shap import TreeExplainer, LinearExplainer
 import lime.lime_tabular as lt
-
+from .error_handler import error_handler
 
 def _create_pandas_profiling():
     pandas_profiling = '''Generated profile report from a 
         pandas <code>DataFrame</code> prepared by 
-        <code>Pandas profiling library</code>.
+        <code><a href="https://pypi.org/project/pandas-profiling/">Pandas profiling library</a></code>.
     '''
     return {
         'name': 'Pandas profiling',
@@ -20,12 +20,11 @@ def _create_pandas_profiling():
                   './profiling_report.html\';">'
                   'Go to report</button></div>'],
         'header': f'<p class="fs-5 fw-light">{pandas_profiling}</p>',
-        'footer': '<a href="https://pypi.org/project/'
-                  'pandas-profiling/">library page</a>',
+        'footer': '',
         'icon': '<i class="bi bi-briefcase"></i>',
     }
 
-
+@error_handler(False)
 def _create_dataset_description(x_train, x_test, y_train, y_test, task,
                                 description, y_description,
                                 dataset=None):
@@ -67,7 +66,7 @@ def _create_dataset_description(x_train, x_test, y_train, y_test, task,
         'icon': '<i class="bi bi-book"></i>',
     }
 
-
+@error_handler(False)
 def _create_importance_charts():
     # create html for js 
     nav_items = ''
@@ -106,7 +105,7 @@ def _create_importance_charts():
     </div>    
     '''
 
-
+@error_handler(True)
 def _create_shap(x_train, x_test, model, shap_type):
     # footer values are used by js in the report_template
     footer = dict()
@@ -170,7 +169,7 @@ def _create_shap(x_train, x_test, model, shap_type):
     </div>
     '''
 
-
+@error_handler(True)
 def _create_partial_dependence(x_train, x_test, model):
     # footer values are used by js in the report_template
     footer = {}
@@ -223,7 +222,7 @@ def _create_partial_dependence(x_train, x_test, model):
         </form>
     </div>'''
 
-
+@error_handler(False)
 def _explain_instance(explain_instance, model, x, task, original_dataset, shap_type):
     footer = dict()
     footer['shap_waterfall'] = shap_explain(explain_instance, model, shap_type, x)
@@ -332,7 +331,7 @@ def _describe_dataset(x_train, x_test, dataset):
 
     return description_table
 
-
+@error_handler(False)
 def _create_features_description(x_train, x_test, dataset, description=None):
     # create html with features description
     html_grid = ''

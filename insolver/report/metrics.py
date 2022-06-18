@@ -4,11 +4,12 @@ import numpy as np
 import pandas as pd
 from insolver.model_tools import (deviance_poisson, deviance_gamma, deviance_score, deviance_explained,
                                   deviance_explained_poisson, deviance_explained_gamma, lift_score)
+from .error_handler import error_handler
 
 gain_descr = 'gain curve description'
 lift_descr = 'lift curve description'
 
-
+@error_handler(True)
 def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, predicted_test, exposure=None):
     descr_html = ''
     try:
