@@ -139,3 +139,6 @@ docs/_templates
 
 # datasets
 examples/datasets
+
+# locust
+app.log*
