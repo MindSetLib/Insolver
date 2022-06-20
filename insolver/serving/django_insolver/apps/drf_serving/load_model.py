@@ -1,3 +1,4 @@
+import os
 import pickle
 
 from insolver.transforms import init_transforms
@@ -7,9 +8,9 @@ from insolver.serving import utils
 from django.conf import settings
 
 
-model_path = settings.MODEL_PATH
-transforms_path = settings.TRANSFORMS_PATH
-module_path = settings.MODULE_PATH
+model_path = os.environ['model_path']
+transforms_path = os.environ['transforms_path']
+module_path = os.environ['module_path']
 
 
 # Load model

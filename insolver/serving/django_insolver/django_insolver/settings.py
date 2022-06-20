@@ -1,14 +1,9 @@
 import os, sys
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
-INSOLVER_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 
@@ -16,7 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY='django-insooosse-mtds(-rt@9&8*3tsa#p^=qx1f9@$(eh9b45#tp65kksu)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -72,13 +67,9 @@ WSGI_APPLICATION = 'django_insolver.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
-        "HOST": os.environ.get("DB_HOST"),
-        "PORT": os.environ.get("DB_PORT"),
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -130,14 +121,3 @@ STATIC_ROOT = PROJECT_ROOT / 'static'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Model files
-model_path = os.environ.get('MODEL_PATH')
-transforms_path = os.environ.get('TRANSFORMS_PATH')
-module_path = os.environ.get('MODULE_PATH')
-
-MODEL_DIR = os.path.join(INSOLVER_ROOT, 'model_pkl')
-
-MODEL_PATH = os.path.join(MODEL_DIR, model_path)
-TRANSFORMS_PATH = os.path.join(MODEL_DIR, transforms_path)
-MODULE_PATH = os.path.join(MODEL_DIR, module_path) if module_path else None
