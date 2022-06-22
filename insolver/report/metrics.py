@@ -41,9 +41,9 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
         '''
     except(ValueError):
         footer = {}
-
+    gain = False
     # if exposure create gain curve
-    if exposure:
+    if gain:
         footer['gain'] = 'true'
         
         # ideal model
