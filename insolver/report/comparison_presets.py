@@ -158,7 +158,7 @@ def _create_features_comparison(data_type, x, y, dataset, models_to_compare, gro
     return result, f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
             style="overflow-x: auto;">
                 {nav_items}
             </ul>
@@ -221,7 +221,7 @@ def _create_predict_groups(data_type, x, y, models_to_compare, groups_type, bins
     return result, f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
              style="overflow-x: auto;">
                 {nav_items}
             </ul>
@@ -300,7 +300,7 @@ def _create_difference_comparison(data_type, x, y, main_model, models_to_compare
     return result,  f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
              style="overflow-x: auto;">
                 {nav_items}
             </ul>
@@ -382,7 +382,7 @@ def _create_comparison_matrix(x, y, pairs_for_matrix, bins, freq):
     return f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
             style="overflow-x: auto;">
                 {nav_items}
             </ul>

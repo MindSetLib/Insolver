@@ -92,7 +92,7 @@ def _create_importance_charts():
     <div class="collapse" id="collapse_metrics">
         <div class="card text-center">
             <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+                <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
                  style="overflow-x: auto;">
                     {nav_items}
                 </ul>
@@ -156,7 +156,7 @@ def _create_shap(x_train, x_test, model, shap_type):
     <div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">
         <div class="card text-center">
             <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+                <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
                  style="overflow-x: auto;">
                     {nav_items}
                 </ul>
@@ -212,7 +212,7 @@ def _create_partial_dependence(x_train, x_test, model):
     return footer, f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
             style="overflow-x: auto;">
                 {nav_items}
             </ul>

@@ -104,7 +104,7 @@ def _calc_psi(x_train, x_test, dataset):
     return f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs" 
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs" 
             style="overflow-x: auto;">
                 {nav_items}
             </ul>
