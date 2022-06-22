@@ -238,7 +238,7 @@ class Report:
         self.sections.append(section[0])
         
         with open(f'{path}/{report_name}/dataset_section.html', 'w') as f:
-            html_ = self.template.render(sections=section)
+            html_ = self.template.render(sections=section, title='Dataset')
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
             f.write(html_)
 
@@ -318,7 +318,7 @@ class Report:
         self.sections.append(section[0])
         
         with open(f'{path}/{report_name}/model_section.html', 'w') as f:
-            html_ = self.template.render(sections=section)
+            html_ = self.template.render(sections=section, title='Model')
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
             f.write(html_)
 
@@ -338,7 +338,7 @@ class Report:
         self.sections.append(section[0])
         
         with open(f'{path}/{report_name}/comparison_section.html', 'w') as f:
-            html_ = self.template.render(sections=section)
+            html_ = self.template.render(sections=section, title='Comparison')
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
             f.write(html_)
 
@@ -362,7 +362,7 @@ class Report:
         self.sections.append(section[0])
         
         with open(f'{path}/{report_name}/parameters_section.html', 'w') as f:
-            html_ = self.template.render(sections=section)
+            html_ = self.template.render(sections=section, title='Parameters')
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
             f.write(html_)
         
@@ -420,7 +420,7 @@ class Report:
         else:
 
             with open(f'{path}/{report_name}/report.html', 'w') as f:
-                html_ = self.template.render(sections=self.sections)
+                html_ = self.template.render(sections=self.sections, title='Insolver Report')
                 html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
                 f.write(html_)
 
