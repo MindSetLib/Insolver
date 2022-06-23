@@ -129,10 +129,14 @@ def _create_shap(x_train, x_test, model, shap_type):
         footer[f'mean_{key}'] = [list(mean_dict.keys()), [round(num, 3) for num in mean_dict.values()]]
         nav_items = ''
         tab_pane_items = ''
+        # get 50 random values
+        _value = value.sample(n=50) if len(value) > 50 else value
+        _shap_values = explainer.shap_values(_value) if len(value) > 50 else shap_values
+        # save shap for each feature
         for i in range(len(variables)):
             feat = variables[i]
-            shap_feat = shap_values.T[i]
-            footer[f'{feat}_{key}'] = [[round(num, 4) for num in list(value[feat])],
+            shap_feat = _shap_values.T[i]
+            footer[f'{feat}_{key}'] = [[round(num, 4) for num in list(_value[feat])],
                                        [round(num, 4) for num in list(shap_feat)]]
             # replace ' ' so that href could work correctly
             feature_replaced = feat.replace(' ', '_')
