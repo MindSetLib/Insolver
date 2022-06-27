@@ -1,16 +1,16 @@
 import pandas as pd
 from insolver.wrappers import InsolverBaseWrapper, InsolverGBMWrapper, InsolverGLMWrapper
 from sklearn.inspection import PartialDependenceDisplay
-import metrics
+from .metrics import _calc_psi
 import numpy as np
 from shap import TreeExplainer, LinearExplainer
 import lime.lime_tabular as lt
-
+from .error_handler import error_handler
 
 def _create_pandas_profiling():
     pandas_profiling = '''Generated profile report from a 
         pandas <code>DataFrame</code> prepared by 
-        <code>Pandas profiling library</code>.
+        <code><a href="https://pypi.org/project/pandas-profiling/">Pandas profiling library</a></code>.
     '''
     return {
         'name': 'Pandas profiling',
@@ -20,12 +20,11 @@ def _create_pandas_profiling():
                   './profiling_report.html\';">'
                   'Go to report</button></div>'],
         'header': f'<p class="fs-5 fw-light">{pandas_profiling}</p>',
-        'footer': '<a href="https://pypi.org/project/'
-                  'pandas-profiling/">library page</a>',
+        'footer': '',
         'icon': '<i class="bi bi-briefcase"></i>',
     }
 
-
+@error_handler(False)
 def _create_dataset_description(x_train, x_test, y_train, y_test, task,
                                 description, y_description,
                                 dataset=None):
@@ -67,7 +66,7 @@ def _create_dataset_description(x_train, x_test, y_train, y_test, task,
         'icon': '<i class="bi bi-book"></i>',
     }
 
-
+@error_handler(False)
 def _create_importance_charts():
     # create html for js 
     nav_items = ''
@@ -93,7 +92,7 @@ def _create_importance_charts():
     <div class="collapse" id="collapse_metrics">
         <div class="card text-center">
             <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+                <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
                  style="overflow-x: auto;">
                     {nav_items}
                 </ul>
@@ -106,7 +105,7 @@ def _create_importance_charts():
     </div>    
     '''
 
-
+@error_handler(True)
 def _create_shap(x_train, x_test, model, shap_type):
     # footer values are used by js in the report_template
     footer = dict()
@@ -114,7 +113,7 @@ def _create_shap(x_train, x_test, model, shap_type):
     footer['features'] = list(x_train.columns)
     # check model type
     base_model = model.model if isinstance(model, InsolverBaseWrapper) else model
-    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) else base_model
+    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) and model.backend=='sklearn' else base_model
     for key, value in {'train': x_train, 'test': x_test}.items():
         # get shap values
         explainer = TreeExplainer(base_model) if shap_type == 'tree' else LinearExplainer(linear_model, value)
@@ -130,10 +129,14 @@ def _create_shap(x_train, x_test, model, shap_type):
         footer[f'mean_{key}'] = [list(mean_dict.keys()), [round(num, 3) for num in mean_dict.values()]]
         nav_items = ''
         tab_pane_items = ''
+        # get 50 random values
+        _value = value.sample(n=50) if len(value) > 50 else value
+        _shap_values = explainer.shap_values(_value) if len(value) > 50 else shap_values
+        # save shap for each feature
         for i in range(len(variables)):
             feat = variables[i]
-            shap_feat = shap_values.T[i]
-            footer[f'{feat}_{key}'] = [[round(num, 4) for num in list(value[feat])],
+            shap_feat = _shap_values.T[i]
+            footer[f'{feat}_{key}'] = [[round(num, 4) for num in list(_value[feat])],
                                        [round(num, 4) for num in list(shap_feat)]]
             # replace ' ' so that href could work correctly
             feature_replaced = feat.replace(' ', '_')
@@ -157,7 +160,7 @@ def _create_shap(x_train, x_test, model, shap_type):
     <div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">
         <div class="card text-center">
             <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+                <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
                  style="overflow-x: auto;">
                     {nav_items}
                 </ul>
@@ -170,7 +173,7 @@ def _create_shap(x_train, x_test, model, shap_type):
     </div>
     '''
 
-
+@error_handler(True)
 def _create_partial_dependence(x_train, x_test, model):
     # footer values are used by js in the report_template
     footer = {}
@@ -213,7 +216,7 @@ def _create_partial_dependence(x_train, x_test, model):
     return footer, f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
             style="overflow-x: auto;">
                 {nav_items}
             </ul>
@@ -223,7 +226,7 @@ def _create_partial_dependence(x_train, x_test, model):
         </form>
     </div>'''
 
-
+@error_handler(False)
 def _explain_instance(explain_instance, model, x, task, original_dataset, shap_type):
     footer = dict()
     footer['shap_waterfall'] = shap_explain(explain_instance, model, shap_type, x)
@@ -332,7 +335,7 @@ def _describe_dataset(x_train, x_test, dataset):
 
     return description_table
 
-
+@error_handler(False)
 def _create_features_description(x_train, x_test, dataset, description=None):
     # create html with features description
     html_grid = ''
@@ -363,7 +366,7 @@ def _create_features_description(x_train, x_test, dataset, description=None):
             '</div>'
             '<div class="p-3 my-3 bg-light border rounded-3 text-center fw-light">'
             '<h4 class="text-center fw-light">Population Stability Index:</h4>'
-            f'{metrics._calc_psi(x_train, x_test, dataset)}'
+            f'{_calc_psi(x_train, x_test, dataset)}'
             '</div>'
         ],
         'header': '',
@@ -377,7 +380,7 @@ def shap_explain(instance, model, shap_type, x):
         return np.true_divide(1, np.add(1, np.exp(x)))
 
     base_model = model.model if isinstance(model, InsolverBaseWrapper) else model
-    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) else base_model
+    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) and model.backend=='sklearn' else base_model
     explainer = TreeExplainer(base_model) if shap_type == 'tree' else LinearExplainer(linear_model, x)
         
     feature_names = list(instance.index)

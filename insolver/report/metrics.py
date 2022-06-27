@@ -4,27 +4,46 @@ import numpy as np
 import pandas as pd
 from insolver.model_tools import (deviance_poisson, deviance_gamma, deviance_score, deviance_explained,
                                   deviance_explained_poisson, deviance_explained_gamma, lift_score)
+from .error_handler import error_handler
 
 gain_descr = 'gain curve description'
 lift_descr = 'lift curve description'
 
-
+@error_handler(True)
 def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, predicted_test, exposure=None):
-    # calculate lift score
-    train_lift = lift_score(predicted_train, y_train, show=False, output=True, lift_type='quantile', q=20)
-    test_lift = lift_score(predicted_test, y_test, show=False, output=True, lift_type='quantile', q=20)
-    # generate indexes to display %
-    train_lift.index = np.arange(5, 105, 5)
-    test_lift.index = np.arange(5, 105, 5)
-    footer = {
-        'train_lift': [list(train_lift.dropna().index), list(train_lift.dropna()['Predict'])],
-        'test_lift': [list(test_lift.dropna().index), list(test_lift.dropna()['Predict'])],
-        'y_name': y_train.name,
-        'gain': 'false'
-    }
-    gain_curve = ''
+    descr_html = ''
+    try:
+        # calculate lift score
+        train_lift = lift_score(predicted_train, y_train, show=False, output=True, lift_type='quantile', q=20)
+        test_lift = lift_score(predicted_test, y_test, show=False, output=True, lift_type='quantile', q=20)
+        # generate indexes to display %
+        train_lift.index = np.arange(5, 105, 5)
+        test_lift.index = np.arange(5, 105, 5)
+        footer = {
+            'train_lift': [list(train_lift.dropna().index), list(train_lift.dropna()['Predict'])],
+            'test_lift': [list(test_lift.dropna().index), list(test_lift.dropna()['Predict'])],
+            'y_name': y_train.name,
+            'gain': 'false'
+        }
+        descr_html += f'''
+        <div class="p-3 m-3 bg-light border rounded-3 fw-light">
+            <h4 class="text-center fw-light">Lift Chart:</h4>
+                <div id="lift_score"></div>
+                <button class="btn btn-primary m-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_lift"
+                aria-expanded="False" aria-controls="collapseWidthExample">
+                    Show description
+                </button>
+                <div class="collapse" id="collapse_lift">
+                    <div class="p-3 m-3 bg-light border rounded-3 fw-light">
+                    {lift_descr}</div>
+                </div>
+        </div>
+        '''
+    except(ValueError):
+        footer = {}
+    gain = False
     # if exposure create gain curve
-    if exposure:
+    if gain:
         footer['gain'] = 'true'
         
         # ideal model
@@ -38,7 +57,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
         t1, t2, t3 = gini_coef(y_test, predicted_test, X_test[exposure])
         footer['test_gain'] = [list(t1), list(t2), t3]
 
-        gain_curve += f'''
+        descr_html += f'''
         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
             <h4 class="text-center fw-light">Gain Curve:</h4>
                 <div id="gini_score"></div>
@@ -52,20 +71,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
                 </div>
         </div>'''
 
-    return footer, f'''
-    <div class="p-3 m-3 bg-light border rounded-3 fw-light">
-        <h4 class="text-center fw-light">Lift Chart:</h4>
-            <div id="lift_score"></div>
-            <button class="btn btn-primary m-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_lift"
-             aria-expanded="False" aria-controls="collapseWidthExample">
-                Show description
-            </button>
-            <div class="collapse" id="collapse_lift">
-                <div class="p-3 m-3 bg-light border rounded-3 fw-light">
-                {lift_descr}</div>
-            </div>
-    </div>{gain_curve}
-    '''
+    return footer, descr_html
 
 
 def _calc_psi(x_train, x_test, dataset):
@@ -98,7 +104,7 @@ def _calc_psi(x_train, x_test, dataset):
     return f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs" 
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs" 
             style="overflow-x: auto;">
                 {nav_items}
             </ul>
