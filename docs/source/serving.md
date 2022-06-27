@@ -15,9 +15,7 @@ You can choose the server based on Flask or FastApi with the option `service`:
 - `-service fastapi`
 - `-service django`
 
-The default endpoint is `http://localhost:8000/predict` \
-(for django use `http://localhost:8000/predict/`), \
-but you can change it with the parameters `-ip` and `-port`.
+The default endpoint is `http://localhost:8000/predict` (for django use `http://localhost:8000/predict/`), but you can change it with the parameters `-ip` and `-port`.
 
 For example:
 ```shell
