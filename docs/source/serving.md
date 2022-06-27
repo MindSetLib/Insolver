@@ -13,14 +13,21 @@ insolver_serving -model path_to_model -transforms path_to_transforms -transforms
 You can choose the server based on Flask or FastApi with the option `service`:
 - `-service flask`
 - `-service fastapi`
+- `-service django`
 
-The default endpoint is `http://localhost:8000/predict`, but you can change it with the parameters `-ip` and `-port`.
+The default endpoint is `http://localhost:8000/predict` \
+(for django use `http://localhost:8000/predict/`), \
+but you can change it with the parameters `-ip` and `-port`.
 
 For example:
 ```shell
 insolver_serving -model path_to_model -transforms path_to_transforms -transforms_module path_to_transforms_module  -service flask -ip 127.0.0.10 -port 5000
 ```
 
+- Features of passing paths to models. \
+When using Django, it's important to pass the absolute path in full. \
+When using Flask and FastsApi, you can only pass the name of the model, \
+but on the condition that it lies in the root of the project.
 
 ## Using serving service
 
