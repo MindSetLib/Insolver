@@ -45,7 +45,7 @@ def index():
 async def predict(data: Data):
     # Extract data in correct order
     data_dict = data.dict()
-    df = pd.DataFrame(data_dict['df'])
+    df = pd.DataFrame(data_dict['df'], index=[0])
 
     insdataframe = InsolverDataFrame(df)
     # Apply transformations

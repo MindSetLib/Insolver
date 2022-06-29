@@ -10,8 +10,7 @@ from rest_framework.views import APIView, Response
 class PredictAPIView(APIView):
     def post(self, request):
         # json request
-        json_str = json.dumps(request.data['df'])
-        df = pd.read_json(json_str)
+        df = pd.DataFrame(request.data['df'], index=[0])
         insdataframe = InsolverDataFrame(df)
 
         # Apply transformations
