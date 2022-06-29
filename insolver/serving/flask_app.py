@@ -62,9 +62,8 @@ def predict():
     start_prediction = time()
 
     # json request
-    json_input = request.json
-    json_str = json.dumps(json_input['df'])
-    df = pd.read_json(json_str)
+    data_dict = request.json
+    df = pd.DataFrame(data_dict['df'], index=[0])
     insdataframe = InsolverDataFrame(df)
     # Apply transformations
     instransforms = InsolverTransform(insdataframe, tranforms)
