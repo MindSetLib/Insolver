@@ -1,3 +1,4 @@
+import json
 import pickle
 
 import pandas as pd
@@ -7,7 +8,9 @@ from insolver.transforms import InsolverTransform, init_transforms
 from insolver.wrappers import InsolverGLMWrapper
 
 # load data
-df = pd.read_json('request_example.json')
+with open('request_example.json', 'r') as file:
+    data_dict = json.load(file)
+df = pd.DataFrame(data_dict['df'], index=[0])
 InsDataFrame = InsolverDataFrame(df)
 
 # load and init transformations
