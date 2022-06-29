@@ -7,7 +7,6 @@ from insolver import InsolverDataFrame
 from insolver.wrappers import InsolverGLMWrapper
 from insolver.transforms import (InsolverTransform, TransformAge, TransformMapValues,
                                  TransformPolynomizer, TransformAgeGender)
-from insolver.serving.flask_app import app
 
 
 class TransformExp:
@@ -78,6 +77,8 @@ predict = iglm.predict(x_test)
 os.environ['model_path'] = './test_glm_model.h2o'
 os.environ['transforms_path'] = './transforms.pickle'
 os.environ['module_path'] = '../examples/user_transforms.py'
+
+from insolver.serving.flask_app import app
 
 
 app.testing = True
