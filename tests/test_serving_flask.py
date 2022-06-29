@@ -89,7 +89,7 @@ def test_index_page():
     assert response.status_code == 200
 
 
-request_json = {'df': json.loads(test_df.iloc[[0]].to_json())}
+request_json = {'df': json.loads(test_df.iloc[0].to_json())}
 
 
 def test_h2o_model():
