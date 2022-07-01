@@ -27,3 +27,4 @@ lime>=0.2.0.1
 django==3.2.*
 djangorestframework==3.13.1
 psycopg2-binary==2.9.3
+dill>=0.3.4
