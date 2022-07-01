@@ -1,6 +1,7 @@
 [![PyPI](https://img.shields.io/pypi/v/insolver?style=flat)](https://pypi.org/project/insolver/)
 [![Documentation Status](https://readthedocs.org/projects/insolver/badge/?version=latest)](https://insolver.readthedocs.io/en/latest/?badge=latest)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MindSetLib/Insolver/Python%20application?logo=github&label=tests)](https://github.com/MindSetLib/Insolver/actions)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MindSetLib/Insolver/Insolver%20testing?logo=github&label=tests)](https://github.com/MindSetLib/Insolver/actions)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Downloads](https://pepy.tech/badge/insolver/week)](https://pepy.tech/project/insolver)
 
 # Insolver
@@ -28,10 +29,10 @@ jupyter labextension install jupyterlab-plotly
 This tutorial demonstrates how to create **classification models** for the [`weatherAUS`](https://www.kaggle.com/jsphyg/weather-dataset-rattle-package) dataset: getting and preprocessing data, transformations, creating models, plotting SHAP values and comparing models.
 
 - [Data Preprocessing Example I - New York City Airbnb](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Data%20Preprocessing%20Example%20I%20-%20New%20York%20City%20Airbnb.ipynb)
-This tutorial demonstrates how to use the [`feature_engineering`](https://github.com/MindSetLib/Insolver/tree/fixed_docs/insolver/feature_engineering) module and all the **main features of each class**. For this, the [`AB_NYC_2019`](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data) dataset is used. 
+This tutorial demonstrates how to use the [`feature_engineering`](https://github.com/MindSetLib/Insolver/tree/fixed_docs/insolver/feature_engineering) module and all the **main features of each class**. For this, the [`AB_NYC_2019`](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data) dataset is used.
 
 - [Data Preprocessing Example II - New York City Airbnb](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Data%20Preprocessing%20Example%20II%20-%20New%20York%20City%20Airbnb.ipynb)
-This tutorial also demonstrates how to use the [`feature_engineering`](https://github.com/MindSetLib/Insolver/tree/fixed_docs/insolver/feature_engineering) module, but it covers the **automated data preprossesing** class and all of its features. For this, the [`AB_NYC_2019`](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data) dataset is used. 
+This tutorial also demonstrates how to use the [`feature_engineering`](https://github.com/MindSetLib/Insolver/tree/fixed_docs/insolver/feature_engineering) module, but it covers the **automated data preprossesing** class and all of its features. For this, the [`AB_NYC_2019`](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data) dataset is used.
 
 - [Gradient Boosting Example - Lending Club](https://github.com/MindSetLib/Insolver/blob/fixed_docs/tutorials/Gradient%20Boosting%20Example%20-%20Lending%20Club.ipynb)
 This tutorial demonstrates how to create **classification models** for the [`Lending Club`](https://www.kaggle.com/wordsforthewise/lending-club) dataset using the **Gradient Boosting libraries** and the `InsolverGBMWrapper` class.
@@ -91,13 +92,13 @@ Please, feel free to open an issue or/and suggest PR, if you find any bugs or an
 
 ## Demo
 ### Example of creating models using the Insolver
-![](InsolverDemo.gif)
+![](https://github.com/MindSetLib/Insolver/releases/download/v0.4.6/InsolverDemo.gif)
 
 ### Example of a model production service
-![](InsolverImplementation.gif)
+![](https://github.com/MindSetLib/Insolver/releases/download/v0.4.6/InsolverImplementation.gif)
 
 ### Example of an elyra pipeline built with the Insolver inside
-![](InsolverElyraPipeline.gif)
+![](https://github.com/MindSetLib/Insolver/releases/download/v0.4.6/InsolverElyraPipeline.gif)
 
 ### Contacts
 frank@mind-set.ru

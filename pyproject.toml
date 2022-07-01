@@ -1,0 +1,29 @@
+[build-system]
+requires = [
+    "setuptools",
+    "wheel"
+]
+
+[tool.black]
+line-length = 120
+preview = true
+exclude = '''
+/(
+    \.git
+  | \.idea
+  | build
+  | dist
+  | venv
+  | env
+)/
+'''
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+filterwarnings = [
+    "ignore:the imp module is deprecated in favour of importlib;"
+]
