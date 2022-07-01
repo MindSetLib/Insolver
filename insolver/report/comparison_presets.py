@@ -2,8 +2,9 @@ from insolver.model_tools import ModelMetricsCompare
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from .error_handler import error_handler
 
-
+@error_handler(False)
 def _create_models_comparison(x_train, y_train, x_test, y_test, dataset, task, models_to_compare, comparison_metrics,
                               f_groups_type, f_bins, f_start, f_end, f_freq,
                               p_groups_type, p_bins, p_start, p_end, p_freq,
@@ -157,7 +158,7 @@ def _create_features_comparison(data_type, x, y, dataset, models_to_compare, gro
     return result, f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
             style="overflow-x: auto;">
                 {nav_items}
             </ul>
@@ -220,7 +221,7 @@ def _create_predict_groups(data_type, x, y, models_to_compare, groups_type, bins
     return result, f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
              style="overflow-x: auto;">
                 {nav_items}
             </ul>
@@ -299,7 +300,7 @@ def _create_difference_comparison(data_type, x, y, main_model, models_to_compare
     return result,  f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
              style="overflow-x: auto;">
                 {nav_items}
             </ul>
@@ -381,7 +382,7 @@ def _create_comparison_matrix(x, y, pairs_for_matrix, bins, freq):
     return f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs flex-nowrap text-nowrap p-3" data-bs-tabs="tabs"
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
             style="overflow-x: auto;">
                 {nav_items}
             </ul>

@@ -6,7 +6,8 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.88.1">
-    <title>Insolver Report</title>
+    <title>{{ title }}</title>
+    
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.1/examples/cheatsheet/">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -17,7 +18,6 @@
 
     <!-- Bootstrap Font Icon CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.min.css">
-
 
     <style>
       
@@ -88,7 +88,9 @@
     {% for article in section.articles %}
       <article class="p-4 my-3 bg-light border rounded-3" id="{{ article.name }}">
            <!-- Save data for creating charts -->
-          <meta id="index_{{ article.name }}" data-column ="{{ article.footer['index'] }}">
+          {% if article.name=='Coefficients' %}
+          <meta id="index_Coefficients" data-column ="{{ article.footer['index'] }}">
+          {% endif %}
           {% if article.name=='Metrics' %}
           <meta id="meta_lift" data-description="{{ article.footer }}">
           {% endif %}
@@ -112,6 +114,12 @@
         {% endif %}
         {% if article.name=='Partial Dependence' %}
           <meta id="meta_pdp" data-description="{{ article.footer }}">
+        {% endif %}
+        {% if article.name=='SHAP' %}
+          <meta id="meta_shap" data-description="{{ article.footer }}">
+        {% endif %}
+        {% if article.name=='Explain instance' %}
+          <meta id="meta_instance" data-description="{{ article.footer }}">
         {% endif %}
         <!-- Save data for the models comparison -->
         {% if article.name=='Compare on train data' %}
@@ -297,18 +305,203 @@ for (feat of features){
           buttons: [{
               method: 'restyle',
               args: ['visible', [true, false]],
-              label: 'pdp train'
+              label: 'train'
           }, {
               method: 'restyle',
               args: ['visible', [false, true]],
-              label: 'pdp test'
+              label: 'test'
           },]
       }]
     };
 
   Plotly.newPlot(ctx, trace, layout);
 }
+</script>
 
+  <!-- Model.SHAP charts -->
+<script>
+var footer = JSON.parse($(`#meta_shap`).data('description').replace(/'/g, '"'));
+var features = footer['features']
+var ctx = document.getElementById(`shap_mean`);
+var trace1 = {
+  x: footer['mean_train'][1],
+  y: footer['mean_train'][0],
+  orientation: 'h',
+  type: 'bar',
+  name: 'train',
+  marker: {color: 'rgb(167, 158, 225)',},
+};
+var trace2 = {
+  x: footer['mean_test'][1],
+  y: footer['mean_test'][0],
+  orientation: 'h',
+  type: 'bar',
+  name: 'test',
+  marker: {color: 'rgb(158, 210, 225)',},
+  
+};
+var trace = [trace1, trace2]
+var layout = {
+  margin: {l: 200},
+  title: `Mean SHAP values`, 
+};
+
+Plotly.newPlot(ctx, trace, layout);
+
+var buttons = []
+var marker = {color: "rgba(158, 202, 225, 0.5)", line: {color:  "rgba(158, 202, 225, 1)", width: 1}}
+for (feat of features){
+  var marker_train = {color: footer[`${feat}_train`][0], colorbar: {title: {text: feat, side: 'right',}, thickness : 20}};
+  var marker_test = {color: footer[`${feat}_test`][0], colorbar: {title: {text: feat, side: 'right',}, thickness : 20}};
+  buttons.push({
+              method: 'restyle',
+              args: ['marker', [marker_train, marker, marker_test, marker]],
+              label: feat
+          });
+}
+
+for (feat of features){
+  var ctx = document.getElementById(`shap_${feat}`);
+  var trace1 = {
+    x: footer[`${feat}_train`][0],
+    y: footer[`${feat}_train`][1],
+    mode: 'markers',
+    type: 'scatter',
+    name: 'feature shap train',
+    marker: {
+      color: footer[`${features[0]}_train`][0], 
+      colorbar: {
+        title: features[0],
+        titleside: 'top',
+      }, 
+    }, 
+    visible: true
+    };
+
+  var trace1_1 = {
+    x: footer[`${feat}_train`][0],
+    type: 'histogram',
+    opacity: 0.5,
+    marker: {
+      color: "rgba(158, 202, 225, 0.5)", 
+      line: {
+        color:  "rgba(158, 202, 225, 1)", 
+        width: 1
+      }
+    },
+    yaxis: 'y2',
+    name: 'distribution',
+    visible: true
+  };
+
+  var trace2 = {
+    x: footer[`${feat}_test`][0],
+    y: footer[`${feat}_test`][1],
+    mode: 'markers',
+    type: 'scatter',
+    name: 'feature shap test',
+    marker: {
+      color: footer[`${features[0]}_test`][0], 
+      colorbar: {
+        title: features[0],
+        titleside: 'top',
+      }, 
+    }, 
+    visible: false
+  };
+
+  var trace2_1 = {
+    x: footer[`${feat}_test`][0],
+    type: 'histogram',
+    opacity: 0.7,
+    marker: {
+      color: "rgba(158, 202, 225, 0.5)", 
+      line: {
+        color:  "rgba(158, 202, 225, 1)", 
+        width: 1
+      }
+    },  
+    yaxis: 'y2',
+    name: 'distribution',
+    visible: false
+  };
+
+  var trace = [trace1, trace1_1, trace2, trace2_1];
+  var layout = {
+      autosize: false,
+      width: 1000,
+      height: 800,
+      title: `${feat} SHAP values`, 
+      xaxis: {title: `${feat}`}, 
+      yaxis: {
+        title: "SHAP",
+        domain: [0, 0.85], 
+      },
+      yaxis2: {
+        domain: [0.85, 1], 
+        showgrid: false, 
+        zeroline: false,
+        side: 'right',
+      }, 
+      showlegend: false,
+      updatemenus: [{
+          x: -0.3,
+          xanchor: 'left',
+          y: 1,
+          yanchor: 'top',
+          buttons: [{
+              method: 'restyle',
+              args: ['visible', [true, true, false, false]],
+              label: 'train'
+          }, {
+              method: 'restyle',
+              args: ['visible', [false, false, true, true]],
+              label: 'test'
+          },]
+      },{
+          x: -0.4,
+          xanchor: 'left',
+          y: 0.9,
+          yanchor: 'top',
+          buttons: buttons,
+          }
+    ]
+};
+
+  Plotly.newPlot(ctx, trace, layout);
+}
+</script>
+
+  <!-- Explain instance charts -->
+<script>
+var footer = JSON.parse($(`#meta_instance`).data('description').replace(/'/g, '"'));
+var ctx = document.getElementById(`shap_waterfall`);
+var trace1 = [{
+  type: "waterfall",
+  orientation: "h",
+  measure: ['shap_waterfall'][2],
+  x: footer['shap_waterfall'][0],
+  y: footer['shap_waterfall'][1]
+}];
+var layout = {
+  margin: {l: 200},
+  title: `SHAP Waterfall`, 
+};
+Plotly.newPlot(ctx, trace1, layout);
+
+var ctx = document.getElementById(`lime`);
+var trace1 = [{
+  x: footer['lime'][1],
+  y: footer['lime'][0],
+  text: footer['lime'][2],
+  orientation: 'h',
+  type: 'bar',
+}];
+var layout = {
+  margin: {l: 300},
+  title: `Lime for the predicted value ${footer['lime'][3]}`, 
+};
+Plotly.newPlot(ctx, trace1, layout);
 </script>
 
 <!-- Dataset description Y class/reg charts -->

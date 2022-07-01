@@ -80,6 +80,7 @@ os.environ['module_path'] = '../examples/user_transforms.py'
 
 from insolver.serving.flask_app import app
 
+
 app.testing = True
 client = app.test_client()
 
@@ -89,7 +90,7 @@ def test_index_page():
     assert response.status_code == 200
 
 
-request_json = {'df': json.loads(test_df.iloc[[0]].to_json())}
+request_json = {'df': json.loads(test_df.iloc[0].to_json())}
 
 
 def test_h2o_model():
