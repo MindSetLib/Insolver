@@ -33,7 +33,7 @@ setup(name='insolver',
             ]
       },
       install_requires=required,
-      setup_requires=['wheel'],
+      setup_requires=['setuptools', 'wheel'],
       extras_require={'full': extras},
       zip_safe=False,
       classifiers=[

@@ -1,10 +1,10 @@
-name: Python application
+name: Insolver testing
 
 on:
   push:
     branches: [master, dev]
   pull_request:
-    branches: [master, dev]
+    branches: [master]
 
 jobs:
   build:
@@ -21,7 +21,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Macos setup
+    - name: macOS setup
       if: matrix.os == 'macOS-latest'
       shell: bash
       run: |
@@ -30,8 +30,12 @@ jobs:
       shell: bash
       run: |
         python -m pip install --upgrade pip
-        pip install wheel flake8 pytest
+        pip install wheel flake8 pytest black[jupyter]
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with black
+      shell: bash
+      run: |
+        black . --check --line-length 120
     - name: Lint with flake8
       shell: bash
       run: |

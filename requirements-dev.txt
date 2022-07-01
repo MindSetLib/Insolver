@@ -1,3 +1,6 @@
+black>=22.6.0
+flake8>=4.0.1
+pre-commit>=2.19.0
 pytest>=6.2.5
 pytest-cov>=2.12.1
 tox>=3.24.3
