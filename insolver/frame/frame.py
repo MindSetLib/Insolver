@@ -19,9 +19,9 @@ class InsolverDataFrame(DataFrame):
          instead (default=None).
         dtype (pandas.dtype): Data type to force. Only a single dtype is allowed. If `None`, infer (default=None).
         copy (bool) Copy data from inputs. For dict data, the default of None behaves like `copy=True`. For
-         `pandas.DataFrame` or 2d ndarray input, the default of `None` behaves like copy=False (default=None).
+         `pandas.DataFrame` or 2d ndarray input (default=True).
     """
-    def __init__(self, data=None, index=None, columns=None, dtype=None, copy=None):
+    def __init__(self, data=None, index=None, columns=None, dtype=None, copy=True):
         super(InsolverDataFrame, self).__init__(data, index, columns, dtype, copy)
 
     def get_meta_info(self):
@@ -61,7 +61,10 @@ class InsolverDataFrame(DataFrame):
         Returns:
             request (dict)
         """
-        data_str = self.sample(batch_size).to_json()
+        if batch_size == 1:
+            data_str = self.sample(batch_size).iloc[0].to_json()
+        else:
+            data_str = self.sample(batch_size).to_json()
         data = json.loads(data_str)
         request = {'df': data}
         return request

@@ -27,4 +27,4 @@ def test_get_meta_info():
 def test_sample_request():
     insdf = InsolverDataFrame(df)
     request = insdf.sample_request()
-    assert request['df'] == {'col1': {'0': 1}, 'col2': {'0': 2}}
+    assert request['df'] == {'col1': 1, 'col2': 2}

@@ -49,12 +49,11 @@ class InsolverTransform(InsolverDataFrame):
                         priority = transform.priority
 
             for n, transform in enumerate(self.transforms):
-                obj = transform(self)
-                self._update_inplace(obj)
+                self._update_inplace(transform(self))
                 attributes = dict()
                 for attribute in dir(transform):
-                    if attribute[0] != '_':
-                        exec("attributes.update({attribute: transform.%s})" % attribute)
+                    if not attribute.startswith('_'):
+                        attributes.update({attribute: getattr(transform, attribute)})
                 self.transforms_done.update({n: {'name': type(transform).__name__, 'attributes': attributes}})
 
         return self.transforms_done
