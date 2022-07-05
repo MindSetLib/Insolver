@@ -19,7 +19,7 @@ class InsolverDataFrame(DataFrame):
          instead (default=None).
         dtype (pandas.dtype): Data type to force. Only a single dtype is allowed. If `None`, infer (default=None).
         copy (bool) Copy data from inputs. For dict data, the default of None behaves like `copy=True`. For
-         `pandas.DataFrame` or 2d ndarray input. (default=True).
+         `pandas.DataFrame` or 2d ndarray input (default=True).
     """
     def __init__(self, data=None, index=None, columns=None, dtype=None, copy=True):
         super(InsolverDataFrame, self).__init__(data, index, columns, dtype, copy)
