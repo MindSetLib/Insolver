@@ -39,14 +39,9 @@ class InsolverTransform(InsolverDataFrame):
 
         if isinstance(transforms, list):
             self.transforms = transforms
-        if isinstance(transforms, dict):
-            required = ["transforms", "transforms_done", "ins_output_cache", "ins_input_cache"]
-            req_type = [list, dict, dict, dict]
-            if set(transforms.keys()).difference(set(required)) == set():
-                _check_all_types = list(map(type, transforms.values()))
-                if _check_all_types == req_type:
-                    for key in required:
-                        setattr(self, key, transforms[key])
+        elif isinstance(transforms, dict) and _check_transforms(transforms):
+            for key in transforms.keys():
+                setattr(self, key, transforms[key])
 
         self.transforms_done: Dict = dict()
 
@@ -111,6 +106,22 @@ class InsolverTransform(InsolverDataFrame):
                        "transforms_done": self.transforms_done}, file)
 
 
-def load_transforms(path: str) -> Dict[str, Union[List, Dict]]:
+def _check_transforms(obj: Any) -> bool:
+    condition = False
+    print(obj)
+    if isinstance(obj, dict):
+        required = ["transforms", "transforms_done", "ins_output_cache", "ins_input_cache"]
+        req_type = [list, dict, dict, dict]
+        if (set(obj.keys()).difference(set(required)) == set()) and (list(map(type, obj.values())) == req_type):
+            condition = True
+    return condition
+
+
+def load_transforms(path: str) -> Optional[Dict[str, Union[List, Dict]]]:
     with open(path, 'rb') as file:
-        return dill.load(file)
+        loaded_file = dill.load(file)
+
+    if _check_transforms(loaded_file):
+        return loaded_file
+    else:
+        ValueError('Loaded file is not supported by InsolverTransform.')
