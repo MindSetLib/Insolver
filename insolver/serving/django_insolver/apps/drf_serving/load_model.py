@@ -1,7 +1,6 @@
 import os
-import pickle
 
-from insolver.transforms import init_transforms
+from insolver.transforms import load_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 from insolver.serving import utils
 
@@ -23,7 +22,5 @@ else:
     model = InsolverGLMWrapper(backend='h2o', load_path=model_path)
 
 
-# load and init transformations
-with open(transforms_path, 'rb') as file:
-    tranforms = pickle.load(file)
-tranforms = init_transforms(tranforms, module_path=module_path, inference=True)
+# load transformations
+transforms = load_transforms(transforms_path)
