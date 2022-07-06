@@ -1,13 +1,18 @@
-import os
-import sys
-import json
-import pickle
-import importlib
-import warnings
+from typing import List, Dict, Type, Union, Optional, Any
 import dill
+from numpy import dtype
+from pandas import DataFrame
 
 from insolver.frame import InsolverDataFrame
-from insolver.transforms import basic, person, insurance, autofillna, date_time, grouping_sorting
+from insolver.utils import warn_insolver
+
+
+class TransformsWarning(Warning):
+    def __init__(self, message: str) -> None:
+        self.message = message
+
+    def __str__(self) -> str:
+        return repr(self.message)
 
 
 class InsolverTransform(InsolverDataFrame):
@@ -19,31 +24,67 @@ class InsolverTransform(InsolverDataFrame):
     Priority=3: transforms which get functions of values (TransformPolynomizer, TransformGetDummies, etc).
 
     Parameters:
-        df: InsolverDataFrame to transform.
+        data: InsolverDataFrame to transform.
         transforms: List of transforms to be done.
     """
-    _metadata = ['transforms', 'transforms_done']
+    _internal_names = DataFrame._internal_names + ["transforms_done", "ins_output_cache"]
+    _internal_names_set = set(_internal_names)
+    _metadata = ["transforms", "ins_input_cache"]
 
-    def __init__(self, df, transforms):
-        super().__init__(df)
+    def __init__(self, data: Any, transforms: Union[List, Dict[str, Union[List, Dict]], None] = None) -> None:
+        super(InsolverTransform, self).__init__(data)
+        self.ins_output_cache: Optional[Dict[str, dtype]] = None
+        if isinstance(data, (InsolverDataFrame, DataFrame)):
+            self.ins_input_cache = dict(zip(list(self.columns), list(self.dtypes)))
+
         if isinstance(transforms, list):
             self.transforms = transforms
-        self.transforms_done = dict()
+        if isinstance(transforms, dict):
+            required = ["transforms", "transforms_done", "ins_output_cache", "ins_input_cache"]
+            req_type = [list, dict, dict, dict]
+            if set(transforms.keys()).difference(set(required)) == set():
+                _check_all_types = list(map(type, transforms.values()))
+                if _check_all_types == req_type:
+                    for key in required:
+                        setattr(self, key, transforms[key])
 
-    def ins_transform(self):
+        self.transforms_done: Dict = dict()
+
+    @property
+    def _constructor(self) -> Type["InsolverTransform"]:
+        return InsolverTransform
+
+    @staticmethod
+    def _check_colnames_dtypes(expected: Dict[str, dtype], input_: Dict[str, dtype], step: str) -> None:
+        missing_col_checks = set(expected.keys()).difference(set(input_.keys()))
+        if missing_col_checks != set():
+            warn_insolver(f'{step.capitalize()} data missing columns {list(missing_col_checks)}!', TransformsWarning)
+            common_cols = set(expected.keys()).intersection(set(input_.keys()))
+            input_ = {key: input_[key] for key in common_cols}
+            expected = {key: expected[key] for key in common_cols}
+
+        if expected != input_:
+            for key in expected.keys():
+                if expected[key] != input_[key]:
+                    message = f"{key}: input {input_[key]}, expected {expected[key]}"
+                    warn_insolver(f'{step.capitalize()} column dtype mismatch: Column {message}!', TransformsWarning)
+
+    def ins_transform(self) -> Dict:
         """Transforms data in InsolverDataFrame.
 
         Returns:
             list: List of transforms have been done.
         """
-        if self.transforms:
+        self._check_colnames_dtypes(self.ins_input_cache, dict(self.dtypes), 'input')
 
+        if self.transforms:
             priority = 0
             for transform in self.transforms:
                 if hasattr(transform, 'priority'):
                     if transform.priority < priority:
-                        warnings.warn('WARNING! Check the order of transforms. '
-                                      'Transforms with higher priority should be done first.', stacklevel=0)
+                        warn_insolver('Check the order of transforms. '
+                                      'Transforms with higher priority should be done first!',
+                                      TransformsWarning)
                         break
                     else:
                         priority = transform.priority
@@ -56,106 +97,20 @@ class InsolverTransform(InsolverDataFrame):
                         attributes.update({attribute: getattr(transform, attribute)})
                 self.transforms_done.update({n: {'name': type(transform).__name__, 'attributes': attributes}})
 
+            if hasattr(self, "ins_output_cache") and (self.ins_output_cache is not None):
+                self._check_colnames_dtypes(self.ins_output_cache, dict(self.dtypes), "output")
+            else:
+                self.ins_output_cache = dict(zip(list(self.columns), list(self.dtypes)))
         return self.transforms_done
 
-    def save(self, filename):
+    def save(self, filename: str) -> None:
         with open(filename, 'wb') as file:
-            pickle.dump(self.transforms_done, file)
-
-    def save2(self, filename):
-        with open(filename, 'wb') as file:
-            dill.dump(self.transforms, file)
-
-    def save_json(self, filename):
-        with open(filename, 'w') as file:
-            json.dump(self.transforms_done, file, separators=(',', ':'), sort_keys=True, indent=4)
+            dill.dump({"transforms": self.transforms,
+                       "ins_input_cache": self.ins_input_cache,
+                       "ins_output_cache": self.ins_output_cache,
+                       "transforms_done": self.transforms_done}, file)
 
 
-def load_class(module_list, transform_name):
-    for module in module_list:
-        try:
-            transform_class = getattr(module, transform_name)
-            return transform_class
-        except AttributeError:
-            pass
-
-
-def load_transforms(path):
+def load_transforms(path: str) -> Dict[str, Union[List, Dict]]:
     with open(path, 'rb') as file:
         return dill.load(file)
-
-
-def init_transforms(transforms, module_path=None, inference=False):
-    """Function for creation transformations objects from the dictionary.
-
-    Args:
-        transforms (list): Dictionary with classes and their init parameters.
-        module_path (str, None): Path to the user transformations saved in .py file. E.g., user_transforms.py.
-        inference (bool): Should be 'False' if transforms are applied while preparing data for modeling.
-            Should be 'True' if transforms are applied on inference.
-
-    Returns:
-        list: List of transformations objects.
-    """
-    transforms_list = []
-    module_list = [basic, person, insurance, autofillna, date_time, grouping_sorting]
-
-    if not ((module_path is None) or (module_path == '')):
-        _directory = os.path.dirname(os.path.abspath(module_path))
-        _script = os.path.basename(os.path.abspath(module_path))
-        if not _script.endswith('.py'):
-            raise ValueError('Argument module_path should contain path to the .py file.')
-        else:
-            user_transforms = _script.strip('.py')
-        sys.path.insert(1, _directory)
-
-        try:
-            user_transforms = importlib.import_module(user_transforms)
-            importlib.reload(user_transforms)
-            module_list.append(user_transforms)
-
-        except ModuleNotFoundError:
-            pass
-
-    for n in transforms:
-        try:
-            del transforms[n]['attributes']['priority']
-        except KeyError:
-            pass
-
-        if inference in transforms[n]['attributes'].keys():
-            transforms[n]['attributes']['inference'] = inference
-
-        transform_class = load_class(module_list, transforms[n]['name'])
-        if transform_class:
-            transforms_list.append(transform_class(**transforms[n]['attributes']))
-
-    return transforms_list
-
-
-def import_transforms(module_path):
-    """Function for importing custom transformations into dictionary.
-
-        Args:
-            module_path (str): Path to the user transformations saved in .py file. E.g., user_transforms.py.
-
-        Returns:
-            dict: Dictionary containing user-defined transformations.
-        """
-    if not module_path == '':
-        _directory = os.path.dirname(os.path.abspath(module_path))
-        _script = os.path.basename(os.path.abspath(module_path))
-        if not _script.endswith('.py'):
-            raise ValueError('Argument module_path should contain path to the .py file.')
-        else:
-            user_transforms = _script.strip('.py')
-        sys.path.insert(1, _directory)
-
-        user_transforms = importlib.import_module(user_transforms)
-        importlib.reload(user_transforms)
-
-        if "__all__" in user_transforms.__dict__:
-            names = user_transforms.__dict__["__all__"]
-        else:
-            names = [x for x in user_transforms.__dict__ if not x.startswith("_")]
-        return {k: getattr(user_transforms, k) for k in names}
