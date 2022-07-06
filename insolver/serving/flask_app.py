@@ -1,11 +1,10 @@
 import os
-import pickle
 
 import pandas as pd
 from flask import Flask, request, jsonify
 
 from insolver import InsolverDataFrame
-from insolver.transforms import InsolverTransform, init_transforms
+from insolver.transforms import InsolverTransform, load_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 from insolver.serving import utils
 
@@ -36,10 +35,8 @@ elif model and model.algo == 'glm':
 else:
     model = InsolverGLMWrapper(backend='h2o', load_path=model_path)
 
-# load and init transformations
-with open(transforms_path, 'rb') as file:
-    tranforms = pickle.load(file)
-tranforms = init_transforms(tranforms, module_path=module_path, inference=True)
+# load transformations
+tranforms = load_transforms(transforms_path)
 
 
 @app.route("/")
