@@ -1,5 +1,4 @@
-import pandas as pd
-
+from pandas import DataFrame, to_numeric, concat, get_dummies
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 
@@ -10,13 +9,13 @@ class TransformToNumeric:
         column_param (str): Column name in InsolverDataFrame containing parameter to transform.
         downcast: Target numeric dtype, equal to Pandas' 'downcast' in the 'to_numeric' function, 'integer' by default.
     """
-    def __init__(self, column_param, downcast='integer'):
-        self.priority = 0
+    def __init__(self, column_param, downcast='integer', priority=0):
+        self.priority = priority
         self.column_param = column_param
         self.downcast = downcast
 
     def __call__(self, df):
-        df[self.column_param] = pd.to_numeric(df[self.column_param], downcast=self.downcast)
+        df[self.column_param] = to_numeric(df[self.column_param], downcast=self.downcast)
         return df
 
 
@@ -27,8 +26,8 @@ class TransformMapValues:
         column_param (str): Column name in InsolverDataFrame containing parameter to map.
         dictionary (dict): The dictionary for mapping.
     """
-    def __init__(self, column_param, dictionary):
-        self.priority = 1
+    def __init__(self, column_param, dictionary, priority=1):
+        self.priority = priority
         self.column_param = column_param
         self.dictionary = dictionary
 
@@ -44,8 +43,8 @@ class TransformPolynomizer:
         column_param (str): Column name in InsolverDataFrame containing parameter to polynomize.
         n (int): Polynomial degree.
     """
-    def __init__(self, column_param, n=2):
-        self.priority = 3
+    def __init__(self, column_param, n=2, priority=3):
+        self.priority = priority
         self.column_param = column_param
         self.n = n
 
@@ -68,8 +67,8 @@ class TransformGetDummies:
         inference (bool): Sign if the transformation is used for inference, False by default.
         dummy_columns (list): List of the dummy columns, for inference only.
     """
-    def __init__(self, column_param, drop_first=False, inference=False, dummy_columns=None):
-        self.priority = 3
+    def __init__(self, column_param, drop_first=False, inference=False, dummy_columns=None, priority=3):
+        self.priority = priority
         self.column_param = column_param
         self.drop_first = drop_first
         self.inference = inference
@@ -82,9 +81,9 @@ class TransformGetDummies:
 
     def __call__(self, df):
         if not self.inference:
-            df_dummy = pd.get_dummies(df[[self.column_param]], prefix_sep='_', drop_first=self.drop_first)
+            df_dummy = get_dummies(df[[self.column_param]], prefix_sep='_', drop_first=self.drop_first)
             self.dummy_columns = list(df_dummy.columns)
-            df = pd.concat([df, df_dummy], axis=1)
+            df = concat([df, df_dummy], axis=1)
         else:
             for column in self.dummy_columns:
                 df[column] = 1 * ((self.column_param + '_' + df[self.column_param]) == column)
@@ -99,8 +98,8 @@ class EncoderTransforms:
          le_classes (dict): dictionary with label encoding classes for each column
 
     """
-    def __init__(self, column_names, le_classes=None):
-        self.priority = 3
+    def __init__(self, column_names, le_classes=None, priority=3):
+        self.priority = priority
         self.column_names = column_names
         self.le_classes = le_classes
 
@@ -126,8 +125,8 @@ class OneHotEncoderTransforms:
         column_names (list): columns for one hot encoding
         encoder_dict (dict): dictionary with encoder_params for each column
     """
-    def __init__(self, column_names, encoder_dict=None):
-        self.priority = 3
+    def __init__(self, column_names, encoder_dict=None, priority=3):
+        self.priority = priority
         self.column_names = column_names
         self.encoder_dict = encoder_dict
 
@@ -137,7 +136,7 @@ class OneHotEncoderTransforms:
         encoder.fit(df[[column_name]])
         encoder_params = encoder.categories_
         encoder_params = [x.tolist() for x in encoder_params]
-        column_encoded = pd.DataFrame(encoder.transform(df[[column_name]]))
+        column_encoded = DataFrame(encoder.transform(df[[column_name]]))
         column_encoded.columns = encoder.get_feature_names_out([column_name])
         for column in column_encoded.columns:
             df[column] = column_encoded[column]
