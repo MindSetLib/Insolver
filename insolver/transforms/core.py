@@ -108,7 +108,6 @@ class InsolverTransform(InsolverDataFrame):
 
 def _check_transforms(obj: Any) -> bool:
     condition = False
-    print(obj)
     if isinstance(obj, dict):
         required = ["transforms", "transforms_done", "ins_output_cache", "ins_input_cache"]
         req_type = [list, dict, dict, dict]

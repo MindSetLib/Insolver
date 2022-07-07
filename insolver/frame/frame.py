@@ -1,7 +1,7 @@
 import json
-from typing import Type, Optional, List, Dict, Union, Any, Tuple
+from typing import Type, Optional, List, Dict, Union, Any
 from numpy import dtype as numpy_dtype
-from pandas import DataFrame, Series
+from pandas import DataFrame
 from insolver.model_tools import train_val_test_split
 
 
@@ -42,7 +42,7 @@ class InsolverDataFrame(DataFrame):
         return meta_json
 
     def split_frame(self, val_size: float, test_size: float, random_state: Optional[int] = 0, shuffle: bool = True,
-                    stratify: Any = None) -> Tuple[Union[DataFrame, Series]]:
+                    stratify: Any = None) -> List[DataFrame]:
         """Function for splitting dataset into train/validation/test partitions.
 
         Args:
@@ -54,7 +54,7 @@ class InsolverDataFrame(DataFrame):
             stratify (array_like, optional): Passed to train_test_split() from scikit-learn (default=None).
 
         Returns:
-            tuple: (train, valid, test). A tuple of partitions of the initial dataset.
+            list: (train, valid, test). A list of partitions of the initial dataset.
         """
         return train_val_test_split(self, val_size=val_size, test_size=test_size, random_state=random_state,
                                     shuffle=shuffle, stratify=stratify)

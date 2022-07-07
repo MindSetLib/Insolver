@@ -17,6 +17,5 @@ def warn_insolver(msg: Union[Warning, str],
 
     defailt_format = warnings.formatwarning
     warnings.formatwarning = warning_format
-    warnings.simplefilter(filter_, category_)
     warnings.warn(msg, category_)
     warnings.formatwarning = defailt_format
