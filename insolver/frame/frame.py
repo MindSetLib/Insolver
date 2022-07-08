@@ -6,24 +6,25 @@ from insolver.model_tools import train_val_test_split
 
 
 class InsolverDataFrame(DataFrame):
-    """Primary DataFrame class for Insolver. Almost the same as the pandas.DataFrame.
-    Parameters:
-        data (ndarray (structured or homogeneous), Iterable, dict, or pandas.DataFrame): Dict can contain
-         `pandas.Series`, arrays, constants, dataclass or list-like objects. If data is a dict, column order follows
-         insertion-order. If a dict contains `pandas.Series` which have an index defined, it is aligned by its index
-         (default=None).
-        columns (pandas.Index or array-like): Column labels to use for resulting frame when data does not have them,
-         defaulting to `pandas.RangeIndex(0, 1, 2, …, n)`. If data contains column labels, will perform column selection
-         instead (default=None).
-        columns (pandas.Index or array-like): Column labels to use for resulting frame when data does not have them,
-         defaulting to `pandas.RangeIndex(0, 1, 2, …, n)`. If data contains column labels, will perform column selection
-         instead (default=None).
-        dtype (numpy.dtype): Data type to force. Only a single dtype is allowed. If `None`, infer (default=None).
-        copy (bool) Copy data from inputs. For dict data, the default of None behaves like `copy=True`. For
-         `pandas.DataFrame` or 2d ndarray input, the default of `None` behaves like copy=False (default=None).
-    """
     def __init__(self, data: Any = None, index: Any = None, columns: Any = None, dtype: Optional[numpy_dtype] = None,
                  copy: Optional[bool] = None) -> None:
+        """Primary DataFrame class for Insolver. Almost the same as the pandas.DataFrame.
+
+        Args:
+            data (ndarray (structured or homogeneous), Iterable, dict, or pandas.DataFrame): Dict can contain
+             `pandas.Series`, arrays, constants, dataclass or list-like objects. If data is a dict, column order follows
+             insertion-order. If a dict contains `pandas.Series` which have an index defined, it is aligned by its index
+             (default=None).
+            index (pandas.Index or array-like): Index to use for resulting frame. Will default to RangeIndex if no
+             indexing information part of input data and no index provided.
+            columns (pandas.Index or array-like): Column labels to use for resulting frame when data does not have them,
+             defaulting to `pandas.RangeIndex(0, 1, 2, …, n)`. If data contains column labels, will perform column
+             selection instead (default=None).
+            dtype (numpy.dtype): Data type to force. Only a single dtype is allowed. If `None`, infer (default=None).
+            copy (bool) Copy data from inputs. For dict data, the default of None behaves like `copy=True`. For
+             `pandas.DataFrame` or 2d ndarray input, the default of `None` behaves like copy=False (default=None).
+
+        """
         super(InsolverDataFrame, self).__init__(data, index, columns, dtype, copy)
 
     @property
