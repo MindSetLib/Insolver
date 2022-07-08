@@ -284,16 +284,36 @@ print(df_transformed)
 
 ## Custom transformations
 
-Custom transformations can be created in a particular module. It must be a python file, e.g., `user_transforms.py`.
-To use it in your workflow, you should pass the path to this module into `import_transforms` or `init_transforms`functions.
+Custom transformations can also be created. You can save all the transformations you need in `save()` method.
+
+```python
+import pandas as pd
+from insolver.frame import InsolverDataFrame
+from insolver.transforms import InsolverTransform, OneHotEncoderTransforms
+
+df = InsolverDataFrame(pd.DataFrame(data={'col1': ['A', 'B', 'C', 'A']}))
+df_transformed = InsolverTransform(df, [
+    OneHotEncoderTransforms(['col1']),
+])
+
+df_transformed.ins_transform()
+df_transformed.save('transforms')
+```
+
+This method serialises transforms using `dill` package.
+
+To use them in your workflow, you should pass the path to the saved transforms using `load_transforms` function.
 
 In this module, you can create your transformation classes.
 
-The custom class must have the `__call__` method, which gets the initial dataframe and returns transformed one:
+The custom transform class must have the `__call__` method, which gets the initial dataframe and returns transformed one.
+
+After that, you can use them in the same way as the build-in transformations.
 
 ```python
-# user_transforms.py
 import pandas as pd
+from insolver.frame import InsolverDataFrame
+from insolver.transforms import InsolverTransform
 
 
 class TransformToNumeric:
@@ -311,17 +331,8 @@ class TransformToNumeric:
         for column in self.column_names:
             df[column] = pd.to_numeric(df[column], downcast=self.downcast)
         return df
-```
 
-After that, you can import user-defined transformations (updating globals) and then use them in the same way as the build-in transformations:
-
-```python
-import pandas as pd
-
-from insolver.frame import InsolverDataFrame
-from insolver.transforms import InsolverTransform, import_transforms
-
-globals().update(import_transforms("./user_transforms.py"))
+    
 df = InsolverDataFrame(pd.DataFrame(data={'col1': ['1.0', '2', -3]}))
 
 print(df)
@@ -348,24 +359,19 @@ print(df_transformed.dtypes)
 # dtype: object
 ```
 
-When using saved user-defined transforms, they should be initialized with `init_transforms`.   
+When using saved transforms (including user-defined), they should be loaded with `load_transforms`.   
 
 ```python
-import pickle
 import pandas as pd
-
 from insolver import InsolverDataFrame
-from insolver.transforms import InsolverTransform, init_transforms
+from insolver.transforms import InsolverTransform, load_transforms
 
 # load data
 df = pd.read_json('request_example.json')
 InsDataFrame = InsolverDataFrame(df)
 
-# load and init transformations
-with open('transforms.pickle', 'rb') as file:
-    transforms = pickle.load(file)
-
-transforms = init_transforms(transforms, module_path='./user_transforms.py', inference=True)
+# load transformations
+transforms = load_transforms('transforms')
 InsTransforms = InsolverTransform(InsDataFrame, transforms)
 InsTransforms.ins_transform()
 ...
