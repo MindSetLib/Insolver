@@ -16,7 +16,6 @@ def run():
     parser = argparse.ArgumentParser(description='ML API service')
     parser.add_argument('-model', action='store', required=False)
     parser.add_argument('-transforms', action='store', required=False)
-    parser.add_argument('-transforms_module', action='store', required=False)
     parser.add_argument('-service', action='store', required=False)
     
     # add new parameter config file and models and transforms
@@ -41,12 +40,6 @@ def run():
         os.environ['transforms_path'] = args.transforms
     else:
         os.environ['transforms_path'] = ''
-
-    if args.transforms_module is not None:
-        print(args.transforms_module)
-        os.environ['module_path'] = args.transforms_module
-    else:
-        os.environ['module_path'] = ''
 
     # add new config file and models
     if args.configfile is not None:
