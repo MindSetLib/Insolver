@@ -2,7 +2,7 @@ import os
 import json
 import pytest
 
-os.environ['model_path'] = './dev/insolver_gbm_lightgbm_1655906642142.pickle'
+os.environ['model_path'] = './dev/insolver_gbm_lightgbm_1657653374832.pickle'
 os.environ['transforms_path'] = './dev/transforms'
 
 from insolver.serving.flask_app import app
