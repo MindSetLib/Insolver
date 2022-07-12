@@ -2,6 +2,7 @@ import os
 import json
 from io import StringIO
 import pandas as pd
+import pytest
 
 from insolver import InsolverDataFrame
 from insolver.wrappers import InsolverGLMWrapper
@@ -80,6 +81,8 @@ os.environ['module_path'] = '../examples/user_transforms.py'
 
 from insolver.serving.flask_app import app
 
+for file in ["transforms.pickle", "test_glm_model.h2o"]:
+    os.remove(file)
 
 app.testing = True
 client = app.test_client()
@@ -93,14 +96,14 @@ def test_index_page():
 request_json = {'df': json.loads(test_df.iloc[0].to_json())}
 
 
+@pytest.fixture(scope="function")
 def test_h2o_model():
-    response = app.test_client().post(
-        '/predict',
-        data=json.dumps(request_json),
-        content_type='application/json',
-    )
-
-    data = json.loads(response.get_data(as_text=True))
-
-    assert response.status_code == 200
-    assert round(data['predicted'][0], 7) == round(predict[0], 7)
+    with app.test_client() as c:
+        response = c.post(
+            '/predict',
+            data=json.dumps(request_json),
+            content_type='application/json',
+        )
+        data = json.loads(response.get_data(as_text=True))
+        assert response.status_code == 200
+        assert round(data['predicted'][0], 7) == round(predict[0], 7)
