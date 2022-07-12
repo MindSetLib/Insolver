@@ -1,7 +1,7 @@
 from typing import List, Dict, Type, Union, Optional, Any
 import dill
-import numpy as np
-import pandas as pd
+from numpy import dtype
+from pandas import DataFrame
 
 from insolver.frame import InsolverDataFrame
 from insolver.utils import warn_insolver
@@ -27,14 +27,14 @@ class InsolverTransform(InsolverDataFrame):
         data: InsolverDataFrame to transform.
         transforms: List of transforms to be done.
     """
-    _internal_names = pd.DataFrame._internal_names + ["transforms_done", "ins_output_cache"]
+    _internal_names = DataFrame._internal_names + ["transforms_done", "ins_output_cache"]
     _internal_names_set = set(_internal_names)
     _metadata = ["transforms", "ins_input_cache"]
 
     def __init__(self, data: Any, transforms: Union[List, Dict[str, Union[List, Dict]], None] = None) -> None:
         super(InsolverTransform, self).__init__(data)
-        self.ins_output_cache: Optional[Dict[str, np.dtype]] = None
-        if isinstance(data, (InsolverDataFrame, pd.DataFrame)):
+        self.ins_output_cache: Optional[Dict[str, dtype]] = None
+        if isinstance(data, (InsolverDataFrame, DataFrame)):
             self.ins_input_cache = dict(zip(list(self.columns), list(self.dtypes)))
 
         if isinstance(transforms, list):
@@ -50,7 +50,7 @@ class InsolverTransform(InsolverDataFrame):
         return InsolverTransform
 
     @staticmethod
-    def _check_colnames_dtypes(expected: Dict[str, np.dtype], input_: Dict[str, np.dtype], step: str) -> None:
+    def _check_colnames_dtypes(expected: Dict[str, dtype], input_: Dict[str, dtype], step: str) -> None:
         missing_col_checks = set(expected.keys()).difference(set(input_.keys()))
         if missing_col_checks != set():
             warn_insolver(f'{step.capitalize()} data missing columns {list(missing_col_checks)}!', TransformsWarning)
@@ -123,4 +123,4 @@ def load_transforms(path: str) -> Optional[Dict[str, Union[List, Dict]]]:
     if _check_transforms(loaded_file):
         return loaded_file
     else:
-        ValueError('Loaded file is not supported by InsolverTransform.')
+        raise ValueError('Loaded file is not supported by InsolverTransform.')
