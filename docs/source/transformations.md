@@ -284,31 +284,10 @@ print(df_transformed)
 
 ## Custom transformations
 
-Custom transformations can also be created. You can save all the transformations you need in `save()` method.
-
-```python
-import pandas as pd
-from insolver.frame import InsolverDataFrame
-from insolver.transforms import InsolverTransform, OneHotEncoderTransforms
-
-df = InsolverDataFrame(pd.DataFrame(data={'col1': ['A', 'B', 'C', 'A']}))
-df_transformed = InsolverTransform(df, [
-    OneHotEncoderTransforms(['col1']),
-])
-
-df_transformed.ins_transform()
-df_transformed.save('transforms')
-```
-
-This method serialises transforms using `dill` package.
-
-To use them in your workflow, you should pass the path to the saved transforms using `load_transforms` function.
-
-In this module, you can create your transformation classes.
-
-The custom transform class must have the `__call__` method, which gets the initial dataframe and returns transformed one.
-
-After that, you can use them in the same way as the build-in transformations.
+Custom transformations can also be created. Transfromation can be defined as a `class` object, which has `__init__` and `__call__` methods.
+The `__call__` method should take one argument, which is the initial dataframe, and return transformed one.
+Also, all packages and assets used in the custom transformation should be imported explicitly in methods where they are used.
+Otherwise, custom transformations may not work properly, since the saved transformation is serialized by `dill` package, which may not resolve all the references when transformation will be loaded.
 
 ```python
 import pandas as pd
@@ -328,6 +307,7 @@ class TransformToNumeric:
         self.downcast = downcast
 
     def __call__(self, df):
+        import pandas as pd
         for column in self.column_names:
             df[column] = pd.to_numeric(df[column], downcast=self.downcast)
         return df
@@ -359,7 +339,27 @@ print(df_transformed.dtypes)
 # dtype: object
 ```
 
-When using saved transforms (including user-defined), they should be loaded with `load_transforms`.   
+## Saving and loading transformations
+
+Transformations can also be saved with `save()` method for both development and production use.
+
+```python
+import pandas as pd
+from insolver.frame import InsolverDataFrame
+from insolver.transforms import InsolverTransform, OneHotEncoderTransforms
+
+df = InsolverDataFrame(pd.DataFrame(data={'col1': ['A', 'B', 'C', 'A']}))
+df_transformed = InsolverTransform(df, [
+    OneHotEncoderTransforms(['col1']),
+])
+
+df_transformed.ins_transform()
+df_transformed.save('transforms')
+```
+
+Transformations saving is performed by serialization with `dill` package.
+To use saved transformations (including user-defined) your workflow, you should pass their filepath into `load_transforms` function.
+After that you can use them in the same way as the build-in imported transformations.
 
 ```python
 import pandas as pd
