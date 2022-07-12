@@ -111,7 +111,7 @@ def test_h2o_model():
 
 def test_flask_transforms_inference():
     os.environ['model_path'] = './dev/insolver_gbm_lightgbm_1657653374832.pickle'
-    os.environ['transforms_path'] = './dev/transforms_uwi'
+    os.environ['transforms_path'] = './dev/transforms'
     importlib.reload(insolver.serving.flask_app)
     from insolver.serving.flask_app import app
     app.testing = True
