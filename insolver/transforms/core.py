@@ -98,12 +98,24 @@ class InsolverTransform(InsolverDataFrame):
                 self.ins_output_cache = dict(zip(list(self.columns), list(self.dtypes)))
         return self.transforms_done
 
-    def save(self, filename: str) -> None:
+    def save(self,
+             filename: str,
+             protocol: Optional[int] = None,
+             byref: Optional[bool] = None,
+             fmode: Optional[int] = None,
+             recurse: Optional[bool] = None,
+             **kwargs: Any) -> None:
         with open(filename, 'wb') as file:
             dill.dump({"transforms": self.transforms,
                        "ins_input_cache": self.ins_input_cache,
                        "ins_output_cache": self.ins_output_cache,
-                       "transforms_done": self.transforms_done}, file)
+                       "transforms_done": self.transforms_done},
+                      file,
+                      protocol=protocol,
+                      byref=byref,
+                      fmode=fmode,
+                      recurse=recurse,
+                      **kwargs)
 
 
 def _check_transforms(obj: Any) -> bool:
