@@ -2,7 +2,6 @@ import os
 import json
 from io import StringIO
 import pandas as pd
-import pytest
 
 from insolver import InsolverDataFrame
 from insolver.wrappers import InsolverGLMWrapper
@@ -96,7 +95,6 @@ def test_index_page():
 request_json = {'df': json.loads(test_df.iloc[0].to_json())}
 
 
-@pytest.fixture(scope="function")
 def test_h2o_model():
     with app.test_client() as c:
         response = c.post(
