@@ -16,7 +16,7 @@ from time import strftime, time
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
-module_path = os.environ['module_path']
+# module_path = os.environ['module_path']
 
 # Logging
 handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)

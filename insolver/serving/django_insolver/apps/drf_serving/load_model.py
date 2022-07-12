@@ -9,7 +9,7 @@ from django.conf import settings
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
-module_path = os.environ['module_path']
+# module_path = os.environ['module_path']
 
 
 # Load model
