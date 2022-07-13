@@ -39,7 +39,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
                 </div>
         </div>
         '''
-    except(ValueError):
+    except ValueError:
         footer = {}
     gain = False
     # if exposure create gain curve

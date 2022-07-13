@@ -191,7 +191,7 @@ def gain_curve(y_true, y_pred, exposure, step=1, figsize=(10, 6)):
     y_true = y_true[::step]
 
     # Random Baseline
-    plt.plot([0, 1], [0, 1], c='red', linestyle='--', linewidth=0.5, label=f'Random Baseline')
+    plt.plot([0, 1], [0, 1], c='red', linestyle='--', linewidth=0.5, label='Random Baseline')
 
     # Ideal Model
     cumul_samples, cumul_claim_amt, gini = lorenz_curve(y_true, y_true, exposure)

@@ -267,13 +267,13 @@ def _describe_y(y_train, y_test, task, y_description, dataset=None, **kwargs):
             if task == 'reg':
                 descr = pd.DataFrame(round(y_column.describe(), 2))
                 footer['data_y'] = list(y_column)
-                descr_dict[f'Y chart:'] = f'<div id="chart_y"></div>'
+                descr_dict['Y chart:'] = '<div id="chart_y"></div>'
 
             else:
                 descr = pd.DataFrame(y_column.value_counts())
                 footer['index_y'] = list(pd.Series(list(descr.index)).apply(str))
                 footer['data_y'] = list(descr[y_column.name])
-                descr_dict[f'Y chart:'] = f'<canvas id="chart_y"></canvas>'
+                descr_dict['Y chart:'] = '<canvas id="chart_y"></canvas>'
 
             descr = descr.append(pd.Series({y_column.name: y_column.isnull().sum()}, name='null'))
             descr_dict['Y values description:'] = f'{descr.to_html(**kwargs)}'

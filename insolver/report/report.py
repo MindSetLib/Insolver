@@ -2,7 +2,6 @@ import ntpath
 import builtins
 import inspect
 import glob
-from pathlib import Path
 
 import pandas
 from pandas_profiling import ProfileReport
