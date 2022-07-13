@@ -110,7 +110,7 @@ class Report:
                  d_groups_type='cut', d_bins=10, d_start=None, d_end=None, d_freq=1.5,
                  main_diff_model=None, compare_diff_models=None,
                  pairs_for_matrix=None, m_bins=20, m_freq=None,
-                 show_parameters=False, pandas_profiling = True):
+                 show_parameters=False, pandas_profiling=True):
         # check and save attributes
         self.pandas_profiling = pandas_profiling
         self.show_parameters = show_parameters
@@ -123,10 +123,10 @@ class Report:
         self.model = model
         self.models_to_compare = models_to_compare
         self.comparison_metrics = [] if not comparison_metrics else comparison_metrics
-        self.predicted_train = pandas.Series(model.predict(X_train),
-                                             index=X_train.index) if not isinstance(predicted_train, pandas.Series) else predicted_train
-        self.predicted_test = pandas.Series(model.predict(X_test),
-                                            index=X_test.index) if not isinstance(predicted_test, pandas.Series) else predicted_test
+        self.predicted_train = (pandas.Series(model.predict(X_train), index=X_train.index)
+                                if not isinstance(predicted_train, pandas.Series) else predicted_train)
+        self.predicted_test = (pandas.Series(model.predict(X_test), index=X_test.index)
+                               if not isinstance(predicted_test, pandas.Series) else predicted_test)
         self.explain_instance = explain_instance
         if task in ['reg', 'class']:
             self.task = task
@@ -203,8 +203,6 @@ class Report:
     def get_sections(self):
         return self.sections
 
-
-    
     def _save_dataset_section(self, path, report_name):
         self.pbar.update(1)
         self.pbar.set_description('Creating Dataset section')
@@ -215,8 +213,7 @@ class Report:
                 'name': 'Dataset',
                 'articles': [
                     _create_dataset_description(self.X_train, self.X_test, self.y_train, self.y_test, self.task,
-                                                        self.dataset_description, self.y_description,
-                                                        self.original_dataset),
+                                                self.dataset_description, self.y_description, self.original_dataset),
                 ],
                 'icon': '<i class="bi bi-bricks" width="24" height="24" role="img"></i>',
             }]
@@ -231,8 +228,7 @@ class Report:
         self.pbar.update(1)
         self.pbar.set_description('Creating features description article')
         section[0]['articles'].append(_create_features_description(self.X_train, self.X_test,
-                                                                                 self.original_dataset,
-                                                                                 self.features_description))
+                                                                   self.original_dataset, self.features_description))
         
         # save section
         self.sections.append(section[0])
@@ -254,10 +250,9 @@ class Report:
         # create lift chart and gain curve
         self.pbar.update(1)
         self.pbar.set_description('Creating lift chart and gain curve')
-        metrics_footer, metrics_part = _create_metrics_charts(self.X_train, self.X_test,
-                                                                      self.y_train, self.y_test,
-                                                                      self.predicted_train, self.predicted_test,
-                                                                      self.exposure_column)
+        metrics_footer, metrics_part = _create_metrics_charts(self.X_train, self.X_test, self.y_train, self.y_test,
+                                                              self.predicted_train, self.predicted_test,
+                                                              self.exposure_column)
         # create shap
         self.pbar.update(1)
         self.pbar.set_description('Creating shap')
@@ -313,7 +308,7 @@ class Report:
         if isinstance(self.explain_instance, pandas.Series):
             self.pbar.set_description('Explaining instance')
             section[0]['articles'].append(_explain_instance(self.explain_instance, self.model, self.X_train,
-                                                                          self.task, self.original_dataset, self.shap_type))
+                                                            self.task, self.original_dataset, self.shap_type))
         # save section
         self.sections.append(section[0])
         
@@ -326,14 +321,14 @@ class Report:
         # create models comparison if model is regression
         self.pbar.set_description('Comparing models')
         section = [_create_models_comparison(self.X_train, self.y_train, self.X_test, self.y_test,
-                                            self.original_dataset, self.task,
-                                            self.models_to_compare, self.comparison_metrics,
-                                            self.f_groups_type, self.f_bins, self.f_start, self.f_end, self.f_freq,
-                                            self.p_groups_type, self.p_bins, self.p_start, self.p_end, self.p_freq,
-                                            self.d_groups_type, self.d_bins, self.d_start, self.d_end, self.d_freq,
-                                            self.model, self.main_diff_model, self.compare_diff_models,
-                                            self.m_bins, self.m_freq, self.pairs_for_matrix,
-                                            classes="table table-striped", justify="center")]
+                                             self.original_dataset, self.task,
+                                             self.models_to_compare, self.comparison_metrics,
+                                             self.f_groups_type, self.f_bins, self.f_start, self.f_end, self.f_freq,
+                                             self.p_groups_type, self.p_bins, self.p_start, self.p_end, self.p_freq,
+                                             self.d_groups_type, self.d_bins, self.d_start, self.d_end, self.d_freq,
+                                             self.model, self.main_diff_model, self.compare_diff_models,
+                                             self.m_bins, self.m_freq, self.pairs_for_matrix,
+                                             classes="table table-striped", justify="center")]
         # save section
         self.sections.append(section[0])
         
@@ -347,15 +342,15 @@ class Report:
         self.pbar.set_description('Creating parameters')
         section = [
             {
-            'name': 'Parameters',
-            'articles': [{
                 'name': 'Parameters',
-                'parts': self._model_parameters_to_list(),
-                'header': '',
-                'footer': '',
-                'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>',
-            }],
-            'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>'
+                'articles': [{
+                    'name': 'Parameters',
+                    'parts': self._model_parameters_to_list(),
+                    'header': '',
+                    'footer': '',
+                    'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>',
+                }],
+                'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>'
             }
         ]
         # save section
@@ -365,22 +360,22 @@ class Report:
             html_ = self.template.render(sections=section, title='Parameters')
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
             f.write(html_)
-        
-    
-    def to_html(self, path: str = '.', report_name: str = 'report', separate_files = True):
+
+    def to_html(self, path: str = '.', report_name: str = 'report', separate_files: bool = True):
         """Saves prepared report to html file
 
         Args:
             path: existing location to save report
             report_name: name of report directory
+            separate_files: flag whether to write output to separate files
         """
 
         def _check_name(name_, path_):
             """Add a number to {name_} if it exists in {path_} directory"""
 
             check_names = [x.strip(f'{path_}/') for x in glob.glob(f"{path_}/*")
-                            if x.strip(f'{path_}/').find(name_) == 0
-                            and (x.strip(f'{path_}/')[len(name_):None].isnumeric()
+                           if x.strip(f'{path_}/').find(name_) == 0
+                           and (x.strip(f'{path_}/')[len(name_):None].isnumeric()
                                 or x.strip(f'{path_}/')[len(name_):None] == '')]
 
             name_to_check = name_
@@ -468,9 +463,9 @@ class Report:
     @error_handler(False)
     def _calculate_train_test_metrics(self):
         table_train = _calc_metrics(self.y_train, self.predicted_train, self.task, self.metrics_to_calc,
-                                            self.X_train, self.exposure_column)
+                                    self.X_train, self.exposure_column)
         table_test = _calc_metrics(self.y_test, self.predicted_test, self.task, self.metrics_to_calc,
-                                           self.X_test, self.exposure_column)
+                                   self.X_test, self.exposure_column)
 
         table = {key: [table_train.get(key, ''), table_test.get(key, '')] for key in table_train.keys()}
         model_metrics = self._create_html_table(["train", "test"], table, two_columns_table=False,
@@ -563,7 +558,7 @@ class Report:
 
         result_df = pandas.DataFrame(data=body.values(), columns=head, index=body.keys())
         footer = {'columns': head, 'data': [result_df[column].to_list() for column in result_df.columns],
-                 'index': list(result_df.axes[0])}
+                  'index': list(result_df.axes[0])}
         return [footer, result_df.to_html(**kwargs)]
 
     @staticmethod
