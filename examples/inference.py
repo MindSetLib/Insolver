@@ -4,7 +4,7 @@ import pickle
 import pandas as pd
 
 from insolver import InsolverDataFrame
-from insolver.transforms import InsolverTransform, init_transforms
+from insolver.transforms import InsolverTransform, load_transforms
 from insolver.wrappers import InsolverGLMWrapper
 
 # load data
@@ -13,11 +13,8 @@ with open('request_example.json', 'r') as file:
 df = pd.DataFrame(data_dict['df'], index=[0])
 InsDataFrame = InsolverDataFrame(df)
 
-# load and init transformations
-with open('transforms.pickle', 'rb') as file:
-    transforms = pickle.load(file)
-
-transforms = init_transforms(transforms, module_path='./user_transforms.py', inference=True)
+# load transformations
+transforms = load_transforms('transforms.pickle')
 
 # Apply transformations
 InsTransforms = InsolverTransform(InsDataFrame, transforms)

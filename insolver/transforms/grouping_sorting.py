@@ -1,4 +1,4 @@
-import pandas as pd
+from pandas import DataFrame
 
 
 class TransformParamUselessGroup:
@@ -11,8 +11,8 @@ class TransformParamUselessGroup:
         inference (bool): Sign if the transformation is used for inference, False by default.
         param_useless (list): The list of useless values of the parameter, for inference only.
     """
-    def __init__(self, column_param, size_min=1000, group_name=0, inference=False, param_useless=None):
-        self.priority = 1
+    def __init__(self, column_param, size_min=1000, group_name=0, inference=False, param_useless=None, priority=1):
+        self.priority = priority
         self.column_param = column_param
         self.size_min = size_min
         self.group_name = group_name
@@ -36,7 +36,7 @@ class TransformParamUselessGroup:
         Returns:
             list: List of parameter's values with few data.
         """
-        param_size = pd.DataFrame(df.groupby(column_param).size().reset_index(name='param_size'))
+        param_size = DataFrame(df.groupby(column_param).size().reset_index(name='param_size'))
         param_useless = list(param_size[column_param].loc[param_size['param_size'] < size_min])
         return param_useless
 
@@ -62,13 +62,13 @@ class TransformParamSortFreq:
         param_freq_dict (dict): The dictionary of sorted values of the parameter, for inference only.
     """
     def __init__(self, column_param, column_param_sort_freq, column_policies_count, column_claims_count,
-                 inference=False, param_freq_dict=None):
-        self.priority = 2
+                 inference=False, param_freq_dict=None, priority=2):
+        self.priority = priority
         self.column_param = column_param
         self.column_param_sort_freq = column_param_sort_freq
         self.column_policies_count = column_policies_count
         self.column_claims_count = column_claims_count
-        self.param_freq = pd.DataFrame
+        self.param_freq = DataFrame
         self.inference = inference
         if inference:
             if param_freq_dict is None:
@@ -108,13 +108,13 @@ class TransformParamSortAC:
         param_ac_dict (dict): The dictionary of sorted values of the parameter, for inference only.
     """
     def __init__(self, column_param, column_param_sort_ac, column_claims_count, column_claims_sum,
-                 inference=False, param_ac_dict=None):
-        self.priority = 2
+                 inference=False, param_ac_dict=None, priority=2):
+        self.priority = priority
         self.column_param = column_param
         self.column_param_sort_ac = column_param_sort_ac
         self.column_claims_count = column_claims_count
         self.column_claims_sum = column_claims_sum
-        self.param_ac = pd.DataFrame
+        self.param_ac = DataFrame
         self.inference = inference
         if inference:
             if param_ac_dict is None:

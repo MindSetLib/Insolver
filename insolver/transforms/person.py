@@ -13,8 +13,8 @@ class TransformGenderGetFromName:
         gender_male (str): Return value for male gender in InsolverDataFrame, 'male' by default.
         gender_female (str): Return value for female gender in InsolverDataFrame, 'female' by default.
     """
-    def __init__(self, column_name, column_gender, gender_male='male', gender_female='female'):
-        self.priority = 0
+    def __init__(self, column_name, column_gender, gender_male='male', gender_female='female', priority=0):
+        self.priority = priority
         self.column_name = column_name
         self.column_gender = column_gender
         self.gender_male = gender_male
@@ -47,8 +47,8 @@ class TransformAgeGetFromBirthday:
         column_date_start (str): Column name in InsolverDataFrame containing policies' start dates, column type is date.
         column_age (str): Column name in InsolverDataFrame for clients' ages in years, column type is int.
     """
-    def __init__(self, column_date_birth, column_date_start, column_age):
-        self.priority = 0
+    def __init__(self, column_date_birth, column_date_start, column_age, priority=0):
+        self.priority = priority
         self.column_date_birth = column_date_birth
         self.column_date_start = column_date_start
         self.column_age = column_age
@@ -86,8 +86,8 @@ class TransformAge:
         age_min (int): Minimum value of drivers' age in years, lower values are invalid, 18 by default.
         age_max (int): Maximum value of drivers' age in years, bigger values will be grouped, 70 by default.
     """
-    def __init__(self, column_driver_minage, age_min=18, age_max=70):
-        self.priority = 1
+    def __init__(self, column_driver_minage, age_min=18, age_max=70, priority=1):
+        self.priority = priority
         self.column_driver_minage = column_driver_minage
         self.age_min = age_min
         self.age_max = age_max
@@ -123,8 +123,8 @@ class TransformAgeGender:
         gender_female: Value for male gender in InsolverDataFrame, 'female' by default.
     """
     def __init__(self, column_age, column_gender, column_age_m, column_age_f, age_default=18,
-                 gender_male='male', gender_female='female'):
-        self.priority = 2
+                 gender_male='male', gender_female='female', priority=2):
+        self.priority = priority
         self.column_age = column_age
         self.column_gender = column_gender
         self.column_age_m = column_age_m
@@ -172,8 +172,8 @@ class TransformNameCheck:
         name_position (int): The position of the name in full name. For example, argument should be 0 for notation such
         as 'John Doe', but 1 for notation like 'Ivanov Ivan'.
     """
-    def __init__(self, column_name, column_name_check, names_list, name_full=False, name_position=1):
-        self.priority = 1
+    def __init__(self, column_name, column_name_check, names_list, name_full=False, name_position=1, priority=1):
+        self.priority = priority
         self.column_name = column_name
         self.name_full = name_full
         self.column_name_check = column_name_check

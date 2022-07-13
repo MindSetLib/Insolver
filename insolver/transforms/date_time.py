@@ -1,5 +1,5 @@
-import numpy as np
-import pandas as pd
+from numpy import where
+from pandas import to_datetime, Timedelta
 
 
 class DatetimeTransforms:
@@ -19,7 +19,8 @@ class DatetimeTransforms:
     
     """
     def __init__(self, column_names, column_types=None, dayfirst=False, yearfirst=False, feature='unix',
-                 column_feature=None):
+                 column_feature=None, priority=0):
+        self.priority = priority
         self.feature = feature
         self.column_names = column_names
         self.column_types = column_types
@@ -30,7 +31,7 @@ class DatetimeTransforms:
         
     def _get_date_feature(self, df):
         self.feature_dict = {
-            'unix': lambda col: (col - pd.to_datetime("1970-01-01")) // pd.Timedelta('1s'),
+            'unix': lambda col: (col - to_datetime("1970-01-01")) // Timedelta('1s'),
             'date': lambda col: col.dt.date,
             'time': lambda col: col.dt.time,
             'month': lambda col: col.dt.month,
@@ -38,7 +39,7 @@ class DatetimeTransforms:
             'year': lambda col: col.dt.year,
             'day': lambda col: col.dt.day,
             'day_of_the_week': lambda col: col.dt.dayofweek,
-            'weekend': lambda col: np.where(col.dt.day_name().isin(['Sunday', 'Saturday']), 1, 0)
+            'weekend': lambda col: where(col.dt.day_name().isin(['Sunday', 'Saturday']), 1, 0)
         }
         
         if self.column_feature:
@@ -52,11 +53,11 @@ class DatetimeTransforms:
                     type_of_column = self.column_types[column] if column in self.column_types.keys() else None
                     if type_of_column:
                         df[f'{column}_{_col_feature}'] = self.feature_dict[_col_feature](
-                            pd.to_datetime(df[column], dayfirst=self.dayfirst,
-                                           yearfirst=self.yearfirst)).astype(type_of_column)
+                            to_datetime(df[column], dayfirst=self.dayfirst,
+                                        yearfirst=self.yearfirst)).astype(type_of_column)
                     else: 
                         df[f'{column}_{_col_feature}'] = self.feature_dict[_col_feature](
-                            pd.to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst))
+                            to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst))
 
         if self.feature in self._feature_types:
             if self.column_types:
@@ -64,15 +65,15 @@ class DatetimeTransforms:
                     type_of_column = self.column_types[column] if column in self.column_types.keys() else None
                     if type_of_column:
                         df[f'{column}_{self.feature}'] = self.feature_dict[self.feature](
-                            pd.to_datetime(df[column], dayfirst=self.dayfirst,
-                                           yearfirst=self.yearfirst)).astype(type_of_column)
+                            to_datetime(df[column], dayfirst=self.dayfirst,
+                                        yearfirst=self.yearfirst)).astype(type_of_column)
                     else: 
                         df[f'{column}_{self.feature}'] = self.feature_dict[self.feature](
-                            pd.to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst))
+                            to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst))
             else:
                 for column in self.column_names:
                     df[f'{column}_{self.feature}'] = self.feature_dict[self.feature](
-                        pd.to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst))
+                        to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst))
         
         else:
             raise NotImplementedError(f'Method parameter supports values in {self._feature_types}.')
