@@ -11,7 +11,6 @@ from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 
 model_path = os.environ['model_path']
 transforms_path = os.environ['transforms_path']
-# module_path = os.environ['module_path']
 
 # Load model
 model = utils.load_pickle_model(model_path)

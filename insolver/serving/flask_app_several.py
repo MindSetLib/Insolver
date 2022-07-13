@@ -30,8 +30,6 @@ if os.environ['transforms_folder'] is not None:
     transforms_folder = os.environ['transforms_folder']
 if os.environ['config_file'] is not None:
     config_file = os.environ['config_file']
-if os.environ['module_path'] is not None:
-    module_path = os.environ['module_path']
 
 # Logging
 handler = RotatingFileHandler('app.log', maxBytes=100000, backupCount=5)

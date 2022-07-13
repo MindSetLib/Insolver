@@ -1,3 +1,4 @@
+myst-parser
 Sphinx
 sphinx-rtd-theme
 sphinxcontrib-applehelp
@@ -6,5 +7,3 @@ sphinxcontrib-htmlhelp
 sphinxcontrib-jsmath
 sphinxcontrib-qthelp
 sphinxcontrib-serializinghtml
-myst-parser
-watchgod==0.7
