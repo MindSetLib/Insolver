@@ -81,7 +81,7 @@ def deviance_explained(y, y_pred, weight=None, power=0):
         """
     dev = deviance_score(y, y_pred, weight=weight, power=power)
     dev0 = deviance_score(y, np.repeat(np.mean(y), len(y)), weight=weight, power=power)
-    return 1 - dev/dev0
+    return 1 - dev / dev0
 
 
 def deviance_explained_poisson(y, y_pred, weight=None):
@@ -130,7 +130,7 @@ def inforamtion_value_woe(data, target, bins=10, cat_thresh=10, detail=False):
     cols = data.columns
     for ivars in cols[~cols.isin([target])]:
         if (data[ivars].dtype.kind in 'bifc') and (len(np.unique(data[ivars])) > cat_thresh):
-            binned_x = qcut(data[ivars], bins,  duplicates='drop')
+            binned_x = qcut(data[ivars], bins, duplicates='drop')
             d0 = DataFrame({'x': binned_x, 'y': data[target]})
         else:
             d0 = DataFrame({'x': data[ivars], 'y': data[target]})
@@ -191,7 +191,7 @@ def gain_curve(y_true, y_pred, exposure, step=1, figsize=(10, 6)):
     y_true = y_true[::step]
 
     # Random Baseline
-    plt.plot([0, 1], [0, 1], c='red', linestyle='--', linewidth=0.5, label=f'Random Baseline')
+    plt.plot([0, 1], [0, 1], c='red', linestyle='--', linewidth=0.5, label='Random Baseline')
 
     # Ideal Model
     cumul_samples, cumul_claim_amt, gini = lorenz_curve(y_true, y_true, exposure)
@@ -304,10 +304,11 @@ def stability_index(scoring_variable, dev, oot, index='psi', binning_method='qua
     else:
         dev_bins = cut(sc_var_dev, bins=bins)
         oot_bins = cut(sc_var_oot, bins=dev_bins.cat.categories)
-    psi = concat([(oot_bins.value_counts().sort_index(ascending=False)/oot_bins.shape[0]*100).rename('OOT'),
-                  (dev_bins.value_counts().sort_index(ascending=False)/dev_bins.shape[0]*100).rename('DEV')], axis=1)
+    psi = concat([(oot_bins.value_counts().sort_index(ascending=False) / oot_bins.shape[0] * 100).rename('OOT'),
+                  (dev_bins.value_counts().sort_index(ascending=False) / dev_bins.shape[0] * 100).rename('DEV')],
+                 axis=1)
     psi['Diff'] = psi['OOT'] - psi['DEV']
-    psi['ln_OOT_DEV'] = np.log(psi['OOT']/psi['DEV'])
+    psi['ln_OOT_DEV'] = np.log(psi['OOT'] / psi['DEV'])
     psi['PSI'] = psi['Diff'] * psi['ln_OOT_DEV']
     total, total.loc[['ln_OOT_DEV', 'Diff']] = Series(np.sum(psi), name='Total'), '-'
     psi = psi.append(total)

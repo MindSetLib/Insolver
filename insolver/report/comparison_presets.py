@@ -4,6 +4,7 @@ import pandas as pd
 import seaborn as sns
 from .error_handler import error_handler
 
+
 @error_handler(False)
 def _create_models_comparison(x_train, y_train, x_test, y_test, dataset, task, models_to_compare, comparison_metrics,
                               f_groups_type, f_bins, f_start, f_end, f_freq,
@@ -85,7 +86,7 @@ def _get_ModelMetricsCompare(x, y, task, source, comparison_metrics):
         'labels': list(metrics_columns)
     }
     for i in range(len(metrics)):
-        row = metrics.iloc[i-1]
+        row = metrics.iloc[i - 1]
         result[row['Algo']] = list(row[metrics_columns])
 
     return result, metrics
@@ -297,7 +298,7 @@ def _create_difference_comparison(data_type, x, y, main_model, models_to_compare
         ''')
 
     result['models_names'] = models
-    return result,  f'''
+    return result, f'''
     <div class="card text-center">
         <div class="card-header">
             <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
@@ -404,7 +405,7 @@ def _cut_column(column, groups_type, bins=None, start=None, end=None, freq=None)
         elif groups_type == 'qcut':
             return pd.qcut(column, bins)
         elif groups_type == 'freq':
-            _start = min(column)-1 if start is None else start
+            _start = min(column) - 1 if start is None else start
             _end = max(column) if end is None else end
             _bins = pd.interval_range(start=_start, end=_end, freq=freq)
             # count digits after the decimal point

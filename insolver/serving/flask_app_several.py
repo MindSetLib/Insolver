@@ -9,7 +9,7 @@ from insolver import InsolverDataFrame
 from insolver.transforms import InsolverTransform, load_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 from insolver.serving import utils
-from insolver.configs.settings import *
+from insolver.configs.settings import FORMULA, FORMULA_CALCULATION, N_CORES, VARIABLES_LIST
 
 import re
 import glob

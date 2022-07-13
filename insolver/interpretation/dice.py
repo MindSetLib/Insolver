@@ -32,7 +32,7 @@ class DiCEExplanation(InterpretBase):
             raise AttributeError('Either y or outcome_name must be initialized.')
     
     def show_explanation(self, instance, total_CFs=2, desired_range=None, desired_class='opposite',
-                         features_to_vary='all', permitted_range=None, result_type='dataframe', return_json = False):
+                         features_to_vary='all', permitted_range=None, result_type='dataframe', return_json=False):
         """
         Show explanation. Creates dice_ml.Data, dice_ml.Model, dice_ml.Dice using Data and Model, then generates 
         counterfactuals using dice_ml.Dice.generate_counterfactuals() method.
@@ -45,6 +45,7 @@ class DiCEExplanation(InterpretBase):
             features_to_vary: Either a string “all” or a list of feature names to vary.
             permitted_range (dict): Dictionary with feature names as keys and permitted range in list as values.
             result_type (str): Type of the result to visualize. Values `dataframe` and `list` are supported.
+            return_json (bool): Flag whether to return json.
             
         Raises:
             NotImplementedError: If result type is not supported.
@@ -74,8 +75,8 @@ class DiCEExplanation(InterpretBase):
         counterfactuals = self.model.generate_counterfactuals(
             query_instances=instance,
             total_CFs=total_CFs,
-            desired_range=desired_range, desired_class = desired_class,
-            features_to_vary=features_to_vary, permitted_range = permitted_range
+            desired_range=desired_range, desired_class=desired_class,
+            features_to_vary=features_to_vary, permitted_range=permitted_range
         )
               
         # visualize as dataframe

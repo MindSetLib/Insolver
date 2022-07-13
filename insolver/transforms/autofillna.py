@@ -86,7 +86,7 @@ class AutoFillNATransforms:
             
             if self.categorical_method == 'imputed_column':
                 for column in self.categorical_columns:
-                    df[column+"_Imputed"] = where(df[column].isnull(), 1, 0)
+                    df[f"{column}_Imputed"] = where(df[column].isnull(), 1, 0)
                 
             self.freq_categories = {}
             for column in self.categorical_columns:

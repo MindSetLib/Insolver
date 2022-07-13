@@ -57,5 +57,3 @@ def train_test_column_split(x, y, df_column):
     y1[col_name] = df_column
     return (x1[x1[col_name] == 'train'].drop(col_name, axis=1), x1[x1[col_name] == 'test'].drop(col_name, axis=1),
             y1[y1[col_name] == 'train'].drop(col_name, axis=1), y1[y1[col_name] == 'test'].drop(col_name, axis=1))
-
-

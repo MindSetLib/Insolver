@@ -9,6 +9,7 @@ from .error_handler import error_handler
 gain_descr = 'gain curve description'
 lift_descr = 'lift curve description'
 
+
 @error_handler(True)
 def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, predicted_test, exposure=None):
     descr_html = ''
@@ -29,8 +30,8 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
             <h4 class="text-center fw-light">Lift Chart:</h4>
                 <div id="lift_score"></div>
-                <button class="btn btn-primary m-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_lift"
-                aria-expanded="False" aria-controls="collapseWidthExample">
+                <button class="btn btn-primary m-3" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse_lift" aria-expanded="False" aria-controls="collapseWidthExample">
                     Show description
                 </button>
                 <div class="collapse" id="collapse_lift">
@@ -39,7 +40,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
                 </div>
         </div>
         '''
-    except(ValueError):
+    except ValueError:
         footer = {}
     gain = False
     # if exposure create gain curve
@@ -187,15 +188,15 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
 
 functions_names_dict = {
     'binary_cont': [
-                        "average_precision_score",
-                        "brier_score_loss",
-                        "det_curve",
-                        "hinge_loss",
-                        "log_loss",
-                        "precision_recall_curve",
-                        "roc_auc_score",
-                        "roc_curve",
-                    ],
+        "average_precision_score",
+        "brier_score_loss",
+        "det_curve",
+        "hinge_loss",
+        "log_loss",
+        "precision_recall_curve",
+        "roc_auc_score",
+        "roc_curve",
+    ],
     'class_main': [
         'roc_auc_score',
         'f1_score',
@@ -213,7 +214,6 @@ functions_names_dict = {
         'deviance_explained_poisson',
         'deviance_explained_gamma',
         'mean_tweedie_deviance',
-
     ],
 }
 
@@ -238,10 +238,11 @@ def stability_index(scoring_variable, dev, oot, kind='psi', bins=10):
     else:
         dev_bins = pd.cut(dev[scoring_variable], bins=bins)
         oot_bins = pd.cut(oot[scoring_variable], bins=dev_bins.cat.categories)
-    psi = pd.concat([(oot_bins.value_counts().sort_index(ascending=False)/oot_bins.shape[0]*100).rename('OOT'),
-                     (dev_bins.value_counts().sort_index(ascending=False)/dev_bins.shape[0]*100).rename('DEV')], axis=1)
+    psi = pd.concat([(oot_bins.value_counts().sort_index(ascending=False) / oot_bins.shape[0] * 100).rename('OOT'),
+                     (dev_bins.value_counts().sort_index(ascending=False) / dev_bins.shape[0] * 100).rename('DEV')],
+                    axis=1)
     psi['Diff'] = psi['OOT'] - psi['DEV']
-    psi['ln_OOT_DEV'] = np.log(psi['OOT']/psi['DEV'])
+    psi['ln_OOT_DEV'] = np.log(psi['OOT'] / psi['DEV'])
     psi['ln_OOT_DEV'].replace([np.inf, -np.inf], 0, inplace=True)
     psi['PSI'] = psi['Diff'] * psi['ln_OOT_DEV']
     total, total.loc[['ln_OOT_DEV', 'Diff']] = pd.Series(np.sum(psi), name='Total'), '-'
@@ -251,48 +252,48 @@ def stability_index(scoring_variable, dev, oot, kind='psi', bins=10):
 
 
 metrics_regression = {
-            'explained_variance_score': metrics.explained_variance_score,
-            'max_error': metrics.max_error,
-            'mean_absolute_error': metrics.mean_absolute_error,
-            'mean_squared_error': metrics.mean_squared_error,
-            'root_mean_squared_error': lambda y_true, y_pred: np.sqrt(metrics.mean_squared_error(y_true, y_pred)),
-            'median_absolute_error': metrics.median_absolute_error,
-            'mean_absolute_percentage_error': metrics.mean_absolute_percentage_error,
-            'r2_score': metrics.r2_score,
-            'deviance_gaussian': deviance_score,
-            'deviance_poisson': deviance_poisson,
-            'deviance_gamma': deviance_gamma,
-            'deviance_explained_gaussian': deviance_explained,
-            'deviance_explained_poisson': deviance_explained_poisson,
-            'deviance_explained_gamma': deviance_explained_gamma,
-            'mean_tweedie_deviance': metrics.mean_tweedie_deviance,
-            'd2_tweedie_score': metrics.d2_tweedie_score,
-            'mean_pinball_loss': metrics.mean_pinball_loss,
-            'gini_coef': gini_coef,
-            'lift_score': lift_score,
-        }
+    'explained_variance_score': metrics.explained_variance_score,
+    'max_error': metrics.max_error,
+    'mean_absolute_error': metrics.mean_absolute_error,
+    'mean_squared_error': metrics.mean_squared_error,
+    'root_mean_squared_error': lambda y_true, y_pred: np.sqrt(metrics.mean_squared_error(y_true, y_pred)),
+    'median_absolute_error': metrics.median_absolute_error,
+    'mean_absolute_percentage_error': metrics.mean_absolute_percentage_error,
+    'r2_score': metrics.r2_score,
+    'deviance_gaussian': deviance_score,
+    'deviance_poisson': deviance_poisson,
+    'deviance_gamma': deviance_gamma,
+    'deviance_explained_gaussian': deviance_explained,
+    'deviance_explained_poisson': deviance_explained_poisson,
+    'deviance_explained_gamma': deviance_explained_gamma,
+    'mean_tweedie_deviance': metrics.mean_tweedie_deviance,
+    'd2_tweedie_score': metrics.d2_tweedie_score,
+    'mean_pinball_loss': metrics.mean_pinball_loss,
+    'gini_coef': gini_coef,
+    'lift_score': lift_score,
+}
         
 metrics_classification = {
-            "accuracy_score": metrics.accuracy_score,
-            "average_precision_score": metrics.average_precision_score,
-            "balanced_accuracy_score": metrics.balanced_accuracy_score,
-            "brier_score_loss": metrics.brier_score_loss,
-            "classification_report": metrics.classification_report,
-            "cohen_kappa_score": metrics.cohen_kappa_score,
-            "confusion_matrix": metrics.confusion_matrix,
-            "det_curve": metrics.det_curve,
-            "f1_score": metrics.f1_score,
-            "hamming_loss": metrics.hamming_loss,
-            "hinge_loss": metrics.hinge_loss,
-            "jaccard_score": metrics.jaccard_score,
-            "log_loss": metrics.log_loss,
-            "matthews_corrcoef": metrics.matthews_corrcoef,
-            "multilabel_confusion_matrix": metrics.multilabel_confusion_matrix,
-            "precision_recall_curve": metrics.precision_recall_curve,
-            "precision_recall_fscore_support": metrics.precision_recall_fscore_support,
-            "precision_score": metrics.precision_score,
-            "recall_score": metrics.recall_score,
-            "roc_auc_score": metrics.roc_auc_score,
-            "roc_curve": metrics.roc_curve,
-            "zero_one_loss": metrics.zero_one_loss,
-        }
+    "accuracy_score": metrics.accuracy_score,
+    "average_precision_score": metrics.average_precision_score,
+    "balanced_accuracy_score": metrics.balanced_accuracy_score,
+    "brier_score_loss": metrics.brier_score_loss,
+    "classification_report": metrics.classification_report,
+    "cohen_kappa_score": metrics.cohen_kappa_score,
+    "confusion_matrix": metrics.confusion_matrix,
+    "det_curve": metrics.det_curve,
+    "f1_score": metrics.f1_score,
+    "hamming_loss": metrics.hamming_loss,
+    "hinge_loss": metrics.hinge_loss,
+    "jaccard_score": metrics.jaccard_score,
+    "log_loss": metrics.log_loss,
+    "matthews_corrcoef": metrics.matthews_corrcoef,
+    "multilabel_confusion_matrix": metrics.multilabel_confusion_matrix,
+    "precision_recall_curve": metrics.precision_recall_curve,
+    "precision_recall_fscore_support": metrics.precision_recall_fscore_support,
+    "precision_score": metrics.precision_score,
+    "recall_score": metrics.recall_score,
+    "roc_auc_score": metrics.roc_auc_score,
+    "roc_curve": metrics.roc_curve,
+    "zero_one_loss": metrics.zero_one_loss,
+}

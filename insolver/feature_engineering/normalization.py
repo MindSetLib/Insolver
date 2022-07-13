@@ -59,7 +59,7 @@ class Normalization:
             for column in self.column_method:
                 if self.column_names:
                     if column in self.column_names:
-                        raise Exception(f'Columns in column_method cannot be duplicated in column_names')
+                        raise Exception('Columns in column_method cannot be duplicated in column_names')
                 
                 # reshape to prevent "ValueError: Expected 2D array, got 1D array instead"
                 old_column = self.new_df[column].to_numpy().reshape(-1, 1)    

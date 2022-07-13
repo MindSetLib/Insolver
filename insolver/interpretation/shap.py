@@ -76,7 +76,7 @@ class SHAPExplanation(InterpretBase):
             feature_names = list(instance.index)
         else:
             if len(instance.shape) > 1:
-                raise NotImplementedError(f'Only (*,) shape is supported.')
+                raise NotImplementedError('Only (*,) shape is supported.')
             feature_names = []
             for f in range(instance.shape[0]):
                 feature_names.append(f'Feature {f}')
@@ -115,7 +115,7 @@ class SHAPExplanation(InterpretBase):
             Exception: If plot() is called before show_explanation().
         """
         try:
-            fig = Figure(Waterfall(name=f'Prediction',
+            fig = Figure(Waterfall(name='Prediction',
                                    orientation='h',
                                    measure=['relative'] * len(self.prediction),
                                    y=[self.prediction.index[i] if i == 0

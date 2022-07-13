@@ -132,20 +132,20 @@ class InsolverDiscretizer:
             return round(5 * log10(len_X))
 
         elif n_bins == 'cencov':
-            return round(pow(len_X, 1/3))
+            return round(pow(len_X, 1 / 3))
 
         elif n_bins == 'rice-rule':
-            return round(power(len_X, 1/3) * 2)
+            return round(power(len_X, 1 / 3) * 2)
 
         elif n_bins == 'terrell-scott':
-            return round(power(2*len_X, 1/3))
+            return round(power(2 * len_X, 1 / 3))
 
         elif n_bins == 'scott':
-            return round((npmax(self.X) - npmin(self.X)) / 3.5 * std(self.X) * power(len_X, -1/3))
+            return round((npmax(self.X) - npmin(self.X)) / 3.5 * std(self.X) * power(len_X, -1 / 3))
 
         elif n_bins == 'freedman-diaconis':
             iqr = subtract(*percentile(self.X, [75, 25]))
-            h = 2 * iqr / power(len_X, 1/3)
+            h = 2 * iqr / power(len_X, 1 / 3)
             return round((npmax(self.X) - npmin(self.X)) / h)
 
     def __check_X_shape(self):

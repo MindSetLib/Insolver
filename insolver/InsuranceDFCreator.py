@@ -52,7 +52,7 @@ class InsuranceDFCreator:
 
         if isinstance(self._df_policies, pd.DataFrame) and isinstance(self._df_claims, pd.DataFrame):
             if not (isinstance(self.column_policies_policy_id, str) and isinstance(self.column_claims_policy_id, str)):
-                raise NotImplementedError("'column_policies_policy_id' and 'column_claims_policy_id' should be defined.")
+                raise ValueError("'column_policies_policy_id' and 'column_claims_policy_id' should be defined.")
             self._df_policies_result = self._df_policies.merge(self._get_claims_grouped_df,
                                                                how='left',
                                                                left_on=self.column_policies_policy_id,
@@ -127,22 +127,19 @@ class InsuranceDFCreator:
                         self.column_claims_k_infl = self.column_calendar_k_infl
                     elif self.column_calendar_k_infl + '_cal' in list(self._df_claims.columns):
                         self.column_claims_k_infl = self.column_calendar_k_infl + '_cal'
-                    self._df_claims[self.column_claims_sum_infl] = self._df_claims[self.column_claims_sum] * \
-                                                                   self._df_claims[self.column_claims_k_infl]
+                    self._df_claims[self.column_claims_sum_infl] = (self._df_claims[self.column_claims_sum] *
+                                                                    self._df_claims[self.column_claims_k_infl])
                     self.columns_claims_to_sum.append(self.column_claims_sum_infl)
             else:
                 self.columns_claims_to_sum.append(self.column_claims_sum)
 
     def _get_claims_grouped_df(self):
         if isinstance(self.column_claims_date_event, str):
-            return self._df_claims \
-                [self._df_claims[self.column_claims_date_event] <= self.claim_date_event_max] \
-                [[self.column_claims_policy_id] + self.columns_claims_to_sum]. \
-                groupby(by=self.column_claims_policy_id, as_index=False).sum()
+            subset = self._df_claims[self._df_claims[self.column_claims_date_event] <= self.claim_date_event_max]
         else:
-            return self._df_claims \
-                [[self.column_claims_policy_id] + self.columns_claims_to_sum]. \
-                groupby(by=self.column_claims_policy_id, as_index=False).sum()
+            subset = self._df_claims
+        subset = subset[[self.column_claims_policy_id] + self.columns_claims_to_sum]
+        return subset.groupby(by=self.column_claims_policy_id, as_index=False).sum()
 
     def _check_policies_df(self):
         if isinstance(self._df_policies_result, pd.DataFrame):
@@ -157,16 +154,18 @@ class InsuranceDFCreator:
                     self.column_policies_exposure = 'exposure'
                     while self.column_policies_exposure in list(self._df_policies_result.columns):
                         self.column_policies_exposure = self.column_policies_exposure + '_'
-                    self._df_policies_result[self.column_policies_exposure] = self._df_policies_result \
-                        [[self.column_policies_date_start, self.column_policies_date_end]]. \
-                        apply(self._get_exposure, axis=1, args=(self.claim_date_event_max,))
+                    _temp_filtered_df_pols = self._df_policies_result[[self.column_policies_date_start,
+                                                                       self.column_policies_date_end]]
+                    _df_pl = _temp_filtered_df_pols.apply(self._get_exposure, axis=1, args=(self.claim_date_event_max,))
+                    self._df_policies_result[self.column_policies_exposure] = _df_pl
                 if not isinstance(self.column_policies_claims_count_adj, str):
                     self.column_policies_claims_count_adj = 'claims_count_adj'
                     while self.column_policies_claims_count_adj in list(self._df_policies_result.columns):
                         self.column_policies_claims_count_adj = self.column_policies_claims_count_adj + '_'
-                self._df_policies_result[self.column_policies_claims_count_adj] = self._df_policies_result \
-                    [[self.column_policies_exposure, self.column_policies_claims_count]]. \
-                    apply(self._get_claims_count_adj, axis=1)
+                _temp_filtred_df_pols_adj = self._df_policies_result[[self.column_policies_exposure,
+                                                                      self.column_policies_claims_count]]
+                _temp_filtred_df_pols_adj = _temp_filtred_df_pols_adj.apply(self._get_claims_count_adj, axis=1)
+                self._df_policies_result[self.column_policies_claims_count_adj] = _temp_filtred_df_pols_adj
 
     @staticmethod
     def _get_exposure(date_start_end, claim_date_event_max):

@@ -157,7 +157,7 @@ class Sampling:
             New dataset with cluster column.
         """
         # get the cluster size as DataFrame length divided by the number of clusters
-        cluster_size = round(len(df)/self.n_clusters)
+        cluster_size = round(len(df) / self.n_clusters)
         new_df = df.copy()
 
         # if a column that is used as a clusters is initialized
@@ -177,14 +177,14 @@ class Sampling:
 
             except ValueError:
                 # if not get indexes
-                indexes = np.repeat([range(1, self.n_clusters+1)], cluster_size)
+                indexes = np.repeat([range(1, self.n_clusters + 1)], cluster_size)
                 # calculate the difference 
                 diff = len(indexes) - len(df)
                 
                 # if the difference is greater than 0 delete one row
                 if diff > 0:
                     for i in range(diff):
-                        new_df['cluster_id'] = np.delete(indexes, len(indexes)-1)
+                        new_df['cluster_id'] = np.delete(indexes, len(indexes) - 1)
                     
                 # if the difference is less than 0 add one row
                 if diff < 0:

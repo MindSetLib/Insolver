@@ -28,17 +28,17 @@ setup(name='insolver',
       license='MIT',
       packages=find_packages(),
       entry_points={
-            'console_scripts': [
-                  'insolver_serving = insolver.serving.run_service:run'
-            ]
+          'console_scripts': [
+              'insolver_serving = insolver.serving.run_service:run'
+          ]
       },
       install_requires=required,
       setup_requires=['setuptools', 'wheel'],
       extras_require={'full': extras},
       zip_safe=False,
       classifiers=[
-            'Programming Language :: Python :: 3',
-            'License :: OSI Approved :: MIT License',
+          'Programming Language :: Python :: 3',
+          'License :: OSI Approved :: MIT License',
       ],
       python_requires='>=3.7',
       include_package_data=True

@@ -7,6 +7,7 @@ from shap import TreeExplainer, LinearExplainer
 import lime.lime_tabular as lt
 from .error_handler import error_handler
 
+
 def _create_pandas_profiling():
     pandas_profiling = '''Generated profile report from a 
         pandas <code>DataFrame</code> prepared by 
@@ -23,6 +24,7 @@ def _create_pandas_profiling():
         'footer': '',
         'icon': '<i class="bi bi-briefcase"></i>',
     }
+
 
 @error_handler(False)
 def _create_dataset_description(x_train, x_test, y_train, y_test, task,
@@ -66,6 +68,7 @@ def _create_dataset_description(x_train, x_test, y_train, y_test, task,
         'icon': '<i class="bi bi-book"></i>',
     }
 
+
 @error_handler(False)
 def _create_importance_charts():
     # create html for js 
@@ -105,6 +108,7 @@ def _create_importance_charts():
     </div>    
     '''
 
+
 @error_handler(True)
 def _create_shap(x_train, x_test, model, shap_type):
     # footer values are used by js in the report_template
@@ -113,7 +117,8 @@ def _create_shap(x_train, x_test, model, shap_type):
     footer['features'] = list(x_train.columns)
     # check model type
     base_model = model.model if isinstance(model, InsolverBaseWrapper) else model
-    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) and model.backend=='sklearn' else base_model
+    linear_model = (model.model['glm'] if isinstance(model, InsolverGLMWrapper) and model.backend == 'sklearn'
+                    else base_model)
     for key, value in {'train': x_train, 'test': x_test}.items():
         # get shap values
         explainer = TreeExplainer(base_model) if shap_type == 'tree' else LinearExplainer(linear_model, value)
@@ -173,6 +178,7 @@ def _create_shap(x_train, x_test, model, shap_type):
     </div>
     '''
 
+
 @error_handler(True)
 def _create_partial_dependence(x_train, x_test, model):
     # footer values are used by js in the report_template
@@ -226,6 +232,7 @@ def _create_partial_dependence(x_train, x_test, model):
         </form>
     </div>'''
 
+
 @error_handler(False)
 def _explain_instance(explain_instance, model, x, task, original_dataset, shap_type):
     footer = dict()
@@ -260,13 +267,13 @@ def _describe_y(y_train, y_test, task, y_description, dataset=None, **kwargs):
             if task == 'reg':
                 descr = pd.DataFrame(round(y_column.describe(), 2))
                 footer['data_y'] = list(y_column)
-                descr_dict[f'Y chart:'] = f'<div id="chart_y"></div>'
+                descr_dict['Y chart:'] = '<div id="chart_y"></div>'
 
             else:
                 descr = pd.DataFrame(y_column.value_counts())
                 footer['index_y'] = list(pd.Series(list(descr.index)).apply(str))
                 footer['data_y'] = list(descr[y_column.name])
-                descr_dict[f'Y chart:'] = f'<canvas id="chart_y"></canvas>'
+                descr_dict['Y chart:'] = '<canvas id="chart_y"></canvas>'
 
             descr = descr.append(pd.Series({y_column.name: y_column.isnull().sum()}, name='null'))
             descr_dict['Y values description:'] = f'{descr.to_html(**kwargs)}'
@@ -282,7 +289,7 @@ def _describe_y(y_train, y_test, task, y_description, dataset=None, **kwargs):
             if task == 'reg':
                 descr = pd.DataFrame(round(value.describe(), 2))
                 footer[f'data_{key}'] = list(value)
-                descr_dict[f'Y {key} chart:'] = f'<div id="chart_y_{key}"></canvas>'
+                descr_dict['Y {key} chart:'] = '<div id="chart_y_{key}"></canvas>'
 
             else:
                 descr = pd.DataFrame(value.value_counts())
@@ -291,7 +298,7 @@ def _describe_y(y_train, y_test, task, y_description, dataset=None, **kwargs):
                 descr_dict[f'Y {key} chart:'] = f'<canvas id="chart_y_{key}"></canvas>'
 
             descr['null'] = value.isnull().sum()
-            descr_dict[f'Y {key} values description:'] = f'{descr.to_html(**kwargs)}'
+            descr_dict['Y {key} values description:'] = '{descr.to_html(**kwargs)}'
 
     descr_html = ''
 
@@ -334,6 +341,7 @@ def _describe_dataset(x_train, x_test, dataset):
         TypeError(f'Parameter `dataset` {type(dataset)} must be pandas.DataFrame.')
 
     return description_table
+
 
 @error_handler(False)
 def _create_features_description(x_train, x_test, dataset, description=None):
@@ -380,7 +388,8 @@ def shap_explain(instance, model, shap_type, x):
         return np.true_divide(1, np.add(1, np.exp(x)))
 
     base_model = model.model if isinstance(model, InsolverBaseWrapper) else model
-    linear_model = model.model['glm'] if isinstance(model, InsolverGLMWrapper) and model.backend=='sklearn' else base_model
+    linear_model = (model.model['glm'] if isinstance(model, InsolverGLMWrapper) and model.backend == 'sklearn'
+                    else base_model)
     explainer = TreeExplainer(base_model) if shap_type == 'tree' else LinearExplainer(linear_model, x)
         
     feature_names = list(instance.index)
@@ -390,7 +399,7 @@ def shap_explain(instance, model, shap_type, x):
     expected_value = (explainer.expected_value[0] if isinstance(explainer.expected_value, np.ndarray)
                       else explainer.expected_value)
 
-    prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(), index=['E[f(x)]']+feature_names,
+    prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(), index=['E[f(x)]'] + feature_names,
                               columns=['SHAP Value'])
         
     prediction['CumSum'] = np.cumsum(prediction['SHAP Value'])

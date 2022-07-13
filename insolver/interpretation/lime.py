@@ -81,7 +81,7 @@ class LimeExplanation(InterpretBase):
         explanation = self.model.explain_instance(data_row=instance, predict_fn=predict_fn)
         
         if self.mode == 'classification' and result_type == 'list' and label is None:
-            raise AttributeError(f'label must be initialized in classification if result_type is `list`.')
+            raise AttributeError('label must be initialized in classification if result_type is `list`.')
         
         # show explanation
         return self.result_type_dict[result_type](explanation)
