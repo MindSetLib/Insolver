@@ -61,7 +61,7 @@ InsTransforms = InsolverTransform(train_df, [
     TransformAgeGender('DrivAge', 'Gender', 'Age_m', 'Age_f', age_default=18, gender_male=0, gender_female=1),
     TransformPolynomizer('Age_m'),
     TransformPolynomizer('Age_f'),
-    ])
+])
 InsTransforms.ins_transform()
 InsTransforms.save('transforms.pickle')
 

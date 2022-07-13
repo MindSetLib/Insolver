@@ -124,7 +124,7 @@ class Smoothing:
         # compute the one-dimensional discrete Fourier Transform 
         fourier = rfft(signal)
         # get the Discrete Fourier Transform sample frequencies
-        frequencies = rfftfreq(signal.size, d=20e-3/signal.size)
+        frequencies = rfftfreq(signal.size, d=20e-3 / signal.size)
         # remove values outside the threshold 
         fourier[frequencies > self.threshold] = 0
         # compute the inverse of rfftn and create a new column

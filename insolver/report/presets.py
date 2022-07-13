@@ -399,7 +399,7 @@ def shap_explain(instance, model, shap_type, x):
     expected_value = (explainer.expected_value[0] if isinstance(explainer.expected_value, np.ndarray)
                       else explainer.expected_value)
 
-    prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(), index=['E[f(x)]']+feature_names,
+    prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(), index=['E[f(x)]'] + feature_names,
                               columns=['SHAP Value'])
         
     prediction['CumSum'] = np.cumsum(prediction['SHAP Value'])

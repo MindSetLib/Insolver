@@ -185,12 +185,12 @@ class DataPreprocessing:
         
         # warn about columns that are not included (check with target)
         elif target and set(df.columns) - set(self.categorical_columns + self.numerical_columns) - set(target):
-            left_cols = set(df.columns) - set(self.categorical_columns+self.numerical_columns) - set(target)
+            left_cols = set(df.columns) - set(self.categorical_columns + self.numerical_columns) - set(target)
             warnings.warn(f'Columns {left_cols} are not included.')
             
         # warn about columns that are not included (check without target)
         elif not target and set(df.columns) - set(self.categorical_columns + self.numerical_columns):
-            left_cols = set(df.columns) - set(self.categorical_columns+self.numerical_columns)
+            left_cols = set(df.columns) - set(self.categorical_columns + self.numerical_columns)
             warnings.warn(f'Columns {left_cols} are not included.')
     
     def _transform_categorical(self, df):
@@ -201,10 +201,10 @@ class DataPreprocessing:
             df (pandas.Dataframe): The dataframe.
         """
         # create categorical transformations dict
-        cat_dict = { 
-            'one_hot_encoder': OneHotEncoderTransforms, 
+        cat_dict = {
+            'one_hot_encoder': OneHotEncoderTransforms,
             'encoder': EncoderTransforms,
-          }
+        }
         
         # set default value if parameter is initialized as True
         if self.transform_categorical is True:
@@ -326,10 +326,10 @@ class DataPreprocessing:
         """
         # create dict of default sampling_n values
         n_dict = {
-            'simple': int(len(df)/2),
+            'simple': int(len(df) / 2),
             'systematic': 2,
-            'cluster': int(self.sampling_n_clusters/2),
-            'stratified': int(len(df)/self.sampling_n_clusters/2)
+            'cluster': int(self.sampling_n_clusters / 2),
+            'stratified': int(len(df) / self.sampling_n_clusters / 2)
         }
         
         # set default value if parameter is initialized as True

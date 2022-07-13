@@ -291,7 +291,7 @@ class FeatureSelection:
             'random_forest': lambda model: model.feature_importances_,
             'mutual_inf': lambda model: model,
             'chi2': lambda model: model[1],
-            'f_statistic': lambda model: -np.log10(model[1])/(-np.log10(model[1])).max(),
+            'f_statistic': lambda model: -np.log10(model[1]) / (-np.log10(model[1])).max(),
             'lasso': lambda model: model.coef_,
             'elasticnet': lambda model: model.coef_
         }

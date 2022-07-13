@@ -64,7 +64,7 @@ def test_n_bins_formulas():
     expected_2 = np.array([2., 3., 1., 3., 1., 0., 0., 3.])
     expected_3 = np.array([3., 4., 2., 4., 2., 0., 0., 4.])
     expected_4 = np.array([1., 1., 0., 1., 0., 0., 0., 1.])
-    expected_5 = np.array([30., 37., 19., 46., 22.,  7.,  0., 45.])
+    expected_5 = np.array([30., 37., 19., 46., 22., 7., 0., 45.])
     assert np.all(expected_1 == insolverDisc.transform(data.X, n_bins='square-root'))
     assert np.all(expected_2 == insolverDisc.transform(data.X, n_bins='sturges'))
     assert np.all(expected_2 == insolverDisc.transform(data.X, n_bins='huntsberger'))

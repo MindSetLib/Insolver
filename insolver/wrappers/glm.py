@@ -237,8 +237,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper, InsolverH2OExtension, InsolverCVHP
 
         """
         methods = {
-                'sklearn': lambda x: x.__sklearn_is_fitted__(),
-                'h2o': lambda x: x._model_json is not None,
+            'sklearn': lambda x: x.__sklearn_is_fitted__(),
+            'h2o': lambda x: x._model_json is not None,
         }
 
         if self.backend not in methods.keys():
