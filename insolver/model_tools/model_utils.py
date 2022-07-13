@@ -13,9 +13,9 @@ def train_val_test_split(*arrays, val_size, test_size, random_state=0, shuffle=T
         stratify (array_like, optional): Passed to train_test_split() from scikit-learn. (default=None).
 
     Returns:
-        tuple: (x_train, x_valid, x_test, y_train, y_valid, y_test).
+        list: [x_train, x_valid, x_test, y_train, y_valid, y_test].
 
-        A tuple of partitions of the initial dataset.
+        A list of partitions of the initial dataset.
     """
     n_arrays = len(arrays)
     split1 = train_test_split(*arrays, random_state=random_state, shuffle=shuffle,
@@ -26,18 +26,18 @@ def train_val_test_split(*arrays, val_size, test_size, random_state=0, shuffle=T
             split2 = train_test_split(*train, random_state=random_state, shuffle=shuffle,
                                       test_size=val_size / (1 - test_size), stratify=stratify)
             train, valid = split2[0::2], split2[1::2]
-            return (*train, *valid, *test)
+            return [*train, *valid, *test]
         else:
-            return (*train, *test)
+            return [*train, *test]
     else:
         train, test = split1[0], split1[1]
         if val_size != 0:
             split2 = train_test_split(train, random_state=random_state, shuffle=shuffle,
                                       test_size=val_size / (1 - test_size), stratify=stratify)
             train, valid = split2[0], split2[1]
-            return train, valid, test
+            return [train, valid, test]
         else:
-            return train, test
+            return [train, test]
 
 
 def train_test_column_split(x, y, df_column):

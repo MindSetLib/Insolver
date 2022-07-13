@@ -2,11 +2,13 @@ import os
 import json
 from io import StringIO
 import pandas as pd
-
+import importlib
+import insolver
 from insolver import InsolverDataFrame
 from insolver.wrappers import InsolverGLMWrapper
 from insolver.transforms import (InsolverTransform, TransformAge, TransformMapValues,
                                  TransformPolynomizer, TransformAgeGender)
+from h2o.exceptions import H2OServerError
 
 
 class TransformExp:
@@ -72,35 +74,59 @@ iglm.fit(x_train, y_train)
 iglm.save_model(name='test_glm_model')
 
 predict = iglm.predict(x_test)
+request_json_h2o = {'df': json.loads(test_df.iloc[0].to_json())}
 
-
-os.environ['model_path'] = './test_glm_model.h2o'
-os.environ['transforms_path'] = './transforms.pickle'
-os.environ['module_path'] = '../examples/user_transforms.py'
-
-from insolver.serving.flask_app import app
-
-
-app.testing = True
-client = app.test_client()
-
-
-def test_index_page():
-    response = client.get()
-    assert response.status_code == 200
-
-
-request_json = {'df': json.loads(test_df.iloc[0].to_json())}
+with open("./dev/test_request_frempl.json", 'r') as file_:
+    request_json = json.load(file_)
 
 
 def test_h2o_model():
-    response = app.test_client().post(
-        '/predict',
-        data=json.dumps(request_json),
-        content_type='application/json',
-    )
+    os.environ['model_path'] = './test_glm_model.h2o'
+    os.environ['transforms_path'] = './transforms.pickle'
+    try:
+        from insolver.serving.flask_app import app
+        for file in ["transforms.pickle", "test_glm_model.h2o"]:
+            os.remove(file)
+        app.testing = True
 
-    data = json.loads(response.get_data(as_text=True))
+        with app.test_client() as client:
+            response = client.post(
+                '/predict',
+                data=json.dumps(request_json_h2o),
+                content_type='application/json',
+            )
+            data = json.loads(response.get_data(as_text=True))
+            assert response.status_code == 200
+            assert round(data['predicted'][0], 7) == round(predict[0], 7)
+    except H2OServerError:
+        assert True
 
-    assert response.status_code == 200
-    assert round(data['predicted'][0], 7) == round(predict[0], 7)
+
+def test_index_page():
+    os.environ['model_path'] = './dev/insolver_gbm_lightgbm_1657653374832.pickle'
+    os.environ['transforms_path'] = './dev/transforms'
+    importlib.reload(insolver.serving.flask_app)
+    from insolver.serving.flask_app import app
+    app.testing = True
+    with app.test_client() as client:
+        response = client.get()
+        assert response.status_code == 200
+
+
+def test_flask_transforms_inference():
+    os.environ['model_path'] = './dev/insolver_gbm_lightgbm_1657653374832.pickle'
+    os.environ['transforms_path'] = './dev/transforms'
+    importlib.reload(insolver.serving.flask_app)
+    from insolver.serving.flask_app import app
+    app.testing = True
+
+    with app.test_client() as c:
+        response = c.post(
+            '/predict',
+            data=json.dumps(request_json),
+            content_type='application/json',
+        )
+        data = json.loads(response.get_data(as_text=True))
+        print(data)
+        assert data['predicted'][0] == {"predicted": [1288.2517257166407]}['predicted'][0]
+        assert response.status_code == 200

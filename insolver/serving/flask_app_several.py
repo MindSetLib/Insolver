@@ -1,13 +1,12 @@
 import json
 import os
-import pickle
 
 import pandas as pd
 from flask import Flask, request, jsonify
 from sympy import sympify
 
 from insolver import InsolverDataFrame
-from insolver.transforms import InsolverTransform, init_transforms
+from insolver.transforms import InsolverTransform, load_transforms
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper
 from insolver.serving import utils
 from insolver.configs.settings import *
@@ -83,10 +82,8 @@ for i, model_path in enumerate(models):
 
     mlist.append(model)
 
-    # load and init transformations
-    with open(transforms[i], 'rb') as file:
-        transformations = pickle.load(file)
-    transformations = init_transforms(transformations, module_path=module_path, inference=True)
+    # load transformations
+    transformations = load_transforms(transforms[i])
 
     tlist.append(transformations)
 

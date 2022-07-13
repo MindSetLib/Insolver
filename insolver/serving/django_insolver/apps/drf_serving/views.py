@@ -1,7 +1,7 @@
 import json
 
 import pandas as pd
-from drf_serving.load_model import model, tranforms
+from drf_serving.load_model import model, transforms
 from insolver import InsolverDataFrame
 from insolver.transforms import InsolverTransform
 from rest_framework.views import APIView, Response
@@ -14,7 +14,7 @@ class PredictAPIView(APIView):
         insdataframe = InsolverDataFrame(df)
 
         # Apply transformations
-        instransforms = InsolverTransform(insdataframe, tranforms)
+        instransforms = InsolverTransform(insdataframe, transforms)
         instransforms.ins_transform()
 
         # Prediction
