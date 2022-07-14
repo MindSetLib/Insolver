@@ -9,32 +9,32 @@ from .base import InterpretBase
 class SHAPExplanation(InterpretBase):
     """
     SHapley Additive exPlanations (SHAP). Uses shap package.
-    
+
     Parameters:
         estimator: A fitted estimator object implementing `predict` or `predict_proba`.
-        estimator_type (str): Type of the estimator, supported values are `tree` and `linear`. 
+        estimator_type (str): Type of the estimator, supported values are `tree` and `linear`.
         data (pandas.Dataframe): Data for creating LinearExplainer.
     """
     def __init__(self, estimator, estimator_type='tree', data=None):
         self.estimator = estimator.model if isinstance(estimator, InsolverBaseWrapper) else estimator
         self.estimator = estimator.model['glm'] if isinstance(estimator, InsolverGLMWrapper) else self.estimator
         self.estimator_type = estimator_type
-        
+
         if self.estimator_type not in ['tree', 'linear']:
             raise NotImplementedError(f'''
             estimator_type {estimator_type} is not supported. Supported values are "tree" and "linear".''')
-            
+
         self.explainer = (TreeExplainer(self.estimator) if self.estimator_type == 'tree'
                           else LinearExplainer(self.estimator, masker=data))
-        
+
     def get_features_shap(self, X, show=False, plot_type='bar'):
         """Method for shap values calculation and corresponding plot of feature importances.
-        
+
         Parameters:
             X (pd.DataFrame, pd.Series): Data for shap values calculation.
             show (boolean, optional): Whether to plot a graph.
             plot_type (str, optional): Type of feature importance graph, takes value in ['dot', 'bar'].
-            
+
         Raises:
             TypeError: If the type of X is not supported.
         """
@@ -50,17 +50,17 @@ class SHAPExplanation(InterpretBase):
         # show plot if True
         if show:
             summary_plot(shap_values, X, plot_type=plot_type)
-            
+
         return {variables[i]: round(mean_shap[i], 4) for i in range(len(variables))}
 
     def show_explanation(self, instance, link=None, show=True):
         """Show explanation.
-        
+
         Parameters:
             instance (pd.Series, np.ndarray): Data for shap values calculation.
             link (callable, optional): A function for transforming shap values into predictions.
             show (boolean, optional): Whether to plot a graph or return a json.
-            
+
         Raises:
             TypeError: If the instance type is not supported.
         """
@@ -102,15 +102,15 @@ class SHAPExplanation(InterpretBase):
         else:
             prediction['Contribution'] = list(prediction['SHAP Value'])
         # save instance and prediction for plotting result
-        self.instance = instance 
+        self.instance = instance
         self.prediction = prediction
-        
+
         return self.prediction
-            
+
     def plot(self, figsize=None, **kwargs):
         """
         Plot waterfall chart using values created in the `show_explanation` method.
-        
+
         Raises:
             Exception: If plot() is called before show_explanation().
         """
@@ -119,13 +119,13 @@ class SHAPExplanation(InterpretBase):
                                    orientation='h',
                                    measure=['relative'] * len(self.prediction),
                                    y=[self.prediction.index[i] if i == 0
-                                        else f'{self.prediction.index[i]} = {round(self.instance[i-1], 4)}' for i 
+                                        else f'{self.prediction.index[i]} = {round(self.instance[i-1], 4)}' for i
                                         in range(len(self.prediction.index))],
                                    x=self.prediction['Contribution']))
             fig.update_layout(kwargs)
             fig.show()
         except AttributeError:
             raise AttributeError('First call the "show_explanation()" method to create the prediction!')
-        
+
     def get_model(self):
         return self.explainer

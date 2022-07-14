@@ -9,8 +9,8 @@ from .error_handler import error_handler
 
 
 def _create_pandas_profiling():
-    pandas_profiling = '''Generated profile report from a 
-        pandas <code>DataFrame</code> prepared by 
+    pandas_profiling = '''Generated profile report from a
+        pandas <code>DataFrame</code> prepared by
         <code><a href="https://pypi.org/project/pandas-profiling/">Pandas profiling library</a></code>.
     '''
     return {
@@ -71,7 +71,7 @@ def _create_dataset_description(x_train, x_test, y_train, y_test, task,
 
 @error_handler(False)
 def _create_importance_charts():
-    # create html for js 
+    # create html for js
     nav_items = ''
     tab_pane_items = ''
     for coef_name in ['relative_importance', 'scaled_importance', 'percentage']:
@@ -99,13 +99,13 @@ def _create_importance_charts():
                  style="overflow-x: auto;">
                     {nav_items}
                 </ul>
-                
+
             </div>
             <form class="card-body tab-content">
                 {tab_pane_items}
             </form>
         </div>
-    </div>    
+    </div>
     '''
 
 
@@ -169,7 +169,7 @@ def _create_shap(x_train, x_test, model, shap_type):
                  style="overflow-x: auto;">
                     {nav_items}
                 </ul>
-                
+
             </div>
             <form class="card-body tab-content d-flex justify-content-center">
                 {tab_pane_items}
@@ -324,7 +324,7 @@ def _describe_dataset(x_train, x_test, dataset):
                                        round(dataset.describe().transpose(), 2)],
                                       axis=1).rename(columns={0: 'type', 1: 'null'}).sort_values(by=['type'])
 
-        # Dataframe.describe() method is not working for object columns          
+        # Dataframe.describe() method is not working for object columns
         if description_table['count'].isnull().sum() > 0:
             description_table['count'] = dataset.count()
         description_table.fillna("-", inplace=True)
@@ -391,7 +391,7 @@ def shap_explain(instance, model, shap_type, x):
     linear_model = (model.model['glm'] if isinstance(model, InsolverGLMWrapper) and model.backend == 'sklearn'
                     else base_model)
     explainer = TreeExplainer(base_model) if shap_type == 'tree' else LinearExplainer(linear_model, x)
-        
+
     feature_names = list(instance.index)
     shap_values = explainer.shap_values(instance)
     cond_bool = isinstance(shap_values, list) and (len(shap_values) == 2)
@@ -401,10 +401,10 @@ def shap_explain(instance, model, shap_type, x):
 
     prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(), index=['E[f(x)]'] + feature_names,
                               columns=['SHAP Value'])
-        
+
     prediction['CumSum'] = np.cumsum(prediction['SHAP Value'])
     prediction['Value'] = np.append(np.nan, instance.values.reshape(-1))
-        
+
     objective = base_model.objective if isinstance(base_model, InsolverGBMWrapper) else None
     link = None
     if objective is not None:

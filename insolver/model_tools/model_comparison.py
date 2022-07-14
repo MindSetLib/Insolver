@@ -34,7 +34,7 @@ class ModelMetricsCompare:
 
     """
 
-    def __init__(self, X, y, task=None, create_models=False, 
+    def __init__(self, X, y, task=None, create_models=False,
                  source=None, metrics=None, stats=None,
                  h2o_init_params=None, predict_params=None,
                  features=None, names=None):
@@ -71,23 +71,23 @@ class ModelMetricsCompare:
     def compare(self):
         """Compares models using initialized parameters.
         If `self.create_models` == True, new models will be created and added to the source list.
-            
+
         Raises:
             Exception: `task` parameter must be initialized and be `class` or `reg`.
-        
+
         """
         if self.task not in ['reg', 'class']:
             raise Exception('Task must be "reg" or "class".')
-            
+
         if self.create_models:
             self._init_new_models()
-            
+
         self._init_default_metrics()
         self._init_source_models()
-        
+
         self._calc_metrics()
         self.__repr__()
-               
+
     def _init_new_models(self):
         """Initializes new models using the `task` parameter.
         If `class` then Gradient Boosting model with the catboost backend and Random Forest with the sklearn backend
@@ -96,9 +96,9 @@ class ModelMetricsCompare:
         Linear Model with the sklearn backend will be created.
         This method uses train_test_split from sklearn.model_selection, fits models with train values and changes
         `self.X`, `self.y` to test values. Thus, when calculating metrics, it will use test values.
-            
+
         """
-        
+
         self.source = [] if self.source is None else self.source
         models_dict = {}
         if self.task == 'class':
@@ -112,14 +112,14 @@ class ModelMetricsCompare:
                 'new_gbm': InsolverGBMWrapper(backend='catboost', task='reg', n_estimators=10),
                 'new_rf': InsolverRFWrapper(backend='sklearn', task='reg'),
             }
-         
+
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y)
         for model_name in models_dict:
             _model = models_dict[model_name]
             _model.fit(X_train, y_train)
             _model.algo = model_name
             self.source.insert(0, _model)
-            
+
         self.X, self.y = X_test, y_test
 
     def _init_default_metrics(self):
@@ -127,36 +127,36 @@ class ModelMetricsCompare:
         If `class` then accuracy score and f1 score will be added.
         If `reg` then mean absolute error and r2 score will be added.
         If `self.metrics` is callable it will be changed to the list type.
-            
+
         """
         if callable(self.metrics):
             self.metrics = [self.metrics]
-            
+
         if self.task == 'class':
             self.metrics.insert(0, accuracy_score)
             self.metrics.insert(1, f1_score)
-            
+
         elif self.task == 'reg':
             self.metrics.insert(0, mean_absolute_error)
             self.metrics.insert(1, r2_score)
-        
+
     def _init_source_models(self):
         """Initializes source models.
         if `source` is `None` it use current working directory as a source.
-        
+
         Raises:
             Exception: Models with the insolver name format were not found in the current working directory.
             TypeError: Source type is not supported.
-            
+
         """
         assert (True if self.names is None else
                 len(self.names) == len(self.source)), 'Check length of list containing model names.'
         wrappers = {
-            'glm': InsolverGLMWrapper, 
-            'gbm': InsolverGBMWrapper, 
+            'glm': InsolverGLMWrapper,
+            'gbm': InsolverGBMWrapper,
             'rf': InsolverRFWrapper
         }
-        
+
         if (self.source is None) or isinstance(self.source, str):
             self.source = os.getcwd() if self.source is None else self.source
             files = glob(os.path.join(self.source, '*'))
@@ -169,29 +169,29 @@ class ModelMetricsCompare:
                                       wrappers[algo](backend=backend, load_path=file,
                                                      h2o_init_params=self.h2o_init_params))
                 self.models = model_list
-                
+
             else:
                 raise Exception('No models with the insolver name format found.')
-                
+
         elif isinstance(self.source, (list, tuple)):
             self.models = self.source
-            
+
         else:
             raise TypeError(f'Source of type {type(self.source)} is not supported.')
-    
+
     def _calc_metrics(self):
         """Computes metrics and statistics for the models.
-            
+
         Raises:
             TypeError: Statistics type are not supported.
             TypeError: Metrics type are not supported.
-            
+
         Returns:
             Returns `None`, but results available in `self.stats`, `self.metrics`.
 
         """
 
-        stats_df, model_metrics = DataFrame(), DataFrame() 
+        stats_df, model_metrics = DataFrame(), DataFrame()
         algos, backend = [], []
         trivial = InsolverTrivialWrapper(task='reg', agg=lambda x: x)
         trivial.fit(self.X, self.y)
@@ -201,17 +201,17 @@ class ModelMetricsCompare:
             algos.append(model.algo.upper()) if hasattr(model, 'algo') else algos.append('-')
             (backend.append(model.backend.capitalize()) if hasattr(model, 'backend') else
              backend.append(model.__class__.__name__))
-                
+
             p = model.predict(self.X if (features is None) or (features[models.index(model)] is None)
                               else self.X[features[models.index(model)]],
                               **({} if (self.predict_params is None) or
                                        (self.predict_params[models.index(model)] is None) else
                                  self.predict_params[models.index(model)]))
-            
+
             stats_val = [mean(p), var(p), std(p), min(p), quantile(p, 0.25), median(p), quantile(p, 0.75), max(p)]
-                
+
             name_stats = ['Mean', 'Variance', 'St. Dev.', 'Min', 'Q1', 'Median', 'Q3', 'Max']
-           
+
             if self.stats is not None:
                 if isinstance(self.stats, (list, tuple)):
                     for stat in self.stats:
@@ -220,13 +220,13 @@ class ModelMetricsCompare:
                             name_stats.append(stat.__name__.replace('_', ' '))
                         else:
                             raise TypeError(f'Statistics with type {type(stat)} are not supported.')
-                            
+
                 elif callable(self.stats):
                     stats_val.append(self.stats(p))
                     name_stats.append(self.stats.__name__.replace('_', ' '))
                 else:
                     raise TypeError(f'Statistics with type {type(self.stats)} are not supported.')
-                    
+
             stats_df = stats_df.append(DataFrame([stats_val], columns=name_stats))
 
             if (self.metrics is not None) and not models.index(model) == 0:
@@ -237,16 +237,16 @@ class ModelMetricsCompare:
                             m_metrics.append(metric(self.y, p))
                         else:
                             raise TypeError(f'Metrics with type {type(metric)} are not supported.')
-                            
+
                     metrics_names = [m.__name__.replace('_', ' ') for m in self.metrics]
                     model_metrics = model_metrics.append(DataFrame(dict(zip(metrics_names, m_metrics), index=[0])))
-                    
+
                 else:
                     raise TypeError(f'Metrics with type {type(self.metrics)} are not supported.')
-            
+
                 model_metrics = model_metrics.reset_index(drop=True)
-                model_metrics = (model_metrics if 'index' not in 
-                                 model_metrics.columns else 
+                model_metrics = (model_metrics if 'index' not in
+                                 model_metrics.columns else
                                  model_metrics.drop(['index'], axis=1))
 
         model_metrics.index = (list(range(len(model_metrics))) if self.names is None else self.names)
@@ -257,6 +257,6 @@ class ModelMetricsCompare:
                                                        index=model_metrics.index)
         stats_df = stats_df[list(stats_df.columns[-2:]) + list(stats_df.columns[:-2])]
         model_metrics = model_metrics[list(model_metrics.columns[-2:]) + list(model_metrics.columns[:-2])]
-        
+
         self.stats_results = self.stats_results.append(stats_df)
         self.metrics_results = self.metrics_results.append(model_metrics)

@@ -34,18 +34,18 @@ class AutoFillNATransforms:
 
     def _fillna_numerical(self, df):
         """Replace numerical NaN values using specified method"""
-        
+
         if not self.numerical_columns:
             return
-        
+
         if self.numerical_method == 'remove':
             df.dropna(subset=self.numerical_columns, inplace=True)
             return
-        
+
         if self.numerical_constants:
             for column in self.numerical_constants.keys():
                 df[column].fillna(self.numerical_constants[column], inplace=True)
-        
+
         if self.numerical_method in self._num_methods:
             self._num_methods_dict = {
                 'median': lambda col: df[col].median(),
@@ -59,44 +59,44 @@ class AutoFillNATransforms:
                     self.values[column] = 1
                 else:
                     self.values[column] = self._num_methods_dict[self.numerical_method](column)
-                    
+
                 df[column].fillna(self.values[column], inplace=True)
         else:
             raise NotImplementedError(f'Method parameter supports values in {self._num_methods}.')
 
     def _fillnan_categorical(self, df):
         """Replace categorical NaN values using specified method"""
-        
+
         if not self.categorical_columns:
             return
-        
+
         if self.categorical_method == 'remove':
             df.dropna(subset=self.categorical_columns, inplace=True)
             return
-        
+
         if self.categorical_constants:
             for column in self.categorical_constants.keys():
                 df[column].fillna(self.categorical_constants[column], inplace=True)
-        
+
         if self.categorical_method in self._cat_methods:
             if self.categorical_method == 'new_category':
                 for column in self.categorical_columns:
                     df[column].fillna('Unknown', inplace=True)
                 return
-            
+
             if self.categorical_method == 'imputed_column':
                 for column in self.categorical_columns:
                     df[f"{column}_Imputed"] = where(df[column].isnull(), 1, 0)
-                
+
             self.freq_categories = {}
             for column in self.categorical_columns:
                 if df[column].mode().values.size > 0:
                     self.freq_categories[column] = df[column].mode()[0]
                 else:
                     self.freq_categories[column] = 1
-                    
+
                 df[column].fillna(self.freq_categories[column], inplace=True)
-        
+
         else:
             raise NotImplementedError(f'Method parameter supports values in {self._cat_methods}.')
 

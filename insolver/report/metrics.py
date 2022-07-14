@@ -46,7 +46,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
     # if exposure create gain curve
     if gain:
         footer['gain'] = 'true'
-        
+
         # ideal model
         t1, t2, t3 = gini_coef(y_train, y_train, X_train[exposure])
         footer['train_ideal_gain'] = [list(t1), list(t2), t3]
@@ -62,7 +62,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
             <h4 class="text-center fw-light">Gain Curve:</h4>
                 <div id="gini_score"></div>
-                <button class="btn btn-primary m-3" type="button" data-bs-toggle="collapse" 
+                <button class="btn btn-primary m-3" type="button" data-bs-toggle="collapse"
                 data-bs-target="#collapse_gain" aria-expanded="False" aria-controls="collapseWidthExample">
                     Show description
                 </button>
@@ -81,7 +81,7 @@ def _calc_psi(x_train, x_test, dataset):
     tab_pane_items = ''
 
     for feature in features:
-        # get x values from dataset using x_test and x_train indexes 
+        # get x values from dataset using x_test and x_train indexes
         _x_train = dataset.loc[x_train.index]
         _x_test = dataset.loc[x_test.index]
         # if not categorical column, create psi
@@ -105,11 +105,11 @@ def _calc_psi(x_train, x_test, dataset):
     return f'''
     <div class="card text-center">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs" 
+            <ul class="nav nav-tabs card-header-tabs text-nowrap p-3" data-bs-tabs="tabs"
             style="overflow-x: auto;">
                 {nav_items}
             </ul>
-            
+
         </div>
         <form class="card-body tab-content">
             {tab_pane_items}
@@ -141,7 +141,7 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
         elif isinstance(metrics_to_calc, list):
             functions_names = metrics_to_calc
         else:
-            raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported. 
+            raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
                             Must be "all", "main" or list.''')
 
         result['root_mean_square_error'] = np.sqrt(functions['mean_squared_error'](y_true, y_pred))
@@ -160,7 +160,7 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
             elif isinstance(metrics_to_calc, list):
                 functions_names = metrics_to_calc
             else:
-                raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported. 
+                raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
                                 Must be "all", "main" or list.''')
 
         elif type_of_true == 'binary' and type_of_pred == 'continuous':
@@ -179,7 +179,7 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
                 result[name] = functions[name](y_true, y_pred, x[exposure])[2]
             else:
                 result[name] = functions[name](y_true, y_pred)
-            
+
         except Exception as e:
             print(f'\t-{e}')
 
@@ -272,7 +272,7 @@ metrics_regression = {
     'gini_coef': gini_coef,
     'lift_score': lift_score,
 }
-        
+
 metrics_classification = {
     "accuracy_score": metrics.accuracy_score,
     "average_precision_score": metrics.average_precision_score,
