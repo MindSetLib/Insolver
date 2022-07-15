@@ -37,3 +37,23 @@ exclude = [
     'venv',
     'env'
 ]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py37, py38, py39, py310
+skip_missing_interpreters = true
+skipsdist = true
+
+[gh-actions]
+python =
+    3.7: py37
+    3.8: py38
+    3.9: py39
+    3.10: py310
+
+[testenv]
+deps = -r requirements.txt
+commands =
+    pytest --junitxml=test_report.xml
+"""
