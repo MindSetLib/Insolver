@@ -16,16 +16,16 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: macOS setup
-        if: matrix.os == 'macOS-latest'
-        shell: bash
-        run: |
-          brew install libomp
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: macOS setup
+      if: matrix.os == 'macOS-latest'
+      shell: bash
+      run: |
+        brew install libomp
     - name: Install dependencies
       shell: bash
       run: |
