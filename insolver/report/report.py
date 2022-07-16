@@ -19,7 +19,7 @@ from tqdm.auto import tqdm
 
 class Report:
     """Combine data and model summary in one html report
-    
+
     Parameters:
         model (InsolverBaseWrapper): A fitted model implementing `predict`.
         task (str): Model type, supported values are `reg` and `class`.
@@ -36,54 +36,54 @@ class Report:
         dataset_description (str): Description of the dataset set to display.
         y_description (str): Description of the y value set to display.
         features_description (str): Features description set to display.
-        metrics_to_calc (list): The names of the metrics to be calculated, can be `all` (all metrics will be 
+        metrics_to_calc (list): The names of the metrics to be calculated, can be `all` (all metrics will be
             calculated), `main` or list.
-        show_parameters (bool): Show all model parameters, default value is False 
-            because some models have a lot of parameters. 
+        show_parameters (bool): Show all model parameters, default value is False
+            because some models have a lot of parameters.
         pandas_profiling (bool): Create Pandas Profiling, default value is True.
         models_to_compare (list): Fitted models implementing `predict` for comparison.
         comparison_metrics (list): Metrics for comparison.
-        f_groups_type (str, dict): Groups type for the `Features comparison chart`, supported values are: `cut` - bin 
-            values into discrete intervals, `qcut` - quantile-based discretization function, `freq` - bins created 
-            using start, end and the length of each interval. If str, all features are cut using `f_groups_type`. If 
-            dict, must be {'feature': 'groups_type', 'all': 'groups_type'} where 'all' will be used for all features 
+        f_groups_type (str, dict): Groups type for the `Features comparison chart`, supported values are: `cut` - bin
+            values into discrete intervals, `qcut` - quantile-based discretization function, `freq` - bins created
+            using start, end and the length of each interval. If str, all features are cut using `f_groups_type`. If
+            dict, must be {'feature': 'groups_type', 'all': 'groups_type'} where 'all' will be used for all features
             not listed in the dict.
         f_bins (int, dict): Bins for the `Features comparison chart`. Number of bins for `cut` and `qcut` groups_type.
-            If int, all features are cut using `f_bins`. If dict, must be {'feature': bins, 'all': 'groups_type'} 
+            If int, all features are cut using `f_bins`. If dict, must be {'feature': bins, 'all': 'groups_type'}
             where 'all' will be used for all features not listed in the dict. Default value is 10.
         f_start (float, dict): Start for the `Features comparison chart`. Start value for `freq` groups_type. If not
-            set, min(column)-1 is used. If float, all features are cut using `f_start`. If dict, must be 
+            set, min(column)-1 is used. If float, all features are cut using `f_start`. If dict, must be
             {'feature': start, 'all': 'groups_type'} where 'all' will be used for all features not listed in the dict.
         f_end (float, dict): End for the `Features comparison chart`. End value for `freq` groups_type. If not
-            set, max(column) is used. If float, all features are cut using `f_end`. If dict, must be 
+            set, max(column) is used. If float, all features are cut using `f_end`. If dict, must be
             {'feature': end, 'all': 'groups_type'} where 'all' will be used for all features not listed in the dict.
-        f_freq (float, dict): Freq for the `Features comparison chart`. The length of each interval for `freq` 
-            groups_type. Default value is 1.5. If float, all features are cut using `f_freq`. If dict, must be 
+        f_freq (float, dict): Freq for the `Features comparison chart`. The length of each interval for `freq`
+            groups_type. Default value is 1.5. If float, all features are cut using `f_freq`. If dict, must be
             {'feature': freq, 'all': 'groups_type'} where 'all' will be used for all features not listed in the dict.
-        p_groups_type (str): Groups type for the `Predict groups chart`, supported values are: `cut` - bin 
-            values into discrete intervals, `qcut` - quantile-based discretization function, `freq` - bins created 
-            using start, end and the length of each interval. 
-        p_bins (int): Bins for the `Predict groups chart`. Number of bins for `cut` and `qcut` groups_type. Default 
+        p_groups_type (str): Groups type for the `Predict groups chart`, supported values are: `cut` - bin
+            values into discrete intervals, `qcut` - quantile-based discretization function, `freq` - bins created
+            using start, end and the length of each interval.
+        p_bins (int): Bins for the `Predict groups chart`. Number of bins for `cut` and `qcut` groups_type. Default
             value is 10.
         p_start (float): Start for the `Predict groups chart`. Start value for `freq` groups_type. If not
             set, min(column)-1 is used.
         p_end (float): End for the `Predict groups chart`. End value for `freq` groups_type. If not
-            set, max(column) is used. 
-        p_freq (float): Freq for the `Predict groups chart`. The length of each interval for `freq` 
-            groups_type. Default value is 1.5. 
-        d_groups_type (str): Groups type for the `Difference chart`, supported values are: `cut` - bin 
-            values into discrete intervals, `qcut` - quantile-based discretization function, `freq` - bins created 
-            using start, end and the length of each interval. 
-        d_bins (int): Bins for the `Difference chart`. Number of bins for `cut` and `qcut` groups_type. Default 
+            set, max(column) is used.
+        p_freq (float): Freq for the `Predict groups chart`. The length of each interval for `freq`
+            groups_type. Default value is 1.5.
+        d_groups_type (str): Groups type for the `Difference chart`, supported values are: `cut` - bin
+            values into discrete intervals, `qcut` - quantile-based discretization function, `freq` - bins created
+            using start, end and the length of each interval.
+        d_bins (int): Bins for the `Difference chart`. Number of bins for `cut` and `qcut` groups_type. Default
             value is 10.
-        d_start (float): Start for the `Difference chart`. Start value for `freq` groups_type. If not set, 
+        d_start (float): Start for the `Difference chart`. Start value for `freq` groups_type. If not set,
             min(column)-1 is used.
         d_end (float): End for the `Difference chart`. End value for `freq` groups_type. If not set, max(column)
-            is used. 
-        d_freq (float): Freq for the `Difference chart`. The length of each interval for `freq` groups_type. 
-            Default value is 1.5. 
+            is used.
+        d_freq (float): Freq for the `Difference chart`. The length of each interval for `freq` groups_type.
+            Default value is 1.5.
         main_diff_model: Main difference model for the `Difference chart`.
-        compare_diff_models (list): Models for comparison with the main model for the `Difference chart`. 
+        compare_diff_models (list): Models for comparison with the main model for the `Difference chart`.
         pairs_for_matrix (list): List of pairs for the `Comparison matrix`.
         m_bins (int): Number of bins for the `Comparison matrix`.
         m_freq (float): The length of each interval for the `Comparison matrix`. If set, m_bins won't be used.
@@ -156,7 +156,7 @@ class Report:
 
         # check columns
         if not sorted(X_train.columns.to_list()) == sorted(X_test.columns.to_list()):
-            raise KeyError(f'''Columns in X_train {sorted(X_train.columns.to_list())} 
+            raise KeyError(f'''Columns in X_train {sorted(X_train.columns.to_list())}
             and X_test {sorted(X_test.columns.to_list())} are not the same.''')
         elif len(set(X_train.columns.to_list()).difference(original_dataset.columns.to_list())) > 0:
             s = set(X_train.columns.to_list()).difference(original_dataset.columns.to_list())
@@ -190,7 +190,7 @@ class Report:
         # create additional parameters
         self.pbar = tqdm(total=10)
         self.profile = None
-        
+
         # prepare jinja environment and template
         templateLoader = jinja2.FileSystemLoader(searchpath=self._directory)
         self.env = jinja2.Environment(loader=templateLoader)
@@ -222,16 +222,16 @@ class Report:
             self._profile_data()
             pandas_profiling_html = _create_pandas_profiling()
             section[0]['articles'].append(pandas_profiling_html)
-        
+
         # create features description article, contains specification, description and psi
         self.pbar.update(1)
         self.pbar.set_description('Creating features description article')
         section[0]['articles'].append(_create_features_description(self.X_train, self.X_test,
                                                                    self.original_dataset, self.features_description))
-        
+
         # save section
         self.sections.append(section[0])
-        
+
         with open(f'{path}/{report_name}/dataset_section.html', 'w') as f:
             html_ = self.template.render(sections=section, title='Dataset')
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
@@ -256,7 +256,7 @@ class Report:
         self.pbar.update(1)
         self.pbar.set_description('Creating shap')
         shap_footer, shap_part = _create_shap(self.X_train, self.X_test, self.model, self.shap_type)
-        # create partial dependence 
+        # create partial dependence
         self.pbar.update(1)
         self.pbar.set_description('Creating partial dependence')
         pdp_footer, pdp_part = _create_partial_dependence(self.X_train, self.X_test, self.model)
@@ -310,7 +310,7 @@ class Report:
                                                             self.task, self.original_dataset, self.shap_type))
         # save section
         self.sections.append(section[0])
-        
+
         with open(f'{path}/{report_name}/model_section.html', 'w') as f:
             html_ = self.template.render(sections=section, title='Model')
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
@@ -330,7 +330,7 @@ class Report:
                                              classes="table table-striped", justify="center")]
         # save section
         self.sections.append(section[0])
-        
+
         with open(f'{path}/{report_name}/comparison_section.html', 'w') as f:
             html_ = self.template.render(sections=section, title='Comparison')
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
@@ -354,7 +354,7 @@ class Report:
         ]
         # save section
         self.sections.append(section[0])
-        
+
         with open(f'{path}/{report_name}/parameters_section.html', 'w') as f:
             html_ = self.template.render(sections=section, title='Parameters')
             html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
@@ -393,7 +393,7 @@ class Report:
         # save profile report
         if self.pandas_profiling:
             self.profile.to_file(f"{path}/{report_name}/profiling_report.html")
-        
+
         if separate_files:
             self._save_dataset_section(path, report_name)
             print('Dataset section is saved.')
@@ -470,7 +470,7 @@ class Report:
         model_metrics = self._create_html_table(["train", "test"], table, two_columns_table=False,
                                                 classes='table table-striped', justify='left')
         return model_metrics
-    
+
     @error_handler(False)
     def _model_parameters_to_list(self):
         """Model parameters as html tables in one list"""
