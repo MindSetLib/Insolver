@@ -16,13 +16,6 @@ Insolver is a low-code machine learning library, originally created for the insu
 pip install insolver
 ```
 
-### Post-install:
-
-To fix the display of plotly figs in jyputerlab, install:
-```shell
-jupyter labextension install jupyterlab-plotly
-```
-
 ### Insolver is already installed in the easy access cloud via the GitHub login. Try https://mset.space with a familiar notebook-style environment.
 
 ## Examples:

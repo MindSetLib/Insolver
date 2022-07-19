@@ -125,7 +125,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         mean_shap = npabs(shap_values).mean(axis=0).tolist()
 
         if show:
-            summary_plot(shap_values, X, plot_type=plot_type)
+            summary_plot(shap_values, X, plot_type=plot_type, feature_names=variables)
         return {variables[i]: mean_shap[i] for i in range(len(variables))}
 
     def shap_explain(self, data, index=None, link=None, show=True, layout_dict=None):
