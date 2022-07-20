@@ -39,7 +39,7 @@ class TransformParamUselessGroup:
         return param_useless
 
     def __call__(self, df):
-        if (not self.inference) or (self.param_useless != list()):
+        if self.param_useless == list():
             self.param_useless = self._param_useless_get(df, self.column_param, self.size_min)
         df.loc[df[self.column_param].isin(self.param_useless), self.column_param] = self.group_name
         return df
@@ -74,7 +74,7 @@ class TransformParamSortFreq:
             self.param_freq_dict = {}
 
     def __call__(self, df):
-        if (not self.inference) or (self.param_freq_dict != dict()):
+        if self.param_freq_dict == dict():
             self.param_freq = df.groupby([self.column_param]).sum()[[self.column_claims_count,
                                                                      self.column_policies_count]]
             self.param_freq['freq'] = (self.param_freq[self.column_claims_count] /
@@ -118,7 +118,7 @@ class TransformParamSortAC:
             self.param_ac_dict = {}
 
     def __call__(self, df):
-        if (not self.inference) or (self.param_ac_dict != dict()):
+        if self.param_ac_dict == dict():
             self.param_ac = df.groupby([self.column_param]).sum()[[self.column_claims_sum, self.column_claims_count]]
             self.param_ac['avg_claim'] = self.param_ac[self.column_claims_sum] / self.param_ac[self.column_claims_count]
             keys = []
