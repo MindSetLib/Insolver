@@ -72,15 +72,13 @@ class TransformGetDummies:
         self.column_param = column_param
         self.drop_first = drop_first
         self.inference = inference
-        if inference:
-            if dummy_columns is None:
-                raise NotImplementedError("'dummy_columns' should contain the list of dummy columns.")
+        if inference or dummy_columns is not None:
             self.dummy_columns = dummy_columns
         else:
             self.dummy_columns = []
 
     def __call__(self, df):
-        if not self.inference:
+        if (not self.inference) or (self.dummy_columns == list()):
             df_dummy = get_dummies(df[[self.column_param]], prefix_sep='_', drop_first=self.drop_first)
             self.dummy_columns = list([col.replace(' ', '_') for col in df_dummy.columns])
             df_dummy.columns = self.dummy_columns
