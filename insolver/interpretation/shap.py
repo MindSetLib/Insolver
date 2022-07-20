@@ -49,7 +49,7 @@ class SHAPExplanation(InterpretBase):
         mean_shap = np.abs(shap_values).mean(axis=0).tolist()
         # show plot if True
         if show:
-            summary_plot(shap_values, X, plot_type=plot_type)
+            summary_plot(shap_values, X, plot_type=plot_type, feature_names=variables)
 
         return {variables[i]: round(mean_shap[i], 4) for i in range(len(variables))}
 

@@ -17,9 +17,7 @@ class TransformParamUselessGroup:
         self.size_min = size_min
         self.group_name = group_name
         self.inference = inference
-        if inference:
-            if param_useless is None:
-                raise NotImplementedError("'param_useless' should contain the list of useless values.")
+        if inference and param_useless is not None:
             self.param_useless = param_useless
         else:
             self.param_useless = []
@@ -41,7 +39,7 @@ class TransformParamUselessGroup:
         return param_useless
 
     def __call__(self, df):
-        if not self.inference:
+        if self.param_useless == list():
             self.param_useless = self._param_useless_get(df, self.column_param, self.size_min)
         df.loc[df[self.column_param].isin(self.param_useless), self.column_param] = self.group_name
         return df
@@ -70,15 +68,13 @@ class TransformParamSortFreq:
         self.column_claims_count = column_claims_count
         self.param_freq = DataFrame
         self.inference = inference
-        if inference:
-            if param_freq_dict is None:
-                raise NotImplementedError("'param_freq_dict' should contain the dictionary of sorted values.")
+        if inference and param_freq_dict is not None:
             self.param_freq_dict = param_freq_dict
         else:
             self.param_freq_dict = {}
 
     def __call__(self, df):
-        if not self.inference:
+        if self.param_freq_dict == dict():
             self.param_freq = df.groupby([self.column_param]).sum()[[self.column_claims_count,
                                                                      self.column_policies_count]]
             self.param_freq['freq'] = (self.param_freq[self.column_claims_count] /
@@ -116,15 +112,13 @@ class TransformParamSortAC:
         self.column_claims_sum = column_claims_sum
         self.param_ac = DataFrame
         self.inference = inference
-        if inference:
-            if param_ac_dict is None:
-                raise NotImplementedError("'param_ac_dict' should contain the dictionary of sorted values.")
+        if inference and param_ac_dict is not None:
             self.param_ac_dict = param_ac_dict
         else:
             self.param_ac_dict = {}
 
     def __call__(self, df):
-        if not self.inference:
+        if self.param_ac_dict == dict():
             self.param_ac = df.groupby([self.column_param]).sum()[[self.column_claims_sum, self.column_claims_count]]
             self.param_ac['avg_claim'] = self.param_ac[self.column_claims_sum] / self.param_ac[self.column_claims_count]
             keys = []
