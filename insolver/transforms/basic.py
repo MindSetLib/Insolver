@@ -78,14 +78,14 @@ class TransformGetDummies:
             self.dummy_columns = []
 
     def __call__(self, df):
-        if (not self.inference) or (self.dummy_columns != list()):
+        if self.dummy_columns == list():
             df_dummy = get_dummies(df[[self.column_param]], prefix_sep='_', drop_first=self.drop_first)
             self.dummy_columns = list([col.replace(' ', '_') for col in df_dummy.columns])
             df_dummy.columns = self.dummy_columns
             df = concat([df, df_dummy], axis=1)
         else:
             for column in self.dummy_columns:
-                df[column] = 1 * ((self.column_param + '_' + df[self.column_param]) == column)
+                df[column] = ((self.column_param + '_' + df[self.column_param]) == column).astype('int8')
         return df
 
 
