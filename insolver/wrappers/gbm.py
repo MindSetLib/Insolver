@@ -190,7 +190,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
             fig.show()
         else:
             json_ = prediction[['Value', 'SHAP Value', 'Contribution']].T.to_dict()
-            fig_base64 = b64encode(to_image(fig, format='jpeg', engine='kaleido')).decode('ascii')
+            fig_base64 = b64encode(to_image(fig, format='jpeg')).decode('ascii')
             json_.update({'id': int(data.index.values), 'predict': prediction['Link'][-1],
                           "ShapValuesPlot": fig_base64})
             return json_
