@@ -1,6 +1,2 @@
-requests
-requests_cache>=0.8.0
-kaleido>=0.1.0
-geocoder==1.38.1 # No maintainance!
 dice-ml
 alibi

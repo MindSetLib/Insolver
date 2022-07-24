@@ -24,7 +24,7 @@ class TransformExp:
         elif exp < 0:
             exp = None
         else:
-            exp = exp * 7 // 365
+            exp = exp // 12
         if exp > exp_max:
             exp = exp_max
         return exp
