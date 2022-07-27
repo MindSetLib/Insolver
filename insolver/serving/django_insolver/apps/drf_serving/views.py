@@ -1,5 +1,3 @@
-import json
-
 import pandas as pd
 from drf_serving.load_model import model, transforms
 from insolver import InsolverDataFrame
@@ -20,7 +18,5 @@ class PredictAPIView(APIView):
         # Prediction
         predicted = model.predict(instransforms)
 
-        result = {
-            'predicted': predicted.tolist()
-        }
+        result = {'predicted': predicted.tolist()}
         return Response(result)
