@@ -1,5 +1,6 @@
 import os
 import json
+import pytest
 from io import StringIO
 import pandas as pd
 import importlib
@@ -80,26 +81,26 @@ with open("./dev/test_request_frempl.json", 'r') as file_:
     request_json = json.load(file_)
 
 
+@pytest.mark.xfail(raises=H2OServerError)
 def test_h2o_model():
     os.environ['model_path'] = './test_glm_model.h2o'
     os.environ['transforms_path'] = './transforms.pickle'
-    try:
-        from insolver.serving.flask_app import app
-        for file in ["transforms.pickle", "test_glm_model.h2o"]:
-            os.remove(file)
-        app.testing = True
 
-        with app.test_client() as client:
-            response = client.post(
-                '/predict',
-                data=json.dumps(request_json_h2o),
-                content_type='application/json',
-            )
-            data = json.loads(response.get_data(as_text=True))
-            assert response.status_code == 200
-            assert round(data['predicted'][0], 7) == round(predict[0], 7)
-    except H2OServerError:
-        assert True
+    from insolver.serving.flask_app import app
+
+    for file in ["transforms.pickle", "test_glm_model.h2o"]:
+        os.remove(file)
+    app.testing = True
+
+    with app.test_client() as client:
+        response = client.post(
+            '/predict',
+            data=json.dumps(request_json_h2o),
+            content_type='application/json',
+        )
+        data = json.loads(response.get_data(as_text=True))
+        assert response.status_code == 200
+        assert round(data['predicted'][0], 7) == round(predict[0], 7)
 
 
 def test_index_page():

@@ -2,7 +2,6 @@ import os
 import copy
 import time
 import pickle
-import joblib
 
 
 class InsolverBaseWrapper:
@@ -69,12 +68,6 @@ class InsolverBaseWrapper:
     def _pickle_save(self, path, name, **kwargs):
         with open(os.path.join(path, f'{name}.pickle'), 'wb') as _model:
             pickle.dump(self.model, _model, **kwargs)
-
-    def _joblib_load(self, load_path):
-        self.model = joblib.load(load_path)
-
-    def _joblib_save(self, path, name, **kwargs):
-        joblib.dump(self.model, os.path.join(path, f'{name}.joblib'), **kwargs)
 
     def _update_meta(self):
         self.meta = self.__dict__.copy()

@@ -20,7 +20,6 @@ h2o>=3.32.0.3
 statsmodels==0.13.1
 lime>=0.2.0.1
 dill>=0.3.4
-joblib~=1.0.0
 
 # insolver.report
 jinja2>=3.0.1
