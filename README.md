@@ -12,9 +12,10 @@ Insolver is a low-code machine learning library, originally created for the insu
 
 ## Installation:
 
-```shell
-pip install insolver
-```
+- Insolver can be installed by running `pip install insolver`.
+- If you want to install insolver with all heavy requirements, install with `pip install insolver[full]`.
+- If you want to install insolver with development requirements, install with `pip install insolver[dev]`.
+
 
 ### Insolver is already installed in the easy access cloud via the GitHub login. Try https://mset.space with a familiar notebook-style environment.
 
