@@ -3,8 +3,8 @@
 [![PyPI](https://img.shields.io/pypi/v/insolver?style=flat)](https://pypi.org/project/insolver/)
 [![Documentation Status](https://readthedocs.org/projects/insolver/badge/?version=latest)](https://insolver.readthedocs.io/en/latest/?badge=latest)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MindSetLib/Insolver/Insolver%20testing?logo=github&label=tests)](https://github.com/MindSetLib/Insolver/actions)
-[![Downloads](https://pepy.tech/badge/insolver/week)](https://pepy.tech/project/insolver)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Downloads](https://pepy.tech/badge/insolver/week)](https://pepy.tech/project/insolver)
 <!--- [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MindSetLib/Insolver/Python%20application?logo=github&label=tests)](https://github.com/MindSetLib/Insolver/actions) --->
 
 Insolver is a low-code machine learning library, originally created for the insurance industry, but can be used in any other. You can find a more detailed overview [here](https://insolver.readthedocs.io/en/latest/source/overview.html).
