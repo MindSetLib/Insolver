@@ -16,7 +16,9 @@ jobs:
           - ${{ contains(github.ref, 'dev') }}
         exclude:
           - isDev: true
-            os: [ windows-latest, macos-latest ]
+            os: windows-latest
+          - isDev: true
+            os: macos-latest
 
     runs-on: ${{ matrix.os }}
 
