@@ -22,6 +22,7 @@ class Smoothing:
         new_df (pandas.DataFrame): A new dataframe as a copy of the original data with a transformed column added.
 
     """
+
     def __init__(self, method, x_column=None, y_column=None, window=11, polyorder=5, threshold=1e5):
         self.method = method
         self.window = window
@@ -108,9 +109,9 @@ class Smoothing:
             **kwargs: Arguments for the `scipy.signal.savgol_filter` function.
         """
         # create a new column with the savgol_filter method
-        df[f'{self.x_column}_Savitzky_Golaay'] = savgol_filter(df[self.x_column],
-                                                               window_length=self.window,
-                                                               polyorder=self.polyorder, **kwargs)
+        df[f'{self.x_column}_Savitzky_Golaay'] = savgol_filter(
+            df[self.x_column], window_length=self.window, polyorder=self.polyorder, **kwargs
+        )
 
     def _fft(self, df, **kwargs):
         """
@@ -144,15 +145,12 @@ class Smoothing:
         if self.method == 'lowess':
             plt.figure(figsize=figsize)
             # plot old values as scatterplot
-            scatterplot(self.new_df[self.x_column],
-                        self.new_df[self.y_column], label='Raw')
+            scatterplot(self.new_df[self.x_column], self.new_df[self.y_column], label='Raw')
             # plot new values
             if self._lowess_shape == 2:
-                plt.plot(self.new_df[columns[-2]],
-                         self.new_df[columns[-1]], label=self.method)
+                plt.plot(self.new_df[columns[-2]], self.new_df[columns[-1]], label=self.method)
             else:
-                plt.plot(self.new_df[columns[-1]],
-                         self.new_df[self.y_column], label=self.method)
+                plt.plot(self.new_df[columns[-1]], self.new_df[self.y_column], label=self.method)
             plt.legend()
 
         else:

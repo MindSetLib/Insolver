@@ -18,6 +18,7 @@ class Sampling:
         cluster_column (str): Column name of the data frame used as clusters.
         method (str): Sampling method, supported methods: `simple`, `systematic`, `cluster`, `stratified`.
     """
+
     def __init__(self, n, cluster_column=None, n_clusters=10, method='simple'):
         self.method = method
         self.n = n
@@ -42,7 +43,7 @@ class Sampling:
             'simple': lambda d: self._simple_sampling(d),
             'systematic': lambda d: self._systematic_sampling(d),
             'cluster': lambda d: self._cluster_sampling(d),
-            'stratified': lambda d: self._stratified_sampling(d)
+            'stratified': lambda d: self._stratified_sampling(d),
         }
 
         # raise error if the method is not supported

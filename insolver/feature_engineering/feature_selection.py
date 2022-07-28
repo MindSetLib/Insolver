@@ -194,14 +194,13 @@ class FeatureSelection:
                 n = 0
                 # plot each class importances
                 for n_class in self.importances:
-                    df_to_plot = pd.DataFrame({
-                        'feature_name': self.x.columns,
-                        'feature_score': n_class})
+                    df_to_plot = pd.DataFrame({'feature_name': self.x.columns, 'feature_score': n_class})
 
                     # if importance_threshold plot only selected features
                     if importance_threshold:
                         df_to_plot[df_to_plot['feature_score'] > importance_threshold].plot.barh(
-                            x='feature_name', y='feature_score', figsize=figsize)
+                            x='feature_name', y='feature_score', figsize=figsize
+                        )
 
                     # else plot all features
                     else:
@@ -212,15 +211,13 @@ class FeatureSelection:
 
             # else importances is (, n_features)
             else:
-                df_to_plot = pd.DataFrame({
-                    'feature name': self.x.columns,
-                    'feature score': self.importances
-                })
+                df_to_plot = pd.DataFrame({'feature name': self.x.columns, 'feature score': self.importances})
 
                 # if importance_threshold plot only selected features
                 if importance_threshold:
                     df_to_plot[df_to_plot['feature score'] > importance_threshold].plot.barh(
-                        x='feature name', y='feature score', figsize=figsize)
+                        x='feature name', y='feature score', figsize=figsize
+                    )
 
                 # else plot all features
                 else:
@@ -246,10 +243,12 @@ class FeatureSelection:
                 'chi2': lambda x, y: chi2(x, y),
                 'f_statistic': lambda x, y: f_classif(x, y),
                 'random_forest': lambda x, y: RandomForestClassifier(n_estimators=10).fit(x, y),
-                'lasso': lambda x, y: LogisticRegression(penalty='l1',
-                                                         solver='saga').fit(StandardScaler().fit_transform(x), y),
-                'elasticnet': lambda x, y: LogisticRegression(penalty='elasticnet', l1_ratio=0.5,
-                                                              solver='saga').fit(StandardScaler().fit_transform(x), y),
+                'lasso': lambda x, y: LogisticRegression(penalty='l1', solver='saga').fit(
+                    StandardScaler().fit_transform(x), y
+                ),
+                'elasticnet': lambda x, y: LogisticRegression(penalty='elasticnet', l1_ratio=0.5, solver='saga').fit(
+                    StandardScaler().fit_transform(x), y
+                ),
             }
 
         # methods_dict initialization for regression task
@@ -266,12 +265,12 @@ class FeatureSelection:
         elif self.task == 'multiclass':
             self.methods_dict = {
                 'random_forest': lambda x, y: RandomForestRegressor(n_estimators=10).fit(x, y),
-                'lasso': lambda x, y:
-                LogisticRegression(penalty='l1', solver='saga',
-                                   multi_class='multinomial').fit(StandardScaler().fit_transform(x), y),
-                'elasticnet': lambda x, y:
-                LogisticRegression(penalty='elasticnet', l1_ratio=0.5, solver='saga', multi_class='multinomial')
-                .fit(StandardScaler().fit_transform(x), y),
+                'lasso': lambda x, y: LogisticRegression(penalty='l1', solver='saga', multi_class='multinomial').fit(
+                    StandardScaler().fit_transform(x), y
+                ),
+                'elasticnet': lambda x, y: LogisticRegression(
+                    penalty='elasticnet', l1_ratio=0.5, solver='saga', multi_class='multinomial'
+                ).fit(StandardScaler().fit_transform(x), y),
             }
 
         # methods_dict initialization for multiclass multioutput classification task
@@ -284,16 +283,14 @@ class FeatureSelection:
             raise NotImplementedError(f'Value task must be one of the {self.tasks_list}')
 
     def _init_importance_dict(self):
-        """Non-public method for creating an importance dictionary.
-
-        """
+        """Non-public method for creating an importance dictionary."""
         self.importance_dict = {
             'random_forest': lambda model: model.feature_importances_,
             'mutual_inf': lambda model: model,
             'chi2': lambda model: model[1],
             'f_statistic': lambda model: -np.log10(model[1]) / (-np.log10(model[1])).max(),
             'lasso': lambda model: model.coef_,
-            'elasticnet': lambda model: model.coef_
+            'elasticnet': lambda model: model.coef_,
         }
 
     def __call__(self, df):

@@ -124,7 +124,6 @@ def index():
 
 @app.post("/predict")
 def predict(data: Data):
-
     start_prediction = time()
 
     data_dict = data.dict()
@@ -143,9 +142,6 @@ def predict(data: Data):
     end_prediction = time()
     duration = round(end_prediction - start_prediction, 6)
 
-    result = {
-        'result': float(formula_sympy.subs(dict_variables).evalf()),
-        'duration': duration
-    }
+    result = {'result': float(formula_sympy.subs(dict_variables).evalf()), 'duration': duration}
 
     return jsonable_encoder(result)

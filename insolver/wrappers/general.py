@@ -18,6 +18,7 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
         load_path (str, optional): Path to RF model to load from disk.
         **kwargs: Parameters for RF estimators except `n_estimators`. Will not be changed in hyperopt.
     """
+
     def __init__(self, backend, task=None, n_estimators=100, load_path=None, **kwargs):
         super(InsolverRFWrapper, self).__init__(backend)
         self.init_args = self._get_init_args(vars())
@@ -34,10 +35,7 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
             self.load_model(load_path)
         else:
             if task in self._tasks:
-                rf_init = {
-                    'class': {'sklearn': RandomForestClassifier},
-                    'reg': {'sklearn': RandomForestRegressor}
-                }
+                rf_init = {'class': {'sklearn': RandomForestClassifier}, 'reg': {'sklearn': RandomForestRegressor}}
 
                 kwargs.update({'n_estimators': self.n_estimators})
                 self.model, self.params = rf_init[task][self.backend](**(kwargs if kwargs is not None else {})), kwargs
@@ -67,8 +65,11 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
         if report is not None:
             if isinstance(report, (list, tuple)):
                 prediction = self.model.predict(X)
-                print(DataFrame([[x.__name__, x(y, prediction)] for x
-                                 in report]).rename({0: 'Metrics', 1: 'Value'}, axis=1).set_index('Metrics'))
+                print(
+                    DataFrame([[x.__name__, x(y, prediction)] for x in report])
+                    .rename({0: 'Metrics', 1: 'Value'}, axis=1)
+                    .set_index('Metrics')
+                )
 
     def predict(self, X, **kwargs):
         """Predict using RF with feature matrix X.
@@ -80,8 +81,9 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
         Returns:
             array: Returns predicted values.
         """
-        return self.model.predict(X if not hasattr(self.model, 'feature_name_')
-                                  else X[self.model.feature_name_], **kwargs)
+        return self.model.predict(
+            X if not hasattr(self.model, 'feature_name_') else X[self.model.feature_name_], **kwargs
+        )
 
     def cross_val(self, X, y, scoring=None, cv=None, **kwargs):
         """Method for performing cross-validation given the hyperparameters of initialized or fitted model.
@@ -102,8 +104,9 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
         if callable(scoring):
             scorers = {scoring.__name__.replace('_', ' '): array([scoring(y, self.model.predict(X))])}
         elif isinstance(scoring, (tuple, list)):
-            scorers = {scorer.__name__.replace('_', ' '): array([scorer(y, self.model.predict(X))]) for
-                       scorer in scoring}
+            scorers = {
+                scorer.__name__.replace('_', ' '): array([scorer(y, self.model.predict(X))]) for scorer in scoring
+            }
         elif isinstance(scoring, str):
             if scoring in SCORERS:
                 scorers = {scoring.replace('_', ' '): array([SCORERS[scoring](self.model, X=X, y=y)])}

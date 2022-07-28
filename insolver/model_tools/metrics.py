@@ -32,9 +32,15 @@ def deviance_score(y, y_pred, weight=None, power=0, agg='sum'):
     elif isinstance(power, str) or (0 < power < 1):
         raise Exception(f"power={power} is not supported.")
     else:
-        return func(2 * weight * (np.power(np.max(y, 0), 2 - power) / ((1 - power) * (2 - power)) -
-                                  (y * np.power(y_pred, 1 - power)) / (1 - power) +
-                                  (np.power(y_pred, 2 - power)) / (2 - power)))
+        return func(
+            2
+            * weight
+            * (
+                np.power(np.max(y, 0), 2 - power) / ((1 - power) * (2 - power))
+                - (y * np.power(y_pred, 1 - power)) / (1 - power)
+                + (np.power(y_pred, 2 - power)) / (2 - power)
+            )
+        )
 
 
 def deviance_poisson(y, y_pred, weight=None, agg='sum'):
@@ -70,15 +76,15 @@ def deviance_gamma(y, y_pred, weight=None, agg='sum'):
 def deviance_explained(y, y_pred, weight=None, power=0):
     """Function for Pseudo R^2 (Deviance explained) evaluation.
 
-        Args:
-            y: Array with target variable.
-            y_pred: Array with predictions.
-            weight: Weights for weighted metric.
-            power: Power for deviance calculation.
+    Args:
+        y: Array with target variable.
+        y_pred: Array with predictions.
+        weight: Weights for weighted metric.
+        power: Power for deviance calculation.
 
-        Returns:
-            float, value of the Pseudo R^2.
-        """
+    Returns:
+        float, value of the Pseudo R^2.
+    """
     dev = deviance_score(y, y_pred, weight=weight, power=power)
     dev0 = deviance_score(y, np.repeat(np.mean(y), len(y)), weight=weight, power=power)
     return 1 - dev / dev0
@@ -87,28 +93,28 @@ def deviance_explained(y, y_pred, weight=None, power=0):
 def deviance_explained_poisson(y, y_pred, weight=None):
     """Function for Pseudo R^2 (Deviance explained) evaluation for Poisson model.
 
-        Args:
-            y: Array with target variable.
-            y_pred: Array with predictions.
-            weight: Weights for weighted metric.
+    Args:
+        y: Array with target variable.
+        y_pred: Array with predictions.
+        weight: Weights for weighted metric.
 
-        Returns:
-            float, value of the Pseudo R^2.
-        """
+    Returns:
+        float, value of the Pseudo R^2.
+    """
     return deviance_explained(y, y_pred, weight=weight, power=1)
 
 
 def deviance_explained_gamma(y, y_pred, weight=None):
     """Function for Pseudo R^2 (Deviance explained) evaluation for Gamma model.
 
-        Args:
-            y: Array with target variable.
-            y_pred: Array with predictions.
-            weight: Weights for weighted metric.
+    Args:
+        y: Array with target variable.
+        y_pred: Array with predictions.
+        weight: Weights for weighted metric.
 
-        Returns:
-            float, value of the Pseudo R^2.
-        """
+    Returns:
+        float, value of the Pseudo R^2.
+    """
     return deviance_explained(y, y_pred, weight=weight, power=2)
 
 
@@ -195,8 +201,14 @@ def gain_curve(y_true, y_pred, exposure, step=1, figsize=(10, 6)):
 
     # Ideal Model
     cumul_samples, cumul_claim_amt, gini = lorenz_curve(y_true, y_true, exposure)
-    plt.plot(cumul_samples, cumul_claim_amt, c='black', linestyle='-.', linewidth=0.5,
-             label='Ideal Model (Gini: {:.3f})'.format(gini))
+    plt.plot(
+        cumul_samples,
+        cumul_claim_amt,
+        c='black',
+        linestyle='-.',
+        linewidth=0.5,
+        label='Ideal Model (Gini: {:.3f})'.format(gini),
+    )
 
     # Fitted Models
     if isinstance(y_pred, list):
@@ -284,10 +296,13 @@ def stability_index(scoring_variable, dev, oot, index='psi', binning_method='qua
 
     """
     assert index in ['psi', 'csi'], '"index" argument must be in ["psi", "csi"]'
-    assert binning_method in ['quantile', 'equal_width'], ('"binning_method" argument must'
-                                                           'be in ["quantile", "equal_width"]')
-    assert ((scoring_variable in dev.columns) and
-            (scoring_variable in oot.columns)), '"scoring_variable" must be in both `dev` and `out` datasets.'
+    assert binning_method in [
+        'quantile',
+        'equal_width',
+    ], '"binning_method" argument mustbe in ["quantile", "equal_width"]'
+    assert (scoring_variable in dev.columns) and (
+        scoring_variable in oot.columns
+    ), '"scoring_variable" must be in both `dev` and `out` datasets.'
     sc_var_dev, sc_var_oot = dev[scoring_variable], oot[scoring_variable]
     assert sc_var_dev.dtype == sc_var_oot.dtype, '"scoring_variable" type must be the same in both `dev` and `oot`'
 
@@ -304,9 +319,13 @@ def stability_index(scoring_variable, dev, oot, index='psi', binning_method='qua
     else:
         dev_bins = cut(sc_var_dev, bins=bins)
         oot_bins = cut(sc_var_oot, bins=dev_bins.cat.categories)
-    psi = concat([(oot_bins.value_counts().sort_index(ascending=False) / oot_bins.shape[0] * 100).rename('OOT'),
-                  (dev_bins.value_counts().sort_index(ascending=False) / dev_bins.shape[0] * 100).rename('DEV')],
-                 axis=1)
+    psi = concat(
+        [
+            (oot_bins.value_counts().sort_index(ascending=False) / oot_bins.shape[0] * 100).rename('OOT'),
+            (dev_bins.value_counts().sort_index(ascending=False) / dev_bins.shape[0] * 100).rename('DEV'),
+        ],
+        axis=1,
+    )
     psi['Diff'] = psi['OOT'] - psi['DEV']
     psi['ln_OOT_DEV'] = np.log(psi['OOT'] / psi['DEV'])
     psi['PSI'] = psi['Diff'] * psi['ln_OOT_DEV']

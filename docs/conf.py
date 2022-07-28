@@ -32,7 +32,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
-    'myst_parser'
+    'myst_parser',
 ]
 
 # Napoleon settings
@@ -72,7 +72,4 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
 
-source_suffix = {
-    '.md': 'markdown',
-    '.rst': 'restructuredtext'
-}
+source_suffix = {'.md': 'markdown', '.rst': 'restructuredtext'}

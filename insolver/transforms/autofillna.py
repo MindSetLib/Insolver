@@ -14,8 +14,17 @@ class AutoFillNATransforms:
         numerical_constants (dict): Dictionary of constants for each numerical column
         categorical_constants (dict): Dictionary of constants for each categorical column
     """
-    def __init__(self, numerical_columns=None, categorical_columns=None, numerical_method='median',
-                 categorical_method='frequent', numerical_constants=None, categorical_constants=None, priority=0):
+
+    def __init__(
+        self,
+        numerical_columns=None,
+        categorical_columns=None,
+        numerical_method='median',
+        categorical_method='frequent',
+        numerical_constants=None,
+        categorical_constants=None,
+        priority=0,
+    ):
         self.priority = priority
         self.numerical_columns = numerical_columns
         self.categorical_columns = categorical_columns
@@ -50,7 +59,7 @@ class AutoFillNATransforms:
             self._num_methods_dict = {
                 'median': lambda col: df[col].median(),
                 'mean': lambda col: df[col].mean(),
-                'mode': lambda col: df[col].mode()[0]
+                'mode': lambda col: df[col].mode()[0],
             }
 
             self.values = {}

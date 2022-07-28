@@ -34,10 +34,20 @@ class ModelMetricsCompare:
 
     """
 
-    def __init__(self, X, y, task=None, create_models=False,
-                 source=None, metrics=None, stats=None,
-                 h2o_init_params=None, predict_params=None,
-                 features=None, names=None):
+    def __init__(
+        self,
+        X,
+        y,
+        task=None,
+        create_models=False,
+        source=None,
+        metrics=None,
+        stats=None,
+        h2o_init_params=None,
+        predict_params=None,
+        features=None,
+        names=None,
+    ):
         self.X = X
         self.y = y
         self.task = task
@@ -55,6 +65,7 @@ class ModelMetricsCompare:
         stk = traceback.extract_stack()
         if not ('IPython' in stk[-2][0] and 'info' == stk[-2][2]):
             import IPython.display
+
             if self.task == 'reg':
                 print('Model comparison statistics:')
                 IPython.display.display(self.stats_results)
@@ -149,13 +160,10 @@ class ModelMetricsCompare:
             TypeError: Source type is not supported.
 
         """
-        assert (True if self.names is None else
-                len(self.names) == len(self.source)), 'Check length of list containing model names.'
-        wrappers = {
-            'glm': InsolverGLMWrapper,
-            'gbm': InsolverGBMWrapper,
-            'rf': InsolverRFWrapper
-        }
+        assert (
+            True if self.names is None else len(self.names) == len(self.source)
+        ), 'Check length of list containing model names.'
+        wrappers = {'glm': InsolverGLMWrapper, 'gbm': InsolverGBMWrapper, 'rf': InsolverRFWrapper}
 
         if (self.source is None) or isinstance(self.source, str):
             self.source = os.getcwd() if self.source is None else self.source
@@ -165,9 +173,11 @@ class ModelMetricsCompare:
                 model_list = []
                 for file in files:
                     algo, backend = os.path.basename(file).split('_')[1:3]
-                    model_list.append(wrappers[algo](backend=backend, load_path=file) if backend != 'h2o' else
-                                      wrappers[algo](backend=backend, load_path=file,
-                                                     h2o_init_params=self.h2o_init_params))
+                    model_list.append(
+                        wrappers[algo](backend=backend, load_path=file)
+                        if backend != 'h2o'
+                        else wrappers[algo](backend=backend, load_path=file, h2o_init_params=self.h2o_init_params)
+                    )
                 self.models = model_list
 
             else:
@@ -196,17 +206,25 @@ class ModelMetricsCompare:
         trivial = InsolverTrivialWrapper(task='reg', agg=lambda x: x)
         trivial.fit(self.X, self.y)
         models = [trivial] + self.models
-        features = ([None] + self.features if self.features is not None else None)
+        features = [None] + self.features if self.features is not None else None
         for model in models:
             algos.append(model.algo.upper()) if hasattr(model, 'algo') else algos.append('-')
-            (backend.append(model.backend.capitalize()) if hasattr(model, 'backend') else
-             backend.append(model.__class__.__name__))
+            (
+                backend.append(model.backend.capitalize())
+                if hasattr(model, 'backend')
+                else backend.append(model.__class__.__name__)
+            )
 
-            p = model.predict(self.X if (features is None) or (features[models.index(model)] is None)
-                              else self.X[features[models.index(model)]],
-                              **({} if (self.predict_params is None) or
-                                       (self.predict_params[models.index(model)] is None) else
-                                 self.predict_params[models.index(model)]))
+            p = model.predict(
+                self.X
+                if (features is None) or (features[models.index(model)] is None)
+                else self.X[features[models.index(model)]],
+                **(
+                    {}
+                    if (self.predict_params is None) or (self.predict_params[models.index(model)] is None)
+                    else self.predict_params[models.index(model)]
+                ),
+            )
 
             stats_val = [mean(p), var(p), std(p), min(p), quantile(p, 0.25), median(p), quantile(p, 0.75), max(p)]
 
@@ -245,16 +263,18 @@ class ModelMetricsCompare:
                     raise TypeError(f'Metrics with type {type(self.metrics)} are not supported.')
 
                 model_metrics = model_metrics.reset_index(drop=True)
-                model_metrics = (model_metrics if 'index' not in
-                                 model_metrics.columns else
-                                 model_metrics.drop(['index'], axis=1))
+                model_metrics = (
+                    model_metrics if 'index' not in model_metrics.columns else model_metrics.drop(['index'], axis=1)
+                )
 
-        model_metrics.index = (list(range(len(model_metrics))) if self.names is None else self.names)
+        model_metrics.index = list(range(len(model_metrics))) if self.names is None else self.names
         stats_df.index = ['Actual'] + model_metrics.index.tolist()
-        stats_df[['Algo', 'Backend']] = DataFrame({'Algo': ['-'] + algos[1:], 'Backend': ['-'] + backend[1:]},
-                                                  index=stats_df.index)
-        model_metrics[['Algo', 'Backend']] = DataFrame({'Algo': algos[1:], 'Backend': backend[1:]},
-                                                       index=model_metrics.index)
+        stats_df[['Algo', 'Backend']] = DataFrame(
+            {'Algo': ['-'] + algos[1:], 'Backend': ['-'] + backend[1:]}, index=stats_df.index
+        )
+        model_metrics[['Algo', 'Backend']] = DataFrame(
+            {'Algo': algos[1:], 'Backend': backend[1:]}, index=model_metrics.index
+        )
         stats_df = stats_df[list(stats_df.columns[-2:]) + list(stats_df.columns[:-2])]
         model_metrics = model_metrics[list(model_metrics.columns[-2:]) + list(model_metrics.columns[:-2])]
 

@@ -1,5 +1,6 @@
 import warnings
 from typing import Type, Union, Optional
+
 try:
     from typing import Literal
 except ImportError:
@@ -9,13 +10,10 @@ except ImportError:
 expected_type_warning = Literal["default", "error", "ignore", "always", "module", "once"]
 
 
-def warn_insolver(msg: Union[Warning, str],
-                  category_: Type[Warning]) -> None:
-    def warning_format(message: Union[Warning, str],
-                       category: Type[Warning],
-                       filename: str,
-                       lineno: int,
-                       line: Optional[str] = None) -> str:
+def warn_insolver(msg: Union[Warning, str], category_: Type[Warning]) -> None:
+    def warning_format(
+        message: Union[Warning, str], category: Type[Warning], filename: str, lineno: int, line: Optional[str] = None
+    ) -> str:
         return f"{category.__name__}: {message}\n"
 
     default_format = warnings.formatwarning

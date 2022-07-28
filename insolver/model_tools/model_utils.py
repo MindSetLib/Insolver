@@ -18,13 +18,19 @@ def train_val_test_split(*arrays, val_size, test_size, random_state=0, shuffle=T
         A list of partitions of the initial dataset.
     """
     n_arrays = len(arrays)
-    split1 = train_test_split(*arrays, random_state=random_state, shuffle=shuffle,
-                              test_size=test_size, stratify=stratify)
+    split1 = train_test_split(
+        *arrays, random_state=random_state, shuffle=shuffle, test_size=test_size, stratify=stratify
+    )
     if n_arrays > 1:
         train, test = split1[0::2], split1[1::2]
         if val_size != 0:
-            split2 = train_test_split(*train, random_state=random_state, shuffle=shuffle,
-                                      test_size=val_size / (1 - test_size), stratify=stratify)
+            split2 = train_test_split(
+                *train,
+                random_state=random_state,
+                shuffle=shuffle,
+                test_size=val_size / (1 - test_size),
+                stratify=stratify
+            )
             train, valid = split2[0::2], split2[1::2]
             return [*train, *valid, *test]
         else:
@@ -32,8 +38,13 @@ def train_val_test_split(*arrays, val_size, test_size, random_state=0, shuffle=T
     else:
         train, test = split1[0], split1[1]
         if val_size != 0:
-            split2 = train_test_split(train, random_state=random_state, shuffle=shuffle,
-                                      test_size=val_size / (1 - test_size), stratify=stratify)
+            split2 = train_test_split(
+                train,
+                random_state=random_state,
+                shuffle=shuffle,
+                test_size=val_size / (1 - test_size),
+                stratify=stratify,
+            )
             train, valid = split2[0], split2[1]
             return [train, valid, test]
         else:
@@ -55,5 +66,9 @@ def train_test_column_split(x, y, df_column):
     """
     x1, y1, col_name = x.copy(), y.copy(), df_column.name
     y1[col_name] = df_column
-    return (x1[x1[col_name] == 'train'].drop(col_name, axis=1), x1[x1[col_name] == 'test'].drop(col_name, axis=1),
-            y1[y1[col_name] == 'train'].drop(col_name, axis=1), y1[y1[col_name] == 'test'].drop(col_name, axis=1))
+    return (
+        x1[x1[col_name] == 'train'].drop(col_name, axis=1),
+        x1[x1[col_name] == 'test'].drop(col_name, axis=1),
+        y1[y1[col_name] == 'train'].drop(col_name, axis=1),
+        y1[y1[col_name] == 'test'].drop(col_name, axis=1),
+    )

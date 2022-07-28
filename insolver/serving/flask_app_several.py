@@ -156,10 +156,7 @@ def predict():
     current_datatime = strftime('[%Y-%b-%d %H:%M:%S]')
     logger.info(f'{current_datatime} predicted for {duration} msec: {result}\n')
 
-    result = {
-        'result': result,
-        'duration': duration
-    }
+    result = {'result': result, 'duration': duration}
 
     return jsonify(result)
 
@@ -168,13 +165,15 @@ def predict():
 def exceptions(e):
     current_datatime = strftime('[%Y-%b-%d %H:%M:%S]')
     error_message = traceback.format_exc()
-    logger.error('%s %s %s %s %s 5xx INTERNAL SERVER ERROR\n%s',
-                 current_datatime,
-                 request.remote_addr,
-                 request.method,
-                 request.scheme,
-                 request.full_path,
-                 error_message)
+    logger.error(
+        '%s %s %s %s %s 5xx INTERNAL SERVER ERROR\n%s',
+        current_datatime,
+        request.remote_addr,
+        request.method,
+        request.scheme,
+        request.full_path,
+        error_message,
+    )
     return jsonify({'error': 'Internal Server Error'}), 500
 
 

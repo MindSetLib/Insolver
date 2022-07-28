@@ -6,8 +6,14 @@ from insolver.model_tools import train_val_test_split
 
 
 class InsolverDataFrame(DataFrame):
-    def __init__(self, data: Any = None, index: Any = None, columns: Any = None, dtype: Optional[numpy_dtype] = None,
-                 copy: Optional[bool] = None) -> None:
+    def __init__(
+        self,
+        data: Any = None,
+        index: Any = None,
+        columns: Any = None,
+        dtype: Optional[numpy_dtype] = None,
+        copy: Optional[bool] = None,
+    ) -> None:
         """Primary DataFrame class for Insolver. Almost the same as the pandas.DataFrame.
 
         Args:
@@ -42,8 +48,14 @@ class InsolverDataFrame(DataFrame):
             meta_json['columns'].append({'name': column, 'dtype': self[column].dtypes, 'use': 'unknown'})
         return meta_json
 
-    def split_frame(self, val_size: float, test_size: float, random_state: Optional[int] = 0, shuffle: bool = True,
-                    stratify: Any = None) -> List[DataFrame]:
+    def split_frame(
+        self,
+        val_size: float,
+        test_size: float,
+        random_state: Optional[int] = 0,
+        shuffle: bool = True,
+        stratify: Any = None,
+    ) -> List[DataFrame]:
         """Function for splitting dataset into train/validation/test partitions.
 
         Args:
@@ -57,8 +69,9 @@ class InsolverDataFrame(DataFrame):
         Returns:
             list: (train, valid, test). A list of partitions of the initial dataset.
         """
-        return train_val_test_split(self, val_size=val_size, test_size=test_size, random_state=random_state,
-                                    shuffle=shuffle, stratify=stratify)
+        return train_val_test_split(
+            self, val_size=val_size, test_size=test_size, random_state=random_state, shuffle=shuffle, stratify=stratify
+        )
 
     def sample_request(self, batch_size: int = 1) -> Dict[str, object]:
         """Create json request by a random sample from InsolverDataFrame

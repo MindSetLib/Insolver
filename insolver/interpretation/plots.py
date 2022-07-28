@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.inspection import PartialDependenceDisplay
 from alibi.explainers import ALE, plot_ale
 from .base import InterpretBase
+
 warnings.filterwarnings('ignore')
 
 
@@ -67,34 +68,20 @@ class ExplanationPlot(InterpretBase):
         fig, ax = plt.subplots(figsize=figsize)
 
         self.model = PartialDependenceDisplay.from_estimator(
-            kind='average',
-            estimator=self.estimator,
-            X=self.x,
-            features=self.features,
-            ax=ax,
-            **kwargs
+            kind='average', estimator=self.estimator, X=self.x, features=self.features, ax=ax, **kwargs
         )
 
     def _plot_ice(self, figsize, **kwargs):
         fig, ax = plt.subplots(figsize=figsize)
 
         self.model = PartialDependenceDisplay.from_estimator(
-            kind='both',
-            estimator=self.estimator,
-            X=self.x,
-            features=self.features,
-            ax=ax,
-            **kwargs
+            kind='both', estimator=self.estimator, X=self.x, features=self.features, ax=ax, **kwargs
         )
 
     def _plot_ale(self, figsize, **kwargs):
         fig, ax = plt.subplots(figsize=figsize)
 
-        self.model = ALE(
-            predictor=self.estimator.predict,
-            feature_names=self.features,
-            target_names=self.target_names
-        )
+        self.model = ALE(predictor=self.estimator.predict, feature_names=self.features, target_names=self.target_names)
 
         # convert x to numpy if x is pandas.DataFrame
         if isinstance(self.x, pd.DataFrame):

@@ -17,6 +17,7 @@ class InsolverPDPExtension:
             elif plot_backend == 'pdpbox':
                 try:
                     from pdpbox.pdp import pdp_isolate, pdp_plot
+
                     pdp_plot(pdp_isolate(self.model, X, features, feature_name), feature_name, **kwargs)
                     show()
                 except ImportError:

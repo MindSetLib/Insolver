@@ -29,15 +29,22 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         **kwargs: Parameters for GBM estimators except `n_estimators` and `objective`. Will not be changed in hyperopt.
 
     """
+
     def __init__(self, backend, task=None, objective=None, n_estimators=100, load_path=None, **kwargs):
         super(InsolverGBMWrapper, self).__init__(backend)
         self.init_args = self._get_init_args(vars())
         self.algo, self._backends = 'gbm', ['xgboost', 'lightgbm', 'catboost']
         self._tasks = ['class', 'reg']
-        self._back_load_dict = {'xgboost': self._pickle_load, 'lightgbm': self._pickle_load,
-                                'catboost': self._pickle_load}
-        self._back_save_dict = {'xgboost': self._pickle_save, 'lightgbm': self._pickle_save,
-                                'catboost': self._pickle_save}
+        self._back_load_dict = {
+            'xgboost': self._pickle_load,
+            'lightgbm': self._pickle_load,
+            'catboost': self._pickle_load,
+        }
+        self._back_save_dict = {
+            'xgboost': self._pickle_save,
+            'lightgbm': self._pickle_save,
+            'catboost': self._pickle_save,
+        }
         self.n_estimators, self.objective, self.params = n_estimators, objective, None
 
         if backend not in self._backends:
@@ -49,7 +56,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
             if task in self._tasks:
                 gbm_init = {
                     'class': {'xgboost': XGBClassifier, 'lightgbm': LGBMClassifier, 'catboost': CatBoostClassifier},
-                    'reg': {'xgboost': XGBRegressor, 'lightgbm': LGBMRegressor, 'catboost': CatBoostRegressor}
+                    'reg': {'xgboost': XGBRegressor, 'lightgbm': LGBMRegressor, 'catboost': CatBoostRegressor},
                 }
 
                 objectives = {
@@ -57,11 +64,15 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
                     'binary': {'xgboost': 'binary:logistic', 'lightgbm': 'binary', 'catboost': 'Logloss'},
                     'multiclass': {'xgboost': 'multi:softmax', 'lightgbm': 'multiclass', 'catboost': 'MultiClass'},
                     'poisson': {'xgboost': 'count:poisson', 'lightgbm': 'poisson', 'catboost': 'Poisson'},
-                    'gamma': {'xgboost': 'reg:gamma', 'lightgbm': 'gamma',
-                              'catboost': 'Tweedie:variance_power=1.9999999'}
+                    'gamma': {
+                        'xgboost': 'reg:gamma',
+                        'lightgbm': 'gamma',
+                        'catboost': 'Tweedie:variance_power=1.9999999',
+                    },
                 }
-                self.objective_ = (objectives[self.objective][self.backend] if self.objective in objectives.keys()
-                                   else self.objective)
+                self.objective_ = (
+                    objectives[self.objective][self.backend] if self.objective in objectives.keys() else self.objective
+                )
                 kwargs.update({'objective': self.objective_, 'n_estimators': self.n_estimators})
                 self.model, self.params = gbm_init[task][self.backend](**(kwargs if kwargs is not None else {})), kwargs
 
@@ -90,8 +101,11 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         if report is not None:
             if isinstance(report, (list, tuple)):
                 prediction = self.model.predict(X)
-                print(DataFrame([[x.__name__, x(y, prediction)] for x
-                                 in report]).rename({0: 'Metrics', 1: 'Value'}, axis=1).set_index('Metrics'))
+                print(
+                    DataFrame([[x.__name__, x(y, prediction)] for x in report])
+                    .rename({0: 'Metrics', 1: 'Value'}, axis=1)
+                    .set_index('Metrics')
+                )
 
     def predict(self, X, **kwargs):
         """Predict using GBM with feature matrix X.
@@ -103,8 +117,9 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         Returns:
             array: Returns predicted values.
         """
-        return self.model.predict(X if not hasattr(self.model, 'feature_name_')
-                                  else X[self.model.feature_name_], **kwargs)
+        return self.model.predict(
+            X if not hasattr(self.model, 'feature_name_') else X[self.model.feature_name_], **kwargs
+        )
 
     def shap(self, X, show=False, plot_type='bar'):
         """Method for shap values calculation and corresponding plot of feature importances.
@@ -164,8 +179,11 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         shap_values = shap_values[0] if cond_bool else shap_values
         expected_value = explainer.expected_value[0] if cond_bool else explainer.expected_value
 
-        prediction = DataFrame([expected_value] + shap_values.reshape(-1).tolist(), index=['Intercept'] + feature_names,
-                               columns=['SHAP Value'])
+        prediction = DataFrame(
+            [expected_value] + shap_values.reshape(-1).tolist(),
+            index=['Intercept'] + feature_names,
+            columns=['SHAP Value'],
+        )
         prediction['CumSum'] = cumsum(prediction['SHAP Value'])
         prediction['Value'] = append(nan, data.values.reshape(-1))
 
@@ -177,13 +195,18 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         else:
             prediction['Contribution'] = [expected_value] + list(diff(prediction['CumSum']))
 
-        fig = Figure(Waterfall(name=f'Prediction {index}',
-                               orientation='h',
-                               measure=['relative'] * len(prediction),
-                               y=[prediction.index[i] if i == 0
-                                  else f'{prediction.index[i]}={data.values.reshape(-1)[i-1]}' for i
-                                  in range(len(prediction.index))],
-                               x=prediction['Contribution']))
+        fig = Figure(
+            Waterfall(
+                name=f'Prediction {index}',
+                orientation='h',
+                measure=['relative'] * len(prediction),
+                y=[
+                    prediction.index[i] if i == 0 else f'{prediction.index[i]}={data.values.reshape(-1)[i-1]}'
+                    for i in range(len(prediction.index))
+                ],
+                x=prediction['Contribution'],
+            )
+        )
         fig.update_layout(**(layout_dict if layout_dict is not None else {}))
 
         if show:
@@ -191,8 +214,9 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         else:
             json_ = prediction[['Value', 'SHAP Value', 'Contribution']].T.to_dict()
             fig_base64 = b64encode(to_image(fig, format='jpeg')).decode('ascii')
-            json_.update({'id': int(data.index.values), 'predict': prediction['Link'][-1],
-                          "ShapValuesPlot": fig_base64})
+            json_.update(
+                {'id': int(data.index.values), 'predict': prediction['Link'][-1], "ShapValuesPlot": fig_base64}
+            )
             return json_
 
     def cross_val(self, X, y, scoring=None, cv=None, **kwargs):
@@ -214,8 +238,9 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         if callable(scoring):
             scorers = {scoring.__name__.replace('_', ' '): array([scoring(y, self.model.predict(X))])}
         elif isinstance(scoring, (tuple, list)):
-            scorers = {scorer.__name__.replace('_', ' '): array([scorer(y, self.model.predict(X))]) for
-                       scorer in scoring}
+            scorers = {
+                scorer.__name__.replace('_', ' '): array([scorer(y, self.model.predict(X))]) for scorer in scoring
+            }
         elif isinstance(scoring, str):
             if scoring in SCORERS:
                 scorers = {scoring.replace('_', ' '): array([SCORERS[scoring](self.model, X=X, y=y)])}
@@ -228,23 +253,40 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
         shap_coefs = []
         explainer = TreeExplainer(self.model)
 
-        shap_coefs.append(([explainer.expected_value] if explainer.expected_value is None
-                           else explainer.expected_value.tolist()) + explainer.shap_values(X).mean(axis=0).tolist())
+        shap_coefs.append(
+            ([explainer.expected_value] if explainer.expected_value is None else explainer.expected_value.tolist())
+            + explainer.shap_values(X).mean(axis=0).tolist()
+        )
         for model in models:
             explainer = TreeExplainer(model)
-            shap_coefs.append(([explainer.expected_value] if explainer.expected_value is None
-                               else explainer.expected_value.tolist()) + explainer.shap_values(X).mean(axis=0).tolist())
-        shapdf = DataFrame(array(shap_coefs).T, columns=['Overall'] + [f'Fold {x}' for x in range(1, len(models) + 1)],
-                           index=['Intercept'] + X.columns.tolist())
+            shap_coefs.append(
+                ([explainer.expected_value] if explainer.expected_value is None else explainer.expected_value.tolist())
+                + explainer.shap_values(X).mean(axis=0).tolist()
+            )
+        shapdf = DataFrame(
+            array(shap_coefs).T,
+            columns=['Overall'] + [f'Fold {x}' for x in range(1, len(models) + 1)],
+            index=['Intercept'] + X.columns.tolist(),
+        )
         return metrics, shapdf
 
     def auto(self, x_train, y_train, metric, offset=None, selection='shap', selection_thresh=0.05):
-        self.hyperopt_cv(x_train, y_train, AUTO_SPACE_CONFIG[self.backend], max_evals=50,
-                         fn_params={'scoring': metric, 'fit_params': {'sample_weight': offset}})
+        self.hyperopt_cv(
+            x_train,
+            y_train,
+            AUTO_SPACE_CONFIG[self.backend],
+            max_evals=50,
+            fn_params={'scoring': metric, 'fit_params': {'sample_weight': offset}},
+        )
         if selection:
             shaps = self.shap(x_train)
             shaps = DataFrame.from_dict({'shap': shaps}).abs().sort_values('shap', ascending=False)
             shaps = shaps / shaps.sum()
             columns = shaps[shaps['shap'] >= selection_thresh].index.tolist()
-            self.hyperopt_cv(x_train[columns], y_train, AUTO_SPACE_CONFIG[self.backend], max_evals=50,
-                             fn_params={'scoring': metric, 'fit_params': {'sample_weight': offset}})
+            self.hyperopt_cv(
+                x_train[columns],
+                y_train,
+                AUTO_SPACE_CONFIG[self.backend],
+                max_evals=50,
+                fn_params={'scoring': metric, 'fit_params': {'sample_weight': offset}},
+            )

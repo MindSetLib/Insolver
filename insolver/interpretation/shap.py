@@ -15,17 +15,23 @@ class SHAPExplanation(InterpretBase):
         estimator_type (str): Type of the estimator, supported values are `tree` and `linear`.
         data (pandas.Dataframe): Data for creating LinearExplainer.
     """
+
     def __init__(self, estimator, estimator_type='tree', data=None):
         self.estimator = estimator.model if isinstance(estimator, InsolverBaseWrapper) else estimator
         self.estimator = estimator.model['glm'] if isinstance(estimator, InsolverGLMWrapper) else self.estimator
         self.estimator_type = estimator_type
 
         if self.estimator_type not in ['tree', 'linear']:
-            raise NotImplementedError(f'''
-            estimator_type {estimator_type} is not supported. Supported values are "tree" and "linear".''')
+            raise NotImplementedError(
+                f'''
+            estimator_type {estimator_type} is not supported. Supported values are "tree" and "linear".'''
+            )
 
-        self.explainer = (TreeExplainer(self.estimator) if self.estimator_type == 'tree'
-                          else LinearExplainer(self.estimator, masker=data))
+        self.explainer = (
+            TreeExplainer(self.estimator)
+            if self.estimator_type == 'tree'
+            else LinearExplainer(self.estimator, masker=data)
+        )
 
     def get_features_shap(self, X, show=False, plot_type='bar'):
         """Method for shap values calculation and corresponding plot of feature importances.
@@ -67,10 +73,13 @@ class SHAPExplanation(InterpretBase):
         # transformation function
         def logit(x):
             return np.true_divide(1, np.add(1, np.exp(x)))
+
         # check type of instance
         if not isinstance(instance, np.ndarray) and not isinstance(instance, pd.Series):
-            raise TypeError(f'''
-            Type {type(instance)} is not supported. Supported types are numpy.ndarray and pandas.Series.''')
+            raise TypeError(
+                f'''
+            Type {type(instance)} is not supported. Supported types are numpy.ndarray and pandas.Series.'''
+            )
         # get feature_names OR check shape and create features names
         if isinstance(instance, pd.Series):
             feature_names = list(instance.index)
@@ -84,12 +93,18 @@ class SHAPExplanation(InterpretBase):
         shap_values = self.explainer.shap_values(instance)
         cond_bool = isinstance(shap_values, list) and (len(shap_values) == 2)
         shap_values = shap_values[0] if cond_bool else shap_values
-        expected_value = (self.explainer.expected_value[0] if isinstance(self.explainer.expected_value, np.ndarray)
-                          else self.explainer.expected_value)
+        expected_value = (
+            self.explainer.expected_value[0]
+            if isinstance(self.explainer.expected_value, np.ndarray)
+            else self.explainer.expected_value
+        )
         print(self.explainer.expected_value)
         # create predictions Dataframe
-        prediction = pd.DataFrame([expected_value] + shap_values.reshape(-1).tolist(),
-                                  index=['E[f(x)]'] + feature_names, columns=['SHAP Value'])
+        prediction = pd.DataFrame(
+            [expected_value] + shap_values.reshape(-1).tolist(),
+            index=['E[f(x)]'] + feature_names,
+            columns=['SHAP Value'],
+        )
         prediction['CumSum'] = np.cumsum(prediction['SHAP Value'])
         prediction['Value'] = np.append(np.nan, instance)
         # transform result if objective or link
@@ -115,13 +130,20 @@ class SHAPExplanation(InterpretBase):
             Exception: If plot() is called before show_explanation().
         """
         try:
-            fig = Figure(Waterfall(name='Prediction',
-                                   orientation='h',
-                                   measure=['relative'] * len(self.prediction),
-                                   y=[self.prediction.index[i] if i == 0
-                                        else f'{self.prediction.index[i]} = {round(self.instance[i-1], 4)}' for i
-                                        in range(len(self.prediction.index))],
-                                   x=self.prediction['Contribution']))
+            fig = Figure(
+                Waterfall(
+                    name='Prediction',
+                    orientation='h',
+                    measure=['relative'] * len(self.prediction),
+                    y=[
+                        self.prediction.index[i]
+                        if i == 0
+                        else f'{self.prediction.index[i]} = {round(self.instance[i-1], 4)}'
+                        for i in range(len(self.prediction.index))
+                    ],
+                    x=self.prediction['Contribution'],
+                )
+            )
             fig.update_layout(kwargs)
             fig.show()
         except AttributeError:
