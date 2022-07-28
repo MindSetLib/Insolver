@@ -15,8 +15,8 @@ This tutorial also demonstrates how to use the [`feature_engineering`](https://g
 - [Gradient Boosting Example - Lending Club](https://github.com/MindSetLib/Insolver/blob/master/tutorials/Gradient%20Boosting%20Example%20-%20Lending%20Club.ipynb)
 This tutorial demonstrates how to create **classification models** for the [`Lending Club`](https://www.kaggle.com/wordsforthewise/lending-club) dataset using the **Gradient Boosting libraries** and the `InsolverGBMWrapper` class.
 
-- [Inference Example](https://github.com/MindSetLib/Insolver/blob/master/tutorials/Inference%20Example.ipynb)
-This tutorial demonstrates how to load `InsolverTransform` transforms from a file and initialize them using the `init_transforms` function.
+- [Inference Example](https://github.com/MindSetLib/Insolver/blob/master/tutorials/Transforms%20Inference%20Example.ipynb)
+This tutorial demonstrates how to load `InsolverTransform` transforms from a file using the `load_transforms` function.
 
 - [InsolverDataFrame and InsolverTransform Example](https://github.com/MindSetLib/Insolver/blob/master/tutorials/InsolverDataFrame%20and%20InsolverTransform%20Example.ipynb)
 This tutorial demonstrates main features of the `InsolverDataFrame` class and the `InsolverTransform` class.
