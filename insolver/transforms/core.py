@@ -51,6 +51,13 @@ class InsolverTransform(InsolverDataFrame):
 
     @staticmethod
     def _check_colnames_dtypes(expected: Dict[str, dtype], input_: Dict[str, dtype], step: str) -> None:
+        if not isinstance(expected, dict):
+            raise TypeError(f"expected must be dict, got {type(expected)}")
+        if not isinstance(input_, dict):
+            raise TypeError(f"input_ must be dict, got {type(input_)}")
+        if not isinstance(step, str):
+            raise TypeError(f"step must be str, got {type(step)}")
+
         missing_col_checks = set(expected.keys()).difference(set(input_.keys()))
         if missing_col_checks != set():
             warn_insolver(f'{step.capitalize()} data missing columns {list(missing_col_checks)}!', TransformsWarning)
