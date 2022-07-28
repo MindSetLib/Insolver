@@ -51,7 +51,7 @@ jobs:
         python -m pytest --cov=./ --cov-report=xml
     - name: Code coverage with codecov on ubuntu-latest and Python 3.8
       if: |
-        (matrix.os == 'ubuntu-latest' && matrix.python-version == "3.8")
+        (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8')
       uses: codecov/codecov-action@v3
       with:
         flags: unittests
