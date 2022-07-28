@@ -21,8 +21,17 @@ class LimeExplanation(InterpretBase):
         class_names (list): List of class names, ordered according to whatever the classifier is using.
     """
 
-    def __init__(self, estimator, x, mode, feature_names, categorical_features=None,
-                 kernel_width=None, kernel=None, class_names=None):
+    def __init__(
+        self,
+        estimator,
+        x,
+        mode,
+        feature_names,
+        categorical_features=None,
+        kernel_width=None,
+        kernel=None,
+        class_names=None,
+    ):
         self.estimator = estimator
         self.x = x
         self.mode = mode
@@ -74,7 +83,7 @@ class LimeExplanation(InterpretBase):
             categorical_features=self.categorical_features,
             kernel_width=self.kernel_width,
             kernel=self.kernel,
-            class_names=self.class_names
+            class_names=self.class_names,
         )
 
         # explain instance using LimeTabularExplainer
@@ -98,5 +107,5 @@ class LimeExplanation(InterpretBase):
             'list': lambda explanation: explanation.as_list(label=label),
             'map': lambda explanation: explanation.as_map(),
             'file': lambda explanation: explanation.save_to_file(file_path=file_path),
-            'show_in_notebook': lambda explanation: explanation.show_in_notebook(labels=label)
+            'show_in_notebook': lambda explanation: explanation.show_in_notebook(labels=label),
         }

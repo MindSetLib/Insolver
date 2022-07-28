@@ -18,8 +18,17 @@ class DatetimeTransforms:
          columns in column_feature can't be duplicated in column_names.
 
     """
-    def __init__(self, column_names, column_types=None, dayfirst=False, yearfirst=False, feature='unix',
-                 column_feature=None, priority=0):
+
+    def __init__(
+        self,
+        column_names,
+        column_types=None,
+        dayfirst=False,
+        yearfirst=False,
+        feature='unix',
+        column_feature=None,
+        priority=0,
+    ):
         self.priority = priority
         self.feature = feature
         self.column_names = column_names
@@ -39,25 +48,28 @@ class DatetimeTransforms:
             'year': lambda col: col.dt.year,
             'day': lambda col: col.dt.day,
             'day_of_the_week': lambda col: col.dt.dayofweek,
-            'weekend': lambda col: where(col.dt.day_name().isin(['Sunday', 'Saturday']), 1, 0)
+            'weekend': lambda col: where(col.dt.day_name().isin(['Sunday', 'Saturday']), 1, 0),
         }
 
         if self.column_feature:
             for column in self.column_feature.keys():
                 if column in self.column_names:
-                    raise Exception(f'Columns in column_feature{list(self.column_feature.keys())}'
-                                    f'cannot be duplicated in column_names{self.column_names}')
+                    raise Exception(
+                        f'Columns in column_feature{list(self.column_feature.keys())}'
+                        f'cannot be duplicated in column_names{self.column_names}'
+                    )
 
                 else:
                     _col_feature = self.column_feature[column]
                     type_of_column = self.column_types[column] if column in self.column_types.keys() else None
                     if type_of_column:
                         df[f'{column}_{_col_feature}'] = self.feature_dict[_col_feature](
-                            to_datetime(df[column], dayfirst=self.dayfirst,
-                                        yearfirst=self.yearfirst)).astype(type_of_column)
+                            to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst)
+                        ).astype(type_of_column)
                     else:
                         df[f'{column}_{_col_feature}'] = self.feature_dict[_col_feature](
-                            to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst))
+                            to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst)
+                        )
 
         if self.feature in self._feature_types:
             if self.column_types:
@@ -65,15 +77,17 @@ class DatetimeTransforms:
                     type_of_column = self.column_types[column] if column in self.column_types.keys() else None
                     if type_of_column:
                         df[f'{column}_{self.feature}'] = self.feature_dict[self.feature](
-                            to_datetime(df[column], dayfirst=self.dayfirst,
-                                        yearfirst=self.yearfirst)).astype(type_of_column)
+                            to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst)
+                        ).astype(type_of_column)
                     else:
                         df[f'{column}_{self.feature}'] = self.feature_dict[self.feature](
-                            to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst))
+                            to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst)
+                        )
             else:
                 for column in self.column_names:
                     df[f'{column}_{self.feature}'] = self.feature_dict[self.feature](
-                        to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst))
+                        to_datetime(df[column], dayfirst=self.dayfirst, yearfirst=self.yearfirst)
+                    )
 
         else:
             raise NotImplementedError(f'Method parameter supports values in {self._feature_types}.')

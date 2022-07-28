@@ -11,6 +11,7 @@ class TransformParamUselessGroup:
         inference (bool): Sign if the transformation is used for inference, False by default.
         param_useless (list): The list of useless values of the parameter, for inference only.
     """
+
     def __init__(self, column_param, size_min=1000, group_name=0, inference=False, param_useless=None, priority=1):
         self.priority = priority
         self.column_param = column_param
@@ -59,8 +60,17 @@ class TransformParamSortFreq:
         inference (bool): Sign if the transformation is used for inference, False by default.
         param_freq_dict (dict): The dictionary of sorted values of the parameter, for inference only.
     """
-    def __init__(self, column_param, column_param_sort_freq, column_policies_count, column_claims_count,
-                 inference=False, param_freq_dict=None, priority=2):
+
+    def __init__(
+        self,
+        column_param,
+        column_param_sort_freq,
+        column_policies_count,
+        column_claims_count,
+        inference=False,
+        param_freq_dict=None,
+        priority=2,
+    ):
         self.priority = priority
         self.column_param = column_param
         self.column_param_sort_freq = column_param_sort_freq
@@ -75,10 +85,12 @@ class TransformParamSortFreq:
 
     def __call__(self, df):
         if self.param_freq_dict == dict():
-            self.param_freq = df.groupby([self.column_param]).sum()[[self.column_claims_count,
-                                                                     self.column_policies_count]]
-            self.param_freq['freq'] = (self.param_freq[self.column_claims_count] /
-                                       self.param_freq[self.column_policies_count])
+            self.param_freq = df.groupby([self.column_param]).sum()[
+                [self.column_claims_count, self.column_policies_count]
+            ]
+            self.param_freq['freq'] = (
+                self.param_freq[self.column_claims_count] / self.param_freq[self.column_policies_count]
+            )
             keys = []
             values = []
             for i in enumerate(self.param_freq.sort_values('freq', ascending=False).index.values):
@@ -103,8 +115,17 @@ class TransformParamSortAC:
         inference (bool): Sign if the transformation is used for inference, False by default.
         param_ac_dict (dict): The dictionary of sorted values of the parameter, for inference only.
     """
-    def __init__(self, column_param, column_param_sort_ac, column_claims_count, column_claims_sum,
-                 inference=False, param_ac_dict=None, priority=2):
+
+    def __init__(
+        self,
+        column_param,
+        column_param_sort_ac,
+        column_claims_count,
+        column_claims_sum,
+        inference=False,
+        param_ac_dict=None,
+        priority=2,
+    ):
         self.priority = priority
         self.column_param = column_param
         self.column_param_sort_ac = column_param_sort_ac

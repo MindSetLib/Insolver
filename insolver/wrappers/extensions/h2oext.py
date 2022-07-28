@@ -54,8 +54,9 @@ class InsolverH2OExtension:
             features = X.columns.tolist() if isinstance(X, DataFrame) else X.name
             target = y.columns.tolist() if isinstance(y, DataFrame) else y.name
             if (sample_weight is not None) & isinstance(sample_weight, (DataFrame, Series)):
-                params['offset_column'] = (sample_weight.columns.tolist() if isinstance(sample_weight, DataFrame)
-                                           else sample_weight.name)
+                params['offset_column'] = (
+                    sample_weight.columns.tolist() if isinstance(sample_weight, DataFrame) else sample_weight.name
+                )
                 X = concat([X, sample_weight], axis=1)
             train_set = to_h2oframe(concat([X, y], axis=1))
         else:
@@ -63,8 +64,11 @@ class InsolverH2OExtension:
 
         if (X_valid is not None) & (y_valid is not None):
             if isinstance(X_valid, (DataFrame, Series)) & isinstance(y_valid, (DataFrame, Series)):
-                if ((sample_weight_valid is not None) & isinstance(sample_weight_valid, (DataFrame, Series)) &
-                        (sample_weight is not None)):
+                if (
+                    (sample_weight_valid is not None)
+                    & isinstance(sample_weight_valid, (DataFrame, Series))
+                    & (sample_weight is not None)
+                ):
                     X_valid = concat([X_valid, sample_weight_valid], axis=1)
                 valid_set = to_h2oframe(concat([X_valid, y_valid], axis=1))
                 params['validation_frame'] = valid_set
@@ -72,8 +76,18 @@ class InsolverH2OExtension:
                 raise TypeError('X_valid, y_valid are supposed to be pandas DataFrame or Series')
         return features, target, train_set, params
 
-    def optimize_hyperparam(self, hyper_params, X, y, sample_weight=None, X_valid=None, y_valid=None,
-                            sample_weight_valid=None, h2o_train_params=None, **kwargs):
+    def optimize_hyperparam(
+        self,
+        hyper_params,
+        X,
+        y,
+        sample_weight=None,
+        X_valid=None,
+        y_valid=None,
+        sample_weight_valid=None,
+        h2o_train_params=None,
+        **kwargs,
+    ):
         """Hyperparameter optimization & fitting model in H2O.
 
         Args:
@@ -92,16 +106,22 @@ class InsolverH2OExtension:
         """
         if (self.backend == 'h2o') & isinstance(self.model, H2OEstimator):
             params = dict() if h2o_train_params is None else h2o_train_params
-            features, target, train_set, params = self._x_y_to_h2o_frame(X, y, sample_weight, params, X_valid, y_valid,
-                                                                         sample_weight_valid)
+            features, target, train_set, params = self._x_y_to_h2o_frame(
+                X, y, sample_weight, params, X_valid, y_valid, sample_weight_valid
+            )
             model_grid = H2OGridSearch(model=self.model, hyper_params=hyper_params, **kwargs)
             model_grid.train(y=target, x=features, training_frame=train_set, **params)
             sorted_grid = model_grid.get_grid(sort_by='residual_deviance', decreasing=False)
             self.best_params = sorted_grid.sorted_metric_table().loc[0, :'model_ids'].drop('model_ids').to_dict()
-            self.best_params = {key: self.best_params[key].replace('[', '').replace(']', '')
-                                for key in self.best_params.keys() if key != ''}
-            self.best_params = {key: float(self.best_params[key]) if is_number(self.best_params[key])
-                                else self.best_params[key] for key in self.best_params.keys()}
+            self.best_params = {
+                key: self.best_params[key].replace('[', '').replace(']', '')
+                for key in self.best_params.keys()
+                if key != ''
+            }
+            self.best_params = {
+                key: float(self.best_params[key]) if is_number(self.best_params[key]) else self.best_params[key]
+                for key in self.best_params.keys()
+            }
             self.model = sorted_grid.models[0]
         else:
             raise NotImplementedError(f'Error with the backend choice. Supported backends: {self._backends}')

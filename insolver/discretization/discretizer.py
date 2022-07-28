@@ -13,8 +13,17 @@ class InsolverDiscretizer:
 
     _methods = ['uniform', 'quantile', 'kmeans', 'cart', 'chimerge']
 
-    _n_bins_formula = ('square-root', 'sturges', 'huntsberger', 'brooks-carrther', 'cencov', 'rice-rule',
-                       'terrell-scott', 'scott', 'freedman-diaconis')
+    _n_bins_formula = (
+        'square-root',
+        'sturges',
+        'huntsberger',
+        'brooks-carrther',
+        'cencov',
+        'rice-rule',
+        'terrell-scott',
+        'scott',
+        'freedman-diaconis',
+    )
 
     def __init__(self, method='uniform'):
         if method not in self._methods:
@@ -64,11 +73,12 @@ class InsolverDiscretizer:
         self.__check_X_type()
 
         if self.method in ['uniform', 'quantile', 'kmeans']:
-            if not ((isinstance(n_bins, int) and n_bins > 1)
-                    or n_bins in self._n_bins_formula):
-                raise ValueError('Invalid number of bins. '
-                                 f'Accepted integer value or one of the following options: {self._n_bins_formula},'
-                                 f'got {n_bins} instead.')
+            if not ((isinstance(n_bins, int) and n_bins > 1) or n_bins in self._n_bins_formula):
+                raise ValueError(
+                    'Invalid number of bins. '
+                    f'Accepted integer value or one of the following options: {self._n_bins_formula},'
+                    f'got {n_bins} instead.'
+                )
 
             len_X = self.__check_X_shape()
 
@@ -94,13 +104,17 @@ class InsolverDiscretizer:
         elif isinstance(y, list):
             y = array(y)
         elif not (isinstance(y, ndarray)):
-            raise ValueError('Invalid target type. '
-                             'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
-                             f'{type(y)} instead.')
+            raise ValueError(
+                'Invalid target type. '
+                'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
+                f'{type(y)} instead.'
+            )
 
         if (not y.shape != (len(y), 1) or len(y.shape) != 1) and len(y) != self.X.shape[0]:
-            raise ValueError('Invalid target shape. Expected 1-D array with shape '
-                             f'{(self.X.shape[0],)} or {(self.X.shape[0], 1)}, got {y.shape} instead')
+            raise ValueError(
+                'Invalid target shape. Expected 1-D array with shape '
+                f'{(self.X.shape[0],)} or {(self.X.shape[0], 1)}, got {y.shape} instead'
+            )
 
         return y
 
@@ -157,8 +171,7 @@ class InsolverDiscretizer:
         """
 
         if len(self.X.shape) not in (1, 2):
-            raise ValueError('Expected 1D or 2D array, '
-                             f'got shape={self.X.shape} instead.')
+            raise ValueError(f'Expected 1D or 2D array, got shape={self.X.shape} instead.')
 
         if len(self.X.shape) == 1:
             self.X = self.X.reshape(-1, 1)
@@ -176,6 +189,8 @@ class InsolverDiscretizer:
         elif isinstance(self.X, list):
             self.X = array(self.X)
         elif not (isinstance(self.X, ndarray)):
-            raise ValueError('Invalid data type. '
-                             'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
-                             f'{type(self.X)} instead.')
+            raise ValueError(
+                'Invalid data type. '
+                'Accepted pandas DataFrame and Series instancies, list and numpy array, got '
+                f'{type(self.X)} instead.'
+            )

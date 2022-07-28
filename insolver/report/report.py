@@ -6,8 +6,15 @@ import glob
 import pandas
 from pandas_profiling import ProfileReport
 
-from .presets import (_create_shap, _create_partial_dependence, _create_dataset_description, _create_pandas_profiling,
-                      _create_importance_charts, _create_features_description, _explain_instance)
+from .presets import (
+    _create_shap,
+    _create_partial_dependence,
+    _create_dataset_description,
+    _create_pandas_profiling,
+    _create_importance_charts,
+    _create_features_description,
+    _explain_instance,
+)
 from .metrics import _create_metrics_charts, _calc_metrics
 from .comparison_presets import _create_models_comparison
 from .error_handler import error_handler
@@ -94,22 +101,49 @@ class Report:
 
     """
 
-    def __init__(self, model, task,
-                 X_train, y_train,
-                 X_test, y_test, original_dataset,
-                 shap_type,
-                 predicted_train=None, predicted_test=None,
-                 explain_instance=None, exposure_column=None,
-                 dataset_description: str = 'Add a model description to the `dataset_description` parameter.',
-                 y_description: str = 'Add a y description to the `y_description` parameter.',
-                 features_description=None,
-                 metrics_to_calc='main', models_to_compare=None, comparison_metrics=None,
-                 f_groups_type='cut', f_bins=10, f_start=None, f_end=None, f_freq=1.5,
-                 p_groups_type='cut', p_bins=10, p_start=None, p_end=None, p_freq=1.5,
-                 d_groups_type='cut', d_bins=10, d_start=None, d_end=None, d_freq=1.5,
-                 main_diff_model=None, compare_diff_models=None,
-                 pairs_for_matrix=None, m_bins=20, m_freq=None,
-                 show_parameters=False, pandas_profiling=True):
+    def __init__(
+        self,
+        model,
+        task,
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        original_dataset,
+        shap_type,
+        predicted_train=None,
+        predicted_test=None,
+        explain_instance=None,
+        exposure_column=None,
+        dataset_description: str = 'Add a model description to the `dataset_description` parameter.',
+        y_description: str = 'Add a y description to the `y_description` parameter.',
+        features_description=None,
+        metrics_to_calc='main',
+        models_to_compare=None,
+        comparison_metrics=None,
+        f_groups_type='cut',
+        f_bins=10,
+        f_start=None,
+        f_end=None,
+        f_freq=1.5,
+        p_groups_type='cut',
+        p_bins=10,
+        p_start=None,
+        p_end=None,
+        p_freq=1.5,
+        d_groups_type='cut',
+        d_bins=10,
+        d_start=None,
+        d_end=None,
+        d_freq=1.5,
+        main_diff_model=None,
+        compare_diff_models=None,
+        pairs_for_matrix=None,
+        m_bins=20,
+        m_freq=None,
+        show_parameters=False,
+        pandas_profiling=True,
+    ):
         # check and save attributes
         self.pandas_profiling = pandas_profiling
         self.show_parameters = show_parameters
@@ -122,42 +156,54 @@ class Report:
         self.model = model
         self.models_to_compare = models_to_compare
         self.comparison_metrics = [] if not comparison_metrics else comparison_metrics
-        self.predicted_train = (pandas.Series(model.predict(X_train), index=X_train.index)
-                                if not isinstance(predicted_train, pandas.Series) else predicted_train)
-        self.predicted_test = (pandas.Series(model.predict(X_test), index=X_test.index)
-                               if not isinstance(predicted_test, pandas.Series) else predicted_test)
+        self.predicted_train = (
+            pandas.Series(model.predict(X_train), index=X_train.index)
+            if not isinstance(predicted_train, pandas.Series)
+            else predicted_train
+        )
+        self.predicted_test = (
+            pandas.Series(model.predict(X_test), index=X_test.index)
+            if not isinstance(predicted_test, pandas.Series)
+            else predicted_test
+        )
         self.explain_instance = explain_instance
         if task in ['reg', 'class']:
             self.task = task
         else:
             raise ValueError(f"Not supported task class {task}")
-        if (isinstance(X_train, pandas.DataFrame)
-                and isinstance(X_test, pandas.DataFrame)
-                and isinstance(y_train, pandas.Series)
-                and isinstance(y_test, pandas.Series)
-                and isinstance(self.predicted_train, pandas.Series)
-                and isinstance(self.predicted_test, pandas.Series)
-                and isinstance(original_dataset, pandas.DataFrame)):
+        if (
+            isinstance(X_train, pandas.DataFrame)
+            and isinstance(X_test, pandas.DataFrame)
+            and isinstance(y_train, pandas.Series)
+            and isinstance(y_test, pandas.Series)
+            and isinstance(self.predicted_train, pandas.Series)
+            and isinstance(self.predicted_test, pandas.Series)
+            and isinstance(original_dataset, pandas.DataFrame)
+        ):
             self.X_train = X_train
             self.y_train = y_train
             self.X_test = X_test
             self.y_test = y_test
             self.original_dataset = original_dataset
         else:
-            raise TypeError(f"""Wrong types of input data.
+            raise TypeError(
+                f"""Wrong types of input data.
               \rX_train {type(X_train)} must be pandas.DataFrame
               \ry_train {type(y_train)} must be pandas.Series
               \rX_test {type(X_test)} must be pandas.DataFrame
               \ry_test {type(y_test)} should be pandas.Series
               \rpredicted_train {type(self.predicted_train)} must be pandas.Series
               \rpredicted_test {type(self.predicted_test)} must be pandas.Series
-              \rpredicted_test {type(original_dataset)} must be pandas.DataFrame""")
+              \rpredicted_test {type(original_dataset)} must be pandas.DataFrame"""
+            )
         self._directory = ntpath.dirname(inspect.getfile(Report))
 
         # check columns
         if not sorted(X_train.columns.to_list()) == sorted(X_test.columns.to_list()):
-            raise KeyError(f'''Columns in X_train {sorted(X_train.columns.to_list())}
-            and X_test {sorted(X_test.columns.to_list())} are not the same.''')
+            raise KeyError(
+                f'''Columns in X_train {sorted(X_train.columns.to_list())}
+            and X_test {sorted(X_test.columns.to_list())} are not the same.'''
+            )
         elif len(set(X_train.columns.to_list()).difference(original_dataset.columns.to_list())) > 0:
             s = set(X_train.columns.to_list()).difference(original_dataset.columns.to_list())
             raise KeyError(f'''Columns from X_train {s} are missing from original_dataset.''')
@@ -211,11 +257,20 @@ class Report:
             {
                 'name': 'Dataset',
                 'articles': [
-                    _create_dataset_description(self.X_train, self.X_test, self.y_train, self.y_test, self.task,
-                                                self.dataset_description, self.y_description, self.original_dataset),
+                    _create_dataset_description(
+                        self.X_train,
+                        self.X_test,
+                        self.y_train,
+                        self.y_test,
+                        self.task,
+                        self.dataset_description,
+                        self.y_description,
+                        self.original_dataset,
+                    ),
                 ],
                 'icon': '<i class="bi bi-bricks" width="24" height="24" role="img"></i>',
-            }]
+            }
+        ]
 
         # create pandas profiling
         if self.pandas_profiling:
@@ -226,8 +281,9 @@ class Report:
         # create features description article, contains specification, description and psi
         self.pbar.update(1)
         self.pbar.set_description('Creating features description article')
-        section[0]['articles'].append(_create_features_description(self.X_train, self.X_test,
-                                                                   self.original_dataset, self.features_description))
+        section[0]['articles'].append(
+            _create_features_description(self.X_train, self.X_test, self.original_dataset, self.features_description)
+        )
 
         # save section
         self.sections.append(section[0])
@@ -249,9 +305,15 @@ class Report:
         # create lift chart and gain curve
         self.pbar.update(1)
         self.pbar.set_description('Creating lift chart and gain curve')
-        metrics_footer, metrics_part = _create_metrics_charts(self.X_train, self.X_test, self.y_train, self.y_test,
-                                                              self.predicted_train, self.predicted_test,
-                                                              self.exposure_column)
+        metrics_footer, metrics_part = _create_metrics_charts(
+            self.X_train,
+            self.X_test,
+            self.y_train,
+            self.y_test,
+            self.predicted_train,
+            self.predicted_test,
+            self.exposure_column,
+        )
         # create shap
         self.pbar.update(1)
         self.pbar.set_description('Creating shap')
@@ -266,13 +328,14 @@ class Report:
                 'articles': [
                     {
                         'name': 'Coefficients',
-                        'parts': [f'''
+                        'parts': [
+                            f'''
                         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
-                            {features_importance}{_create_importance_charts()}</div>'''],
+                            {features_importance}{_create_importance_charts()}</div>'''
+                        ],
                         'header': '',
                         'footer': features_importance_footer,
                         'icon': '<i class="bi bi-bar-chart-line"></i>',
-
                     },
                     {
                         'name': 'Metrics',
@@ -290,13 +353,14 @@ class Report:
                     },
                     {
                         'name': 'Partial Dependence',
-                        'parts': [f'''
+                        'parts': [
+                            f'''
                         <div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">
-                            {pdp_part}</div>'''],
+                            {pdp_part}</div>'''
+                        ],
                         'header': '',
                         'footer': pdp_footer,
                         'icon': '<i class="bi bi-graph-up"></i>',
-
                     },
                 ],
                 'icon': '<i class="bi bi-tools"></i>',
@@ -306,8 +370,11 @@ class Report:
         self.pbar.update(1)
         if isinstance(self.explain_instance, pandas.Series):
             self.pbar.set_description('Explaining instance')
-            section[0]['articles'].append(_explain_instance(self.explain_instance, self.model, self.X_train,
-                                                            self.task, self.original_dataset, self.shap_type))
+            section[0]['articles'].append(
+                _explain_instance(
+                    self.explain_instance, self.model, self.X_train, self.task, self.original_dataset, self.shap_type
+                )
+            )
         # save section
         self.sections.append(section[0])
 
@@ -319,15 +386,41 @@ class Report:
     def _save_comparison_section(self, path, report_name):
         # create models comparison if model is regression
         self.pbar.set_description('Comparing models')
-        section = [_create_models_comparison(self.X_train, self.y_train, self.X_test, self.y_test,
-                                             self.original_dataset, self.task,
-                                             self.models_to_compare, self.comparison_metrics,
-                                             self.f_groups_type, self.f_bins, self.f_start, self.f_end, self.f_freq,
-                                             self.p_groups_type, self.p_bins, self.p_start, self.p_end, self.p_freq,
-                                             self.d_groups_type, self.d_bins, self.d_start, self.d_end, self.d_freq,
-                                             self.model, self.main_diff_model, self.compare_diff_models,
-                                             self.m_bins, self.m_freq, self.pairs_for_matrix,
-                                             classes="table table-striped", justify="center")]
+        section = [
+            _create_models_comparison(
+                self.X_train,
+                self.y_train,
+                self.X_test,
+                self.y_test,
+                self.original_dataset,
+                self.task,
+                self.models_to_compare,
+                self.comparison_metrics,
+                self.f_groups_type,
+                self.f_bins,
+                self.f_start,
+                self.f_end,
+                self.f_freq,
+                self.p_groups_type,
+                self.p_bins,
+                self.p_start,
+                self.p_end,
+                self.p_freq,
+                self.d_groups_type,
+                self.d_bins,
+                self.d_start,
+                self.d_end,
+                self.d_freq,
+                self.model,
+                self.main_diff_model,
+                self.compare_diff_models,
+                self.m_bins,
+                self.m_freq,
+                self.pairs_for_matrix,
+                classes="table table-striped",
+                justify="center",
+            )
+        ]
         # save section
         self.sections.append(section[0])
 
@@ -342,14 +435,16 @@ class Report:
         section = [
             {
                 'name': 'Parameters',
-                'articles': [{
-                    'name': 'Parameters',
-                    'parts': self._model_parameters_to_list(),
-                    'header': '',
-                    'footer': '',
-                    'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>',
-                }],
-                'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>'
+                'articles': [
+                    {
+                        'name': 'Parameters',
+                        'parts': self._model_parameters_to_list(),
+                        'header': '',
+                        'footer': '',
+                        'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>',
+                    }
+                ],
+                'icon': '<i class="bi bi-layout-text-sidebar-reverse"></i>',
             }
         ]
         # save section
@@ -372,10 +467,11 @@ class Report:
         def _check_name(name_, path_):
             """Add a number to {name_} if it exists in {path_} directory"""
 
-            check_names = [x.strip(f'{path_}/') for x in glob.glob(f"{path_}/*")
-                           if x.strip(f'{path_}/').find(name_) == 0
-                           and (x.strip(f'{path_}/')[len(name_):None].isnumeric()
-                                or x.strip(f'{path_}/')[len(name_):None] == '')]
+            len_name = len(name_)
+            check_names = [x.strip(f'{path_}/') for x in glob.glob(f"{path_}/*")]
+            check_names = [
+                x for x in check_names if x.find(name_) == 0 and (x[len_name:].isnumeric() or x[len_name:] == '')
+            ]
 
             name_to_check = name_
             name_count = len(check_names)
@@ -388,8 +484,7 @@ class Report:
         report_name = _check_name(report_name, path)
 
         # copy template
-        shutil.copytree(f'{self._directory}/report_template',
-                        f'{path}/{report_name}')
+        shutil.copytree(f'{self._directory}/report_template', f'{path}/{report_name}')
         # save profile report
         if self.pandas_profiling:
             self.profile.to_file(f"{path}/{report_name}/profiling_report.html")
@@ -412,7 +507,6 @@ class Report:
             else:
                 self.pbar.set_description('All done')
         else:
-
             with open(f'{path}/{report_name}/report.html', 'w') as f:
                 html_ = self.template.render(sections=self.sections, title='Insolver Report')
                 html_ = html_.replace('&#34;', '"').replace('&lt;', '<').replace('&gt;', '>')
@@ -440,35 +534,40 @@ class Report:
         """
         if self.model is not None:
             if self.model.algo == "rf":
-                coefs = self._get_coefs_dict({key: value for key, value in zip(self.model.model.feature_name_,
-                                                                               self.model.model.feature_importances_)})
+                coefs = self._get_coefs_dict(
+                    {
+                        key: value
+                        for key, value in zip(self.model.model.feature_name_, self.model.model.feature_importances_)
+                    }
+                )
             elif self.model.algo == "glm":
                 coefs = self._get_coefs_dict(self.model.coef_norm())
             elif self.model.algo == "gbm":
-                coefs = self._get_coefs_dict(
-                    self.model.shap(
-                        self.X_train.append(self.X_test),
-                        show=False))
+                coefs = self._get_coefs_dict(self.model.shap(self.X_train.append(self.X_test), show=False))
             else:
                 raise Exception("Unsupperted backend type {}".format(self.model.backend))
 
             coefs_head = ['relative_importance', 'scaled_importance', 'percentage']
-            model_coefs = self._create_html_table(coefs_head, coefs, two_columns_table=False,
-                                                  classes='table table-striped', justify='left')
+            model_coefs = self._create_html_table(
+                coefs_head, coefs, two_columns_table=False, classes='table table-striped', justify='left'
+            )
         else:
             raise Exception("Model instance was not provided")
         return model_coefs
 
     @error_handler(False)
     def _calculate_train_test_metrics(self):
-        table_train = _calc_metrics(self.y_train, self.predicted_train, self.task, self.metrics_to_calc,
-                                    self.X_train, self.exposure_column)
-        table_test = _calc_metrics(self.y_test, self.predicted_test, self.task, self.metrics_to_calc,
-                                   self.X_test, self.exposure_column)
+        table_train = _calc_metrics(
+            self.y_train, self.predicted_train, self.task, self.metrics_to_calc, self.X_train, self.exposure_column
+        )
+        table_test = _calc_metrics(
+            self.y_test, self.predicted_test, self.task, self.metrics_to_calc, self.X_test, self.exposure_column
+        )
 
         table = {key: [table_train.get(key, ''), table_test.get(key, '')] for key in table_train.keys()}
-        model_metrics = self._create_html_table(["train", "test"], table, two_columns_table=False,
-                                                classes='table table-striped', justify='left')
+        model_metrics = self._create_html_table(
+            ["train", "test"], table, two_columns_table=False, classes='table table-striped', justify='left'
+        )
         return model_metrics
 
     @error_handler(False)
@@ -477,8 +576,11 @@ class Report:
         model_parameters_list = list()
         for table_name, table in self._get_objects_as_dicts(self.model):
             if table:
-                model_parameters_list.append(self._create_html_table([str(table_name)], table, two_columns_table=True,
-                                                                     classes='table table-striped', justify='left')[1])
+                model_parameters_list.append(
+                    self._create_html_table(
+                        [str(table_name)], table, two_columns_table=True, classes='table table-striped', justify='left'
+                    )[1]
+                )
         return model_parameters_list
 
     def _get_objects_as_dicts(self, obj, path='') -> list:
@@ -506,11 +608,11 @@ class Report:
                 result.extend(self._get_objects_as_dicts(value, path=f'{path}/{key}'))
         elif not is_builtin(obj) and '__dict__' in dir(obj):
             if obj.__dict__:
-                obj_dict = {key: value for key, value in obj.__dict__.items()
-                            if key[0] != '_'}
+                obj_dict = {key: value for key, value in obj.__dict__.items() if key[0] != '_'}
                 if obj_dict:
-                    result.append(("{}/{}".format(path,
-                                                  str(obj.__class__).replace('<', '').replace('>', '')), obj_dict))
+                    result.append(
+                        ("{}/{}".format(path, str(obj.__class__).replace('<', '').replace('>', '')), obj_dict)
+                    )
             result.extend(self._get_objects_as_dicts(obj.__dict__, path))
         return result
 
@@ -548,22 +650,24 @@ class Report:
 
             len_body_value = len(list(body.values())[0])
             if len_body_value != len(head):
-                raise Exception(f"column names list length {len(head)} not "
-                                f"equal to columns quantity {len_body_value}")
+                raise Exception(f"column names list length {len(head)} not equal to columns quantity {len_body_value}")
 
         if not check_body(body) or two_columns_table:
             body = {key: [value] for key, value in body.items()}
         check_head(head, body)
 
         result_df = pandas.DataFrame(data=body.values(), columns=head, index=body.keys())
-        footer = {'columns': head, 'data': [result_df[column].to_list() for column in result_df.columns],
-                  'index': list(result_df.axes[0])}
+        footer = {
+            'columns': head,
+            'data': [result_df[column].to_list() for column in result_df.columns],
+            'index': list(result_df.axes[0]),
+        }
         return [footer, result_df.to_html(**kwargs)]
 
     @staticmethod
     def _get_coefs_dict(model_coefs: dict) -> dict:
         """Extern Insolver glm wraper coef table ('relative_importance')
-           with ['scaled_importance', 'percentage'] as in h2o library
+        with ['scaled_importance', 'percentage'] as in h2o library
         """
         # create relative_importance value
         coefs = {key: [abs(value)] for key, value in model_coefs.items()}

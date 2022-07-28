@@ -1,4 +1,3 @@
-
 req_json_ml_ok = {
     "df": {
         "ID": {"73490": "A-2707438"},
@@ -49,6 +48,6 @@ req_json_ml_ok = {
         "Sunrise_Sunset": {"73490": "Day"},
         "Civil_Twilight": {"73490": "Day"},
         "Nautical_Twilight": {"73490": "Day"},
-        "Astronomical_Twilight": {"73490": "Day"}
+        "Astronomical_Twilight": {"73490": "Day"},
     }
 }

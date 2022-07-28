@@ -70,8 +70,10 @@ def run():
         cmd = f'gunicorn --worker-class gthread -b {args.ip}:{args.port} insolver.serving.flask_app_several:app'
         exec_cmd(cmd)
     elif args.service == 'sfastapi':
-        cmd = (f'gunicorn -b {args.ip}:{args.port}'
-               'insolver.serving.fastapi_app_several:app -k uvicorn.workers.UvicornWorker')
+        cmd = (
+            f'gunicorn -b {args.ip}:{args.port}'
+            'insolver.serving.fastapi_app_several:app -k uvicorn.workers.UvicornWorker'
+        )
         exec_cmd(cmd)
     if args.service == 'django':
         django_dir = os.path.join(SERVING_DIR, 'django_insolver')

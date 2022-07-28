@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class InterpretBase(ABC):
-
     @abstractmethod
     def show_explanation(self, instance):
         raise NotImplementedError

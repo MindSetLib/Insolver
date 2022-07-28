@@ -9,6 +9,7 @@ class TransformToNumeric:
         column_param (str): Column name in InsolverDataFrame containing parameter to transform.
         downcast: Target numeric dtype, equal to Pandas' 'downcast' in the 'to_numeric' function, 'integer' by default.
     """
+
     def __init__(self, column_param, downcast='integer', priority=0):
         self.priority = priority
         self.column_param = column_param
@@ -26,6 +27,7 @@ class TransformMapValues:
         column_param (str): Column name in InsolverDataFrame containing parameter to map.
         dictionary (dict): The dictionary for mapping.
     """
+
     def __init__(self, column_param, dictionary, priority=1):
         self.priority = priority
         self.column_param = column_param
@@ -43,6 +45,7 @@ class TransformPolynomizer:
         column_param (str): Column name in InsolverDataFrame containing parameter to polynomize.
         n (int): Polynomial degree.
     """
+
     def __init__(self, column_param, n=2, priority=3):
         self.priority = priority
         self.column_param = column_param
@@ -67,6 +70,7 @@ class TransformGetDummies:
         inference (bool): Sign if the transformation is used for inference, False by default.
         dummy_columns (list): List of the dummy columns, for inference only.
     """
+
     def __init__(self, column_param, drop_first=False, inference=False, dummy_columns=None, priority=3):
         self.priority = priority
         self.column_param = column_param
@@ -92,11 +96,12 @@ class TransformGetDummies:
 class EncoderTransforms:
     """Label Encoder
 
-     Parameters:
-         column_names (list): columns for label encoding
-         le_classes (dict): dictionary with label encoding classes for each column
+    Parameters:
+        column_names (list): columns for label encoding
+        le_classes (dict): dictionary with label encoding classes for each column
 
     """
+
     def __init__(self, column_names, le_classes=None, priority=3):
         self.priority = priority
         self.column_names = column_names
@@ -124,6 +129,7 @@ class OneHotEncoderTransforms:
         column_names (list): columns for one hot encoding
         encoder_dict (dict): dictionary with encoder_params for each column
     """
+
     def __init__(self, column_names, encoder_dict=None, priority=3):
         self.priority = priority
         self.column_names = column_names

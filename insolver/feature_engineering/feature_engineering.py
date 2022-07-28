@@ -55,21 +55,35 @@ class DataPreprocessing:
         smoothing_column (str): Name of the column to smooth.
 
     """
-    def __init__(self, numerical_columns=None, categorical_columns=None,
-                 transform_categorical=True, transform_categorical_drop=None,
-                 fillna=True, fillna_numerical='median', fillna_categorical='frequent',
-                 normalization=True, normalization_drop=None,
-                 feature_selection=None, feat_select_task=None, feat_select_threshold='mean',
-                 dim_red=None, dim_red_n_components=None, dim_red_n_neighbors=None,
-                 sampling=None, sampling_n=None, sampling_n_clusters=10,
-                 smoothing=None, smoothing_column=None):
 
+    def __init__(
+        self,
+        numerical_columns=None,
+        categorical_columns=None,
+        transform_categorical=True,
+        transform_categorical_drop=None,
+        fillna=True,
+        fillna_numerical='median',
+        fillna_categorical='frequent',
+        normalization=True,
+        normalization_drop=None,
+        feature_selection=None,
+        feat_select_task=None,
+        feat_select_threshold='mean',
+        dim_red=None,
+        dim_red_n_components=None,
+        dim_red_n_neighbors=None,
+        sampling=None,
+        sampling_n=None,
+        sampling_n_clusters=10,
+        smoothing=None,
+        smoothing_column=None,
+    ):
         # columns initialization and transformation attributes
         self.numerical_columns = numerical_columns
         self.categorical_columns = categorical_columns
         self.transform_categorical = transform_categorical
-        self.transform_categorical_drop = ([] if transform_categorical_drop is None
-                                           else transform_categorical_drop)
+        self.transform_categorical_drop = [] if transform_categorical_drop is None else transform_categorical_drop
 
         # auto fill NA values attributes
         self.fillna = fillna
@@ -235,10 +249,12 @@ class DataPreprocessing:
             df (pandas.Dataframe): The dataframe.
         """
         # fill NA values with the AutoFillNATransforms class
-        AutoFillNATransforms(numerical_columns=self.numerical_columns,
-                             categorical_columns=self.categorical_columns,
-                             numerical_method=self.fillna_numerical,
-                             categorical_method=self.fillna_categorical).__call__(df=df)
+        AutoFillNATransforms(
+            numerical_columns=self.numerical_columns,
+            categorical_columns=self.categorical_columns,
+            numerical_method=self.fillna_numerical,
+            categorical_method=self.fillna_categorical,
+        ).__call__(df=df)
 
     def _normalization(self, df):
         """
@@ -296,24 +312,25 @@ class DataPreprocessing:
             if isinstance(target, list):
                 raise NotImplementedError('Multi target is not supported for LDA.')
 
-            X = DimensionalityReduction(method=self.dim_red).transform(X=X, y=y,
-                                                                       n_components=self.dim_red_n_components)
+            X = DimensionalityReduction(method=self.dim_red).transform(X=X, y=y, n_components=self.dim_red_n_components)
 
         # if the selected method is TSNE, then set X, n_components and perplexity in the transform method
         elif self.dim_red == 't_sne':
             # set n_components and perplexity to default values if not initialized
             n_components = self.dim_red_n_components if self.dim_red_n_components else 2
             perplexity = self.dim_red_n_neighbors if self.dim_red_n_neighbors else 30
-            X = DimensionalityReduction(method=self.dim_red).transform(X=X, n_components=n_components,
-                                                                       perplexity=perplexity)
+            X = DimensionalityReduction(method=self.dim_red).transform(
+                X=X, n_components=n_components, perplexity=perplexity
+            )
 
         # if the selected method is manifolds, then set X, n_components and n_neighbors in the transform method
         else:
             # set n_components and n_neighbors to default values if not initialized
             n_components = self.dim_red_n_components if self.dim_red_n_components else 2
             n_neighbors = self.dim_red_n_neighbors if self.dim_red_n_neighbors else 5
-            X = DimensionalityReduction(method=self.dim_red).transform(X=X, n_components=n_components,
-                                                                       n_neighbors=n_neighbors)
+            X = DimensionalityReduction(method=self.dim_red).transform(
+                X=X, n_components=n_components, n_neighbors=n_neighbors
+            )
 
         return pd.concat([X, y], axis=1)
 
@@ -329,7 +346,7 @@ class DataPreprocessing:
             'simple': int(len(df) / 2),
             'systematic': 2,
             'cluster': int(self.sampling_n_clusters / 2),
-            'stratified': int(len(df) / self.sampling_n_clusters / 2)
+            'stratified': int(len(df) / self.sampling_n_clusters / 2),
         }
 
         # set default value if parameter is initialized as True

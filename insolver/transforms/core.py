@@ -27,6 +27,7 @@ class InsolverTransform(InsolverDataFrame):
         data: InsolverDataFrame to transform.
         transforms: List of transforms to be done.
     """
+
     _internal_names = DataFrame._internal_names + ["transforms_done", "ins_output_cache"]
     _internal_names_set = set(_internal_names)
     _metadata = ["transforms", "ins_input_cache"]
@@ -51,6 +52,13 @@ class InsolverTransform(InsolverDataFrame):
 
     @staticmethod
     def _check_colnames_dtypes(expected: Dict[str, dtype], input_: Dict[str, dtype], step: str) -> None:
+        if not isinstance(expected, dict):
+            raise TypeError(f"expected must be dict, got {type(expected)}")
+        if not isinstance(input_, dict):
+            raise TypeError(f"input_ must be dict, got {type(input_)}")
+        if not isinstance(step, str):
+            raise TypeError(f"step must be str, got {type(step)}")
+
         missing_col_checks = set(expected.keys()).difference(set(input_.keys()))
         if missing_col_checks != set():
             warn_insolver(f'{step.capitalize()} data missing columns {list(missing_col_checks)}!', TransformsWarning)
@@ -77,9 +85,10 @@ class InsolverTransform(InsolverDataFrame):
             for transform in self.transforms:
                 if hasattr(transform, 'priority'):
                     if transform.priority < priority:
-                        warn_insolver('Check the order of transforms. '
-                                      'Transforms with higher priority should be done first!',
-                                      TransformsWarning)
+                        warn_insolver(
+                            'Check the order of transforms. Transforms with higher priority should be done first!',
+                            TransformsWarning,
+                        )
                         break
                     else:
                         priority = transform.priority
@@ -98,24 +107,30 @@ class InsolverTransform(InsolverDataFrame):
                 self.ins_output_cache = dict(zip(list(self.columns), list(self.dtypes)))
         return self.transforms_done
 
-    def save(self,
-             filename: str,
-             protocol: Optional[int] = None,
-             byref: Optional[bool] = None,
-             fmode: Optional[int] = None,
-             recurse: Optional[bool] = None,
-             **kwargs: Any) -> None:
+    def save(
+        self,
+        filename: str,
+        protocol: Optional[int] = None,
+        byref: Optional[bool] = None,
+        fmode: Optional[int] = None,
+        recurse: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> None:
         with open(filename, 'wb') as file:
-            dill.dump({"transforms": self.transforms,
-                       "ins_input_cache": self.ins_input_cache,
-                       "ins_output_cache": self.ins_output_cache,
-                       "transforms_done": self.transforms_done},
-                      file,
-                      protocol=protocol,
-                      byref=byref,
-                      fmode=fmode,
-                      recurse=recurse,
-                      **kwargs)
+            dill.dump(
+                {
+                    "transforms": self.transforms,
+                    "ins_input_cache": self.ins_input_cache,
+                    "ins_output_cache": self.ins_output_cache,
+                    "transforms_done": self.transforms_done,
+                },
+                file,
+                protocol=protocol,
+                byref=byref,
+                fmode=fmode,
+                recurse=recurse,
+                **kwargs,
+            )
 
 
 def _check_transforms(obj: Any) -> bool:

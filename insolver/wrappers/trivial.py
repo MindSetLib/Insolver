@@ -14,6 +14,7 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         thresh (float, optional): Threshold for continuous prediction in dummy classification.
         **kwargs: Other arguments.
     """
+
     def __init__(self, task=None, col_name=None, agg=None, thresh=0.5, **kwargs):
         super(InsolverTrivialWrapper, self).__init__(backend='trivial')
         self._tasks = ['class', 'reg']
@@ -26,8 +27,11 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
         else:
             raise NotImplementedError(f'Task parameter supports values in {self._tasks}.')
 
-        if (isinstance(col_name, (str, list, tuple)) or col_name is None or
-                (isinstance(col_name, (list, tuple)) and all([isinstance(element, str) for element in col_name]))):
+        if (
+            isinstance(col_name, (str, list, tuple))
+            or col_name is None
+            or (isinstance(col_name, (list, tuple)) and all([isinstance(element, str) for element in col_name]))
+        ):
             self.col_name = col_name
         else:
             raise TypeError(f'Column of type {type(self.col_name)} is not supported.')
@@ -66,5 +70,6 @@ class InsolverTrivialWrapper(InsolverBaseWrapper):
             output = broadcast_to(self.fitted, X.shape[0])
         else:
             output = merge(X[self.col_name], self.fitted, how='left', on=self.col_name)[self.y_train.name].fillna(
-                self.agg(self.y_train))
+                self.agg(self.y_train)
+            )
         return array(output) if self.task != 'class' else where(array(output) >= self.thresh, 1, 0)

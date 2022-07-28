@@ -2,8 +2,15 @@ from sklearn import metrics
 from sklearn.utils.multiclass import type_of_target
 import numpy as np
 import pandas as pd
-from insolver.model_tools import (deviance_poisson, deviance_gamma, deviance_score, deviance_explained,
-                                  deviance_explained_poisson, deviance_explained_gamma, lift_score)
+from insolver.model_tools import (
+    deviance_poisson,
+    deviance_gamma,
+    deviance_score,
+    deviance_explained,
+    deviance_explained_poisson,
+    deviance_explained_gamma,
+    lift_score,
+)
 from .error_handler import error_handler
 
 gain_descr = 'gain curve description'
@@ -24,7 +31,7 @@ def _create_metrics_charts(X_train, X_test, y_train, y_test, predicted_train, pr
             'train_lift': [list(train_lift.dropna().index), list(train_lift.dropna()['Predict'])],
             'test_lift': [list(test_lift.dropna().index), list(test_lift.dropna()['Predict'])],
             'y_name': y_train.name,
-            'gain': 'false'
+            'gain': 'false',
         }
         descr_html += f'''
         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
@@ -96,11 +103,11 @@ def _calc_psi(x_train, x_test, dataset):
                 {feature}</a>
             </li>'''
             tab_pane_class = "tab-pane active" if feature == features[0] else "tab-pane"
-            tab_pane_items += (f'''
+            tab_pane_items += f'''
             <div class="{tab_pane_class}" id="psi_{feature_replaced}">
                 {psi.to_html(classes = "table table-striped", justify="center")}
             </div>
-            ''')
+            '''
 
     return f'''
     <div class="card text-center">
@@ -141,8 +148,10 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
         elif isinstance(metrics_to_calc, list):
             functions_names = metrics_to_calc
         else:
-            raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
-                            Must be "all", "main" or list.''')
+            raise TypeError(
+                f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
+                            Must be "all", "main" or list.'''
+            )
 
         result['root_mean_square_error'] = np.sqrt(functions['mean_squared_error'](y_true, y_pred))
 
@@ -160,20 +169,25 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
             elif isinstance(metrics_to_calc, list):
                 functions_names = metrics_to_calc
             else:
-                raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
-                                Must be "all", "main" or list.''')
+                raise TypeError(
+                    f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
+                                Must be "all", "main" or list.'''
+                )
 
         elif type_of_true == 'binary' and type_of_pred == 'continuous':
-            functions_names = (functions_names_dict['binary_cont'] if not isinstance(metrics_to_calc, list)
-                               else metrics_to_calc)
+            functions_names = (
+                functions_names_dict['binary_cont'] if not isinstance(metrics_to_calc, list) else metrics_to_calc
+            )
 
         else:
             raise TypeError(f"Not supported target type <{type_of_true}> or predicted type <{type_of_pred}>")
 
     for name in functions_names:
         if name not in functions.keys():
-            raise NotImplementedError(f'''{name} metric name is not supported. Supported names for {task} task:
-                                      {functions.keys()}.''')
+            raise NotImplementedError(
+                f'''{name} metric name is not supported. Supported names for {task} task:
+                                      {functions.keys()}.'''
+            )
         try:
             if name == 'gini_coef' and exposure:
                 result[name] = functions[name](y_true, y_pred, x[exposure])[2]
@@ -238,9 +252,13 @@ def stability_index(scoring_variable, dev, oot, kind='psi', bins=10):
     else:
         dev_bins = pd.cut(dev[scoring_variable], bins=bins)
         oot_bins = pd.cut(oot[scoring_variable], bins=dev_bins.cat.categories)
-    psi = pd.concat([(oot_bins.value_counts().sort_index(ascending=False) / oot_bins.shape[0] * 100).rename('OOT'),
-                     (dev_bins.value_counts().sort_index(ascending=False) / dev_bins.shape[0] * 100).rename('DEV')],
-                    axis=1)
+    psi = pd.concat(
+        [
+            (oot_bins.value_counts().sort_index(ascending=False) / oot_bins.shape[0] * 100).rename('OOT'),
+            (dev_bins.value_counts().sort_index(ascending=False) / dev_bins.shape[0] * 100).rename('DEV'),
+        ],
+        axis=1,
+    )
     psi['Diff'] = psi['OOT'] - psi['DEV']
     psi['ln_OOT_DEV'] = np.log(psi['OOT'] / psi['DEV'])
     psi['ln_OOT_DEV'].replace([np.inf, -np.inf], 0, inplace=True)

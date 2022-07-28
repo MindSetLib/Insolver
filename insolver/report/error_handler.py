@@ -6,5 +6,7 @@ def error_handler(return_footer):
             except Exception as e:
                 print(f'Exception {e.__class__.__name__} in {func.__name__}: {e}')
                 return [] if not return_footer else ({'footer': []}, [])
+
         return inner_function
+
     return inner_decorator

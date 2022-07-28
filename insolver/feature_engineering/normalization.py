@@ -21,6 +21,7 @@ class Normalization:
         new_df (pandas.DataFrame): A new dataframe as a copy of the original data with a transformed columns.
 
     """
+
     def __init__(self, method='standard', column_names=None, column_method=None):
         self.method = method
         self.column_names = column_names

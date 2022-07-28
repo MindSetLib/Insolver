@@ -112,10 +112,12 @@ class ChiMergeDiscretizer:
 
     @staticmethod
     def _get_chi(values, values_reversed, target, target_unique, intervals, i):
-        interval_0 = target[np.argmax(values == intervals[i][0]):len(values_reversed) - np.argmax(
-            values_reversed == intervals[i][1])]
-        interval_1 = target[np.argmax(values == intervals[i + 1][0]):len(values_reversed) - np.argmax(
-            values_reversed == intervals[i + 1][1])]
+        left0 = np.argmax(values == intervals[i][0])
+        left1 = np.argmax(values == intervals[i + 1][0])
+        right0 = len(values_reversed) - np.argmax(values_reversed == intervals[i][1])
+        right1 = len(values_reversed) - np.argmax(values_reversed == intervals[i + 1][1])
+        interval_0 = target[left0:right0]
+        interval_1 = target[left1:right1]
         a_1 = np.bincount(interval_0, minlength=len(target_unique))
         a_2 = np.bincount(interval_1, minlength=len(target_unique))
         r_1 = np.sum(a_1)

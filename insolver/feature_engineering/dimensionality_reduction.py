@@ -22,6 +22,7 @@ class DimensionalityReduction:
         methods_dict (dict): Methods dictionary.
 
     """
+
     def __init__(self, method='pca'):
         self.method = method
         self.estimator, self.X_transformed = None, None
@@ -75,7 +76,6 @@ class DimensionalityReduction:
         """
         # try in case plot_transformed() is called before transform()
         try:
-
             # if y is DataFrame use the first column to concat X_transformed and y
             if isinstance(y, pd.DataFrame):
                 y = y[y.columns[0]]
