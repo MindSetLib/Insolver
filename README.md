@@ -58,22 +58,9 @@ Available [here](https://insolver.readthedocs.io/)
 
 ## Supported libraries:
 
-Libs:
-- sklearn
-- H2O
-
-Boosting models:
-- XGBoost
-- LightGBM
-- CatBoost
-
-Model interpretation:
-- shap plots
-
-Serving (REST-API):
-- flask
-- fastapi
-
+| GLM                 | Boosting models                           | Serving (REST-API)                 | Model interpretation |
+|---------------------|-------------------------------------------|------------------------------------|----------------------|
+| - sklearn<br/>- h2o | - XGBoost<br/> - LightGBM<br/> - CatBoost | - Flask<br/>- FastAPI<br/>- Django | - shap plots         |
 
 ### Run tests:
 ```shell
@@ -100,6 +87,6 @@ Please, feel free to open an issue or/and suggest PR, if you find any bugs or an
 ### Example of an elyra pipeline built with the Insolver inside
 ![](https://github.com/MindSetLib/Insolver/releases/download/v0.4.6/InsolverElyraPipeline.gif)
 
-### Contacts
+## Contacts
 frank@mind-set.ru
 +79263790123
