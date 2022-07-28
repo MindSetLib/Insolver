@@ -11,8 +11,10 @@ pip install "git+https://github.com/MindSetLib/Insolver.git"
 ```
 
 ## Install from PyPI
-Insolver can be installed via pip from [PyPI](https://pypi.org/project/insolver/).
+Insolver can be installed via pip from [PyPI](https://pypi.org/project/insolver/). There are several installation options available:
 
-- Insolver can be installed by running `pip install insolver`.
-- If you want to install insolver with all heavy requirements, install with `pip install insolver[full]`.
-- If you want to install insolver with development requirements, install with `pip install insolver[dev]`.
+| Description                                | Command                       |
+|--------------------------------------------|-------------------------------|
+| Regular installation                       | `pip install insolver`        |
+| Installation with all heavy requirements   | `pip install insolver[full]`  |
+| Installation with development requirements | `pip install insolver[dev]`   |
