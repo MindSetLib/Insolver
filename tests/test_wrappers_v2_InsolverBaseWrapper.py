@@ -16,7 +16,11 @@ class DescendantInsolverBaseWrapper(InsolverBaseWrapper):
 
 def test_InsolverBaseWrapper():
     descendant = DescendantInsolverBaseWrapper(backend='some_backend', task='nothing')
-    assert descendant.metadata == {'init_params': {'backend': 'some_backend', 'task': 'nothing'}, 'is_fitted': False}
+    assert descendant.metadata == {
+        'init_params': {'backend': 'some_backend', 'task': 'nothing'},
+        'is_fitted': False,
+        'algo': 'dummy',
+    }
     assert descendant.algo == 'dummy'
     assert descendant.model is None
     assert descendant() is None
@@ -26,6 +30,7 @@ def test_InsolverBaseWrapper():
         'init_params': {'backend': 'some_backend', 'task': 'nothing'},
         'backend': 'some_backend',
         'task': 'nothing',
+        'algo': 'dummy',
         'is_fitted': False,
     }
 
