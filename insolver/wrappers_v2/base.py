@@ -49,7 +49,7 @@ class InsolverBaseWrapper:
         }
         self.metadata.update(_metadata)
 
-    def _save_insolver(self, path_or_buf: Union[str, PathLike[str]], method: Callable, **kwargs: Any) -> None:
+    def _save_insolver(self, path_or_buf: Union[str, 'PathLike[str]'], method: Callable, **kwargs: Any) -> None:
         buffer = BytesIO()
         with ZipFile(buffer, mode="w", compression=ZIP_DEFLATED) as zip_file:
             zip_file.writestr("metadata.json", json.dumps(self.metadata))
@@ -63,7 +63,7 @@ class InsolverBaseWrapper:
 
     def save_model(
         self,
-        path_or_buf: Union[None, str, PathLike[str]] = None,
+        path_or_buf: Union[None, str, 'PathLike[str]'] = None,
         mode: Literal['insolver', 'raw'] = "insolver",
         method: str = '',
         **kwargs: Any,

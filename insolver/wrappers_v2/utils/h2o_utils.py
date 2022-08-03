@@ -77,7 +77,7 @@ def x_y_to_h2o_frame(
 
 
 def save_h2o(
-    model: H2OEstimator, path_or_buf: Union[None, str, PathLike[str]] = None, **kwargs: Any
+    model: H2OEstimator, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any
 ) -> Optional[bytes]:
     if not ((path_or_buf is None) or (isinstance(path_or_buf, str))):
         raise ValueError(f"Invalid file path or buffer object {type(path_or_buf)}")
@@ -102,7 +102,7 @@ def save_h2o(
 
 
 def load_h2o(
-    path_or_buf: Union[str, PathLike[str], bytes],
+    path_or_buf: Union[str, 'PathLike[str]', bytes],
     h2o_server_params: Optional[Dict[str, Any]] = None,
     terminate: bool = True,
 ) -> H2OEstimator:

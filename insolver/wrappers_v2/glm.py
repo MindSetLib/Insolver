@@ -414,7 +414,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
             coefs = self.model.coef()
         return coefs
 
-    def coef_to_csv(self, path_or_buf: Union[None, str, PathLike[str]] = None, **kwargs: Any) -> None:
+    def coef_to_csv(self, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any) -> None:
         """Write GLM coefficients to a comma-separated values (csv) file.
 
         Args:

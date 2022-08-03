@@ -9,12 +9,12 @@ from zipfile import ZipFile, ZIP_DEFLATED, BadZipFile
 from .h2o_utils import load_h2o
 
 
-def load(path_or_buf: Union[str, PathLike[str], bytes], saving_method: str, **kwargs: Any) -> Callable:
+def load(path_or_buf: Union[str, 'PathLike[str]', bytes], saving_method: str, **kwargs: Any) -> Callable:
     load_config: Dict[str, Callable] = dict(pickle=load_pickle, dill=load_dill, h2o=load_h2o)
     return load_config[saving_method](path_or_buf, **kwargs)
 
 
-def load_model(path_or_buf: Union[str, PathLike[str], IO[bytes]], **kwargs: Any) -> Any:
+def load_model(path_or_buf: Union[str, 'PathLike[str]', IO[bytes]], **kwargs: Any) -> Any:
     from insolver.wrappers_v2 import InsolverGLMWrapper
 
     wrapper_config = dict(glm=InsolverGLMWrapper)
@@ -49,7 +49,7 @@ def load_model(path_or_buf: Union[str, PathLike[str], IO[bytes]], **kwargs: Any)
         )
 
 
-def save_pickle(model: Any, path_or_buf: Union[None, str, PathLike[str]] = None, **kwargs: Any) -> Optional[bytes]:
+def save_pickle(model: Any, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any) -> Optional[bytes]:
     if not ((path_or_buf is None) or (isinstance(path_or_buf, str))):
         raise ValueError(f"Invalid file path or buffer object {type(path_or_buf)}")
 
@@ -61,7 +61,7 @@ def save_pickle(model: Any, path_or_buf: Union[None, str, PathLike[str]] = None,
         return None
 
 
-def load_pickle(path_or_buf: Union[str, PathLike[str], bytes], **kwargs: Any) -> Any:
+def load_pickle(path_or_buf: Union[str, 'PathLike[str]', bytes], **kwargs: Any) -> Any:
     if isinstance(path_or_buf, (str, PathLike)):
         with open(path_or_buf, 'rb') as _file:
             return pickle.load(_file, **kwargs)
@@ -69,7 +69,7 @@ def load_pickle(path_or_buf: Union[str, PathLike[str], bytes], **kwargs: Any) ->
         return pickle.loads(path_or_buf, **kwargs)
 
 
-def save_dill(model: Any, path_or_buf: Union[None, str, PathLike[str]] = None, **kwargs: Any) -> Optional[bytes]:
+def save_dill(model: Any, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any) -> Optional[bytes]:
     if not ((path_or_buf is None) or (isinstance(path_or_buf, str))):
         raise ValueError(f"Invalid file path or buffer object {type(path_or_buf)}")
 
@@ -81,7 +81,7 @@ def save_dill(model: Any, path_or_buf: Union[None, str, PathLike[str]] = None, *
         return None
 
 
-def load_dill(path_or_buf: Union[str, PathLike[str], bytes], **kwargs: Any) -> Any:
+def load_dill(path_or_buf: Union[str, 'PathLike[str]', bytes], **kwargs: Any) -> Any:
     if isinstance(path_or_buf, (str, PathLike)):
         with open(path_or_buf, 'rb') as _file:
             return dill.load(_file, **kwargs)
