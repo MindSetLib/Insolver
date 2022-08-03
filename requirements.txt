@@ -1,11 +1,15 @@
 # Python 3.7 specific
-typing_extensions>=4.0.1
+typing_extensions>=4.0.; python_version<"3.8"
 
 # Restrictions due to Python 3.7
-numpy~=1.21.0,<1.22.0
-pandas>=1.2.0,<1.4.0
-scipy>=1.6.0,<1.8.0
-scikit-learn>=1.0,<1.1.0
+numpy~=1.21.0,<1.22.0; python_version=="3.7"
+pandas>=1.2.0,<1.4.0; python_version=="3.7"
+scipy>=1.6.0,<1.8.0; python_version=="3.7"
+scikit-learn>=1.0,<1.1.0; python_version=="3.7"
+numpy>=1.21.0; python_version>"3.7"
+pandas>=1.2.0; python_version>"3.7"
+scipy>=1.6.0; python_version>"3.7"
+scikit-learn>=1.0; python_version>"3.7"
 
 # Python 3.7 not affecting
 xgboost>=1.5.0 # Python 3.7 deprecates after major release after 1.6.1
@@ -16,7 +20,7 @@ matplotlib>=3.4.3
 plotly>=5.3.1
 seaborn==0.11.2
 shap>=0.39.0
-h2o>=3.32.0.3
+h2o>=3.36.0.*
 statsmodels==0.13.1
 lime>=0.2.0.1
 dill>=0.3.4
@@ -31,7 +35,8 @@ fastapi>=0.65.2
 uvicorn[standard]>=0.13.3
 pydantic==1.8.2
 gunicorn>=20.0.4
-django==3.2.* # Restrictions due to Python 3.7
+django==3.2.*; python_version=="3.7" # Restrictions due to Python 3.7
+django>=3.2.*; python_version>"3.7"
 djangorestframework==3.13.1
 psycopg2-binary==2.9.3
 sympy==1.9

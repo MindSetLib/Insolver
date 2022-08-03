@@ -41,8 +41,8 @@ class InsolverTransform(InsolverDataFrame):
         if isinstance(transforms, list):
             self.transforms = transforms
         elif isinstance(transforms, dict) and _check_transforms(transforms):
-            for key in transforms.keys():
-                setattr(self, key, transforms[key])
+            for key, value in transforms.items():
+                setattr(self, key, value)
 
         self.transforms_done: Dict = dict()
 
@@ -67,9 +67,9 @@ class InsolverTransform(InsolverDataFrame):
             expected = {key: expected[key] for key in common_cols}
 
         if expected != input_:
-            for key in expected.keys():
-                if expected[key] != input_[key]:
-                    message = f"{key}: input {input_[key]}, expected {expected[key]}"
+            for key, value in expected.items():
+                if value != input_[key]:
+                    message = f"{key}: input {input_[key]}, expected {value}"
                     warn_insolver(f'{step.capitalize()} column dtype mismatch: Column {message}!', TransformsWarning)
 
     def ins_transform(self) -> Dict:
