@@ -1,1 +1,1 @@
-from insolver.frame import InsolverDataFrame
+from .frame import InsolverDataFrame

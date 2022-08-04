@@ -14,6 +14,8 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Literal
 
+from .utils import get_requirements
+
 
 class InsolverWrapperWarning(Warning):
     def __init__(self, message: str) -> None:
@@ -53,6 +55,7 @@ class InsolverBaseWrapper:
         buffer = BytesIO()
         with ZipFile(buffer, mode="w", compression=ZIP_DEFLATED) as zip_file:
             zip_file.writestr("metadata.json", json.dumps(self.metadata))
+            zip_file.writestr("requirements.txt", get_requirements())
             zip_file.writestr(
                 f"model_{os.path.basename(path_or_buf)}",
                 BytesIO(method(self.model, path_or_buf=None, **kwargs)).getvalue(),

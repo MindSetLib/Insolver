@@ -3,8 +3,8 @@ import dill
 from numpy import dtype
 from pandas import DataFrame
 
-from insolver.frame import InsolverDataFrame
-from insolver.utils import warn_insolver
+from ..frame import InsolverDataFrame
+from ..utils import warn_insolver
 
 
 class TransformsWarning(Warning):
