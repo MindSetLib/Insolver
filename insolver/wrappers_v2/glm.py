@@ -26,11 +26,6 @@ from .utils.h2o_utils import x_y_to_h2o_frame, h2o_start, h2o_stop, to_h2oframe,
 
 
 class InsolverGLMWrapper(InsolverBaseWrapper):
-    algo = 'glm'
-    _backends = ["h2o", "sklearn"]
-    _tasks = ["class", "reg"]
-    _backend_saving_methods = {'sklearn': {'pickle': save_pickle, 'dill': save_dill}, 'h2o': {'h2o': save_h2o}}
-
     """Insolver wrapper for Generalized Linear Models.
 
     Parameters:
@@ -44,7 +39,12 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
         **kwargs: Parameters for GLM estimators (for H2OGeneralizedLinearEstimator or TweedieRegressor) except
           `family` (`power` for TweedieRegressor) and `link`.
 
-        """
+    """
+
+    algo = 'glm'
+    _backends = ["h2o", "sklearn"]
+    _tasks = ["class", "reg"]
+    _backend_saving_methods = {'sklearn': {'pickle': save_pickle, 'dill': save_dill}, 'h2o': {'h2o': save_h2o}}
 
     def __init__(
         self,
