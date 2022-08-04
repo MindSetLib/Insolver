@@ -1,10 +1,22 @@
 import os
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
+
+from typing import Union
+from os import PathLike
 from io import BytesIO
 from urllib.request import urlopen
 from zipfile import ZipFile
 
 
-def download_dataset(name, folder='datasets'):
+def download_dataset(
+    name: Literal['freMPL-R', 'US_Accidents', 'US_Accidents_small', 'Lending_Club', 'weatherAUS', 'AB_NYC_2019'],
+    folder: Union[str, 'PathLike'] = 'datasets',
+) -> str:
     """Function for downloading and unzipping example datasets
 
     Args:
