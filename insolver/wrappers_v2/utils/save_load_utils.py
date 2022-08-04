@@ -16,9 +16,9 @@ def load(path_or_buf: Union[str, 'PathLike[str]', bytes], saving_method: str, **
 
 
 def load_model(path_or_buf: Union[str, 'PathLike[str]', IO[bytes]], **kwargs: Any) -> Any:
-    from insolver.wrappers_v2 import InsolverGLMWrapper
+    from insolver.wrappers_v2 import InsolverGLMWrapper, InsolverGBMWrapper
 
-    wrapper_config = dict(glm=InsolverGLMWrapper)
+    wrapper_config = dict(glm=InsolverGLMWrapper, gbm=InsolverGBMWrapper)
 
     if isinstance(path_or_buf, str):
         path_or_buf = os.path.abspath(path_or_buf)

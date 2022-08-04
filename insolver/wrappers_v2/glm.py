@@ -77,12 +77,12 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
 
         # Checks on supported families vs tasks
         if self.family not in [None, 'poisson', 'gamma', 'tweedie', 'normal', 'gaussian', 'inverse_gaussian', 'logit']:
-            ValueError(f'Distribution family "{self.family}" is not supported with sklearn backend.')
+            raise ValueError(f'Distribution family "{self.family}" is not supported with sklearn backend.')
         else:
             if (self.family in ['logit']) and (self.task == 'reg'):
-                ValueError(f'Distribution family "{self.family}" does not match the task "{self.task}".')
+                raise ValueError(f'Distribution family "{self.family}" does not match the task "{self.task}".')
             if (self.family not in [None, 'logit']) and (self.task == 'class'):
-                ValueError(f'Distribution family "{self.family}" does not match the task "{self.task}".')
+                raise ValueError(f'Distribution family "{self.family}" does not match the task "{self.task}".')
             if self.family is None:
                 self.family = 'gaussian' if self.task == 'reg' else 'logit'
 
@@ -162,17 +162,10 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
 
     def init_model(self) -> Any:
         model = None
+        params = self.metadata['init_params']['kwargs']
         if self.backend == 'sklearn':
-            params = self.metadata['init_params']['kwargs']
-            # params.update(params.pop('kwargs'))
             model = self._init_glm_sklearn(**params)
         if self.backend == 'h2o':
-            params = {
-                key: self.metadata['init_params'][key]
-                for key in self.metadata['init_params']
-                if key not in ['family', 'link', 'backend', 'task', 'h2o_server_params', 'kwargs']
-            }
-            params.update(self.metadata['init_params']['kwargs'])
             model = self._init_glm_h2o(**params)
         self._update_metadata()
         return model
