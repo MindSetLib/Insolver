@@ -7,6 +7,7 @@ from typing import Union, Any, Optional, IO, Callable, Dict
 from zipfile import ZipFile, ZIP_DEFLATED, BadZipFile
 
 from .h2o_utils import load_h2o
+from .req_utils import check_requirements
 
 
 def load(path_or_buf: Union[str, 'PathLike[str]', bytes], saving_method: str, **kwargs: Any) -> Callable:
@@ -25,9 +26,12 @@ def load_model(path_or_buf: Union[str, 'PathLike[str]', IO[bytes]], **kwargs: An
     try:
         with ZipFile(file=path_or_buf, mode="r", compression=ZIP_DEFLATED) as zip_file:
             filenames = zip_file.namelist()
-            if (len(zip_file.filelist) == 2) and ("metadata.json" in filenames):
+            if (len(zip_file.filelist) == 3) and ("metadata.json" in filenames) and ("requirements.txt" in filenames):
                 metadata = json.loads(zip_file.read("metadata.json"))
                 filenames.remove("metadata.json")
+                requirements = zip_file.read("requirements.txt")
+                check_requirements(requirements)
+                filenames.remove("requirements.txt")
                 model = zip_file.read(filenames[0])
             else:
                 raise RuntimeError(
