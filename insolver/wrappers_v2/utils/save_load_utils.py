@@ -24,7 +24,7 @@ def load_model(path_or_buf: Union[str, 'PathLike[str]', IO[bytes]], **kwargs: An
         path_or_buf = os.path.abspath(path_or_buf)
 
     try:
-        with ZipFile(file=path_or_buf, mode="r", compression=ZIP_DEFLATED) as zip_file:
+        with ZipFile(file=path_or_buf, mode="r", compression=ZIP_DEFLATED, compresslevel=9) as zip_file:
             filenames = zip_file.namelist()
             if (len(zip_file.filelist) == 3) and ("metadata.json" in filenames) and ("requirements.txt" in filenames):
                 metadata = json.loads(zip_file.read("metadata.json"))

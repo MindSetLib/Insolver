@@ -1,9 +1,11 @@
 import os
 import json
-import pytest
-from io import StringIO
-import pandas as pd
 import importlib
+from io import StringIO
+
+import h2o.exceptions
+import pytest
+import pandas as pd
 import insolver
 from insolver import InsolverDataFrame
 from insolver.wrappers import InsolverGLMWrapper
@@ -14,7 +16,6 @@ from insolver.transforms import (
     TransformPolynomizer,
     TransformAgeGender,
 )
-from h2o.exceptions import H2OServerError, H2OConnectionError
 
 
 class TransformExp:
@@ -104,7 +105,7 @@ with open("./dev/test_request_frempl.json", 'r') as file_:
     request_json = json.load(file_)
 
 
-@pytest.mark.xfail(raises=(H2OServerError, H2OConnectionError))
+@pytest.mark.xfail(raises=h2o.exceptions.H2OServerError)
 def test_h2o_model():
     os.environ['model_path'] = './test_glm_model.h2o'
     os.environ['transforms_path'] = './transforms.pickle'

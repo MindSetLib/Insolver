@@ -53,7 +53,7 @@ class InsolverBaseWrapper:
 
     def _save_insolver(self, path_or_buf: Union[str, 'PathLike[str]'], method: Callable, **kwargs: Any) -> None:
         buffer = BytesIO()
-        with ZipFile(buffer, mode="w", compression=ZIP_DEFLATED) as zip_file:
+        with ZipFile(buffer, mode="w", compression=ZIP_DEFLATED, compresslevel=9) as zip_file:
             zip_file.writestr("metadata.json", json.dumps(self.metadata))
             zip_file.writestr("requirements.txt", get_requirements())
             zip_file.writestr(
