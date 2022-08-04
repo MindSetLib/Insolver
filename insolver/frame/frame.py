@@ -2,7 +2,7 @@ import json
 from typing import Type, Optional, List, Dict, Union, Any
 from numpy import dtype as numpy_dtype
 from pandas import DataFrame
-from insolver.model_tools import train_val_test_split
+from ..model_tools import train_val_test_split
 
 
 class InsolverDataFrame(DataFrame):
