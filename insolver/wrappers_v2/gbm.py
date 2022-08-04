@@ -5,14 +5,16 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Literal
 
-from typing import Optional, Any, Callable, Union, List, Tuple
+from typing import Optional, Any, Callable, Union, List, Tuple, Dict
 
-from numpy import ndarray
+from numpy import ndarray, array, abs as npabs, mean, argsort, float64
 from pandas import DataFrame, Series
 
-from xgboost import XGBClassifier, XGBRegressor, XGBModel
+from xgboost import XGBClassifier, XGBRegressor, XGBModel, DMatrix
 from lightgbm import LGBMClassifier, LGBMRegressor, LGBMModel
-from catboost import CatBoostClassifier, CatBoostRegressor, CatBoost
+from catboost import CatBoostClassifier, CatBoostRegressor, CatBoost, Pool, EFstrType
+
+from plotly.graph_objects import Figure, Bar
 
 from .base import InsolverBaseWrapper
 from .utils import save_pickle
@@ -382,3 +384,43 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
             raise TypeError(f'Invalid type {type(x)} for "x". It must be either pd.DataFrame or pd.Series.')
 
         return self.model.predict(x[self.metadata['feature_names']] if isinstance(x, DataFrame) else x, **kwargs)
+
+    def shap(self, x: Union[DataFrame, Series], show: bool = False) -> Dict[str, float64]:
+        """Method for shap values calculation and corresponding plot of feature importances.
+
+        Args:
+            x (pd.DataFrame, pd.Series): Data for shap values calculation.
+            show (boolean, optional): Whether to plot a graph.
+
+        Returns:
+            JSON containing shap values.
+        """
+        if not self.metadata['is_fitted']:
+            raise ValueError("This instance is not fitted yet. Call '.fit(...)' before using this estimator.")
+
+        if not isinstance(x, (DataFrame, Series)):
+            raise TypeError(f'Invalid type {type(x)} for "x". It must be either pd.DataFrame or pd.Series.')
+
+        shap_values: ndarray = ndarray((0,))
+        if self.backend == 'lightgbm':
+            shap_values = self.model.predict(x, pred_contrib=True)
+        if self.backend == 'xgboost':
+            shap_values = self.model._Booster.predict(DMatrix(x), pred_contribs=True)
+        if self.backend == 'catboost':
+            shap_values = self.model.get_feature_importance(Pool(x), type=EFstrType.ShapValues)
+
+        imps = mean(npabs(shap_values), axis=0)[:-1]
+        order = argsort(imps, axis=-1)
+        sorted_features_names = array(self.metadata['feature_names'])[order]
+        imps = imps[order]
+
+        if show:
+            fig = Figure(Bar(x=imps, y=sorted_features_names, orientation='h'))
+            fig.update_layout(
+                margin=dict(l=0, r=0, t=0, b=0),
+                xaxis=dict(title_text="Mean(|SHAP value|) (average impact on model output magnitude)"),
+            )
+            fig.update_yaxes(automargin=True)
+            fig.show()
+
+        return dict(zip(sorted_features_names[::-1], imps[::-1]))
