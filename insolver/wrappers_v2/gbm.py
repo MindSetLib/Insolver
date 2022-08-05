@@ -420,7 +420,6 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         """
         # Currently does not support multiclass
         shap_values = self._calc_shap_values(x)
-        print(shap_values.shape)
         imps = mean(npabs(shap_values), axis=0)[:-1]
         order = argsort(imps, axis=-1)
         sorted_features_names = array(self.metadata['feature_names'])[order]
