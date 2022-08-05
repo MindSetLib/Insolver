@@ -7,14 +7,14 @@ else:
 
 from typing import Optional, Any, Callable, Union, List, Tuple, Dict
 
-from numpy import ndarray, array, abs as npabs, mean, argsort, float64
+from numpy import ndarray, array, abs as npabs, mean, argsort, float64, cumsum, append, diff
 from pandas import DataFrame, Series
 
 from xgboost import XGBClassifier, XGBRegressor, XGBModel, DMatrix
 from lightgbm import LGBMClassifier, LGBMRegressor, LGBMModel
 from catboost import CatBoostClassifier, CatBoostRegressor, CatBoost, Pool, EFstrType
 
-from plotly.graph_objects import Figure, Bar
+from plotly.graph_objects import Figure, Bar, Waterfall
 
 from .base import InsolverBaseWrapper
 from .utils import save_pickle
@@ -308,6 +308,11 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
                     f'{[*list(alias.keys()), *reg_obj, *class_obj]}.'
                 )
 
+        def_params = dict(verbose=0, allow_writing_files=False)
+        for key, val in def_params.items():
+            if key not in params.keys():
+                params.update({key: val})
+
         if self.task == 'reg':
             model = CatBoostRegressor(objective=objective, n_estimators=self.n_estimators, **params)
         if self.task == 'class':
@@ -385,22 +390,15 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
 
         return self.model.predict(x[self.metadata['feature_names']] if isinstance(x, DataFrame) else x, **kwargs)
 
-    def shap(self, x: Union[DataFrame, Series], show: bool = False) -> Dict[str, float64]:
-        """Method for shap values calculation and corresponding plot of feature importances.
-
-        Args:
-            x (pd.DataFrame, pd.Series): Data for shap values calculation.
-            show (boolean, optional): Whether to plot a graph.
-
-        Returns:
-            JSON containing shap values.
-        """
+    def _calc_shap_values(self, x: Union[DataFrame, Series]) -> ndarray:
         if not self.metadata['is_fitted']:
             raise ValueError("This instance is not fitted yet. Call '.fit(...)' before using this estimator.")
 
         if not isinstance(x, (DataFrame, Series)):
             raise TypeError(f'Invalid type {type(x)} for "x". It must be either pd.DataFrame or pd.Series.')
 
+        feature_names = self.metadata['feature_names']
+        x = DataFrame(x).T[feature_names] if isinstance(x, Series) else x[feature_names]
         shap_values: ndarray = ndarray((0,))
         if self.backend == 'lightgbm':
             shap_values = self.model.predict(x, pred_contrib=True)
@@ -408,7 +406,21 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
             shap_values = self.model._Booster.predict(DMatrix(x), pred_contribs=True)
         if self.backend == 'catboost':
             shap_values = self.model.get_feature_importance(Pool(x), type=EFstrType.ShapValues)
+        return shap_values
 
+    def shap(self, x: Union[DataFrame, Series], show: bool = True) -> Optional[Dict[str, float64]]:
+        """Method for SHAP feature importance estimation.
+
+        Args:
+            x (pd.DataFrame, pd.Series): Data for SHAP feature importance estimation.
+            show (boolean, optional): Whether to plot a graph (default: show=True).
+
+        Returns:
+            Dict[str, float64] containing SHAP feature importances.
+        """
+        # Currently does not support multiclass
+        shap_values = self._calc_shap_values(x)
+        print(shap_values.shape)
         imps = mean(npabs(shap_values), axis=0)[:-1]
         order = argsort(imps, axis=-1)
         sorted_features_names = array(self.metadata['feature_names'])[order]
@@ -422,5 +434,67 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
             )
             fig.update_yaxes(automargin=True)
             fig.show()
+            return None
+        else:
+            return dict(zip(sorted_features_names[::-1], imps[::-1]))
 
-        return dict(zip(sorted_features_names[::-1], imps[::-1]))
+    def shap_explain(
+        self, data: Union[DataFrame, Series], show: bool = True, layout_dict: Dict[str, Any] = None
+    ) -> Optional[Dict[str, Dict[str, float64]]]:
+        """Method for plotting a waterfall with feature contributions or returning a dict with feature contributions.
+
+        Args:
+            data (pd.DataFrame, pd.Series): One-dimensional data sample for shap feature contribution calculation.
+            show (boolean, optional): Whether to plot a graph or return a json.
+            layout_dict (boolean, optional): Dictionary containing the parameters of plotly figure layout.
+
+        Returns:
+            None or dict: Waterfall graph or corresponding dict.
+        """
+        # Currently does not support multiclass. Also, lacks link function. Different results with SHAP.
+
+        if isinstance(data, DataFrame) and (data.shape[0] != 1):
+            raise ValueError('Argument "data" must be a one-dimensional data sample.')
+
+        shap_values = self._calc_shap_values(data)[0]
+        factors, base = shap_values[:-1], shap_values[-1]
+        order = argsort(-npabs(factors))[::-1]
+        feature_names = array(self.metadata['feature_names'])[order]
+        value = data.values.reshape(-1)[order]
+
+        cumsum_ = cumsum(append(base, factors[order]))
+        contribution = diff(cumsum_)
+
+        mask_ = contribution != 0
+        feature_names = feature_names[mask_]
+        value = value[mask_]
+        contribution = contribution[mask_]
+
+        if show:
+            fig = Figure(
+                Waterfall(
+                    orientation='h',
+                    measure=['relative'] * contribution.shape[0],
+                    base=base,
+                    y=[f'{feature_names[i]} = {value[i]}' for i in range(len(feature_names))],
+                    x=contribution,
+                )
+            )
+            fig.add_vline(
+                x=base, annotation_text='E[f(x)]', annotation_position="top left", line_width=0.2, line_dash="dot"
+            )
+            fig.add_vline(
+                x=cumsum_[-1],
+                annotation_text='f(x)',
+                annotation_position="bottom right",
+                line_width=0.2,
+                line_dash="dot",
+            )
+            fig.update_layout(**(layout_dict if layout_dict is not None else {'margin': dict(l=0, r=0, t=0, b=0)}))
+            fig.update_yaxes(automargin=True)
+            fig.show()
+            return None
+        else:
+            explain = {f: {'value': v, 'contribution': c} for f, v, c in zip(feature_names, value, contribution)}
+            explain.update({'E[f(x)]': {'value': base, 'contribution': base}})
+            return explain

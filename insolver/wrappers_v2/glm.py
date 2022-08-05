@@ -149,6 +149,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
             model = LogisticRegression(**params)
 
         if self.family in ['poisson', 'gamma', 'tweedie', 'inverse_gaussian']:
+            # Since sklearn GLM tend to fail optimization on non-standardized data
             model = Pipeline([('scaler', StandardScaler(with_mean=True, with_std=True)), ('glm', model)])
             self.metadata.update({'is_standardized': True})
         else:
