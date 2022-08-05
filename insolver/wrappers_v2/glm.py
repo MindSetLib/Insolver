@@ -49,7 +49,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
     def __init__(
         self,
         backend: Optional[Literal['sklearn', 'h2o']],
-        task: Optional[Literal['class', 'reg']] = 'reg',
+        task: Literal['class', 'reg'] = 'reg',
         family: Optional[str] = None,
         link: Optional[str] = None,
         h2o_server_params: Optional[Dict] = None,
