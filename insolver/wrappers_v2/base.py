@@ -14,7 +14,7 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Literal
 
-from .utils import get_requirements
+from .utils.req_utils import get_requirements
 
 
 class InsolverWrapperWarning(Warning):
@@ -58,7 +58,7 @@ class InsolverBaseWrapper:
             zip_file.writestr("requirements.txt", get_requirements())
             zip_file.writestr(
                 f"model_{os.path.basename(path_or_buf)}",
-                BytesIO(method(self.model, path_or_buf=None, **kwargs)).getvalue(),
+                BytesIO(method(self, path_or_buf=None, **kwargs)).getvalue(),
             )
 
         with open(path_or_buf if str(path_or_buf).endswith('.zip') else f'{path_or_buf}.zip', "wb") as f:
@@ -109,24 +109,14 @@ class InsolverBaseWrapper:
 
         if path_or_buf is None:
             if self._model_cached is None:
-                return self._backend_saving_methods[self.backend][method](self.model, path_or_buf, **kwargs)
+                return self._backend_saving_methods[self.backend][method](self, path_or_buf, **kwargs)
             else:
                 return self._model_cached
         else:
             if mode == "insolver":
                 self.metadata.update({"saving_method": method})
-                if self._model_cached is None:
-                    self._save_insolver(
-                        path_or_buf, method=self._backend_saving_methods[self.backend][method], **kwargs
-                    )
-                else:
-                    self._save_insolver(
-                        path_or_buf,
-                        method=self._backend_saving_methods[self.backend][method],
-                        _model_cached=self._model_cached,
-                        **kwargs,
-                    )
-                path_or_buf = f'{path_or_buf}.zip'
+                self._save_insolver(path_or_buf, method=self._backend_saving_methods[self.backend][method], **kwargs)
+                path_or_buf = f'{path_or_buf}.zip' if not path_or_buf.endswith('.zip') else path_or_buf
             else:
-                self._backend_saving_methods[self.backend][method](self.model, path_or_buf, **kwargs)
+                self._backend_saving_methods[self.backend][method](self, path_or_buf, **kwargs)
             return f"Saved model: {os.path.normpath(path_or_buf)}"

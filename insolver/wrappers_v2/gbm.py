@@ -44,7 +44,7 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
     def __init__(
         self,
         backend: Optional[Literal['xgboost', 'lightgbm', 'catboost']],
-        task: Optional[Literal['class', 'reg']] = 'reg',
+        task: Literal['class', 'reg'] = 'reg',
         objective: Union[None, str, Callable] = None,
         n_estimators: int = 100,
         **kwargs: Any,
