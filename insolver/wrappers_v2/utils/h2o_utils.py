@@ -10,6 +10,8 @@ from h2o.backend import H2OLocalServer
 from h2o.estimators import H2OEstimator
 from h2o import no_progress, cluster, remove_all, connect, load_model, save_model
 
+from ..base import InsolverBaseWrapper
+
 
 def h2o_start(h2o_server_params: Dict[str, Any] = None) -> None:
     # nthreads=-1, enable_assertions=True, max_mem_size=None, min_mem_size=None,
@@ -77,17 +79,21 @@ def x_y_to_h2o_frame(
 
 
 def save_h2o(
-    model: H2OEstimator, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any
+    wrapper: InsolverBaseWrapper, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any
 ) -> Optional[bytes]:
     if not ((path_or_buf is None) or (isinstance(path_or_buf, str))):
         raise ValueError(f"Invalid file path or buffer object {type(path_or_buf)}")
 
-    _model_cached = None if '_model_cached' not in kwargs else kwargs.pop('_model_cached')
+    if hasattr(wrapper, '_model_cached'):
+        _model_cached = wrapper._model_cached
+    else:
+        _model_cached = None
+        h2o_start()
 
     if path_or_buf is None:
         # Since there no possibility to save h2o model to a variable, workaround is needed
         if _model_cached is None:
-            save_model(model=model, filename='.temp_h2o_model_save', **kwargs)
+            save_model(model=wrapper.model, filename='.temp_h2o_model_save', **kwargs)
             with open('.temp_h2o_model_save', 'rb') as file:
                 saved = file.read()
             os.remove('.temp_h2o_model_save')
@@ -97,7 +103,11 @@ def save_h2o(
     else:
         path, filename = os.path.split(path_or_buf)
         # force = False, export_cross_validation_predictions = False
-        save_model(model=model, path=path, filename=filename, **kwargs)
+        if _model_cached is None:
+            save_model(model=wrapper.model, path=path, filename=filename, **kwargs)
+        else:
+            with open(path_or_buf, 'wb') as file:
+                file.write(_model_cached)
         return None
 
 

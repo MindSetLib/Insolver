@@ -9,6 +9,8 @@ from zipfile import ZipFile, ZIP_DEFLATED, BadZipFile
 from .h2o_utils import load_h2o
 from .req_utils import check_requirements
 
+from ..base import InsolverBaseWrapper
+
 
 def load(path_or_buf: Union[str, 'PathLike[str]', bytes], saving_method: str, **kwargs: Any) -> Callable:
     load_config: Dict[str, Callable] = dict(pickle=load_pickle, dill=load_dill, h2o=load_h2o)
@@ -53,15 +55,17 @@ def load_model(path_or_buf: Union[str, 'PathLike[str]', IO[bytes]], **kwargs: An
         )
 
 
-def save_pickle(model: Any, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any) -> Optional[bytes]:
+def save_pickle(
+    wrapper: InsolverBaseWrapper, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any
+) -> Optional[bytes]:
     if not ((path_or_buf is None) or (isinstance(path_or_buf, str))):
         raise ValueError(f"Invalid file path or buffer object {type(path_or_buf)}")
 
     if path_or_buf is None:
-        return pickle.dumps(model, **kwargs)
+        return pickle.dumps(wrapper.model, **kwargs)
     else:
         with open(path_or_buf, "wb") as _file:
-            pickle.dump(model, _file, **kwargs)
+            pickle.dump(wrapper.model, _file, **kwargs)
         return None
 
 
@@ -73,15 +77,17 @@ def load_pickle(path_or_buf: Union[str, 'PathLike[str]', bytes], **kwargs: Any) 
         return pickle.loads(path_or_buf, **kwargs)
 
 
-def save_dill(model: Any, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any) -> Optional[bytes]:
+def save_dill(
+    wrapper: InsolverBaseWrapper, path_or_buf: Union[None, str, 'PathLike[str]'] = None, **kwargs: Any
+) -> Optional[bytes]:
     if not ((path_or_buf is None) or (isinstance(path_or_buf, str))):
         raise ValueError(f"Invalid file path or buffer object {type(path_or_buf)}")
 
     if path_or_buf is None:
-        return dill.dumps(model, **kwargs)
+        return dill.dumps(wrapper.model, **kwargs)
     else:
         with open(path_or_buf, "wb") as _file:
-            dill.dump(model, _file, **kwargs)
+            dill.dump(wrapper.model, _file, **kwargs)
         return None
 
 
