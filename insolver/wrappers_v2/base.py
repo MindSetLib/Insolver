@@ -14,7 +14,7 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Literal
 
-from .utils import get_requirements
+from .utils.req_utils import get_requirements
 
 
 class InsolverWrapperWarning(Warning):
