@@ -18,6 +18,7 @@ from plotly.graph_objects import Figure, Bar, Waterfall
 
 from .base import InsolverBaseWrapper
 from .utils import save_pickle
+from .utils.hypertoptcv import hyperopt_cv_proc
 
 
 class InsolverGBMWrapper(InsolverBaseWrapper):
@@ -62,6 +63,8 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         self.objective = objective
         self.n_estimators = n_estimators
         self.kwargs = kwargs
+        self.best_params = None
+        self.trials = None
         self.model = self.init_model()
         self.__dict__.update(self.metadata)
 
@@ -320,9 +323,11 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
 
         return model
 
-    def init_model(self) -> Any:
+    def init_model(self, additional_params: Optional[Dict] = None) -> Any:
         model = None
         params = self.metadata['init_params']['kwargs']
+        if additional_params is not None:
+            params.update(additional_params)
         if self.backend == 'xgboost':
             model = self._init_gbm_xgboost(**params)
         if self.backend == 'lightgbm':
@@ -497,3 +502,34 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
             explain = {f: {'value': v, 'contribution': c} for f, v, c in zip(feature_names, value, contribution)}
             explain.update({'E[f(x)]': {'value': base, 'contribution': base}})
             return explain
+
+    def hyperopt_cv(
+        self, x, y, params, fn=None, algo=None, max_evals=10, timeout=None, fmin_params=None, fn_params=None
+    ):
+        """Hyperparameter optimization using hyperopt. Using cross-validation to evaluate hyperparameters by default.
+
+        Args:
+            x (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            params (dict): Dictionary of hyperparameters passed to hyperopt.
+            fn (callable, optional): Objective function to optimize with hyperopt.
+            algo (callable, optional): Algorithm for hyperopt. Available choices are: hyperopt.tpe.suggest and
+             hyperopt.random.suggest. Using hyperopt.tpe.suggest by default.
+            max_evals (int, optional): Number of function evaluations before returning.
+            timeout (None, int, optional): Limits search time by parametrized number of seconds.
+             If None, then the search process has no time constraint. None by default.
+            fmin_params (dict, optional): Dictionary of supplementary arguments for hyperopt.fmin function.
+            fn_params (dict, optional):  Dictionary of supplementary arguments for custom fn objective function.
+
+        Returns:
+            dict: Dictionary of the best choice of hyperparameters. Also, best model is fitted.
+        """
+        self.best_params, self.trials = hyperopt_cv_proc(
+            self, x, y, params, fn, algo, max_evals, timeout, fmin_params, fn_params
+        )
+        self.model = self.init_model(self.best_params)
+        self.fit(
+            x, y, **({} if not ((fn_params is not None) and ("fit_params" in fn_params)) else fn_params["fit_params"])
+        )
+        self._update_metadata()
+        return self.best_params
