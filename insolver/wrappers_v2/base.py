@@ -116,7 +116,7 @@ class InsolverBaseWrapper:
             if mode == "insolver":
                 self.metadata.update({"saving_method": method})
                 self._save_insolver(path_or_buf, method=self._backend_saving_methods[self.backend][method], **kwargs)
-                path_or_buf = f'{path_or_buf}.zip' if not path_or_buf.endswith('.zip') else path_or_buf
+                path_or_buf = f'{path_or_buf}.zip' if not os.fspath(path_or_buf).endswith('.zip') else path_or_buf
             else:
                 self._backend_saving_methods[self.backend][method](self, path_or_buf, **kwargs)
             return f"Saved model: {os.path.normpath(path_or_buf)}"

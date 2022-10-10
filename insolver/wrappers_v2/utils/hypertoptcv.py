@@ -1,11 +1,11 @@
 import functools
-from typing import Dict, Union
+from typing import Dict, Union, Tuple, Any, Callable, Optional, Iterable
 
 from numpy import mean
 from pandas import DataFrame, Series
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import make_scorer, check_scoring, mean_squared_error
-from hyperopt import STATUS_OK, Trials, tpe, fmin, space_eval
+from hyperopt import STATUS_OK, Trials, tpe, rand, fmin, space_eval, hp
 
 from ..base import InsolverBaseWrapper
 
@@ -15,12 +15,12 @@ def hyperopt_obj_cv(
     x: Union[DataFrame, Series],
     y: Union[DataFrame, Series],
     wrapper: InsolverBaseWrapper,
-    scoring,
-    cv=None,
-    agg=None,
-    maximize=False,
-    **kwargs
-):
+    scoring: Callable,
+    cv: Union[None, Callable, Iterable, int] = None,
+    agg: Optional[Callable] = None,
+    maximize: bool = False,
+    **kwargs: Any
+) -> Dict[str, Any]:
     """Default hyperopt objective performing cross-validation.
 
     Args:
@@ -64,8 +64,17 @@ def hyperopt_obj_cv(
 
 
 def hyperopt_cv_proc(
-    wrapper, x, y, params, fn=None, algo=None, max_evals=10, timeout=None, fmin_params=None, fn_params=None
-):
+    wrapper: InsolverBaseWrapper,
+    x: Union[DataFrame, Series],
+    y: Union[DataFrame, Series],
+    params: Dict,
+    fn: Optional[Callable] = None,
+    algo: Union[None, rand.suggest, tpe.suggest] = None,
+    max_evals: int = 10,
+    timeout: Optional[int] = None,
+    fmin_params: Dict[str, Any] = None,
+    fn_params: Dict[str, Any] = None,
+) -> Tuple[Dict, Trials]:
     """Hyperparameter optimization using hyperopt. Using cross-validation to evaluate hyperparameters by default.
 
     Args:
@@ -126,3 +135,35 @@ def hyperopt_cv_proc(
     }
 
     return best_params, trials
+
+
+AUTO_SPACE_CONFIG = {
+    "xgboost": {
+        "max_depth": hp.choice("max_depth", [5, 8, 10, 12, 15]),
+        "min_child_weight": hp.uniform("min_child_weight", 0, 50),
+        "subsample": hp.uniform("subsample", 0.5, 1),
+        "colsample_bytree": hp.uniform("colsample_bytree", 0.5, 1),
+        "alpha": hp.uniform("alpha", 0, 1),
+        "lambda": hp.uniform("lambda", 0, 1),
+        "eta": hp.uniform("eta", 0.01, 1),
+        "gamma": hp.uniform("gamma", 0.01, 1000),
+    },
+    "lightgbm": {
+        "max_depth": hp.choice("max_depth", [5, 8, 10, 12, 15]),
+        "min_child_weight": hp.uniform("min_child_weight", 0, 50),
+        "subsample": hp.uniform("subsample", 0.5, 1),
+        "colsample_bytree": hp.uniform("colsample_bytree", 0.5, 1),
+        "alpha": hp.uniform("alpha", 0, 1),
+        "num_leaves": hp.quniform("num_leaves", 31, 10000, 1),
+        "reg_lambda": hp.uniform("reg_lambda", 0, 1),
+        "learning_rate": hp.uniform("learning_rate", 0.01, 1),
+    },
+    "catboost": {
+        "max_depth": hp.choice("max_depth", [5, 8, 10, 12, 15]),
+        "min_child_samples": hp.uniform("min_child_samples", 0, 50),
+        "subsample": hp.uniform("subsample", 0.5, 1),
+        "colsample_bylevel": hp.uniform("colsample_bylevel", 0.5, 1),
+        "reg_lambda": hp.uniform("reg_lambda", 2, 30),
+        "learning_rate": hp.uniform("learning_rate", 0.01, 1),
+    },
+}

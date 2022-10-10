@@ -23,7 +23,7 @@ from ..utils import warn_insolver
 from .base import InsolverBaseWrapper, InsolverWrapperWarning
 from .utils import save_pickle, save_dill, save_h2o
 from .utils.h2o_utils import x_y_to_h2o_frame, h2o_start, h2o_stop, to_h2oframe, load_h2o
-from .utils.hypertoptcv import hyperopt_cv_proc
+from .utils.hypertoptcv import hyperopt_cv_proc, tpe, rand
 
 
 class InsolverGLMWrapper(InsolverBaseWrapper):
@@ -70,7 +70,7 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
         self.link = link
         self.h2o_server_params = h2o_server_params
         self.kwargs = kwargs
-        self.best_params = None
+        self.best_params: Optional[Dict[str, Any]] = None
         self.trials = None
         self.model = self.init_model()
         self.__dict__.update(self.metadata)
@@ -452,8 +452,17 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
             warn_insolver('No coefficients available!', InsolverWrapperWarning)
 
     def hyperopt_cv(
-        self, x, y, params, fn=None, algo=None, max_evals=10, timeout=None, fmin_params=None, fn_params=None
-    ):
+        self,
+        x: Union[DataFrame, Series],
+        y: Union[DataFrame, Series],
+        params: Dict[str, Any],
+        fn: Callable = None,
+        algo: Union[None, rand.suggest, tpe.suggest] = None,
+        max_evals: int = 10,
+        timeout: Optional[int] = None,
+        fmin_params: Dict[str, Any] = None,
+        fn_params: Dict[str, Any] = None,
+    ) -> Optional[Dict[str, Any]]:
         """Hyperparameter optimization using hyperopt. Using cross-validation to evaluate hyperparameters by default.
 
         Args:
@@ -485,9 +494,9 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
         self.best_params, self.trials = hyperopt_cv_proc(
             self, x, y, params, fn, algo, max_evals, timeout, fmin_params, fn_params
         )
+        self._update_metadata()
         self.model = self.init_model(self.best_params)
         self.fit(
             x, y, **({} if not ((fn_params is not None) and ("fit_params" in fn_params)) else fn_params["fit_params"])
         )
-        self._update_metadata()
         return self.best_params
