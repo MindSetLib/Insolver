@@ -18,6 +18,7 @@ from plotly.graph_objects import Figure, Bar, Waterfall
 
 from .base import InsolverBaseWrapper
 from .utils import save_pickle
+from .utils.hypertoptcv import hyperopt_cv_proc, tpe, rand, AUTO_SPACE_CONFIG
 
 
 class InsolverGBMWrapper(InsolverBaseWrapper):
@@ -62,6 +63,8 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
         self.objective = objective
         self.n_estimators = n_estimators
         self.kwargs = kwargs
+        self.best_params: Optional[Dict[str, Any]] = None
+        self.trials = None
         self.model = self.init_model()
         self.__dict__.update(self.metadata)
 
@@ -320,9 +323,11 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
 
         return model
 
-    def init_model(self) -> Any:
+    def init_model(self, additional_params: Optional[Dict] = None) -> Any:
         model = None
         params = self.metadata['init_params']['kwargs']
+        if additional_params is not None:
+            params.update(additional_params)
         if self.backend == 'xgboost':
             model = self._init_gbm_xgboost(**params)
         if self.backend == 'lightgbm':
@@ -497,3 +502,93 @@ class InsolverGBMWrapper(InsolverBaseWrapper):
             explain = {f: {'value': v, 'contribution': c} for f, v, c in zip(feature_names, value, contribution)}
             explain.update({'E[f(x)]': {'value': base, 'contribution': base}})
             return explain
+
+    def hyperopt_cv(
+        self,
+        x: Union[DataFrame, Series],
+        y: Union[DataFrame, Series],
+        params: Dict[str, Any],
+        fn: Callable = None,
+        algo: Union[None, rand.suggest, tpe.suggest] = None,
+        max_evals: int = 10,
+        timeout: Optional[int] = None,
+        fmin_params: Dict[str, Any] = None,
+        fn_params: Dict[str, Any] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Hyperparameter optimization using hyperopt. Using cross-validation to evaluate hyperparameters by default.
+
+        Args:
+            x (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            params (dict): Dictionary of hyperparameters passed to hyperopt.
+            fn (callable, optional): Objective function to optimize with hyperopt.
+            algo (callable, optional): Algorithm for hyperopt. Available choices are: hyperopt.tpe.suggest and
+             hyperopt.random.suggest. Using hyperopt.tpe.suggest by default.
+            max_evals (int, optional): Number of function evaluations before returning.
+            timeout (None, int, optional): Limits search time by parametrized number of seconds.
+             If None, then the search process has no time constraint. None by default.
+            fmin_params (dict, optional): Dictionary of supplementary arguments for hyperopt.fmin function.
+            fn_params (dict, optional):  Dictionary of supplementary arguments for custom fn objective function.
+
+        Returns:
+            dict: Dictionary of the best choice of hyperparameters. Also, best model is fitted.
+        """
+        self.best_params, self.trials = hyperopt_cv_proc(
+            self, x, y, params, fn, algo, max_evals, timeout, fmin_params, fn_params
+        )
+        self._update_metadata()
+        self.model = self.init_model(self.best_params)
+        self.fit(
+            x, y, **({} if not ((fn_params is not None) and ("fit_params" in fn_params)) else fn_params["fit_params"])
+        )
+        return self.best_params
+
+    def auto_hyperopt_cv(
+        self,
+        x: Union[DataFrame, Series],
+        y: Union[DataFrame, Series],
+        metric: Callable,
+        offset: str = None,
+        max_evals: int = 15,
+        selection: Optional[str] = None,
+        selection_thresh: float = 0.05,
+    ) -> Optional[Dict[str, Any]]:
+        """Hyperparameter optimization using hyperopt. Using cross-validation to evaluate hyperparameters by default.
+
+        Args:
+            x (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            metric: Callable,
+            offset (str, optional): Column name of the offset column.
+            max_evals (int, optional): Number of function evaluations before returning.
+            selection (str, optional): Feature selection method. Currently only 'shap' method is supported.
+            selection_thresh (float, optional): Threshold for feature selection for 'shap' method. Default 0.05.
+
+        Returns:
+            dict: Dictionary of the best choice of hyperparameters. Also, best model is fitted.
+        """
+        if self.backend in AUTO_SPACE_CONFIG.keys():
+            params: Dict[str, Any] = AUTO_SPACE_CONFIG[self.backend]
+            self.best_params = self.hyperopt_cv(
+                x,
+                y,
+                params,
+                max_evals=max_evals,
+                fn_params={'scoring': metric, 'fit_params': {'sample_weight': offset}},
+            )
+
+            if selection == 'shap':
+                shaps: Union[Dict, Series, DataFrame] = self.shap(x, show=False)
+                shaps = DataFrame.from_dict({'shap': shaps}).abs().sort_values('shap', ascending=False)
+                shaps = shaps / shaps.sum()
+                columns = shaps[shaps['shap'] >= selection_thresh].index.tolist()
+                self.best_params = self.hyperopt_cv(
+                    x[columns],
+                    y,
+                    params,
+                    max_evals=max_evals,
+                    fn_params={'scoring': metric, 'fit_params': {'sample_weight': offset}},
+                )
+            return self.best_params
+        else:
+            return None

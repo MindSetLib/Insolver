@@ -23,6 +23,7 @@ from ..utils import warn_insolver
 from .base import InsolverBaseWrapper, InsolverWrapperWarning
 from .utils import save_pickle, save_dill, save_h2o
 from .utils.h2o_utils import x_y_to_h2o_frame, h2o_start, h2o_stop, to_h2oframe, load_h2o
+from .utils.hypertoptcv import hyperopt_cv_proc, tpe, rand
 
 
 class InsolverGLMWrapper(InsolverBaseWrapper):
@@ -69,6 +70,8 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
         self.link = link
         self.h2o_server_params = h2o_server_params
         self.kwargs = kwargs
+        self.best_params: Optional[Dict[str, Any]] = None
+        self.trials = None
         self.model = self.init_model()
         self.__dict__.update(self.metadata)
 
@@ -161,9 +164,11 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
         model = H2OGeneralizedLinearEstimator(family=self.family, link=self.link, **params)
         return model
 
-    def init_model(self) -> Any:
+    def init_model(self, additional_params: Optional[Dict] = None) -> Any:
         model = None
         params = self.metadata['init_params']['kwargs']
+        if additional_params is not None:
+            params.update(additional_params)
         if self.backend == 'sklearn':
             model = self._init_glm_sklearn(**params)
         if self.backend == 'h2o':
@@ -445,3 +450,53 @@ class InsolverGLMWrapper(InsolverBaseWrapper):
                 result.to_csv(path_or_buf, **kwargs)
         else:
             warn_insolver('No coefficients available!', InsolverWrapperWarning)
+
+    def hyperopt_cv(
+        self,
+        x: Union[DataFrame, Series],
+        y: Union[DataFrame, Series],
+        params: Dict[str, Any],
+        fn: Callable = None,
+        algo: Union[None, rand.suggest, tpe.suggest] = None,
+        max_evals: int = 10,
+        timeout: Optional[int] = None,
+        fmin_params: Dict[str, Any] = None,
+        fn_params: Dict[str, Any] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Hyperparameter optimization using hyperopt. Using cross-validation to evaluate hyperparameters by default.
+
+        Args:
+            x (pd.DataFrame, pd.Series): Training data.
+            y (pd.DataFrame, pd.Series): Training target values.
+            params (dict): Dictionary of hyperparameters passed to hyperopt.
+            fn (callable, optional): Objective function to optimize with hyperopt.
+            algo (callable, optional): Algorithm for hyperopt. Available choices are: hyperopt.tpe.suggest and
+             hyperopt.random.suggest. Using hyperopt.tpe.suggest by default.
+            max_evals (int, optional): Number of function evaluations before returning.
+            timeout (None, int, optional): Limits search time by parametrized number of seconds.
+             If None, then the search process has no time constraint. None by default.
+            fmin_params (dict, optional): Dictionary of supplementary arguments for hyperopt.fmin function.
+            fn_params (dict, optional):  Dictionary of supplementary arguments for custom fn objective function.
+
+        Returns:
+            dict: Dictionary of the best choice of hyperparameters. Also, best model is fitted.
+        """
+        if self.backend == 'h2o':
+            raise NotImplementedError("Method hyperopt_cv() is not supported for backend == 'h2o'")
+
+        # If model is a Pipeline, then tune parameters for its last step.
+        if isinstance(self.model, Pipeline) and ((fn_params is not None) and ("fit_params" in fn_params)):
+            fn_params["fit_params"] = {
+                f"{self.model.steps[-1][0]}__{key}": fn_params["fit_params"].get(key)
+                for key in fn_params["fit_params"].keys()
+            }
+
+        self.best_params, self.trials = hyperopt_cv_proc(
+            self, x, y, params, fn, algo, max_evals, timeout, fmin_params, fn_params
+        )
+        self._update_metadata()
+        self.model = self.init_model(self.best_params)
+        self.fit(
+            x, y, **({} if not ((fn_params is not None) and ("fit_params" in fn_params)) else fn_params["fit_params"])
+        )
+        return self.best_params
