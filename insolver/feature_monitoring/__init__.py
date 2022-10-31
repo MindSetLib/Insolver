@@ -1,0 +1,2 @@
+from .homogeneity_tests import ContinuousHomogeneityTests
+from .homogeneity_tests import DiscreteHomogeneityTests

@@ -23,17 +23,17 @@ def sec_min(x):
     return min2
 
 
-def psi_cont_2samp(x1, x2, nan_value=-1., buckets=20):
+def psi_cont_2samp(x1, x2, nan_value=-1.0, buckets=20):
     """
     This function counts population stability index (PSI)
     between two samples of continuous variables.
-    
+
     Parameters:
         x1 (np.array): sample from base period.
         x2 (np.array): sample from current period.
         nan_value (float): value used to fill nans in arrays. Must be the smallest element in each array.
         buckets (int): number of bins for calculating psi. 20 by default.
-        
+
     Returns:
         psi_value (float): psi between x1 and x2.
 
@@ -43,7 +43,7 @@ def psi_cont_2samp(x1, x2, nan_value=-1., buckets=20):
 
     if (x1.min() < nan_value) or (x2.min() < nan_value):
         raise ValueError("Elements of x1 and x2 can't be smaller than 'nan_value' for counting psi.")
-    
+
     # build grid for histograms
     min_ = min(x1.min(), x2.min())
     max_ = max(x1.max(), x2.max())
@@ -56,15 +56,15 @@ def psi_cont_2samp(x1, x2, nan_value=-1., buckets=20):
         sec_min_ = min(sec_min1, sec_min2)
         main_grid = np.linspace(sec_min_, max_, buckets)
         grid = np.concatenate([[nan_value], main_grid])
-    
+
     # count number of elements in buckets
     old_percents = np.histogram(x1, grid)[0] / len(x1)
     new_percents = np.histogram(x2, grid)[0] / len(x2)
-    
+
     # fill empty buckets with nonzero value (to avoid zero-division)
     old_percents[old_percents == 0] = 1e-4
     new_percents[new_percents == 0] = 1e-4
-    
+
     # resulting psi
     psi_value = (old_percents - new_percents) @ np.log(old_percents / new_percents)
     return psi_value
@@ -73,15 +73,15 @@ def psi_cont_2samp(x1, x2, nan_value=-1., buckets=20):
 def psi_discr_2samp(x1, x2):
     """
     This function counts psi_value between two samples of discrete variables.
-    
+
     Parameters:
         x1 (np.array): sample from base period.
         x2 (np.array): sample from current period.
-        
+
     Returns:
         psi_value (float): psi between x1 and x2.
     """
-        
+
     n1, n2 = len(x1), len(x2)
 
     # find unique categories and their frequencies in both arrays
@@ -93,24 +93,24 @@ def psi_discr_2samp(x1, x2):
 
     cats = np.union1d(cats1, cats2)
     num_cats = len(cats)
-    
+
     # if both samples consist of only one constant
     # value we consider statistic to be zero
     if num_cats == 1:
         return 0.0
-    
+
     # count frequencies for each category
     old_percents = np.zeros([num_cats], dtype=float)
     new_percents = np.zeros([num_cats], dtype=float)
-    
+
     for i, cat in enumerate(cats):
         old_percents[i] = counts1[cat] / n1
         new_percents[i] = counts2[cat] / n2
-    
+
     # fill empty buckets with nonzero value (to avoid zero-division)
     old_percents[old_percents == 0] = 1e-4
     new_percents[new_percents == 0] = 1e-4
-    
+
     # resulting psi
     psi_value = (old_percents - new_percents) @ np.log(old_percents / new_percents)
     return psi_value

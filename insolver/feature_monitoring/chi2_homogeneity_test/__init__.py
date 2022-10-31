@@ -1,0 +1,1 @@
+from .chi2_homogeneity_test import chi2_discr_2samp

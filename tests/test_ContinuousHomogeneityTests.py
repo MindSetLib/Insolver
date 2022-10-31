@@ -2,88 +2,91 @@ import numpy as np
 import pandas as pd
 from scipy import stats as sps
 import pytest
-from insolver.feature_monitoring.homogeneity_tests import ContinuousHomogeneityTests
+from insolver.feature_monitoring import ContinuousHomogeneityTests
 from insolver.feature_monitoring.psi_homogeneity_test import psi_cont_2samp
 import os
 from urllib.request import urlopen
 from zipfile import ZipFile
 from io import BytesIO
 
+
 def gen_examples_cont(samp_size):
     # SIMPLE SYNTHETIC EXAMPLES
-    examples = [(np.random.uniform(0, 1, samp_size), np.random.uniform(0, 1, samp_size), 'Same distributions'),
-                (np.random.randn(samp_size) + 1000, np.random.randn(samp_size) + 1000, 'Same distributions'),
-                (sps.chi2.rvs(df=4, size=samp_size), sps.chi2.rvs(df=4, size=samp_size), 'Same distributions'),
-                (sps.chi2.rvs(df=4, size=samp_size), sps.chi2.rvs(df=4, size=samp_size) * 5, 'Different distributions'),
-                (sps.chi2.rvs(df=5, size=samp_size), sps.chi2.rvs(df=3, size=samp_size), 'Different distributions'),
-                (np.random.randn(samp_size) * 10 + 1000, np.random.randn(samp_size) * 7 + 1000, 'Different distributions'),
-                (np.random.uniform(0, 1, samp_size), np.random.uniform(0, 1.5, samp_size), 'Different distributions')]
-    
+    examples = [
+        (np.random.uniform(0, 1, samp_size), np.random.uniform(0, 1, samp_size), 'Same distributions'),
+        (np.random.randn(samp_size) + 1000, np.random.randn(samp_size) + 1000, 'Same distributions'),
+        (sps.chi2.rvs(df=4, size=samp_size), sps.chi2.rvs(df=4, size=samp_size), 'Same distributions'),
+        (sps.chi2.rvs(df=4, size=samp_size), sps.chi2.rvs(df=4, size=samp_size) * 5, 'Different distributions'),
+        (sps.chi2.rvs(df=5, size=samp_size), sps.chi2.rvs(df=3, size=samp_size), 'Different distributions'),
+        (np.random.randn(samp_size) * 10 + 1000, np.random.randn(samp_size) * 7 + 1000, 'Different distributions'),
+        (np.random.uniform(0, 1, samp_size), np.random.uniform(0, 1.5, samp_size), 'Different distributions'),
+    ]
+
     # EXAMPLES FROM TEST FRAME
-    if not os.path.exists('data/freMPL-R.csv'):
+    if not os.path.exists('tests/data/freMPL-R.csv'):
         url = 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/freMPL-R.zip'
         with urlopen(url) as file:
             with ZipFile(BytesIO(file.read())) as zfile:
-                zfile.extractall('.')
+                zfile.extractall('tests/data')
 
-    df = pd.read_csv('data/freMPL-R.csv', low_memory=False)
+    df = pd.read_csv('tests/data/freMPL-R.csv', low_memory=False)
 
     # Driver age feature
     x = df['DrivAge'].values.copy().astype(float)
     np.random.shuffle(x)
-    x1 = x[:len(x) // 2]
-    x2 = x[len(x) // 2:]
+    x1 = x[: (len(x) // 2)]
+    x2 = x[len(x) // 2 :]
     examples.append((x1, x2, 'Same distributions'))
-    
+
     # Example with same percent of nans
     idx = np.random.choice(np.arange(len(x)), len(x) // 3, replace=False)
-    x[idx] = np.nan # -1
-    x1 = x[:len(x) // 2]
-    x2 = x[len(x) // 2:]
+    x[idx] = np.nan  # -1
+    x1 = x[: len(x) // 2]
+    x2 = x[len(x) // 2 :]
     examples.append((x1, x2, 'Same distributions'))
-    
+
     # Example with different percents of nans
     x = df['DrivAge'].values.copy().astype(float)
     np.random.shuffle(x)
-    x1 = x[:len(x) // 2]
-    x2 = x[len(x) // 2:]
+    x1 = x[: len(x) // 2]
+    x2 = x[len(x) // 2 :]
     idx1 = np.random.choice(np.arange(len(x1)), len(x1) // 3, replace=False)
     idx2 = np.random.choice(np.arange(len(x2)), len(x2) // 10, replace=False)
-    x1[idx1] = np.nan # -1
-    x2[idx2] = np.nan # -1
+    x1[idx1] = np.nan  # -1
+    x2[idx2] = np.nan  # -1
     examples.append((x1, x2, 'Different distributions'))
-    
+
     # Same for KBM (important case)
     x = df['BonusMalus'].values.copy().astype(float)
     np.random.shuffle(x)
-    x1 = x[:len(x) // 2]
-    x2 = x[len(x) // 2:]
+    x1 = x[: len(x) // 2]
+    x2 = x[len(x) // 2 :]
     examples.append((x1, x2, 'Same distributions'))
-    
+
     # Example with same percent of nans
     idx = np.random.choice(np.arange(len(x)), len(x) // 3, replace=False)
-    x[idx] = np.nan # -1
-    x1 = x[:len(x) // 2]
-    x2 = x[len(x) // 2:]
+    x[idx] = np.nan  # -1
+    x1 = x[: len(x) // 2]
+    x2 = x[len(x) // 2 :]
     examples.append((x1, x2, 'Same distributions'))
-    
+
     # Example with different percents of nans
     x = df['BonusMalus'].values.copy().astype(float)
     np.random.shuffle(x)
-    x1 = x[:len(x) // 2]
-    x2 = x[len(x) // 2:]
+    x1 = x[: len(x) // 2]
+    x2 = x[len(x) // 2 :]
     idx1 = np.random.choice(np.arange(len(x1)), len(x1) // 3, replace=False)
     idx2 = np.random.choice(np.arange(len(x2)), len(x2) // 10, replace=False)
-    x1[idx1] = np.nan # -1
-    x2[idx2] = np.nan # -1
+    x1[idx1] = np.nan  # -1
+    x2[idx2] = np.nan  # -1
     examples.append((x1, x2, 'Different distributions'))
-    
+
     # KBM for 2 groups of driver ages (expecting to get difference)
     x = df['BonusMalus'].values.copy().astype(float)
     x1 = x[df['DrivAge'] > 30]
     x2 = x[df['DrivAge'] <= 30]
     examples.append((x1, x2, 'Different distributions'))
-    
+
     # Same case with nans
     idx = np.random.choice(np.arange(len(x)), len(x) // 3, replace=False)
     x1 = x[df['DrivAge'] > 30]
@@ -94,15 +97,15 @@ def gen_examples_cont(samp_size):
     x = df['RiskArea'].values.copy()
     np.random.shuffle(x)
     filt = ~df['RiskArea'].isna()
-    x1 = x[filt][:len(x) // 2]
-    x2 = x[filt][len(x) // 2:]
+    x1 = x[filt][: len(x) // 2]
+    x2 = x[filt][len(x) // 2 :]
     examples.append((x1, x2, 'Same distributions'))
 
     # Same case with nans
     x = df['RiskArea'].values.copy()
     np.random.shuffle(x)
-    x1 = x[:len(x) // 2]
-    x2 = x[len(x) // 2:]
+    x1 = x[: len(x) // 2]
+    x2 = x[len(x) // 2 :]
     examples.append((x1, x2, 'Same distributions'))
 
     # Risk area for two types of social category (expecting to get difference)
@@ -118,85 +121,63 @@ def gen_examples_cont(samp_size):
     x2 = x[df['SocioCateg'] == 'CSP40']
     examples.append((x1, x2, 'Different distributions'))
 
-    os.remove('data/freMPL-R.csv')
+    os.remove('tests/data/freMPL-R.csv')
     return examples
 
 
-@pytest.mark.parametrize('x1, x2, expected',
-                         gen_examples_cont(5000))
+@pytest.mark.parametrize('x1, x2, expected', gen_examples_cont(5000))
 def test_continuous_tests_class(x1, x2, expected):
-    homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05,
-                                                samp_size=500,
-                                                bootstrap_num=100)
+    homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
     test_res = homogen_tester.run_all(x1, x2)
     for res in test_res:
         assert res[-1] == expected
 
-    
+
 def test_psi_cont_small_diff():
     x1 = sps.chi2.rvs(df=4, size=5000)
     x2 = sps.chi2.rvs(df=5, size=5000)
-    
-    homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05,
-                                                samp_size=500,
-                                                bootstrap_num=100)
+
+    homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
     psi_res = homogen_tester.run_all(x1, x2)[-1]
     assert psi_res[-1] == 'Small difference'
 
-        
+
 def test_shape_error_cont():
     with pytest.raises(Exception):
-        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05,
-                                                  samp_size=500,
-                                                  bootstrap_num=100)
-        test_res = homogen_tester.run_all(np.array([]), np.array([]))
-        
-    with pytest.raises(Exception):
-        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05,
-                                                  samp_size=500,
-                                                  bootstrap_num=100)
-        test_res = homogen_tester.run_all(np.zeros([100]), np.ones([200]))
-        
-    with pytest.raises(Exception):
-        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05,
-                                                  samp_size=500,
-                                                  bootstrap_num=100)
-        test_res = homogen_tester.run_all(np.zeros([550]), np.ones([550]))
-        
-
-def test_type_error_cont():  
-    with pytest.raises(Exception):
-        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05,
-                                                    samp_size=500,
-                                                    bootstrap_num=100)
-        test_res = homogen_tester.run_all([0] * 1000, [1] * 2000)
+        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
+        _ = homogen_tester.run_all(np.array([]), np.array([]))
 
     with pytest.raises(Exception):
-        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05,
-                                                    samp_size=500,
-                                                    bootstrap_num=100)
-        test_res = homogen_tester.run_all(np.random.randint(0, 5, 1000),
-                                          np.random.randn(2000))
+        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
+        _ = homogen_tester.run_all(np.zeros([100]), np.ones([200]))
 
-        
+    with pytest.raises(Exception):
+        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
+        _ = homogen_tester.run_all(np.zeros([550]), np.ones([550]))
+
+
+def test_type_error_cont():
+    with pytest.raises(Exception):
+        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
+        _ = homogen_tester.run_all([0] * 1000, [1] * 2000)
+
+    with pytest.raises(Exception):
+        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
+        _ = homogen_tester.run_all(np.random.randint(0, 5, 1000), np.random.randn(2000))
+
+
 def test_attr_error_cont():
     with pytest.raises(Exception):
-        homogen_tester = ContinuousHomogeneityTests(pval_thresh=1.02,
-                                                   samp_size=500,
-                                                   bootstrap_num=100)
+        _ = ContinuousHomogeneityTests(pval_thresh=1.02, samp_size=500, bootstrap_num=100)
     with pytest.raises(Exception):
-        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.02,
-                                                   samp_size=90,
-                                                   bootstrap_num=100)
-        
+        _ = ContinuousHomogeneityTests(pval_thresh=0.02, samp_size=90, bootstrap_num=100)
+
     with pytest.raises(Exception):
-        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.02,
-                                                   samp_size=500,
-                                                   bootstrap_num=5)
+        _ = ContinuousHomogeneityTests(pval_thresh=0.02, samp_size=500, bootstrap_num=5)
 
 
 def test_psi_cont_bad_nan():
     with pytest.raises(Exception):
         x1 = np.random.randn(1000)
         x2 = np.random.randn(1000)
-        psi_value = psi_cont_2samp(x1, x2, nan_value=-1)
+        _ = psi_cont_2samp(x1, x2, nan_value=-1)
