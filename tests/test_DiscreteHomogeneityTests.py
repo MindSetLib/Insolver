@@ -26,14 +26,15 @@ def gen_examples_discr(samp_size):
     ]
 
     # EXAMPLES FROM TEST FRAME
+    # Download frame if necessary
     if not os.path.exists('tests/data/freMPL-R.csv'):
         url = 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/freMPL-R.zip'
         with urlopen(url) as file:
             with ZipFile(BytesIO(file.read())) as zfile:
                 zfile.extractall('tests/data')
-
     df = pd.read_csv('tests/data/freMPL-R.csv', low_memory=False)
 
+    # Simple check for categorical feat., no nans
     x = df['SocioCateg'].values.copy()
     np.random.shuffle(x)
     x1 = x[: len(x) // 2]
@@ -84,7 +85,7 @@ def gen_examples_discr(samp_size):
     x2 = x[df['DrivAge'] < 35]
     examples.append((x1, x2, 'Different distributions'))
 
-    # EXAMPLES WITH SMALL AND SIGNIFICENT NOISES IN DISTRIBUTION
+    # EXAMPLES WITH SMALL AND SIGNIFICANT NOISES IN DISTRIBUTION
     # We expect our system to be tolerant to some small noises
 
     # Small noise
@@ -101,7 +102,7 @@ def gen_examples_discr(samp_size):
     x2 = rv.rvs(size=samp_size)
     examples.append((x1, x2, 'Same distributions'))
 
-    # Significent noise
+    # Significant noise
     values = np.arange(5)
     probs1 = np.array([0.2, 0.2, 0.2, 0.2, 0.2])
     probs2 = np.array([0.15, 0.3, 0.1, 0.1, 0.35])
@@ -110,9 +111,9 @@ def gen_examples_discr(samp_size):
     x1 = rv.rvs(size=samp_size)
     rv = sps.rv_discrete(values=(values, probs2))
     x2 = rv.rvs(size=samp_size)
-
     examples.append((x1, x2, 'Different distributions'))
 
+    # Delete test data
     os.remove('tests/data/freMPL-R.csv')
     return examples
 
@@ -125,6 +126,7 @@ def test_discrete_tests_class(x1, x2, expected):
         assert res[-1] == expected
 
 
+# Check psi with small difference (0.1 <= psi < 0.2)
 def test_psi_discr_small_diff():
     values = np.arange(5)
     probs1 = np.array([0.2, 0.2, 0.2, 0.2, 0.2])
@@ -140,6 +142,7 @@ def test_psi_discr_small_diff():
     assert psi_res[-1] == 'Small difference'
 
 
+# Check if class recognises too small data in input
 def test_shape_error_discr():
     with pytest.raises(Exception):
         homogen_tester = DiscreteHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
@@ -154,6 +157,7 @@ def test_shape_error_discr():
         _ = homogen_tester.run_all(np.zeros([550]), np.ones([550]))
 
 
+# Check if class recognises type missmatches
 def test_type_error_discr():
     with pytest.raises(Exception):
         homogen_tester = DiscreteHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
@@ -164,6 +168,7 @@ def test_type_error_discr():
         _ = homogen_tester.run_all(np.random.randint(0, 5, 1000), np.random.randn(2000))
 
 
+# Check if class recognises bad hypeparameters
 def test_attr_error_discr():
     with pytest.raises(Exception):
         _ = DiscreteHomogeneityTests(pval_thresh=1.02, samp_size=500, bootstrap_num=100)

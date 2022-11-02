@@ -1,8 +1,8 @@
 import numpy as np
 from scipy import stats as sps
 from sklearn.preprocessing import LabelEncoder
-from insolver.feature_monitoring.chi2_homogeneity_test import chi2_discr_2samp
-from insolver.feature_monitoring.psi_homogeneity_test import psi_discr_2samp, psi_cont_2samp, sec_min
+from .chi2_homogeneity_test import chi2_discr_2samp
+from .psi_homogeneity_test import psi_discr_2samp, psi_cont_2samp, sec_min
 
 
 def gen_sample(x, samp_size, replace=False):
