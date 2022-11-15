@@ -158,6 +158,7 @@ class HomogeneityReport:
         self,
         df1,
         df2,
+        dropna: bool = False,
         name1: str = 'Base subset',
         name2: str = 'Current subset',
         render: bool = False,
@@ -171,6 +172,7 @@ class HomogeneityReport:
         Parameters:
             df1 (pd.DataFrame): set of feature samples from base period.
             df2 (pd.DataFrame): set of feature samples from current period.
+            dropna (bool): whether to do drop missing values or not while building report.
             name1 (str): name to describe base period.
             name2 (str): name to describe current period.
             render (bool): whether to render report or not.
@@ -178,7 +180,7 @@ class HomogeneityReport:
 
         Returns:
             report_data (list): list of sub-lists. Each sublist contains 2 elements.
-            1) string describing comparsion
+            1) string describing comparison
             2) results of each test with conclusion
 
         Raises:
@@ -231,8 +233,12 @@ class HomogeneityReport:
             bootstrap_num = 100 if ('bootstrap_num' not in properties) else properties['bootstrap_num']
 
             # copy data to avoid side effects
-            x1 = df1[feat].values.copy()
-            x2 = df2[feat].values.copy()
+            if dropna:
+                x1 = df1[feat].dropna().values
+                x2 = df2[feat].dropna().values
+            else:
+                x1 = df1[feat].values.copy()
+                x2 = df2[feat].values.copy()
 
             if feat_type == 'continuous':
                 # optional psi_bins
