@@ -134,6 +134,20 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>NaN percent1</th>
+                                <th>NaN percent2</th>
+                                <th>NaN gap (percent2 - percent1)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <TD>{{set[3].nan_perc1}}</TD>
+                            <TD>{{set[3].nan_perc2}}</TD>
+                            <TD>{{set[3].nan_perc_gap}}</TD>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -141,116 +155,4 @@
     </main>
 
 </body>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
-    crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/jquery-1.11.3.js"></script>
-     <script>
-
-   $('tr:has(td:contains("Population"))').each(
-        function() {
-            var good = 0.1
-            var bad = 0.2
-            stvalue = Number($(':nth-child(2)', this).text());
-
-            if (stvalue > bad) {
-                $(':nth-child(2)', this).addClass('red')
-                $(':nth-child(3)', this).addClass('red')
-            }
-            
-            else if (stvalue <= good) {
-                $(':nth-child(2)', this).addClass('green')
-                $(':nth-child(3)', this).addClass('green')
-        
-            }
-
-            else {
-                $(':nth-child(2)', this).addClass('neutral')
-                $(':nth-child(3)', this).addClass('neutral')
-            }
-            
-    });    
-    
-       $('tr:has(td:contains("Kulbak-Leibler"))').each(
-        function() {
-            var good = 0.5
-            stvalue = Number($(':nth-child(2)', this).text());
-
-            if (stvalue < good) {
-                $(':nth-child(2)', this).addClass('green')
-                $(':nth-child(3)', this).addClass('green')
-            }
-
-            else if (stvalue >= good) {
-                $(':nth-child(2)', this).addClass('red')
-                $(':nth-child(3)', this).addClass('red')
-            }
-    }); 
-    
-   $('tr:has(td:contains("Jensen-Shannon"))').each(
-        function() {
-            var good = 0.3
-            stvalue = Number($(':nth-child(2)', this).text());
-
-            if (stvalue < good) {
-                $(':nth-child(2)', this).addClass('green')
-                $(':nth-child(3)', this).addClass('green')
-            }
-
-            else if (stvalue >= good) {
-                $(':nth-child(2)', this).addClass('red')
-                $(':nth-child(3)', this).addClass('red')
-            }
-    });         
-    
-       $('tr:has(td:contains("Wasserstein"))').each(
-        function() {
-            var good = 0.1
-            stvalue = Number($(':nth-child(2)', this).text());
-
-            if (stvalue < good) {
-                $(':nth-child(2)', this).addClass('green')
-                $(':nth-child(3)', this).addClass('green')
-            }
-
-            else if (stvalue >= good) {
-                $(':nth-child(2)', this).addClass('red')
-                $(':nth-child(3)', this).addClass('red')
-            }
-    }); 
-         
-    $('tr:has(td:contains("test"))').each(
-        function () {
-            var good = 0.05
-            pvalue = Number($(':nth-child(2)', this).text());
-
-            if (pvalue < good) {
-                $(':nth-child(2)', this).addClass('red')
-                $(':nth-child(3)', this).addClass('red')
-            }
-            
-            else if (pvalue >= good) {
-                $(':nth-child(2)', this).addClass('green')
-                $(':nth-child(3)', this).addClass('green')
-            };
-
-        });
-        
-       $('table:last-child tr').each(
-        function() {
-            var good = 0.65
-            stvalue = Number($(':nth-child(1)', this).text());
-
-            if (stvalue < good) {
-                $(':nth-child(1)', this).addClass('green')
-            }
-
-            else if (stvalue >= good) {
-                $(':nth-child(1)', this).addClass('red')
-            }
-    });  
-    
-      </script>
-      
 </html>

@@ -182,6 +182,7 @@ class HomogeneityReport:
             report_data (list): list of sub-lists. Each sublist contains 2 elements.
             1) string describing comparison
             2) results of each test with conclusion
+            3) nan ratio - relation between number of nans in subset1 and subset2
 
         Raises:
             TypeError: if df1 is not pd.DataFrame.
@@ -231,6 +232,12 @@ class HomogeneityReport:
             pval_thresh = 0.05 if ('pval_thresh' not in properties) else properties['pval_thresh']
             samp_size = 500 if ('samp_size' not in properties) else properties['samp_size']
             bootstrap_num = 100 if ('bootstrap_num' not in properties) else properties['bootstrap_num']
+
+            # count nan difference between x1, x2
+            nan_perc1 = df1[feat].isna().sum() / len(df1[feat])
+            nan_perc2 = df2[feat].isna().sum() / len(df2[feat])
+            nan_perc_gap = nan_perc2 - nan_perc1
+            nan_gap_dict = {'nan_perc1': nan_perc1, 'nan_perc2': nan_perc2, 'nan_perc_gap': nan_perc_gap}
 
             # copy data to avoid side effects
             if dropna:
@@ -285,9 +292,9 @@ class HomogeneityReport:
 
             # assemble data with charts or without
             if render:
-                feat_report = [f"{feat}: {name1} VS {name2}", chart, test_results]
+                feat_report = [f"{feat}: {name1} VS {name2}", chart, test_results, nan_gap_dict]
             else:
-                feat_report = [f"{feat}: {name1} VS {name2}", test_results]
+                feat_report = [f"{feat}: {name1} VS {name2}", test_results, nan_gap_dict]
             report_data.append(feat_report)
 
         # render report
