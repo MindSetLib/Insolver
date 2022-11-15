@@ -5,9 +5,7 @@ import pytest
 from insolver.feature_monitoring import ContinuousHomogeneityTests
 from insolver.feature_monitoring import psi_cont_2samp
 import os
-from urllib.request import urlopen
-from zipfile import ZipFile
-from io import BytesIO
+from insolver.model_tools import download_dataset
 
 
 def gen_examples_cont(samp_size):
@@ -25,10 +23,7 @@ def gen_examples_cont(samp_size):
     # EXAMPLES FROM TEST FRAME
     # Download frame if necessary
     if not os.path.exists('tests/data/freMPL-R.csv'):
-        url = 'https://github.com/MindSetLib/Insolver/releases/download/v0.4.4/freMPL-R.zip'
-        with urlopen(url) as file:
-            with ZipFile(BytesIO(file.read())) as zfile:
-                zfile.extractall('tests/data')
+        download_dataset('freMPL-R', 'tests/data')
     df = pd.read_csv('tests/data/freMPL-R.csv', low_memory=False)
 
     # Simple check for numerical feat., no nans
