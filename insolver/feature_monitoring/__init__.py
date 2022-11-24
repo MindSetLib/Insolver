@@ -12,3 +12,4 @@ from .chi2_homogeneity_test import chi2_discr_2samp
 from .homogeneity_report import chart_cont
 from .homogeneity_report import chart_discr
 from .homogeneity_report import HomogeneityReport
+from .homogeneity_report import render_report

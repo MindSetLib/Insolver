@@ -76,17 +76,21 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
     else:
         x1, x2 = x1_ref.copy(), x2_ref.copy()
 
-    # if we have numeric data we fill nans with minimum - 1
-    if x1.dtype == 'int' or x1.dtype == 'float':
-        nan_value = min(min(x1[~np.isnan(x1)]), min(x2[~np.isnan(x2)])) - 1
-        x1[np.isnan(x1)] = nan_value
-        x2[np.isnan(x2)] = nan_value
+    # if we have numeric data we define nan_value as (minimum - 1)
+    if x1.dtype == 'int':
+        nan_value = min(min(x1), min(x2)) - 1
+        return x1, x2, nan_value
+    if x1.dtype == 'float':
+        nan_value = min(min(x1[~pd.isna(x1)]), min(x2[~pd.isna(x2)])) - 1
+        x1[pd.isna(x1)] = nan_value
+        x2[pd.isna(x2)] = nan_value
         return x1, x2, nan_value
 
-    # if we have string data we fill nan with 'nan' str
-    x1 = x1.astype(str)
-    x2 = x2.astype(str)
-    return x1, x2, 'nan'
+    # if we have object data we fill nan with 'nan' str
+    if x1.dtype == object:
+        x1[pd.isna(x1)] = 'nan'
+        x2[pd.isna(x2)] = 'nan'
+        return x1, x2, 'nan'
 
 
 def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
@@ -116,16 +120,16 @@ def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
     # we fill nans with value less than all data
     # but it is smaller than minimum on gap between minimum and second minimum
     # it helps to avoid a lot of empty buckets in grids when running stat. tests
-    min_ = min(min(x1[~np.isnan(x1)]), min(x2[~np.isnan(x2)]))
+    min_ = min(min(x1[~pd.isna(x1)]), min(x2[~pd.isna(x2)]))
 
-    sec_min1 = sec_min(x1[~np.isnan(x1)])
-    sec_min2 = sec_min(x2[~np.isnan(x2)])
+    sec_min1 = sec_min(x1[~pd.isna(x1)])
+    sec_min2 = sec_min(x2[~pd.isna(x2)])
 
     sec_min_ = min(sec_min1, sec_min2)
 
     gap = sec_min_ - min_
-    x1[np.isnan(x1)] = min_ - gap
-    x2[np.isnan(x2)] = min_ - gap
+    x1[pd.isna(x1)] = min_ - gap
+    x2[pd.isna(x2)] = min_ - gap
 
     return x1, x2, min_ - gap
 
@@ -182,6 +186,7 @@ class DiscreteHomogeneityTests:
         Raises:
             TypeError: if x1 or x2 is not a numpy array.
             TypeError: if x1 and x2 don't have same data type.
+            TypeError: if x1 or x2 have unsupported data type (not int, float or object).
             ValueError: if size of x1 or x2 is smaller than bootstrap sample size 'samp_size'.
             Warning: if size of x1 or x2 is rather small to give robust estimations of pvalues.
         """
@@ -191,10 +196,13 @@ class DiscreteHomogeneityTests:
             raise TypeError("Only numpy.ndarray can be used as x1 and x2.")
 
         if x1_ref.dtype != x2_ref.dtype:
-            raise TypeError("x1 and x2 have to be of same data type.")
+            raise TypeError("x1 and x2 must be of same data type.")
+
+        if x1_ref.dtype not in [int, float, object]:
+            raise TypeError("Only int, float or object datatypes are supported as x1/x2.dtype.")
 
         if (x1_ref.shape[0] < self.samp_size) or (x2_ref.shape[0] < self.samp_size):
-            raise ValueError("Sizes of x1 and x2 have to not less than 'samp_size' attribute.")
+            raise ValueError("Sizes of x1 and x2 must be not less than 'samp_size' attribute.")
 
         if (x1_ref.shape[0] < self.samp_size * 1.7) or (x2_ref.shape[0] < self.samp_size * 1.7):
             raise Warning(
@@ -297,6 +305,7 @@ class ContinuousHomogeneityTests:
         Raises:
             TypeError: if x1 or x2 is not a numpy array.
             TypeError: if x1 and x2 don't have same data type.
+            TypeError: if x1 or x2 have unsupported data type (not int, float or object).
             ValueError: if size of x1 or x2 is smaller than bootstrap sample size 'samp_size'.
             Warning: if size of x1 or x2 is rather small to give robust estimations of pvalues.
         """
@@ -306,10 +315,13 @@ class ContinuousHomogeneityTests:
             raise TypeError("Only numpy.ndarray can be used as x1 and x2.")
 
         if x1_ref.dtype != x2_ref.dtype:
-            raise TypeError("x1 and x2 have to be of same data type.")
+            raise TypeError("x1 and x2 must be of same data type.")
+
+        if x1_ref.dtype not in [int, float, object]:
+            raise TypeError("Only int, float or object datatypes are supported as x1/x2.dtype.")
 
         if (x1_ref.shape[0] < self.samp_size) or (x2_ref.shape[0] < self.samp_size):
-            raise ValueError("Sizes of x1 and x2 have to be not less than 'samp_size' attribute.")
+            raise ValueError("Sizes of x1 and x2 must be not less than 'samp_size' attribute.")
 
         if (x1_ref.shape[0] < self.samp_size * 1.7) or (x2_ref.shape[0] < self.samp_size * 1.7):
             raise Warning(
