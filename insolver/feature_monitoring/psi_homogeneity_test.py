@@ -41,12 +41,12 @@ def psi_cont_2samp(x1: np.ndarray, x2: np.ndarray, nan_value: float = -1.0, buck
         ValueError: if x1 or x2 contain elements smaller than 'nan_value'.
     """
 
-    if (x1.min() < nan_value) or (x2.min() < nan_value):
+    if (np.min(x1) < nan_value) or (np.min(x2) < nan_value):
         raise ValueError("Elements of x1 and x2 can't be smaller than 'nan_value' for counting psi.")
 
     # build grid for histograms
-    min_ = min(x1.min(), x2.min())
-    max_ = max(x1.max(), x2.max())
+    min_ = min(np.min(x1), np.min(x2))
+    max_ = max(np.max(x1), np.max(x2))
     grid = []
     if min_ > nan_value:
         grid = np.linspace(min_, max_, buckets + 1)

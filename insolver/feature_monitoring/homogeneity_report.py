@@ -4,7 +4,7 @@ from plotly.figure_factory import create_distplot
 from plotly import express as px
 import plotly as py
 import os
-import ntpath
+from os.path import dirname
 import inspect
 
 from .homogeneity_tests import ContinuousHomogeneityTests, DiscreteHomogeneityTests, fillna_cont, fillna_discr
@@ -40,8 +40,8 @@ def chart_cont(
     x2_group = x2[(x2 >= limits[0]) & (x2 <= limits[1])]
 
     # count min, max, size of bin
-    min_ = min(x1_group.min(), x2_group.min())
-    max_ = min(x1_group.max(), x2_group.max())
+    min_ = min(np.min(x1_group), np.min(x2_group))
+    max_ = max(np.max(x1_group), np.max(x2_group))
     bin_size = (max_ - min_) / bins
 
     # discretize values to get accurate histograms
@@ -138,26 +138,46 @@ class HomogeneityReport:
         config_dict (dict): dict. with feature properties (see description).
     """
 
-    def __init__(self, config_dict: dict = {}):
+    def __init__(self, config_dict_inp: dict):
+        # work with conf. dict as with property - all changes will go through setter and raise errors if necessary
+        # calling setter:
+        self.config_dict = config_dict_inp
+
+    @property
+    def features(self):
+        return self.__config_dict.keys()
+
+    @property
+    def config_dict(self):
+        return self.__config_dict
+
+    @config_dict.setter
+    def config_dict(self, config_dict_inp):
         """
         Raises:
-            KeyError: If it is not specified whether certain feature is continuous or discrete.
+            ValueError: if config_dict is empty. It must have some features.
+            KeyError: if it is not specified whether certain feature is continuous or discrete.
             ValueError: if 'feature_type' is not 'continuous' or 'discrete'.
         """
 
-        for feat in config_dict:
-            properties = config_dict[feat]
+        if config_dict_inp == {}:
+            raise ValueError("Expected to get config with some features but not empty.")
+
+        for feat in config_dict_inp:
+            properties = config_dict_inp[feat]
+
+            # check feature_type property
             if 'feature_type' not in properties:
                 raise KeyError(f"Type of {feat} feature is not found in 'config_dict'.")
             elif properties['feature_type'] not in ['continuous', 'discrete']:
                 raise ValueError(f"Types of features must be 'continuous' or 'discrete'. Invalid type for {feat}.")
-        self.config_dict = config_dict
-        self.features = config_dict.keys()
+
+        self.__config_dict = config_dict_inp
 
     def build_report(
         self,
-        df1,
-        df2,
+        df1: pd.DataFrame,
+        df2: pd.DataFrame,
         dropna: bool = False,
         name1: str = 'Base subset',
         name2: str = 'Current subset',
@@ -208,7 +228,7 @@ class HomogeneityReport:
         if not (set(features) <= set(df2.columns)):
             raise KeyError("Can not find some features from configuration in df2.")
 
-        # accurately assemble report data
+        # carefully assemble report data
         report_data = []
         for feat in features:
             properties = self.config_dict[feat]
@@ -257,7 +277,7 @@ class HomogeneityReport:
                 if draw_charts:
                     chart_bins = 15 if ('chart_bins' not in properties) else properties['chart_bins']
                     if not ('chart_limits' in properties):
-                        chart_limits = min(x1.min(), x2.min()), max(x2.max(), x2.max())
+                        chart_limits = min(np.min(x1), np.min(x2)), max(np.max(x2), np.max(x2))
                     else:
                         chart_limits = properties['chart_limits']
 
@@ -284,8 +304,8 @@ class HomogeneityReport:
                     if x1.dtype == object:
                         x1, x2 = x1.astype(str), x2.astype(str)
                     else:
-                        idx1 = (x1 == nan_value)
-                        idx2 = (x2 == nan_value)
+                        idx1 = x1 == nan_value
+                        idx2 = x2 == nan_value
                         x1 = x1.astype(str)
                         x2 = x2.astype(str)
                         x1[idx1] = 'nan'
@@ -328,9 +348,7 @@ def render_report(report_data: list, report_path: str = 'homogeneity_report.html
     """
 
     # check template file
-    if report_path is None:
-        report_path = 'homogeneity_report.html'
-    curr_folder = ntpath.dirname(inspect.getfile(HomogeneityReport))
+    curr_folder = dirname(inspect.getfile(HomogeneityReport))
     template_path = curr_folder + '/' + 'report_template.html'
     if not os.path.exists(template_path):
         raise OSError("Can not find template file. It must be in 'feature_monitoring' package.")

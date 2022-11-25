@@ -78,10 +78,10 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
 
     # if we have numeric data we define nan_value as (minimum - 1)
     if x1.dtype == 'int':
-        nan_value = min(min(x1), min(x2)) - 1
+        nan_value = min(np.min(x1), np.min(x2)) - 1
         return x1, x2, nan_value
     if x1.dtype == 'float':
-        nan_value = min(min(x1[~pd.isna(x1)]), min(x2[~pd.isna(x2)])) - 1
+        nan_value = min(np.min(x1[~pd.isna(x1)]), np.min(x2[~pd.isna(x2)])) - 1
         x1[pd.isna(x1)] = nan_value
         x2[pd.isna(x2)] = nan_value
         return x1, x2, nan_value
@@ -120,7 +120,7 @@ def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
     # we fill nans with value less than all data
     # but it is smaller than minimum on gap between minimum and second minimum
     # it helps to avoid a lot of empty buckets in grids when running stat. tests
-    min_ = min(min(x1[~pd.isna(x1)]), min(x2[~pd.isna(x2)]))
+    min_ = min(np.min(x1[~pd.isna(x1)]), np.min(x2[~pd.isna(x2)]))
 
     sec_min1 = sec_min(x1[~pd.isna(x1)])
     sec_min2 = sec_min(x2[~pd.isna(x2)])
@@ -340,7 +340,7 @@ class ContinuousHomogeneityTests:
             x1, x2, nan_value = fillna_cont(x1, x2, inplace=True)
         else:
             # this value will indicate psi that there are no nans
-            nan_value = min(x1.min(), x2.min()) - 1
+            nan_value = min(np.min(x1), np.min(x2)) - 1
 
         # manually run all tests
         res = []
