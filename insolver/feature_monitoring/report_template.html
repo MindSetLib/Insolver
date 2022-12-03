@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
+
+    <style>
+       
+       body {
+            background: #f3f3f3;
+        }
+        
+        .table td.red {
+            background: rgb(218, 177, 182, .25);
+        }
+        
+        .table td.green {
+            background: rgba(189, 222, 200, .25);
+        }
+        
+        .table td.neutral {
+            background: rgba(221, 222, 189, .25);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .graph-text{
+            margin-top: 30px;
+            font-weight: bold;
+        }
+        
+        .table {
+            width: 100%;
+            border: none;
+            margin-bottom: 10px;
+        }
+
+        .table thead th {
+            font-weight: bold;
+            text-align: left;
+            border: none;
+            padding: 10px 15px;
+            background: #d8d8d8;
+            font-size: 18px;
+        }
+
+        .table thead tr th:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .table thead tr th:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .table tbody td {
+            text-align: left;
+            border: none;
+            padding: 10px 15px;
+            font-size: 18px;
+            vertical-align: top;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background: #f3f3f3;
+        }
+
+        .table tbody tr td:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .table tbody tr td:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .graph {
+            border: 1px dotted;
+        }
+
+        .stats {
+            border: 1px dotted;
+        }
+
+        .flex-equal>* {
+            flex: 1;
+        }
+
+        @media (min-width: 768px) {
+            .flex-md-equal>* {
+                flex: 1;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <h1>Homogeneity Report</h1>
+    </header>
+
+<main>
+{% for set in sets %}
+        <div>
+            <p class="graph-text lead text-center">{{set[0]}}</p>
+            <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
+                <div class="graph me-md-3 pt-3 px-3 pt-md-2 px-md-2 text-center overflow-hidden">
+                    {{set[3]}}
+                </div>
+                <div class="stats bg-white me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Test</th>
+                                <th>Value / p-value</th>
+                                <th>Conclusion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in set[1] %}
+                            <tr>
+                                <TD>{{item.test}}</TD>
+                                <TD>{{item.p_value.round(6)}}</TD>
+                                <TD>{{item.conclusion}}</TD>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>NaN percent1</th>
+                                <th>NaN percent2</th>
+                                <th>NaN gap (percent2 - percent1)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <TD>{{set[2].nan_perc1.round(6)}}</TD>
+                                <TD>{{set[2].nan_perc2.round(6)}}</TD>
+                                <TD>{{set[2].nan_perc_gap.round(6)}}</TD>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+{% endfor %}
+    </main>
+
+</body>
+</html>
