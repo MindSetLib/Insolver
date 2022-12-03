@@ -18,7 +18,7 @@ class Chi2Result:
         self.pvalue = pvalue
 
 
-def chi2_discr_2samp(x1: np.ndarray, x2: np.ndarray):
+def chi2_discr_2samp(x1: np.ndarray, x2: np.ndarray) -> "Chi2Result":
     """
     This function runs chi-square test checking homogeneity of two samples
     of discrete variables.

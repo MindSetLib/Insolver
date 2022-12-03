@@ -1,10 +1,10 @@
+import os
+import pytest
 import numpy as np
 import pandas as pd
 from scipy import stats as sps
-import pytest
 from insolver.feature_monitoring import ContinuousHomogeneityTests
 from insolver.feature_monitoring import psi_cont_2samp
-import os
 from insolver.model_tools import download_dataset
 
 

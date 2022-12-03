@@ -1,20 +1,20 @@
+import os
+import inspect
 import numpy as np
 import pandas as pd
+import plotly as py
+import jinja2
+from os.path import dirname
+from typing import List, Sequence, Dict, Union
 from plotly.figure_factory import create_distplot
 from plotly import express as px
-import plotly as py
-import os
-from os.path import dirname
-import inspect
 
 from .homogeneity_tests import ContinuousHomogeneityTests, DiscreteHomogeneityTests, fillna_cont, fillna_discr
 
-import jinja2
-
 
 def chart_cont(
-    x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, limits: iter, bins: int = 15, offline: bool = True
-):
+    x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, limits: Sequence, bins: int = 15, offline: bool = True
+) -> py.graph_objs.Figure:
     """
     This function draws histograms of given samples using joint grid.
     It needs limits of interested area and number of bins.
@@ -71,7 +71,7 @@ def chart_cont(
         return fig
 
 
-def chart_discr(x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, offline: bool = True):
+def chart_discr(x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, offline: bool = True) -> py.graph_objs.Figure:
     """
     This function draws histograms of given samples using joint grid.
     It needs limits of interested area and number of bins.
@@ -144,15 +144,15 @@ class HomogeneityReport:
         self.config_dict = config_dict_inp
 
     @property
-    def features(self):
-        return self.__config_dict.keys()
+    def features(self) -> List:
+        return list(self.__config_dict.keys())
 
     @property
-    def config_dict(self):
+    def config_dict(self) -> Dict:
         return self.__config_dict
 
     @config_dict.setter
-    def config_dict(self, config_dict_inp):
+    def config_dict(self, config_dict_inp: Dict) -> None:
         """
         Raises:
             ValueError: if config_dict is empty. It must have some features.
@@ -182,7 +182,7 @@ class HomogeneityReport:
         name1: str = 'Base subset',
         name2: str = 'Current subset',
         draw_charts: bool = False,
-    ):
+    ) -> List:
         """
         Main function which assembles all testing logic - it takes raw dataframes
         and runs homogeneity tests for features. Feature set and properties are took from config dict.
@@ -270,7 +270,9 @@ class HomogeneityReport:
                 x1, x2, _ = fillna_cont(x1, x2, inplace=True)
 
                 # run tests
-                homogen_tester = ContinuousHomogeneityTests(pval_thresh, samp_size, bootstrap_num, psi_bins)
+                homogen_tester: Union[
+                    'ContinuousHomogeneityTests', 'DiscreteHomogeneityTests'
+                ] = ContinuousHomogeneityTests(pval_thresh, samp_size, bootstrap_num, psi_bins)
                 test_results = homogen_tester.run_all(x1, x2, inplace=True)
 
                 # optional drawing of charts
@@ -328,7 +330,7 @@ class HomogeneityReport:
         return report_data
 
 
-def render_report(report_data: list, report_path: str = 'homogeneity_report.html'):
+def render_report(report_data: list, report_path: str = 'homogeneity_report.html') -> None:
     """
     This is a separate function to render reports built by 'HomogeneityReport' class.
     Several report data lists can be concatenated and passed to this function.

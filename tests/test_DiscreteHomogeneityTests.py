@@ -1,9 +1,9 @@
+import os
+import pytest
 import numpy as np
 import pandas as pd
 from scipy import stats as sps
-import pytest
 from insolver.feature_monitoring import DiscreteHomogeneityTests
-import os
 from insolver.model_tools import download_dataset
 
 

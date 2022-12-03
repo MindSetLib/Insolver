@@ -1,9 +1,10 @@
 import numpy as np
 from math import inf
 from collections import defaultdict
+from typing import Iterable, Union
 
 
-def sec_min(x):
+def sec_min(x: Iterable) -> Union[float, int]:
     """
     This function counts second minimum of an array.
 
@@ -23,7 +24,7 @@ def sec_min(x):
     return min2
 
 
-def psi_cont_2samp(x1: np.ndarray, x2: np.ndarray, nan_value: float = -1.0, buckets: int = 20):
+def psi_cont_2samp(x1: np.ndarray, x2: np.ndarray, nan_value: float = -1.0, buckets: int = 20) -> float:
     """
     This function counts population stability index (PSI)
     between two samples of continuous variables.
@@ -47,7 +48,7 @@ def psi_cont_2samp(x1: np.ndarray, x2: np.ndarray, nan_value: float = -1.0, buck
     # build grid for histograms
     min_ = min(np.min(x1), np.min(x2))
     max_ = max(np.max(x1), np.max(x2))
-    grid = []
+    grid = np.array([])
     if min_ > nan_value:
         grid = np.linspace(min_, max_, buckets + 1)
     elif min_ == nan_value:
@@ -70,7 +71,7 @@ def psi_cont_2samp(x1: np.ndarray, x2: np.ndarray, nan_value: float = -1.0, buck
     return psi_value
 
 
-def psi_discr_2samp(x1: np.ndarray, x2: np.ndarray):
+def psi_discr_2samp(x1: np.ndarray, x2: np.ndarray) -> float:
     """
     This function counts psi_value between two samples of discrete variables.
 

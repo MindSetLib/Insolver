@@ -2,11 +2,12 @@ import numpy as np
 import pandas as pd
 from scipy import stats as sps
 from sklearn.preprocessing import LabelEncoder
+from typing import Callable, List, Any
 from .chi2_homogeneity_test import chi2_discr_2samp
 from .psi_homogeneity_test import psi_discr_2samp, psi_cont_2samp, sec_min
 
 
-def gen_sample(x: np.ndarray, samp_size: int, replace: bool = False):
+def gen_sample(x: np.ndarray, samp_size: int, replace: bool = False) -> np.ndarray:
     """
     This function generates subsample of given size from main sample (without replaces by default).
 
@@ -24,7 +25,7 @@ def gen_sample(x: np.ndarray, samp_size: int, replace: bool = False):
     return samp
 
 
-def bootstrap(x1: np.ndarray, x2: np.ndarray, bootstrap_num: int, samp_size: int, test: callable):
+def bootstrap(x1: np.ndarray, x2: np.ndarray, bootstrap_num: int, samp_size: int, test: Callable) -> float:
     """
     This function runs same test many times on subsamples of main 2 samples.
     Counted pvalues are used to get average estimate of pvalue. (Bootstrap idea).
@@ -53,7 +54,7 @@ def bootstrap(x1: np.ndarray, x2: np.ndarray, bootstrap_num: int, samp_size: int
     return pvalue
 
 
-def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
+def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> Any:
     """
     This function fills missing values in x1 and x2 safely for homogeneity tests.
     It guarantees that missing values will be filled with unique constant.
@@ -93,7 +94,7 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
         return x1, x2, 'nan'
 
 
-def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
+def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> Any:
     """
     This function fills missing values in x1 and x2 safely for homogeneity tests.
     In case when nan value is just set to some constant less than all elements
@@ -168,7 +169,7 @@ class DiscreteHomogeneityTests:
         self.samp_size = samp_size
         self.bootstrap_num = bootstrap_num
 
-    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
+    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> List:
         """
         Runs all discrete tests for two samples: 'chi2', 'psi'.
 
@@ -198,8 +199,21 @@ class DiscreteHomogeneityTests:
         if x1_ref.dtype != x2_ref.dtype:
             raise TypeError("x1 and x2 must be of same data type.")
 
-        if x1_ref.dtype not in [int, float, object]:
-            raise TypeError("Only int, float or object datatypes are supported as x1/x2.dtype.")
+        if x1_ref.dtype not in [
+            'int8',
+            'int16',
+            'int32',
+            'int64',
+            'uint8',
+            'uint16',
+            'uint32',
+            'uint64',
+            'float16',
+            'float32',
+            'float64',
+            'object',
+        ]:
+            raise TypeError(f"Only int, float or object datatypes are supported as x1/x2.dtype. Got {x1_ref.dtype}.")
 
         if (x1_ref.shape[0] < self.samp_size) or (x2_ref.shape[0] < self.samp_size):
             raise ValueError("Sizes of x1 and x2 must be not less than 'samp_size' attribute.")
@@ -287,7 +301,7 @@ class ContinuousHomogeneityTests:
         self.bootstrap_num = bootstrap_num
         self.psi_bins = psi_bins
 
-    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False):
+    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> List:
         """
         Runs all continuous tests for two samples: 'ks', 'cr-vonmis', 'epps-sing', 'psi'.
 
@@ -317,8 +331,21 @@ class ContinuousHomogeneityTests:
         if x1_ref.dtype != x2_ref.dtype:
             raise TypeError("x1 and x2 must be of same data type.")
 
-        if x1_ref.dtype not in [int, float, object]:
-            raise TypeError("Only int, float or object datatypes are supported as x1/x2.dtype.")
+        if x1_ref.dtype not in [
+            'int8',
+            'int16',
+            'int32',
+            'int64',
+            'uint8',
+            'uint16',
+            'uint32',
+            'uint64',
+            'float16',
+            'float32',
+            'float64',
+            'object',
+        ]:
+            raise TypeError(f"Only int, float or object datatypes are supported as x1/x2.dtype. Got {x1_ref.dtype}.")
 
         if (x1_ref.shape[0] < self.samp_size) or (x2_ref.shape[0] < self.samp_size):
             raise ValueError("Sizes of x1 and x2 must be not less than 'samp_size' attribute.")
