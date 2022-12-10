@@ -112,8 +112,7 @@ def test_h2o_model():
 
     from insolver.serving.flask_app import app
 
-    for file in ["transforms.pickle", "test_glm_model.h2o"]:
-        os.remove(file)
+    os.remove("test_glm_model.h2o")
     app.testing = True
 
     with app.test_client() as client:
@@ -141,9 +140,11 @@ def test_index_page():
 
 def test_flask_transforms_inference():
     os.environ['model_path'] = './dev/insolver_gbm_lightgbm_1657653374832.pickle'
-    os.environ['transforms_path'] = './dev/transforms'
+    os.environ['transforms_path'] = './transforms.pickle'
     importlib.reload(insolver.serving.flask_app)
     from insolver.serving.flask_app import app
+
+    os.remove("transforms.pickle")
 
     app.testing = True
 
@@ -154,6 +155,5 @@ def test_flask_transforms_inference():
             content_type='application/json',
         )
         data = json.loads(response.get_data(as_text=True))
-        print(data)
-        assert data['predicted'][0] == {"predicted": [1288.2517257166407]}['predicted'][0]
+        assert round(data['predicted'][0], 5) == {"predicted": [1598.11057]}['predicted'][0]
         assert response.status_code == 200

@@ -70,6 +70,7 @@ class SHAPExplanation(InterpretBase):
         Raises:
             TypeError: If the instance type is not supported.
         """
+
         # transformation function
         def logit(x):
             return np.true_divide(1, np.add(1, np.exp(x)))
