@@ -26,7 +26,7 @@ lime>=0.2.0.1
 dill>=0.3.4
 
 # insolver.report
-jinja2>=3.0.1
+jinja2>= 3.0
 pandas-profiling==3.1.0
 
 # insolver.serving
