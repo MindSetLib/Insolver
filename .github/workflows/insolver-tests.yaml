@@ -41,7 +41,7 @@ jobs:
     - name: Lint with ruff
       shell: bash
       run: |
-        ruff . --select=E9,F63,F7,F82 --show-source --statistics
+        ruff . --select=E9,F63,F7,F82 --show-source
         ruff . --exit-zero --statistics
     - name: Test with pytest
       shell: bash
