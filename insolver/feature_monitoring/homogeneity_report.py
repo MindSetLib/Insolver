@@ -270,9 +270,9 @@ class HomogeneityReport:
                 x1, x2, _ = fillna_cont(x1, x2, inplace=True)
 
                 # run tests
-                homogen_tester: Union[
-                    'ContinuousHomogeneityTests', 'DiscreteHomogeneityTests'
-                ] = ContinuousHomogeneityTests(pval_thresh, samp_size, bootstrap_num, psi_bins)
+                homogen_tester: Union['ContinuousHomogeneityTests', 'DiscreteHomogeneityTests'] = (
+                    ContinuousHomogeneityTests(pval_thresh, samp_size, bootstrap_num, psi_bins)
+                )
                 test_results = homogen_tester.run_all(x1, x2, inplace=True)
 
                 # optional drawing of charts
