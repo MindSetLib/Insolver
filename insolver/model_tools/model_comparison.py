@@ -216,9 +216,11 @@ class ModelMetricsCompare:
             )
 
             p = model.predict(
-                self.X
-                if (features is None) or (features[models.index(model)] is None)
-                else self.X[features[models.index(model)]],
+                (
+                    self.X
+                    if (features is None) or (features[models.index(model)] is None)
+                    else self.X[features[models.index(model)]]
+                ),
                 **(
                     {}
                     if (self.predict_params is None) or (self.predict_params[models.index(model)] is None)

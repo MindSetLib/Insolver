@@ -61,3 +61,40 @@ deps = -r requirements.txt
 commands =
     pytest --junitxml=test_report.xml
 """
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".idea",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "env",
+    "docs/_build"
+]
+
+line-length = 120
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+target-version = "py310"
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+"insolver/serving/django_insolver/apps/drf_serving/*" = ["F401", "F403", "F405"]

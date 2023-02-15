@@ -118,9 +118,11 @@ class InsolverCVHPExtension:
         )
         best_params = space_eval(params, best)
         best_params = {
-            key: best_params[key]
-            if not (isinstance(best_params[key], float) and best_params[key].is_integer())
-            else int(best_params[key])
+            key: (
+                best_params[key]
+                if not (isinstance(best_params[key], float) and best_params[key].is_integer())
+                else int(best_params[key])
+            )
             for key in best_params.keys()
         }
         self.best_params, self.trials = best_params, trials

@@ -137,9 +137,11 @@ class SHAPExplanation(InterpretBase):
                     orientation='h',
                     measure=['relative'] * len(self.prediction),
                     y=[
-                        self.prediction.index[i]
-                        if i == 0
-                        else f'{self.prediction.index[i]} = {round(self.instance[i-1], 4)}'
+                        (
+                            self.prediction.index[i]
+                            if i == 0
+                            else f'{self.prediction.index[i]} = {round(self.instance[i-1], 4)}'
+                        )
                         for i in range(len(self.prediction.index))
                     ],
                     x=self.prediction['Contribution'],

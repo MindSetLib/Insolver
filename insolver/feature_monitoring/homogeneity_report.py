@@ -270,15 +270,15 @@ class HomogeneityReport:
                 x1, x2, _ = fillna_cont(x1, x2, inplace=True)
 
                 # run tests
-                homogen_tester: Union[
-                    'ContinuousHomogeneityTests', 'DiscreteHomogeneityTests'
-                ] = ContinuousHomogeneityTests(pval_thresh, samp_size, bootstrap_num, psi_bins)
+                homogen_tester: Union['ContinuousHomogeneityTests', 'DiscreteHomogeneityTests'] = (
+                    ContinuousHomogeneityTests(pval_thresh, samp_size, bootstrap_num, psi_bins)
+                )
                 test_results = homogen_tester.run_all(x1, x2, inplace=True)
 
                 # optional drawing of charts
                 if draw_charts:
                     chart_bins = 15 if ('chart_bins' not in properties) else properties['chart_bins']
-                    if not ('chart_limits' in properties):
+                    if 'chart_limits' not in properties:
                         chart_limits = min(np.min(x1), np.min(x2)), max(np.max(x2), np.max(x2))
                     else:
                         chart_limits = properties['chart_limits']
