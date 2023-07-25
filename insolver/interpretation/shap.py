@@ -22,10 +22,8 @@ class SHAPExplanation(InterpretBase):
         self.estimator_type = estimator_type
 
         if self.estimator_type not in ['tree', 'linear']:
-            raise NotImplementedError(
-                f'''
-            estimator_type {estimator_type} is not supported. Supported values are "tree" and "linear".'''
-            )
+            raise NotImplementedError(f'''
+            estimator_type {estimator_type} is not supported. Supported values are "tree" and "linear".''')
 
         self.explainer = (
             TreeExplainer(self.estimator)
@@ -77,10 +75,8 @@ class SHAPExplanation(InterpretBase):
 
         # check type of instance
         if not isinstance(instance, np.ndarray) and not isinstance(instance, pd.Series):
-            raise TypeError(
-                f'''
-            Type {type(instance)} is not supported. Supported types are numpy.ndarray and pandas.Series.'''
-            )
+            raise TypeError(f'''
+            Type {type(instance)} is not supported. Supported types are numpy.ndarray and pandas.Series.''')
         # get feature_names OR check shape and create features names
         if isinstance(instance, pd.Series):
             feature_names = list(instance.index)
