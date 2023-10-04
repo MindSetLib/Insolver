@@ -3,7 +3,7 @@ import traceback
 from glob import glob
 
 from numpy import min, max, mean, var, std, quantile, median
-from pandas import DataFrame
+from pandas import DataFrame, concat
 from sklearn.metrics import accuracy_score, f1_score, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
 from insolver.wrappers import InsolverGLMWrapper, InsolverGBMWrapper, InsolverRFWrapper, InsolverTrivialWrapper
@@ -247,7 +247,7 @@ class ModelMetricsCompare:
                 else:
                     raise TypeError(f'Statistics with type {type(self.stats)} are not supported.')
 
-            stats_df = stats_df.append(DataFrame([stats_val], columns=name_stats))
+            stats_df = concat([stats_df, DataFrame([stats_val], columns=name_stats)])
 
             if (self.metrics is not None) and not models.index(model) == 0:
                 if isinstance(self.metrics, (list, tuple)):
@@ -259,7 +259,7 @@ class ModelMetricsCompare:
                             raise TypeError(f'Metrics with type {type(metric)} are not supported.')
 
                     metrics_names = [m.__name__.replace('_', ' ') for m in self.metrics]
-                    model_metrics = model_metrics.append(DataFrame(dict(zip(metrics_names, m_metrics), index=[0])))
+                    model_metrics = concat([model_metrics, DataFrame(dict(zip(metrics_names, m_metrics), index=[0]))])
 
                 else:
                     raise TypeError(f'Metrics with type {type(self.metrics)} are not supported.')

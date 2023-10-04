@@ -148,10 +148,8 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
         elif isinstance(metrics_to_calc, list):
             functions_names = metrics_to_calc
         else:
-            raise TypeError(
-                f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
-                            Must be "all", "main" or list.'''
-            )
+            raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
+                            Must be "all", "main" or list.''')
 
         result['root_mean_square_error'] = np.sqrt(functions['mean_squared_error'](y_true, y_pred))
 
@@ -169,10 +167,8 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
             elif isinstance(metrics_to_calc, list):
                 functions_names = metrics_to_calc
             else:
-                raise TypeError(
-                    f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
-                                Must be "all", "main" or list.'''
-                )
+                raise TypeError(f'''{type(metrics_to_calc)} type of metrics_to_calc is not supported.
+                                Must be "all", "main" or list.''')
 
         elif type_of_true == 'binary' and type_of_pred == 'continuous':
             functions_names = (
@@ -184,10 +180,8 @@ def _calc_metrics(y_true, y_pred, task, metrics_to_calc, x, exposure=None):
 
     for name in functions_names:
         if name not in functions.keys():
-            raise NotImplementedError(
-                f'''{name} metric name is not supported. Supported names for {task} task:
-                                      {functions.keys()}.'''
-            )
+            raise NotImplementedError(f'''{name} metric name is not supported. Supported names for {task} task:
+                                      {functions.keys()}.''')
         try:
             if name == 'gini_coef' and exposure:
                 result[name] = functions[name](y_true, y_pred, x[exposure])[2]
