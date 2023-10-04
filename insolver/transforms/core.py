@@ -32,7 +32,7 @@ class InsolverTransform(InsolverDataFrame):
     _internal_names_set = set(_internal_names)
     _metadata = ["transforms", "ins_input_cache"]
 
-    def __init__(self, data: Any, transforms: Union[List, Dict[str, Union[List, Dict]], None] = None) -> None:
+    def __init__(self, data: Any, transforms: Union[List, Dict[str, Union[List, Dict]], None] = None, copy: bool = False) -> None:
         super(InsolverTransform, self).__init__(data)
         self.ins_output_cache: Optional[Dict[str, dtype]] = None
         if isinstance(data, (InsolverDataFrame, DataFrame)):
