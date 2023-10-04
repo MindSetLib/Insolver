@@ -280,5 +280,5 @@ class ModelMetricsCompare:
         stats_df = stats_df[list(stats_df.columns[-2:]) + list(stats_df.columns[:-2])]
         model_metrics = model_metrics[list(model_metrics.columns[-2:]) + list(model_metrics.columns[:-2])]
 
-        self.stats_results = self.stats_results.append(stats_df)
-        self.metrics_results = self.metrics_results.append(model_metrics)
+        self.stats_results = concat([self.stats_results, stats_df])
+        self.metrics_results = concat([self.metrics_results, model_metrics])
