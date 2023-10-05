@@ -21,6 +21,6 @@ if __name__ == "__main__":
         install_requires=required,
         extras_require={'full': extras, 'dev': req_dev},
         zip_safe=False,
-        python_requires='>=3.7',
+        python_requires='>=3.8',
         include_package_data=True,
     )
