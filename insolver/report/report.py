@@ -4,7 +4,7 @@ import inspect
 import glob
 
 import pandas
-from pandas_profiling import ProfileReport
+from ydata_profiling import ProfileReport
 
 from .presets import (
     _create_shap,
