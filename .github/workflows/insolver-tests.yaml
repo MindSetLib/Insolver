@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.8", "3.9", '3.10']
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         isDev:
           - ${{ contains(github.ref, 'dev') }}
         exclude:
@@ -47,9 +47,9 @@ jobs:
       shell: bash
       run: |
         python -m pytest --cov=./ --cov-report=xml
-    - name: Code coverage with codecov on (ubuntu-latest & Python 3.8 & master)
+    - name: Code coverage with codecov on (ubuntu-latest & Python 3.10 & master)
       if: |
-        (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8' && github.ref == 'refs/heads/master')
+        (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10' && github.ref == 'refs/heads/master')
       uses: codecov/codecov-action@v3
       with:
         flags: unittests
