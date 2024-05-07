@@ -49,7 +49,7 @@ jobs:
     - name: Test with pytest
       shell: bash
       run: |
-        python -m pytest --cov=pypricer --cov-report xml
+        python -m pytest --cov=insolver --cov-report xml
     - name: Code coverage with codecov on (ubuntu-latest & Python 3.10 & master)
       if: |
         (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10' && github.ref == 'refs/heads/master')
