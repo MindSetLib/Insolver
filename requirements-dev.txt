@@ -1,4 +1,4 @@
-black>=22.6.0
+black[jupyter]==24.4.2
 mypy>=0.971
 pre-commit>=2.19.0
 pytest>=6.2.5

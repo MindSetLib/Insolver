@@ -1,7 +1,8 @@
 from numpy import concatenate, array
 from pandas import DataFrame
 
-from sklearn.metrics import mean_squared_error, SCORERS
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics._scorer import _SCORERS
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from .base import InsolverBaseWrapper
@@ -108,8 +109,8 @@ class InsolverRFWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDPE
                 scorer.__name__.replace('_', ' '): array([scorer(y, self.model.predict(X))]) for scorer in scoring
             }
         elif isinstance(scoring, str):
-            if scoring in SCORERS:
-                scorers = {scoring.replace('_', ' '): array([SCORERS[scoring](self.model, X=X, y=y)])}
+            if scoring in _SCORERS:
+                scorers = {scoring.replace('_', ' '): array([_SCORERS[scoring](self.model, X=X, y=y)])}
             else:
                 raise ValueError(f'Scorer {scoring} is not supported.')
         else:

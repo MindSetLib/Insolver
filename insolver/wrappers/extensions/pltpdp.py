@@ -1,4 +1,4 @@
-from sklearn.inspection import plot_partial_dependence
+from sklearn.inspection import PartialDependenceDisplay
 from matplotlib.pyplot import show, tight_layout
 from .h2oext import to_h2oframe
 
@@ -11,7 +11,8 @@ class InsolverPDPExtension:
             if plot_backend == 'sklearn':
                 if self.backend in ['catboost', 'lightgbm']:
                     self.model.dummy_ = True
-                plot_partial_dependence(self.model, X, features=features, **kwargs)
+                display = PartialDependenceDisplay.from_estimator(self.model, X, features=features, **kwargs)
+                display.plot()
                 tight_layout()
                 show()
             elif plot_backend == 'pdpbox':

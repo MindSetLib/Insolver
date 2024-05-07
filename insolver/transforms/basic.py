@@ -137,7 +137,7 @@ class OneHotEncoderTransforms:
 
     @staticmethod
     def _encode_column(df, column_name):
-        encoder = OneHotEncoder(sparse=False)
+        encoder = OneHotEncoder(sparse_output=False)
         encoder.fit(df[[column_name]])
         encoder_params = encoder.categories_
         encoder_params = [x.tolist() for x in encoder_params]

@@ -1,7 +1,7 @@
 # Installation
 
 ## Python version support
-Insolver is currently available in Python, and installation has been tested in virtual environments for the Python releases 3.7, 3.8, and 3.9 on Linux, macOS, and Windows.
+Insolver is currently available in Python, and installation has been tested in virtual environments for the Python releases 3.8, 3.9, 3.10 and 3.11 on Linux, macOS, and Windows.
 
 ## Install from GitHub
 Insolver installation is available directly from [GitHub repository](https://github.com/MindSetLib/Insolver) with pip.
