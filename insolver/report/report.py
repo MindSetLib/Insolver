@@ -186,20 +186,24 @@ class Report:
             self.y_test = y_test
             self.original_dataset = original_dataset
         else:
-            raise TypeError(f"""Wrong types of input data.
+            raise TypeError(
+                f"""Wrong types of input data.
               \rX_train {type(X_train)} must be pandas.DataFrame
               \ry_train {type(y_train)} must be pandas.Series
               \rX_test {type(X_test)} must be pandas.DataFrame
               \ry_test {type(y_test)} should be pandas.Series
               \rpredicted_train {type(self.predicted_train)} must be pandas.Series
               \rpredicted_test {type(self.predicted_test)} must be pandas.Series
-              \rpredicted_test {type(original_dataset)} must be pandas.DataFrame""")
+              \rpredicted_test {type(original_dataset)} must be pandas.DataFrame"""
+            )
         self._directory = ntpath.dirname(inspect.getfile(Report))
 
         # check columns
         if not sorted(X_train.columns.to_list()) == sorted(X_test.columns.to_list()):
-            raise KeyError(f'''Columns in X_train {sorted(X_train.columns.to_list())}
-            and X_test {sorted(X_test.columns.to_list())} are not the same.''')
+            raise KeyError(
+                f'''Columns in X_train {sorted(X_train.columns.to_list())}
+            and X_test {sorted(X_test.columns.to_list())} are not the same.'''
+            )
         elif len(set(X_train.columns.to_list()).difference(original_dataset.columns.to_list())) > 0:
             s = set(X_train.columns.to_list()).difference(original_dataset.columns.to_list())
             raise KeyError(f'''Columns from X_train {s} are missing from original_dataset.''')
@@ -324,9 +328,11 @@ class Report:
                 'articles': [
                     {
                         'name': 'Coefficients',
-                        'parts': [f'''
+                        'parts': [
+                            f'''
                         <div class="p-3 m-3 bg-light border rounded-3 fw-light">
-                            {features_importance}{_create_importance_charts()}</div>'''],
+                            {features_importance}{_create_importance_charts()}</div>'''
+                        ],
                         'header': '',
                         'footer': features_importance_footer,
                         'icon': '<i class="bi bi-bar-chart-line"></i>',
@@ -347,9 +353,11 @@ class Report:
                     },
                     {
                         'name': 'Partial Dependence',
-                        'parts': [f'''
+                        'parts': [
+                            f'''
                         <div class="p-3 m-3 bg-light border rounded-3 text-center fw-light">
-                            {pdp_part}</div>'''],
+                            {pdp_part}</div>'''
+                        ],
                         'header': '',
                         'footer': pdp_footer,
                         'icon': '<i class="bi bi-graph-up"></i>',
