@@ -3,7 +3,8 @@ from base64 import b64encode
 from numpy import cumsum, diff, exp, true_divide, add, append, nan, concatenate, array, abs as npabs
 from pandas import DataFrame, Series
 
-from sklearn.metrics import mean_squared_error, SCORERS
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics._scorer import _SCORERS
 from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
@@ -242,8 +243,8 @@ class InsolverGBMWrapper(InsolverBaseWrapper, InsolverCVHPExtension, InsolverPDP
                 scorer.__name__.replace('_', ' '): array([scorer(y, self.model.predict(X))]) for scorer in scoring
             }
         elif isinstance(scoring, str):
-            if scoring in SCORERS:
-                scorers = {scoring.replace('_', ' '): array([SCORERS[scoring](self.model, X=X, y=y)])}
+            if scoring in _SCORERS:
+                scorers = {scoring.replace('_', ' '): array([_SCORERS[scoring](self.model, X=X, y=y)])}
             else:
                 raise ValueError(f'Scorer {scoring} is not supported.')
         else:
