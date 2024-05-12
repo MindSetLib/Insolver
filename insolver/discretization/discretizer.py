@@ -27,7 +27,7 @@ class InsolverDiscretizer:
 
     def __init__(self, method='uniform'):
         if method not in self._methods:
-            raise ValueError(f'Accepted methods are {self._methods}, got {method} instead.')
+            raise NotImplementedError(f'Accepted methods are {self._methods}, got {method} instead.')
 
         self.method = method
         self.X = None

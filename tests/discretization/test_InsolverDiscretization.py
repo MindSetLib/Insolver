@@ -81,9 +81,9 @@ def test_n_bins_formulas():
 
 
 def test_errors():
-    for method in ['my_method', 'uniform', 'quantile', 'kmeans']:
-        if method == 'my_method':
-            with pytest.raises(ValueError):
+    for method in ['invalid_method', 'uniform', 'quantile', 'kmeans']:
+        if method == 'invalid_method':
+            with pytest.raises(NotImplementedError):
                 InsolverDiscretizer(method=method)
         else:
             insolver_disc = InsolverDiscretizer(method=method)
