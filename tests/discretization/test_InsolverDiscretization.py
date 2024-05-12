@@ -87,7 +87,7 @@ def test_errors():
                 InsolverDiscretizer(method=method)
         else:
             insolver_disc = InsolverDiscretizer(method=method)
-            for n_bin in [0, 1, -1, 2.0] :
+            for n_bin in [0, 1, -1, 2.0]:
                 with pytest.raises(ValueError):
                     insolver_disc.transform(data.X, n_bins=n_bin)
 

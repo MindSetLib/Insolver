@@ -96,7 +96,7 @@ class DimensionalityReduction:
             pairplot(new_df, hue=y.name, **kwargs)
 
         # except AttributeError:
-            # raise AttributeError('Estimator was not created yet. Call transform() method.')
+        # raise AttributeError('Estimator was not created yet. Call transform() method.')
 
     def _init_methods(self):
         """
