@@ -12,13 +12,12 @@ def sample_data():
     )
     return df
 
+
 @pytest.fixture
 def sample_data2():
     np.random.seed(0)
     df = pd.DataFrame(
-        {'feature1': np.random.rand(100),
-         'feature2': np.random.rand(100),
-         'target': np.random.randint(0, 3, size=100)}
+        {'feature1': np.random.rand(100), 'feature2': np.random.rand(100), 'target': np.random.randint(0, 3, size=100)}
     )
     return df
 
@@ -82,7 +81,7 @@ def test_create_new_dataset(sample_data):
     with pytest.raises(AttributeError):
         fs3.create_new_dataset(threshold='median')
 
-    fs4= FeatureSelection('target', 'multiclass', 'elasticnet')
+    fs4 = FeatureSelection('target', 'multiclass', 'elasticnet')
     fs4.create_model(sample_data)
     fs4.create_new_dataset(threshold=0.4)
     assert isinstance(fs4.new_dataframe, pd.DataFrame)
@@ -96,6 +95,7 @@ def test_plot_importance(sample_data):
     fs = FeatureSelection('target', 'multiclass')
     fs.create_model(sample_data)
     fs.plot_importance(importance_threshold=0.4)
+
 
 def test_plot_importance2(sample_data2):
     fs = FeatureSelection('target', 'multiclass', method='elasticnet', permutation_importance=True)
