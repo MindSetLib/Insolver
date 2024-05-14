@@ -1,8 +1,7 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
+from numpy import log
+from pandas import DataFrame, concat
+from matplotlib.pyplot import title
+from seaborn import displot
 from sklearn.preprocessing import StandardScaler, PowerTransformer, MinMaxScaler, RobustScaler, Normalizer
 
 
@@ -26,8 +25,8 @@ class Normalization:
         self.method = method
         self.column_names = column_names
         self.column_method = column_method
-        self.new_df = pd.DataFrame()
-        self.old_df = pd.DataFrame()
+        self.new_df = DataFrame()
+        self.old_df = DataFrame()
 
     def transform(self, data):
         """
@@ -48,19 +47,19 @@ class Normalization:
             if self.method not in self.methods_dict.keys():
                 raise NotImplementedError(f'Method {self.method} is not supported.')
 
-        if isinstance(data, pd.DataFrame):
+        if isinstance(data, DataFrame):
             self.new_df = data.copy()
         else:
-            self.new_df = pd.DataFrame(data)
+            self.new_df = DataFrame(data)
 
         self.old_df = self.new_df.copy()
 
         # if self.column_method is a dict, check columns in self.column_names and transform
         if isinstance(self.column_method, dict):
-            for column in self.column_method:
+            for column in self.column_method.keys():
                 if self.column_names:
                     if column in self.column_names:
-                        raise Exception('Columns in column_method cannot be duplicated in column_names')
+                        raise ValueError('Columns in column_method cannot be duplicated in column_names')
 
                 # reshape to prevent "ValueError: Expected 2D array, got 1D array instead"
                 old_column = self.new_df[column].to_numpy().reshape(-1, 1)
@@ -109,14 +108,14 @@ class Normalization:
             raise Exception('Dataframes were not created yet. Call transform() method.')
 
         # create new dataframe from old and new columns to plot with the hue
-        old_df = pd.DataFrame(self.old_df[column])
+        old_df = DataFrame(self.old_df[column])
         old_df['Column'] = 'old'
-        new_df = pd.DataFrame(self.new_df[column])
+        new_df = DataFrame(self.new_df[column])
         new_df['Column'] = 'new'
-        self.df_to_plot = pd.concat([old_df, new_df], axis=0, ignore_index=True)
+        self.df_to_plot = concat([old_df, new_df], axis=0, ignore_index=True)
 
-        sns.displot(data=self.df_to_plot, x=column, hue='Column', **kwargs)
-        plt.title("Distribution plot", size=15, weight='bold')
+        displot(data=self.df_to_plot, x=column, hue='Column', **kwargs)
+        title("Distribution plot", size=15, weight='bold')
 
     def _transform_data(self, new_data, method):
         """
@@ -126,18 +125,14 @@ class Normalization:
             new_data : New DataFrame or column to transform.
             method : The method to use in the transformation.
         """
-        if method not in self.methods_dict.keys():
-            raise NotImplementedError(f'Method {method} is not supported.')
-
         if method == 'log':
-            new_data = np.log(new_data + 1)
+            new_data = log(new_data + 1)
 
         else:
-            if isinstance(new_data, pd.DataFrame):
+            if isinstance(new_data, DataFrame):
                 estimator = self.methods_dict[method]
-                new_data = pd.DataFrame(estimator.fit_transform(new_data))
-                new_data.set_axis(self.new_df.columns, axis=1, inplace=True)
-
+                new_data = DataFrame(estimator.fit_transform(new_data))
+                new_data.columns = self.new_df.columns
             else:
                 estimator = self.methods_dict[method]
                 new_data = estimator.fit_transform(new_data)

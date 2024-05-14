@@ -27,7 +27,7 @@ class InsolverDiscretizer:
 
     def __init__(self, method='uniform'):
         if method not in self._methods:
-            raise ValueError(f'Accepted methods are {self._methods}, got {method} instead.')
+            raise NotImplementedError(f'Accepted methods are {self._methods}, got {method} instead.')
 
         self.method = method
         self.X = None
@@ -110,7 +110,7 @@ class InsolverDiscretizer:
                 f'{type(y)} instead.'
             )
 
-        if (not y.shape != (len(y), 1) or len(y.shape) != 1) and len(y) != self.X.shape[0]:
+        if (not y.shape != (len(y), 1) or len(y.shape) != 1) or (len(y) != self.X.shape[0]):
             raise ValueError(
                 'Invalid target shape. Expected 1-D array with shape '
                 f'{(self.X.shape[0],)} or {(self.X.shape[0], 1)}, got {y.shape} instead'
@@ -122,7 +122,7 @@ class InsolverDiscretizer:
         """Calculate number of bins.
 
         Args:
-            n_bins(string): The formula to calculate number of bins.
+            n_bins(string, int): The formula to calculate number of bins.
             len_X(int): length of X.
 
         Returns:

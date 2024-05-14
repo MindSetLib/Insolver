@@ -1,6 +1,6 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
+from pandas import DataFrame, concat
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import Lasso, LogisticRegression, ElasticNet
 from sklearn.feature_selection import mutual_info_classif, mutual_info_regression, chi2, f_classif, f_regression
@@ -34,7 +34,7 @@ class FeatureSelection:
 
     Attributes:
         new_dataframe (pandas.DataFrame): New dataframe with the selected features only.
-        importances (list): A list of the importances created using selected method.
+        importances (np.ndarray): A list of the importances created using selected method.
         model : A model for feature selection.
         permutation_model : Permutation model for feature selection.
 
@@ -45,8 +45,8 @@ class FeatureSelection:
         self.task = task
         self.method = method
         self.permutation_importance = permutation_importance
-        self.new_dataframe = pd.DataFrame()
-        self.importances = []
+        self.new_dataframe = DataFrame()
+        self.importances = np.array([])
         self.tasks_list = ['reg', 'class', 'multiclass', 'multiclass_multioutput']
 
     def create_model(self, df):
@@ -111,10 +111,10 @@ class FeatureSelection:
             self.importances = self.permutation_model.importances_mean
 
         except AttributeError:
-            raise Exception('Model was not created yet.')
+            raise AttributeError('Model was not created yet.')
 
         except TypeError:
-            raise Exception('Permutation importance can only be used with the estimator.')
+            raise TypeError('Permutation importance can only be used with the estimator.')
 
     def create_new_dataset(self, threshold='mean'):
         """
@@ -141,13 +141,13 @@ class FeatureSelection:
                 # calculate mean value for each feature
                 scores = np.mean(np.abs(self.importances), axis=0)
 
-            df_scores = pd.DataFrame({'feature_name': self.x.columns, 'feature_score': scores})
+            df_scores = DataFrame({'feature_name': self.x.columns, 'feature_score': scores})
 
             # calculate mean as threshold and select columns
             if threshold == 'mean':
                 self.threshold = df_scores['feature_score'].abs().mean()
                 cols = df_scores[df_scores['feature_score'] > self.threshold]['feature_name']
-                self.new_dataframe = pd.concat([self.x[cols], self.y], axis=1)
+                self.new_dataframe = concat([self.x[cols], self.y], axis=1)
 
                 return self.new_dataframe
 
@@ -155,7 +155,7 @@ class FeatureSelection:
             elif threshold == 'median':
                 self.threshold = df_scores['feature_score'].abs().median()
                 cols = df_scores[df_scores['feature_score'] > self.threshold]['feature_name']
-                self.new_dataframe = pd.concat([self.x[cols], self.y], axis=1)
+                self.new_dataframe = concat([self.x[cols], self.y], axis=1)
 
                 return self.new_dataframe
 
@@ -163,12 +163,12 @@ class FeatureSelection:
             else:
                 self.threshold = threshold
                 cols = df_scores[df_scores['feature_score'].abs() > self.threshold]['feature_name']
-                self.new_dataframe = pd.concat([self.x[cols], self.y], axis=1)
+                self.new_dataframe = concat([self.x[cols], self.y], axis=1)
 
                 return self.new_dataframe
 
         except AttributeError:
-            raise Exception('Model was not created yet.')
+            raise AttributeError('Model was not created yet.')
 
     def plot_importance(self, figsize=(5, 5), importance_threshold=None):
         """
@@ -194,7 +194,7 @@ class FeatureSelection:
                 n = 0
                 # plot each class importances
                 for n_class in self.importances:
-                    df_to_plot = pd.DataFrame({'feature_name': self.x.columns, 'feature_score': n_class})
+                    df_to_plot = DataFrame({'feature_name': self.x.columns, 'feature_score': n_class})
 
                     # if importance_threshold plot only selected features
                     if importance_threshold:
@@ -211,7 +211,7 @@ class FeatureSelection:
 
             # else importances is (, n_features)
             else:
-                df_to_plot = pd.DataFrame({'feature name': self.x.columns, 'feature score': self.importances})
+                df_to_plot = DataFrame({'feature name': self.x.columns, 'feature score': self.importances})
 
                 # if importance_threshold plot only selected features
                 if importance_threshold:
@@ -226,14 +226,14 @@ class FeatureSelection:
                 plt.title(f'Model {self.method} features scores')
 
         except AttributeError:
-            raise Exception('Model was not created yet.')
+            raise AttributeError('Model was not created yet.')
 
     def _init_methods_dict(self):
         """
-        Non-public method for creating a methods dictionary.
+        Non-public method for creating a methods' dictionary.
 
         Raises:
-            NotImplementedError: If self.task is not supported.
+            NotImplementedError: If `self.task` is not supported.
 
         """
         # methods_dict initialization for classification task
@@ -264,7 +264,7 @@ class FeatureSelection:
         # methods_dict initialization for multiclass classification task
         elif self.task == 'multiclass':
             self.methods_dict = {
-                'random_forest': lambda x, y: RandomForestRegressor(n_estimators=10).fit(x, y),
+                'random_forest': lambda x, y: RandomForestClassifier(n_estimators=10).fit(x, y),
                 'lasso': lambda x, y: LogisticRegression(penalty='l1', solver='saga', multi_class='multinomial').fit(
                     StandardScaler().fit_transform(x), y
                 ),
@@ -276,7 +276,7 @@ class FeatureSelection:
         # methods_dict initialization for multiclass multioutput classification task
         elif self.task == 'multiclass_multioutput':
             self.methods_dict = {
-                'random_forest': lambda x, y: RandomForestRegressor(n_estimators=10).fit(x, y),
+                'random_forest': lambda x, y: RandomForestClassifier(n_estimators=10).fit(x, y),
             }
 
         else:

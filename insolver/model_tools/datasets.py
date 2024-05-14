@@ -1,12 +1,6 @@
 import os
-import sys
 
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
-
-from typing import Union
+from typing import Union, Literal
 from os import PathLike
 from io import BytesIO
 from urllib.request import urlopen

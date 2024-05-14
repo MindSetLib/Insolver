@@ -1,5 +1,5 @@
 import warnings
-import pandas as pd
+from pandas import concat
 from insolver.transforms import EncoderTransforms, OneHotEncoderTransforms, AutoFillNATransforms
 from insolver.feature_engineering import DimensionalityReduction, Sampling, Smoothing, Normalization, FeatureSelection
 
@@ -234,7 +234,7 @@ class DataPreprocessing:
             columns_to_transform = set(self.categorical_columns) - set(self.transform_categorical_drop)
             transform_method(column_names=list(columns_to_transform)).__call__(df=df_to_transform)
 
-            return pd.concat([df_to_transform, columns_to_concat], axis=1)
+            return concat([df_to_transform, columns_to_concat], axis=1)
 
         # else transform all categorical values with the selected method
         else:
@@ -272,7 +272,7 @@ class DataPreprocessing:
             df_to_norm = df.drop(self.normalization_drop, axis=1)
             columns_to_concat = df[self.normalization_drop]
             df_to_norm = Normalization(method=self.normalization).transform(df_to_norm)
-            return pd.concat([df_to_norm, columns_to_concat], axis=1)
+            return concat([df_to_norm, columns_to_concat], axis=1)
 
         # else normalize and return transformed all values
         else:
@@ -332,7 +332,7 @@ class DataPreprocessing:
                 X=X, n_components=n_components, n_neighbors=n_neighbors
             )
 
-        return pd.concat([X, y], axis=1)
+        return concat([X, y], axis=1)
 
     def _sampling(self, df):
         """

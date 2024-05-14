@@ -1,6 +1,6 @@
-import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
+from pandas import DataFrame, Series, concat
+from seaborn import pairplot, scatterplot
 from sklearn.decomposition import PCA, TruncatedSVD, FactorAnalysis, NMF
 from sklearn.manifold import TSNE, Isomap, LocallyLinearEmbedding
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
@@ -51,14 +51,14 @@ class DimensionalityReduction:
 
         # get estimator and create transformed DataFrame
         self.estimator = self.methods_dict[self.method]
-        self.X_transformed = pd.DataFrame(self.estimator(**kwargs).fit_transform(X=X, y=y))
+        self.X_transformed = DataFrame(self.estimator(**kwargs).fit_transform(X=X, y=y))
 
         return self.X_transformed
 
     def plot_transformed(self, y, figsize=(10, 10), **kwargs):
         """
         Plot transformed X values using y as hue.
-        If n_components < 3 it will use seaborn.scatterplot to plot values.
+        If n_components < 2 it will use seaborn.scatterplot to plot values.
         Else it will use sns.pairplot to create plots.
 
         Note:
@@ -77,29 +77,26 @@ class DimensionalityReduction:
         # try in case plot_transformed() is called before transform()
         try:
             # if y is DataFrame use the first column to concat X_transformed and y
-            if isinstance(y, pd.DataFrame):
-                y = y[y.columns[0]]
-                new_df = pd.concat([self.X_transformed, y], axis=1)
-
-            # elif y is Series just concat X_transformed and y
-            elif isinstance(y, pd.Series):
-                new_df = pd.concat([self.X_transformed, y], axis=1)
-
+            if isinstance(y, (DataFrame, Series)):
+                if isinstance(y, DataFrame):
+                    y = y[y.columns[0]]
             # else raise error because only DataFrame or Series can be used in pd.concat
             else:
                 raise TypeError('Only pandas.DataFrame and pandas.Series object can be used as y.')
 
+            y.name = 'y' if y.name in [None, 0, '0'] else y.name
+            new_df = concat([self.X_transformed, y], axis=1)
             # if n_conponents < 2 create sns.scatterplot
-            if self.X_transformed.shape[1] < 3:
+            if self.X_transformed.shape[1] < 2:
                 plt.figure(figsize=figsize)
-                sns.scatterplot(data=new_df, x=0, y=1, hue=y.name, **kwargs)
+                scatterplot(data=new_df, x=0, y=1, hue=y.name, **kwargs)
 
             # else create sns.pairplot to display all components
             else:
-                sns.pairplot(new_df, hue=y.name, **kwargs)
+                pairplot(new_df, hue=y.name, **kwargs)
 
         except AttributeError:
-            raise Exception('Estimator was not created yet. Call transform() method.')
+            raise AttributeError('Estimator was not created yet. Call transform() method.')
 
     def _init_methods(self):
         """

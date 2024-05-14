@@ -88,7 +88,7 @@ class Smoothing:
         lowess = sm.nonparametric.lowess(df[self.y_column], df[self.x_column], **kwargs)
 
         # save lowess shape for use in the plot_transformed() method
-        self._lowess_shape = lowess.shape[1]
+        self._lowess_shape = len(lowess.shape)
 
         # the returned from lowess array is two-dimensional if return_sorted is True
         if self._lowess_shape == 2:
@@ -145,7 +145,7 @@ class Smoothing:
         if self.method == 'lowess':
             plt.figure(figsize=figsize)
             # plot old values as scatterplot
-            scatterplot(self.new_df[self.x_column], self.new_df[self.y_column], label='Raw')
+            scatterplot(x=self.new_df[self.x_column], y=self.new_df[self.y_column], label='Raw')
             # plot new values
             if self._lowess_shape == 2:
                 plt.plot(self.new_df[columns[-2]], self.new_df[columns[-1]], label=self.method)
@@ -160,7 +160,6 @@ class Smoothing:
             # plot new x
             plt.plot(self.new_df[columns[-1]], label=self.method)
             plt.legend()
-            plt.show()
 
     def _init_methods_dict(self):
         """

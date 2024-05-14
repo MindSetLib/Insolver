@@ -1,5 +1,6 @@
-import pandas as pd
-import numpy as np
+from numpy import arange, repeat, delete, append
+from numpy.random import choice
+from pandas import DataFrame, concat
 
 
 class Sampling:
@@ -33,7 +34,7 @@ class Sampling:
             df (pandas.Dataframe): The dataframe.
 
         Raises:
-            NotImplementedError: If self.method is not supported.
+            NotImplementedError: If `self.method` is not supported.
 
         Returns:
             New dataset with selected rows.
@@ -80,7 +81,7 @@ class Sampling:
             New dataset with selected rows.
         """
         # get indexes with selected step
-        indexes = np.arange(0, len(df), step=self.n)
+        indexes = arange(0, len(df), step=self.n)
         # get only selected indexes
         systematic_sample = df.iloc[indexes]
         return systematic_sample
@@ -100,11 +101,11 @@ class Sampling:
         # count clusters to check
         clusters_count = cluster_df['cluster_id'].unique().sum()
 
-        cluster_sample = pd.DataFrame()
+        cluster_sample = DataFrame()
 
         # if the selected number of clusters is bigger then the created number raise error
         if self.n > clusters_count:
-            raise Exception(f'{self.n} cannot be bigger then number of clusters.')
+            raise ValueError(f'{self.n} cannot be bigger then number of clusters.')
 
         # if the selected number of clusters equals the created number return df
         elif self.n == clusters_count:
@@ -112,10 +113,10 @@ class Sampling:
 
         else:
             # randomly chose clusters to keep
-            clusters_to_keep = np.random.choice(cluster_df['cluster_id'].unique(), self.n)
+            clusters_to_keep = choice(cluster_df['cluster_id'].unique(), self.n)
             for cluster in clusters_to_keep:
                 # create a new DataFrame only with the selected clusters
-                cluster_sample = pd.concat([cluster_sample, cluster_df[cluster_df['cluster_id'] == cluster]])
+                cluster_sample = concat([cluster_sample, cluster_df[cluster_df['cluster_id'] == cluster]])
 
         return cluster_sample
 
@@ -132,13 +133,13 @@ class Sampling:
         # create clusters
         cluster_df = self._create_clusters(df)
 
-        stratified_sample = pd.DataFrame()
+        stratified_sample = DataFrame()
 
         for cluster in cluster_df['cluster_id'].unique():
             # get selected number of values from each cluster
             sample_cluster = cluster_df[cluster_df['cluster_id'] == cluster].sample(n=self.n)
             # create a new DataFrame only with the selected values in the cluster
-            stratified_sample = pd.concat([stratified_sample, sample_cluster])
+            stratified_sample = concat([stratified_sample, sample_cluster])
 
         return stratified_sample
 
@@ -174,22 +175,22 @@ class Sampling:
         else:
             try:
                 # try if the clusters can be filled exactly
-                new_df['cluster_id'] = np.repeat([range(1, self.n_clusters + 1)], cluster_size)
+                new_df['cluster_id'] = repeat(list(range(1, self.n_clusters + 1)), cluster_size)
 
             except ValueError:
                 # if not get indexes
-                indexes = np.repeat([range(1, self.n_clusters + 1)], cluster_size)
+                indexes = repeat(list(range(1, self.n_clusters + 1)), cluster_size)
                 # calculate the difference
                 diff = len(indexes) - len(df)
 
                 # if the difference is greater than 0 delete one row
                 if diff > 0:
                     for i in range(diff):
-                        new_df['cluster_id'] = np.delete(indexes, len(indexes) - 1)
+                        new_df['cluster_id'] = delete(indexes, len(indexes) - 1)
 
                 # if the difference is less than 0 add one row
                 if diff < 0:
                     for i in range(abs(diff)):
-                        new_df['cluster_id'] = np.append(indexes, self.n_clusters)
+                        new_df['cluster_id'] = append(indexes, self.n_clusters)
 
         return new_df
