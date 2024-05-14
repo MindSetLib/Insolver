@@ -132,7 +132,7 @@ class DataPreprocessing:
         # create a copy of the DataFrame if inplace=False
         df = df.copy()
 
-        if drop_target:
+        if drop_target and not (self.smoothing or self.sampling or self.dim_red):
             # if target is str add to lists
             if isinstance(target, str):
                 self.normalization_drop.append(target)
