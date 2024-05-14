@@ -75,28 +75,28 @@ class DimensionalityReduction:
             Exception: If method is called before transform() method.
         """
         # try in case plot_transformed() is called before transform()
-        # try:
-        # if y is DataFrame use the first column to concat X_transformed and y
-        if isinstance(y, (DataFrame, Series)):
-            if isinstance(y, DataFrame):
-                y = y[y.columns[0]]
-        # else raise error because only DataFrame or Series can be used in pd.concat
-        else:
-            raise TypeError('Only pandas.DataFrame and pandas.Series object can be used as y.')
+        try:
+            # if y is DataFrame use the first column to concat X_transformed and y
+            if isinstance(y, (DataFrame, Series)):
+                if isinstance(y, DataFrame):
+                    y = y[y.columns[0]]
+            # else raise error because only DataFrame or Series can be used in pd.concat
+            else:
+                raise TypeError('Only pandas.DataFrame and pandas.Series object can be used as y.')
 
-        y.name = 'y' if y.name in [None, 0, '0'] else y.name
-        new_df = concat([self.X_transformed, y], axis=1)
-        # if n_conponents < 2 create sns.scatterplot
-        if self.X_transformed.shape[1] < 2:
-            plt.figure(figsize=figsize)
-            scatterplot(data=new_df, x=0, y=1, hue=y.name, **kwargs)
+            y.name = 'y' if y.name in [None, 0, '0'] else y.name
+            new_df = concat([self.X_transformed, y], axis=1)
+            # if n_conponents < 2 create sns.scatterplot
+            if self.X_transformed.shape[1] < 2:
+                plt.figure(figsize=figsize)
+                scatterplot(data=new_df, x=0, y=1, hue=y.name, **kwargs)
 
-        # else create sns.pairplot to display all components
-        else:
-            pairplot(new_df, hue=y.name, **kwargs)
+            # else create sns.pairplot to display all components
+            else:
+                pairplot(new_df, hue=y.name, **kwargs)
 
-        # except AttributeError:
-        # raise AttributeError('Estimator was not created yet. Call transform() method.')
+        except AttributeError:
+            raise AttributeError('Estimator was not created yet. Call transform() method.')
 
     def _init_methods(self):
         """
