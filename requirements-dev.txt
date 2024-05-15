@@ -1,8 +1,0 @@
-black[jupyter]==24.4.2
-mypy>=0.971
-pre-commit>=2.19.0
-pytest>=6.2.5
-pytest-cov>=2.12.1
-ruff>=0.0.246
-tox>=3.24.3
-locust==2.9.0

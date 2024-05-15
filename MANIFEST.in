@@ -1,1 +1,0 @@
-recursive-include insolver/report *.html *.css *.js *.css.map *.js.map
