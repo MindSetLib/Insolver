@@ -68,7 +68,7 @@ python -m pytest
 
 tests with coverage:
 ```shell
-python -m pytest --cov=insolver; coverage html; xdg-open htmlcov/index.html
+python -m pytest . --cov=insolver --cov-report html
 ```
 
 

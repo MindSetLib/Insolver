@@ -1,13 +1,13 @@
 import os
 import inspect
 import numpy as np
-import pandas as pd
 import plotly as py
-import jinja2
 from os.path import dirname
 from typing import List, Sequence, Dict, Union
-from plotly.figure_factory import create_distplot
+from pandas import DataFrame
 from plotly import express as px
+from plotly.figure_factory import create_distplot
+from jinja2 import Environment, FileSystemLoader
 
 from .homogeneity_tests import ContinuousHomogeneityTests, DiscreteHomogeneityTests, fillna_cont, fillna_discr
 
@@ -176,8 +176,8 @@ class HomogeneityReport:
 
     def build_report(
         self,
-        df1: pd.DataFrame,
-        df2: pd.DataFrame,
+        df1: DataFrame,
+        df2: DataFrame,
         dropna: bool = False,
         name1: str = 'Base subset',
         name2: str = 'Current subset',
@@ -218,9 +218,9 @@ class HomogeneityReport:
         """
 
         # checking error situations
-        if not isinstance(df1, pd.DataFrame):
+        if not isinstance(df1, DataFrame):
             raise TypeError("df1 must be a pandas DataFrame.")
-        if not isinstance(df2, pd.DataFrame):
+        if not isinstance(df2, DataFrame):
             raise TypeError("df2 must be a pandas DataFrame.")
         features = self.features
         if not (set(features) <= set(df1.columns)):
@@ -368,7 +368,7 @@ def render_report(report_data: list, report_path: str = 'homogeneity_report.html
             raise KeyError("Missing information in nan gap dict.")
 
     # render report
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(curr_folder))
+    env = Environment(loader=FileSystemLoader(curr_folder))
     template = env.get_template("report_template.html")
     output = template.render(sets=report_data)
 
