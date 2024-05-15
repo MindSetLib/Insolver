@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "insolver"
-version = "0.4.26"
+version = "0"
 description = "Insolver is low-code machine learning library, initially created for the insurance industry."
 authors = ["Mindset Team <request@mind-set.ru>"]
 homepage = "http://insolver.io/"
@@ -105,6 +105,9 @@ full = ["dice-ml", "alibi"]
 
 [tool.poetry.scripts]
 insolver_serving_cli = 'insolver.serving.run_service:run'
+
+[tool.poetry-version-plugin]
+source = "git-tag"
 
 [build-system]
 requires = ["poetry-core"]
