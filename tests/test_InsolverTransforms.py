@@ -4,8 +4,10 @@ from insolver.transforms import (
     TransformExp,
     TransformAge,
 )
+from insolver.model_tools.datasets import download_dataset
 
-df = pd.read_csv('tests/data/freMPL-R_100.csv')
+download_dataset('freMPL-R', 'tests/data/')
+df = pd.read_csv('tests/data/freMPL-R.csv', nrows=109)
 
 
 def test_TransformExp():
