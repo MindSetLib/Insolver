@@ -78,9 +78,6 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) 
         x1, x2 = x1_ref.copy(), x2_ref.copy()
 
     # if we have numeric data we define nan_value as (minimum - 1)
-    if x1.dtype == 'int':
-        nan_value = min(np.min(x1), np.min(x2)) - 1
-        return x1, x2, nan_value
     if x1.dtype == 'float':
         nan_value = min(np.min(x1[~pd.isna(x1)]), np.min(x2[~pd.isna(x2)])) - 1
         x1[pd.isna(x1)] = nan_value
