@@ -36,6 +36,7 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
+        pip install -U pip setuptools wheel
         poetry install --with dev --no-interaction
     - name: Lint with black
       shell: bash
@@ -59,3 +60,5 @@ jobs:
         name: codecov-insolver
         fail_ci_if_error: false
         files: ./coverage.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
+        verbose: true

@@ -37,7 +37,6 @@ include = [
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/MindSetLib/Insolver/issues"
 "Documentation" = "https://insolver.readthedocs.io/en/stable/"
-"Source Code" = "https://github.com/MindSetLib/Insolver"
 
 
 [tool.poetry.dependencies]
