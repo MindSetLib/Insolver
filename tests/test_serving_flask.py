@@ -103,7 +103,7 @@ request_json_sklearn = {'df': json.loads(test_df.iloc[0].to_json())}
 #     request_json = json.load(file_)
 
 
-def test_h2o_model():
+def test_sklearn_model():
     os.environ['model_path'] = './test_glm_model.pickle'
     os.environ['transforms_path'] = './transforms.pickle'
 

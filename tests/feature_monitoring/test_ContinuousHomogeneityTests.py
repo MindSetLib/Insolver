@@ -118,6 +118,7 @@ def gen_examples_cont(samp_size):
 
     # Delete test data
     os.remove('tests/data/freMPL-R.csv')
+    os.rmdir('tests/data')
     return examples
 
 
