@@ -3,8 +3,6 @@ import json
 import importlib
 from io import StringIO
 
-import h2o.exceptions
-import pytest
 import pandas as pd
 import insolver
 from insolver import InsolverDataFrame
@@ -94,31 +92,31 @@ x_train = InsTransforms.loc[InsTransforms.index.tolist()[:-1], features]
 y_train = InsTransforms.loc[InsTransforms.index.tolist()[:-1], target]
 x_test = InsTransforms.loc[[InsTransforms.index.tolist()[-1]], features]
 
-iglm = InsolverGLMWrapper(backend='h2o', family='gamma', link='log')
+iglm = InsolverGLMWrapper(backend='sklearn', family='gamma', link='log')
 iglm.fit(x_train, y_train)
 iglm.save_model(name='test_glm_model')
 
 predict = iglm.predict(x_test)
-request_json_h2o = {'df': json.loads(test_df.iloc[0].to_json())}
+request_json_sklearn = {'df': json.loads(test_df.iloc[0].to_json())}
 
-with open("./dev/test_request_frempl.json", 'r') as file_:
-    request_json = json.load(file_)
+# with open("./dev/test_request_frempl.json", 'r') as file_:
+#     request_json = json.load(file_)
 
 
-@pytest.mark.xfail(raises=h2o.exceptions.H2OServerError)
 def test_h2o_model():
-    os.environ['model_path'] = './test_glm_model.h2o'
+    os.environ['model_path'] = './test_glm_model.pickle'
     os.environ['transforms_path'] = './transforms.pickle'
 
     from insolver.serving.flask_app import app
 
-    os.remove("test_glm_model.h2o")
+    os.remove("test_glm_model.pickle")
+    os.remove("transforms.pickle")
     app.testing = True
 
     with app.test_client() as client:
         response = client.post(
             '/predict',
-            data=json.dumps(request_json_h2o),
+            data=json.dumps(request_json_sklearn),
             content_type='application/json',
         )
         data = json.loads(response.get_data(as_text=True))
