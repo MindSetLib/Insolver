@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+from pandas import isna
 from scipy import stats as sps
 from sklearn.preprocessing import LabelEncoder
 from typing import Callable, List, Any
@@ -74,15 +74,15 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray) -> Any:
 
     # if we have numeric data we define nan_value as (minimum - 1)
     if x1.dtype == 'float':
-        nan_value = min(np.min(x1[~pd.isna(x1)]), np.min(x2[~pd.isna(x2)])) - 1
-        x1[pd.isna(x1)] = nan_value
-        x2[pd.isna(x2)] = nan_value
+        nan_value = min(np.min(x1[~isna(x1)]), np.min(x2[~isna(x2)])) - 1
+        x1[isna(x1)] = nan_value
+        x2[isna(x2)] = nan_value
         return x1, x2, nan_value
 
     # if we have object data we fill nan with 'nan' str
     if x1.dtype == object:
-        x1[pd.isna(x1)] = 'nan'
-        x2[pd.isna(x2)] = 'nan'
+        x1[isna(x1)] = 'nan'
+        x2[isna(x2)] = 'nan'
         return x1, x2, 'nan'
 
 
@@ -108,16 +108,16 @@ def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray) -> Any:
     # we fill nans with value less than all data
     # but it is smaller than minimum on gap between minimum and second minimum
     # it helps to avoid a lot of empty buckets in grids when running stat. tests
-    min_ = min(np.min(x1[~pd.isna(x1)]), np.min(x2[~pd.isna(x2)]))
+    min_ = min(np.min(x1[~isna(x1)]), np.min(x2[~isna(x2)]))
 
-    sec_min1 = sec_min(x1[~pd.isna(x1)])
-    sec_min2 = sec_min(x2[~pd.isna(x2)])
+    sec_min1 = sec_min(x1[~isna(x1)])
+    sec_min2 = sec_min(x2[~isna(x2)])
 
     sec_min_ = min(sec_min1, sec_min2)
 
     gap = sec_min_ - min_
-    x1[pd.isna(x1)] = min_ - gap
-    x2[pd.isna(x2)] = min_ - gap
+    x1[isna(x1)] = min_ - gap
+    x2[isna(x2)] = min_ - gap
 
     return x1, x2, min_ - gap
 
@@ -213,7 +213,7 @@ class DiscreteHomogeneityTests:
         x1, x2 = x1_ref.copy(), x2_ref.copy()
 
         # fill nan values with special method to avoid collisions of category labels
-        if np.any(pd.isna(x1)) or np.any(pd.isna(x2)):
+        if np.any(isna(x1)) or np.any(isna(x2)):
             x1, x2, _ = fillna_discr(x1, x2)
 
         # encode categorical data with integer nums
@@ -340,7 +340,7 @@ class ContinuousHomogeneityTests:
         x1, x2 = x1_ref.copy(), x2_ref.copy()
 
         # fill nan values with special method; usual 'fillna' don't fully suit homogeneity tests
-        if np.any(pd.isna(x1)) or np.any(pd.isna(x2)):
+        if np.any(isna(x1)) or np.any(isna(x2)):
             x1, x2, nan_value = fillna_cont(x1, x2)
         else:
             # this value will indicate psi that there are no nans
