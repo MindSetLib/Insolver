@@ -54,7 +54,7 @@ def bootstrap(x1: np.ndarray, x2: np.ndarray, bootstrap_num: int, samp_size: int
     return pvalue
 
 
-def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> Any:
+def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray) -> Any:
     """
     This function fills missing values in x1 and x2 safely for homogeneity tests.
     It guarantees that missing values will be filled with unique constant.
@@ -62,8 +62,6 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) 
     Parameters:
         x1_ref (np.array): sample from base period.
         x2_ref (np.array): sample from current period.
-        inplace (bool): whether to modify original x1, x2
-        or to make copy and return it.
 
     Returns:
         x1 (np.array): sample from base period without missing values.
@@ -72,10 +70,7 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) 
     """
 
     # copy inputs to avoid side effects
-    if inplace:
-        x1, x2 = x1_ref, x2_ref
-    else:
-        x1, x2 = x1_ref.copy(), x2_ref.copy()
+    x1, x2 = x1_ref.copy(), x2_ref.copy()
 
     # if we have numeric data we define nan_value as (minimum - 1)
     if x1.dtype == 'float':
@@ -91,7 +86,7 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) 
         return x1, x2, 'nan'
 
 
-def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> Any:
+def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray) -> Any:
     """
     This function fills missing values in x1 and x2 safely for homogeneity tests.
     In case when nan value is just set to some constant less than all elements
@@ -100,8 +95,6 @@ def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -
     Parameters:
         x1_ref (np.array): sample from base period.
         x2_ref (np.array): sample from current period.
-        inplace (bool): whether to modify original x1, x2
-        or to make copy and return it.
 
     Returns:
         x1 (np.array): sample from base period without missing values.
@@ -110,10 +103,7 @@ def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -
     """
 
     # copy inputs to avoid side effects
-    if inplace:
-        x1, x2 = x1_ref, x2_ref
-    else:
-        x1, x2 = x1_ref.copy(), x2_ref.copy()
+    x1, x2 = x1_ref.copy(), x2_ref.copy()
 
     # we fill nans with value less than all data
     # but it is smaller than minimum on gap between minimum and second minimum
@@ -166,15 +156,13 @@ class DiscreteHomogeneityTests:
         self.samp_size = samp_size
         self.bootstrap_num = bootstrap_num
 
-    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> List:
+    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray) -> List:
         """
         Runs all discrete tests for two samples: 'chi2', 'psi'.
 
         Parameters:
             x1_ref (np.array): sample from base period.
             x2_ref (np.array): sample from current period.
-            inplace (bool): whether to modify original x1, x2
-            or to make copy and return it.
 
         Returns:
             res (list of tuples): contains tuples of 3 elemets.
@@ -222,14 +210,11 @@ class DiscreteHomogeneityTests:
             )
 
         # copy inputs to avoid side effects
-        if inplace:
-            x1, x2 = x1_ref, x2_ref
-        else:
-            x1, x2 = x1_ref.copy(), x2_ref.copy()
+        x1, x2 = x1_ref.copy(), x2_ref.copy()
 
         # fill nan values with special method to avoid collisions of category labels
         if np.any(pd.isna(x1)) or np.any(pd.isna(x2)):
-            x1, x2, _ = fillna_discr(x1, x2, inplace=True)
+            x1, x2, _ = fillna_discr(x1, x2)
 
         # encode categorical data with integer nums
         enc = LabelEncoder()
@@ -298,15 +283,13 @@ class ContinuousHomogeneityTests:
         self.bootstrap_num = bootstrap_num
         self.psi_bins = psi_bins
 
-    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> List:
+    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray) -> List:
         """
         Runs all continuous tests for two samples: 'ks', 'cr-vonmis', 'epps-sing', 'psi'.
 
         Parameters:
             x1_ref (np.array): sample from base period.
             x2_ref (np.array): sample from current period.
-            inplace (bool): whether to modify original x1, x2
-            or to make copy and work with it.
 
         Returns:
             res (list of tuples): contains tuples of 3 elements.
@@ -354,14 +337,11 @@ class ContinuousHomogeneityTests:
             )
 
         # copy inputs to avoid side effects
-        if inplace:
-            x1, x2 = x1_ref, x2_ref
-        else:
-            x1, x2 = x1_ref.copy(), x2_ref.copy()
+        x1, x2 = x1_ref.copy(), x2_ref.copy()
 
         # fill nan values with special method; usual 'fillna' don't fully suit homogeneity tests
         if np.any(pd.isna(x1)) or np.any(pd.isna(x2)):
-            x1, x2, nan_value = fillna_cont(x1, x2, inplace=True)
+            x1, x2, nan_value = fillna_cont(x1, x2)
         else:
             # this value will indicate psi that there are no nans
             nan_value = min(np.min(x1), np.min(x2)) - 1
