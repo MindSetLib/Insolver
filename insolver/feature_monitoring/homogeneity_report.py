@@ -59,10 +59,10 @@ def chart_cont(
 
     # add details
     fig.update_layout(
-        autosize=False,
-        width=830,
-        height=650,
-        xaxis_range=None,
+        autosize=True,
+        width=None,
+        height=None,
+        margin=dict(l=5, r=5, t=5, b=5),
         legend=dict(x=0.8, y=0.95, traceorder='normal', font=dict(color='black', size=16)),
     )
     if offline:
@@ -97,12 +97,12 @@ def chart_discr(x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, offline:
 
     # add details
     fig.update_layout(
-        autosize=False,
-        width=830,
-        height=650,
+        autosize=True,
+        width=None,
+        height=None,
+        margin=dict(l=5, r=5, t=5, b=5),
         legend=dict(x=0.8, y=0.95, traceorder='normal', font=dict(color='black', size=16)),
     )
-
     if offline:
         return py.offline.plot(fig, include_plotlyjs=False, output_type='div')
     else:
@@ -267,13 +267,13 @@ class HomogeneityReport:
                 psi_bins = 20 if ('psi_bins' not in properties) else properties['psi_bins']
 
                 # manually fill nans
-                x1, x2, _ = fillna_cont(x1, x2, inplace=True)
+                x1, x2, _ = fillna_cont(x1, x2)
 
                 # run tests
                 homogen_tester: Union['ContinuousHomogeneityTests', 'DiscreteHomogeneityTests'] = (
                     ContinuousHomogeneityTests(pval_thresh, samp_size, bootstrap_num, psi_bins)
                 )
-                test_results = homogen_tester.run_all(x1, x2, inplace=True)
+                test_results = homogen_tester.run_all(x1, x2)
 
                 # optional drawing of charts
                 if draw_charts:
@@ -287,11 +287,11 @@ class HomogeneityReport:
 
             elif feat_type == 'discrete':
                 # manually fill nans
-                x1, x2, nan_value = fillna_discr(x1, x2, inplace=True)
+                x1, x2, nan_value = fillna_discr(x1, x2)
 
                 # run tests
                 homogen_tester = DiscreteHomogeneityTests(pval_thresh, samp_size, bootstrap_num)
-                test_results = homogen_tester.run_all(x1, x2, inplace=True)
+                test_results = homogen_tester.run_all(x1, x2)
 
                 # optional drawing charts
                 if draw_charts:
@@ -353,7 +353,7 @@ def render_report(report_data: list, report_path: str = 'homogeneity_report.html
     curr_folder = dirname(inspect.getfile(HomogeneityReport))
     template_path = curr_folder + '/' + 'report_template.html'
     if not os.path.exists(template_path):
-        raise OSError("Can not find template file. It must be in 'feature_monitoring' package.")
+        raise OSError("Can not find template file. It must be in 'feature_monitoring' module.")
 
     # error situations
     for feat_report in report_data:
@@ -372,5 +372,5 @@ def render_report(report_data: list, report_path: str = 'homogeneity_report.html
     template = env.get_template("report_template.html")
     output = template.render(sets=report_data)
 
-    with open(report_path, 'w') as f:
+    with open(report_path, 'w', encoding="utf-8") as f:
         f.write(output)

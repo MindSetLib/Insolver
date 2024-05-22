@@ -12,19 +12,18 @@
 
 
     <style>
-       
-       body {
+        body {
             background: #f3f3f3;
         }
-        
+
         .table td.red {
             background: rgb(218, 177, 182, .25);
         }
-        
+
         .table td.green {
             background: rgba(189, 222, 200, .25);
         }
-        
+
         .table td.neutral {
             background: rgba(221, 222, 189, .25);
         }
@@ -33,11 +32,11 @@
             text-align: center;
         }
 
-        .graph-text{
+        .graph-text {
             margin-top: 30px;
             font-weight: bold;
         }
-        
+
         .table {
             width: 100%;
             border: none;
@@ -80,7 +79,7 @@
         .table tbody tr td:last-child {
             border-radius: 0 8px 8px 0;
         }
-        
+
         .graph {
             border: 1px dotted;
         }
@@ -107,13 +106,13 @@
         <h1>Homogeneity Report</h1>
     </header>
 
-<main>
-{% for set in sets %}
+    <main>
+        {% for set in sets %}
         <div>
             <p class="graph-text lead text-center">{{set[0]}}</p>
             <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
                 <div class="graph me-md-3 pt-3 px-3 pt-md-2 px-md-2 text-center overflow-hidden">
-                    {{set[3]}}
+                    {{set[3]|safe}}
                 </div>
                 <div class="stats bg-white me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
                     <table class="table">
@@ -153,8 +152,14 @@
                 </div>
             </div>
         </div>
-{% endfor %}
+        {% endfor %}
     </main>
-
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const buttons = document.querySelectorAll('[data-title="Autoscale"]');
+            buttons.forEach(button => button.click());
+        });
+    </script>
 </body>
+
 </html>
