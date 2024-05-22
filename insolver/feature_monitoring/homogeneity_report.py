@@ -1,11 +1,11 @@
 import os
 import inspect
 import numpy as np
-import plotly as py
 from os.path import dirname
 from typing import List, Sequence, Dict, Union
 from pandas import DataFrame
-from plotly import express as px
+from plotly.offline import plot
+from plotly.graph_objects import Figure, Histogram
 from plotly.figure_factory import create_distplot
 from jinja2 import Environment, FileSystemLoader
 
@@ -14,7 +14,7 @@ from .homogeneity_tests import ContinuousHomogeneityTests, DiscreteHomogeneityTe
 
 def chart_cont(
     x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, limits: Sequence, bins: int = 15, offline: bool = True
-) -> py.graph_objs.Figure:
+) -> Figure:
     """
     This function draws histograms of given samples using joint grid.
     It needs limits of interested area and number of bins.
@@ -54,7 +54,13 @@ def chart_cont(
     # draw hists
     hist_data = [x1_group, x2_group]
     fig = create_distplot(
-        hist_data, group_labels, bin_size=bin_size, histnorm='probability', show_curve=False, show_rug=False
+        hist_data,
+        group_labels,
+        bin_size=bin_size,
+        histnorm='probability',
+        colors=['blue', 'red'],
+        show_curve=False,
+        show_rug=False,
     )
 
     # add details
@@ -63,15 +69,15 @@ def chart_cont(
         width=None,
         height=None,
         margin=dict(l=5, r=5, t=5, b=5),
-        legend=dict(x=0.8, y=0.95, traceorder='normal', font=dict(color='black', size=16)),
+        legend=dict(orientation="h", traceorder='normal'),
     )
     if offline:
-        return py.offline.plot(fig, include_plotlyjs=False, output_type='div')
+        return plot(fig, include_plotlyjs=False, output_type='div')
     else:
         return fig
 
 
-def chart_discr(x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, offline: bool = True) -> py.graph_objs.Figure:
+def chart_discr(x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, offline: bool = True) -> Figure:
     """
     This function draws histograms of given samples using joint grid.
     It needs limits of interested area and number of bins.
@@ -89,11 +95,10 @@ def chart_discr(x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, offline:
     """
 
     # draw discrete hists
-    fig1 = px.histogram(x1, histnorm='probability', barmode='overlay', color_discrete_sequence=['green'])
-    fig1.for_each_trace(lambda t: t.update(name=name1))
-    fig2 = px.histogram(x2, histnorm='probability', barmode='overlay', color_discrete_sequence=['red'])
-    fig2.for_each_trace(lambda t: t.update(name=name2))
-    fig = py.graph_objects.Figure(data=fig1.data + fig2.data)
+    fig = Figure()
+    fig.add_trace(Histogram(x=x1, name=name1, histnorm='probability', marker=dict(color='blue'), opacity=0.7))
+    fig.add_trace(Histogram(x=x2, name=name2, histnorm='probability', marker=dict(color='red'), opacity=0.7))
+    fig.update_xaxes(type='category')
 
     # add details
     fig.update_layout(
@@ -101,10 +106,11 @@ def chart_discr(x1: np.ndarray, x2: np.ndarray, name1: str, name2: str, offline:
         width=None,
         height=None,
         margin=dict(l=5, r=5, t=5, b=5),
-        legend=dict(x=0.8, y=0.95, traceorder='normal', font=dict(color='black', size=16)),
+        barmode='overlay',
+        legend=dict(orientation="h", traceorder='normal'),
     )
     if offline:
-        return py.offline.plot(fig, include_plotlyjs=False, output_type='div')
+        return plot(fig, include_plotlyjs=False, output_type='div')
     else:
         return fig
 
