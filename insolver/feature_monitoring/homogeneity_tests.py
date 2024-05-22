@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+from pandas import isna
 from scipy import stats as sps
 from sklearn.preprocessing import LabelEncoder
 from typing import Callable, List, Any
@@ -54,7 +54,7 @@ def bootstrap(x1: np.ndarray, x2: np.ndarray, bootstrap_num: int, samp_size: int
     return pvalue
 
 
-def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> Any:
+def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray) -> Any:
     """
     This function fills missing values in x1 and x2 safely for homogeneity tests.
     It guarantees that missing values will be filled with unique constant.
@@ -62,8 +62,6 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) 
     Parameters:
         x1_ref (np.array): sample from base period.
         x2_ref (np.array): sample from current period.
-        inplace (bool): whether to modify original x1, x2
-        or to make copy and return it.
 
     Returns:
         x1 (np.array): sample from base period without missing values.
@@ -72,29 +70,23 @@ def fillna_discr(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) 
     """
 
     # copy inputs to avoid side effects
-    if inplace:
-        x1, x2 = x1_ref, x2_ref
-    else:
-        x1, x2 = x1_ref.copy(), x2_ref.copy()
+    x1, x2 = x1_ref.copy(), x2_ref.copy()
 
     # if we have numeric data we define nan_value as (minimum - 1)
-    if x1.dtype == 'int':
-        nan_value = min(np.min(x1), np.min(x2)) - 1
-        return x1, x2, nan_value
     if x1.dtype == 'float':
-        nan_value = min(np.min(x1[~pd.isna(x1)]), np.min(x2[~pd.isna(x2)])) - 1
-        x1[pd.isna(x1)] = nan_value
-        x2[pd.isna(x2)] = nan_value
+        nan_value = min(np.min(x1[~isna(x1)]), np.min(x2[~isna(x2)])) - 1
+        x1[isna(x1)] = nan_value
+        x2[isna(x2)] = nan_value
         return x1, x2, nan_value
 
     # if we have object data we fill nan with 'nan' str
     if x1.dtype == object:
-        x1[pd.isna(x1)] = 'nan'
-        x2[pd.isna(x2)] = 'nan'
+        x1[isna(x1)] = 'nan'
+        x2[isna(x2)] = 'nan'
         return x1, x2, 'nan'
 
 
-def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> Any:
+def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray) -> Any:
     """
     This function fills missing values in x1 and x2 safely for homogeneity tests.
     In case when nan value is just set to some constant less than all elements
@@ -103,8 +95,6 @@ def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -
     Parameters:
         x1_ref (np.array): sample from base period.
         x2_ref (np.array): sample from current period.
-        inplace (bool): whether to modify original x1, x2
-        or to make copy and return it.
 
     Returns:
         x1 (np.array): sample from base period without missing values.
@@ -113,24 +103,21 @@ def fillna_cont(x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -
     """
 
     # copy inputs to avoid side effects
-    if inplace:
-        x1, x2 = x1_ref, x2_ref
-    else:
-        x1, x2 = x1_ref.copy(), x2_ref.copy()
+    x1, x2 = x1_ref.copy(), x2_ref.copy()
 
     # we fill nans with value less than all data
     # but it is smaller than minimum on gap between minimum and second minimum
     # it helps to avoid a lot of empty buckets in grids when running stat. tests
-    min_ = min(np.min(x1[~pd.isna(x1)]), np.min(x2[~pd.isna(x2)]))
+    min_ = min(np.min(x1[~isna(x1)]), np.min(x2[~isna(x2)]))
 
-    sec_min1 = sec_min(x1[~pd.isna(x1)])
-    sec_min2 = sec_min(x2[~pd.isna(x2)])
+    sec_min1 = sec_min(x1[~isna(x1)])
+    sec_min2 = sec_min(x2[~isna(x2)])
 
     sec_min_ = min(sec_min1, sec_min2)
 
     gap = sec_min_ - min_
-    x1[pd.isna(x1)] = min_ - gap
-    x2[pd.isna(x2)] = min_ - gap
+    x1[isna(x1)] = min_ - gap
+    x2[isna(x2)] = min_ - gap
 
     return x1, x2, min_ - gap
 
@@ -169,15 +156,13 @@ class DiscreteHomogeneityTests:
         self.samp_size = samp_size
         self.bootstrap_num = bootstrap_num
 
-    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> List:
+    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray) -> List:
         """
         Runs all discrete tests for two samples: 'chi2', 'psi'.
 
         Parameters:
             x1_ref (np.array): sample from base period.
             x2_ref (np.array): sample from current period.
-            inplace (bool): whether to modify original x1, x2
-            or to make copy and return it.
 
         Returns:
             res (list of tuples): contains tuples of 3 elemets.
@@ -225,14 +210,11 @@ class DiscreteHomogeneityTests:
             )
 
         # copy inputs to avoid side effects
-        if inplace:
-            x1, x2 = x1_ref, x2_ref
-        else:
-            x1, x2 = x1_ref.copy(), x2_ref.copy()
+        x1, x2 = x1_ref.copy(), x2_ref.copy()
 
         # fill nan values with special method to avoid collisions of category labels
-        if np.any(pd.isna(x1)) or np.any(pd.isna(x2)):
-            x1, x2, _ = fillna_discr(x1, x2, inplace=True)
+        if np.any(isna(x1)) or np.any(isna(x2)):
+            x1, x2, _ = fillna_discr(x1, x2)
 
         # encode categorical data with integer nums
         enc = LabelEncoder()
@@ -301,15 +283,13 @@ class ContinuousHomogeneityTests:
         self.bootstrap_num = bootstrap_num
         self.psi_bins = psi_bins
 
-    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray, inplace: bool = False) -> List:
+    def run_all(self, x1_ref: np.ndarray, x2_ref: np.ndarray) -> List:
         """
         Runs all continuous tests for two samples: 'ks', 'cr-vonmis', 'epps-sing', 'psi'.
 
         Parameters:
             x1_ref (np.array): sample from base period.
             x2_ref (np.array): sample from current period.
-            inplace (bool): whether to modify original x1, x2
-            or to make copy and work with it.
 
         Returns:
             res (list of tuples): contains tuples of 3 elements.
@@ -357,14 +337,11 @@ class ContinuousHomogeneityTests:
             )
 
         # copy inputs to avoid side effects
-        if inplace:
-            x1, x2 = x1_ref, x2_ref
-        else:
-            x1, x2 = x1_ref.copy(), x2_ref.copy()
+        x1, x2 = x1_ref.copy(), x2_ref.copy()
 
         # fill nan values with special method; usual 'fillna' don't fully suit homogeneity tests
-        if np.any(pd.isna(x1)) or np.any(pd.isna(x2)):
-            x1, x2, nan_value = fillna_cont(x1, x2, inplace=True)
+        if np.any(isna(x1)) or np.any(isna(x2)):
+            x1, x2, nan_value = fillna_cont(x1, x2)
         else:
             # this value will indicate psi that there are no nans
             nan_value = min(np.min(x1), np.min(x2)) - 1

@@ -142,46 +142,53 @@ def test_psi_cont_small_diff():
 
 # Check if class recognises too small data in input
 def test_shape_error_cont():
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all(np.array([]), np.array([]))
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all(np.zeros([100]), np.ones([200]))
 
-    with pytest.raises(Exception):
+    with pytest.raises(Warning):
         homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all(np.zeros([550]), np.ones([550]))
 
 
 # Check if class recognises type missmatches
 def test_type_error_cont():
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all([0] * 1000, [1] * 2000)
 
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all(np.random.randint(0, 5, 1000), np.random.randn(2000))
+
+    with pytest.raises(TypeError):
+        homogen_tester = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
+        _ = homogen_tester.run_all(
+            pd.to_datetime(np.random.randn(2000)).values, pd.to_datetime(np.random.randn(2000)).values
+        )
 
 
 # Check if class recognises bad hypeparameters
 def test_attr_error_cont():
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         _ = ContinuousHomogeneityTests(pval_thresh=1.02, samp_size=500, bootstrap_num=100)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         _ = ContinuousHomogeneityTests(pval_thresh=0.02, samp_size=90, bootstrap_num=100)
-
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         _ = ContinuousHomogeneityTests(pval_thresh=0.02, samp_size=500, bootstrap_num=5)
+    with pytest.raises(ValueError):
+        _ = ContinuousHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100, psi_bins=15)
 
 
 # Check if nan_value for continuous psi test is always minimum in both arrays.
 # It is important because we cannot fill nans with values
 # which can seen in x1 or x2 as it will modify actual distributions.
 def test_psi_cont_bad_nan():
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         x1 = np.random.randn(1000)
         x2 = np.random.randn(1000)
         _ = psi_cont_2samp(x1, x2, nan_value=-1)

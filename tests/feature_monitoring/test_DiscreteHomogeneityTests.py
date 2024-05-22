@@ -140,36 +140,57 @@ def test_psi_discr_small_diff():
 
 # Check if class recognises too small data in input
 def test_shape_error_discr():
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         homogen_tester = DiscreteHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all(np.array([]), np.array([]))
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         homogen_tester = DiscreteHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all(np.zeros([100]), np.ones([200]))
 
-    with pytest.raises(Exception):
+    with pytest.raises(Warning):
         homogen_tester = DiscreteHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all(np.zeros([550]), np.ones([550]))
 
 
 # Check if class recognises type missmatches
 def test_type_error_discr():
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         homogen_tester = DiscreteHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all([0] * 1000, [1] * 2000)
 
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         homogen_tester = DiscreteHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
         _ = homogen_tester.run_all(np.random.randint(0, 5, 1000), np.random.randn(2000))
+
+    with pytest.raises(TypeError):
+        homogen_tester = DiscreteHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
+        _ = homogen_tester.run_all(
+            pd.to_datetime(np.random.randn(2000)).values, pd.to_datetime(np.random.randn(2000)).values
+        )
 
 
 # Check if class recognises bad hypeparameters
 def test_attr_error_discr():
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         _ = DiscreteHomogeneityTests(pval_thresh=1.02, samp_size=500, bootstrap_num=100)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         _ = DiscreteHomogeneityTests(pval_thresh=0.02, samp_size=90, bootstrap_num=100)
-
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         _ = DiscreteHomogeneityTests(pval_thresh=0.02, samp_size=500, bootstrap_num=5)
+
+
+def test_fillna_discr():
+    values = np.arange(5)
+    probs1 = np.array([0.2, 0.2, 0.2, 0.2, 0.2])
+    probs2 = np.array([0.15, 0.28, 0.12, 0.15, 0.3])
+
+    rv = sps.rv_discrete(values=(values, probs1))
+    x1 = rv.rvs(size=5000).astype(float)
+    x1[100] = np.nan
+    rv = sps.rv_discrete(values=(values, probs2))
+    x2 = rv.rvs(size=5000).astype(float)
+
+    homogen_tester = DiscreteHomogeneityTests(pval_thresh=0.05, samp_size=500, bootstrap_num=100)
+    psi_res = homogen_tester.run_all(x1, x2)[-1]
+    assert psi_res[-1] == 'Small difference'
