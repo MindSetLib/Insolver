@@ -1,11 +1,4 @@
-import sys
-
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
-
-from typing import Optional, Any, Callable, Union, List, Tuple, Dict
+from typing import Optional, Any, Callable, Union, List, Tuple, Dict, Literal
 
 from numpy import ndarray, array, abs as npabs, mean, argsort, float64, cumsum, append, diff
 from pandas import DataFrame, Series

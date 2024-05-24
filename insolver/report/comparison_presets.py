@@ -1,8 +1,8 @@
-from insolver.model_tools import ModelMetricsCompare
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from .error_handler import error_handler
+from insolver.model_tools import ModelMetricsCompare
 
 
 @error_handler(False)

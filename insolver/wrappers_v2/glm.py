@@ -1,12 +1,5 @@
-import sys
-
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
-
 from os import PathLike
-from typing import Optional, Dict, Any, Union, List, Tuple, Callable
+from typing import Optional, Dict, Any, Union, List, Tuple, Callable, Literal
 
 from sklearn.base import BaseEstimator
 from sklearn.pipeline import Pipeline
