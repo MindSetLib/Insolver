@@ -6079,7 +6079,7 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [extras]
-all = []
+all = ["Django", "Flask", "Jinja2", "alibi", "dice-ml", "djangorestframework", "fastapi", "gunicorn", "lime", "pydantic", "statsmodels", "sympy", "uvicorn", "ydata-profiling"]
 feature-engineering = ["statsmodels"]
 interpretation = ["alibi", "dice-ml", "lime"]
 report = ["Jinja2", "lime", "ydata-profiling"]
@@ -6088,4 +6088,4 @@ serving = ["Django", "Flask", "Jinja2", "djangorestframework", "fastapi", "gunic
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "767eed5c37dda5fd3f59975154fd2a90bc257ccef8c779e459c1ef8d2f5f8310"
+content-hash = "1625c06cf1ba02a427d1f7583c7a81ccc913a41819156494a0e166e949687dc6"
