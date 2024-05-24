@@ -103,7 +103,7 @@ feature_engineering = ["statsmodels"]
 interpretation = ["alibi", "dice-ml", "lime"]
 report = ["Jinja2", "lime", "ydata-profiling"]
 serving = ["Flask", "fastapi", "uvicorn", "pydantic", "gunicorn", "Django", "djangorestframework", "sympy", "Jinja2"]
-all = ["feature_engineering", "interpretation", "report", "serving"]
+all = ["statsmodels", "alibi", "dice-ml", "lime", "ydata-profiling", "Flask", "fastapi", "uvicorn", "pydantic", "gunicorn", "Django", "djangorestframework", "sympy", "Jinja2"]
 
 [tool.poetry.scripts]
 insolver_serving_cli = 'insolver.serving.run_service:run'
