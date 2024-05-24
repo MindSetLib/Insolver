@@ -1,12 +1,6 @@
 import warnings
 from typing import Type, Union, Optional
-
-import sys
-
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
+from typing import Literal
 
 
 expected_type_warning = Literal["default", "error", "ignore", "always", "module", "once"]

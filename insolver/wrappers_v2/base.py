@@ -5,14 +5,7 @@ from io import BytesIO
 from os import PathLike
 from copy import deepcopy
 from zipfile import ZipFile, ZIP_DEFLATED
-from typing import Union, Any, Dict, Callable, Optional
-
-import sys
-
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
+from typing import Union, Any, Dict, Callable, Optional, Literal
 
 from .utils.req_utils import get_requirements
 
