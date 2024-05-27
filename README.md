@@ -17,7 +17,7 @@ Insolver can be installed via pip from PyPI. There are several installation opti
 |----------------------------------------------------|---------------------------------------------|
 | Regular installation                               | `pip install insolver`                      |
 | Installation with feature engineering requirements | `pip install insolver[feature_engineering]` |
-| Installation with feature monitoringp requirements | `pip install insolver[feature_monitoring]`  |
+| Installation with feature monitoring requirements  | `pip install insolver[feature_monitoring]`  |
 | Installation with interpretation requirements      | `pip install insolver[interpretation]`      |
 | Installation with serving requirements             | `pip install insolver[serving]`             |
 | Installation with report requirements              | `pip install insolver[report]`              |
