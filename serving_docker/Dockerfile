@@ -1,7 +1,7 @@
-FROM python:3.8
+FROM python:3.10
 
 # Setup build arguments
-ARG INSOLVER_VER=0.4.11
+ARG INSOLVER_VER=0.4.28
 ARG MODEL
 ARG TRANSFORMS
 
