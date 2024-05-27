@@ -100,6 +100,7 @@ sphinxcontrib-serializinghtml = "*"
 
 [tool.poetry.extras]
 feature_engineering = ["statsmodels"]
+feature_monitoring = ["Jinja2"]
 interpretation = ["alibi", "dice-ml", "lime"]
 report = ["Jinja2", "lime", "ydata-profiling"]
 serving = ["Flask", "fastapi", "uvicorn", "pydantic", "gunicorn", "Django", "djangorestframework", "sympy", "Jinja2"]
