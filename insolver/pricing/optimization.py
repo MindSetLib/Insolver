@@ -19,7 +19,7 @@ def max_conversion(x: np.ndarray, threshold: Union[float, int] = 0.5) -> np.ndar
     orig = x[np.abs(x[:, 0] - x[:, 1].max()) < 0.01]  # [:, 0] for price, [:, 1] for orig_price
     if orig.shape[0] == 0:
         orig = max_profit(x)
-    if x[:, 3].min() >= 0.5:  # [:, 3] for orig_pred
+    if x[:, 3].min() >= threshold:  # [:, 3] for orig_pred
         choice = orig
     else:
         converted = x[x[:, 2] >= threshold]
