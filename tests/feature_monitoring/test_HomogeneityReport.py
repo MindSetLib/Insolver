@@ -29,3 +29,4 @@ os.remove('./datasets/US_Accidents_small.csv')
 os.rmdir('./datasets/')
 
 assert os.path.exists('homogeneity_report.html')
+os.remove('homogeneity_report.html')
