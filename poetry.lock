@@ -307,8 +307,8 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.15.0", markers = "python_version < \"3.9\""},
     {version = ">=1.19.0", markers = "python_version >= \"3.9\""},
+    {version = ">=1.15.0", markers = "python_version < \"3.9\""},
 ]
 
 [[package]]
@@ -1043,18 +1043,18 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "djangorestframework"
-version = "3.15.1"
+version = "3.15.2"
 description = "Web APIs for Django, made easy."
 optional = true
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "djangorestframework-3.15.1-py3-none-any.whl", hash = "sha256:3ccc0475bce968608cf30d07fb17d8e52d1d7fc8bfe779c905463200750cbca6"},
-    {file = "djangorestframework-3.15.1.tar.gz", hash = "sha256:f88fad74183dfc7144b2756d0d2ac716ea5b4c7c9840995ac3bfd8ec034333c1"},
+    {file = "djangorestframework-3.15.2-py3-none-any.whl", hash = "sha256:2b8871b062ba1aefc2de01f773875441a961fefbf79f5eed1e32b2f096944b20"},
+    {file = "djangorestframework-3.15.2.tar.gz", hash = "sha256:36fe88cd2d6c6bec23dca9804bab2ba5517a8bb9d8f47ebc68981b56840107ad"},
 ]
 
 [package.dependencies]
 "backports.zoneinfo" = {version = "*", markers = "python_version < \"3.9\""}
-django = ">=3.0"
+django = ">=4.2"
 
 [[package]]
 name = "docutils"
@@ -2992,8 +2992,8 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.20.3", markers = "python_version < \"3.10\""},
     {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
+    {version = ">=1.20.3", markers = "python_version < \"3.10\""},
     {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
@@ -4608,8 +4608,8 @@ jinja2 = "*"
 langcodes = ">=3.2.0,<4.0.0"
 murmurhash = ">=0.28.0,<1.1.0"
 numpy = [
-    {version = ">=1.15.0", markers = "python_version < \"3.9\""},
     {version = ">=1.19.0", markers = "python_version >= \"3.9\""},
+    {version = ">=1.15.0", markers = "python_version < \"3.9\""},
 ]
 packaging = ">=20.0"
 preshed = ">=3.0.2,<3.1.0"
@@ -4985,8 +4985,8 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.18,<2", markers = "python_version != \"3.10\" or platform_system != \"Windows\" or platform_python_implementation == \"PyPy\""},
     {version = ">=1.22.3,<2", markers = "python_version == \"3.10\" and platform_system == \"Windows\" and platform_python_implementation != \"PyPy\""},
+    {version = ">=1.18,<2", markers = "python_version != \"3.10\" or platform_system != \"Windows\" or platform_python_implementation == \"PyPy\""},
 ]
 packaging = ">=21.3"
 pandas = ">=1.0,<2.1.0 || >2.1.0"
@@ -5091,8 +5091,8 @@ confection = ">=0.0.1,<1.0.0"
 cymem = ">=2.0.2,<2.1.0"
 murmurhash = ">=1.0.2,<1.1.0"
 numpy = [
-    {version = ">=1.15.0", markers = "python_version < \"3.9\""},
     {version = ">=1.19.0", markers = "python_version >= \"3.9\""},
+    {version = ">=1.15.0", markers = "python_version < \"3.9\""},
 ]
 packaging = ">=20.0"
 preshed = ">=3.0.2,<3.1.0"
