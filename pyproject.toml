@@ -107,7 +107,7 @@ serving = ["Flask", "fastapi", "uvicorn", "pydantic", "gunicorn", "Django", "dja
 all = ["statsmodels", "alibi", "dice-ml", "lime", "ydata-profiling", "Flask", "fastapi", "uvicorn", "pydantic", "gunicorn", "Django", "djangorestframework", "sympy", "Jinja2"]
 
 [tool.poetry.scripts]
-insolver_serving_cli = 'insolver.serving.run_service:run'
+insolver_serving = 'insolver.serving.run_service:run'
 
 [tool.poetry-version-plugin]
 source = "git-tag"
