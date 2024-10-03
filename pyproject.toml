@@ -65,8 +65,8 @@ fastapi = {version = ">=0.109.1", optional = true}
 uvicorn = {extras = ["standard"], version = ">=0.27", optional= true}
 pydantic = {version = ">=2", optional = true}
 gunicorn = {version = ">=20.0.4", optional = true}
-Django = {version = ">=4.2.11", optional= true}
-djangorestframework = {version = ">=3.13.1", optional = true}
+Django = {version = ">=4.2.15", optional= true}
+djangorestframework = {version = ">=3.15.2", optional = true}
 sympy = {version = ">=1.9", optional = true}
 dice-ml = {version = "*", optional = true}
 alibi = { version = "*", optional = true}
@@ -107,10 +107,10 @@ serving = ["Flask", "fastapi", "uvicorn", "pydantic", "gunicorn", "Django", "dja
 all = ["statsmodels", "alibi", "dice-ml", "lime", "ydata-profiling", "Flask", "fastapi", "uvicorn", "pydantic", "gunicorn", "Django", "djangorestframework", "sympy", "Jinja2"]
 
 [tool.poetry.scripts]
-insolver_serving_cli = 'insolver.serving.run_service:run'
+insolver_serving = 'insolver.serving.run_service:run'
 
-[tool.poetry-version-plugin]
-source = "git-tag"
+#[tool.poetry-version-plugin]
+#source = "git-tag"
 
 [build-system]
 requires = ["poetry-core"]
