@@ -109,8 +109,8 @@ all = ["statsmodels", "alibi", "dice-ml", "lime", "ydata-profiling", "Flask", "f
 [tool.poetry.scripts]
 insolver_serving = 'insolver.serving.run_service:run'
 
-#[tool.poetry-version-plugin]
-#source = "git-tag"
+[tool.poetry-version-plugin]
+source = "git-tag"
 
 [build-system]
 requires = ["poetry-core"]
